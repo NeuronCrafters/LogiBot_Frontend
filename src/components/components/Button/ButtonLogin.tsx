@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface ButtonLoginProps {
-  label: string;
   type: "entrar" | "cadastrar";
   onClick?: () => void;
   className?: string;
 }
 
-export function ButtonLogin({ label, type, onClick, className }: ButtonLoginProps) {
+export function ButtonLogin({ type, onClick, className }: ButtonLoginProps) {
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -21,6 +20,8 @@ export function ButtonLogin({ label, type, onClick, className }: ButtonLoginProp
       window.location.href = "/signin";
     }
   };
+
+  const label = type === "entrar" ? "Entrar" : "Cadastrar-se";
 
   return (
     <Button
