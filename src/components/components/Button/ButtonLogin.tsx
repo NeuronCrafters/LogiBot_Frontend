@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface ButtonLoginProps {
@@ -9,16 +10,25 @@ interface ButtonLoginProps {
 }
 
 export function ButtonLogin({ label, type, onClick, className }: ButtonLoginProps) {
-  const baseStyles = "rounded-lg px-6 py-3 flex items-center justify-center";
-  const typeStyles =
-    type === "entrar"
-      ? "bg-blue-500 hover:bg-blue-600 text-white w-[205px] h-[62px]"
-      : "bg-transparent border border-white text-white hover:bg-white hover:text-black w-[205px]";
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+
+    if (type === "entrar") {
+      window.location.href = "/chat";
+    } else if (type === "cadastrar") {
+      window.location.href = "/signin";
+    }
+  };
 
   return (
-    <button
-      onClick={onClick}
-      className={`${baseStyles} ${typeStyles} ${className}`}
+    <Button
+      onClick={handleClick}
+      className={`rounded-lg px-6 py-3 w-[287px] h-[69px] ${type === "entrar"
+        ? "bg-blue-500 hover:bg-blue-600 text-white"
+        : "bg-transparent border border-white text-white hover:bg-white hover:text-black"
+        } ${className}`}
     >
       <Typograph
         text={label}
@@ -27,6 +37,6 @@ export function ButtonLogin({ label, type, onClick, className }: ButtonLoginProp
         weight="medium"
         fontFamily="poppins"
       />
-    </button>
+    </Button>
   );
 }
