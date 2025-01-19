@@ -9,7 +9,7 @@ export function Header() {
   return (
     <header className="w-full h-[154px] bg-[#181818] flex items-center justify-between px-8">
       <div className="flex items-center space-x-4 xl:ml-[87px] ml-[10px]">
-        <Logo className="xl:h-[240px] xl:w-[240px] lg:h-[220px] lg:w-[220px] md:h-[210px] md:w-[210px] sm:h-[200px] sm:w-[200px] h-[140px] w-[140px]" />
+        <Logo type="withName" className="xl:h-[240px] xl:w-[240px] lg:h-[220px] lg:w-[220px] md:h-[210px] md:w-[210px] sm:h-[200px] sm:w-[200px] h-[140px] w-[140px]" />
       </div>
 
       <div className="flex items-center space-x-4">
