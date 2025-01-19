@@ -1,19 +1,16 @@
 import React, { useState } from "react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Input as ShadcnInput } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
-import userIcon from "@/assets/user.svg";
-import emailIcon from "@/assets/email.svg";
-import passwordIcon from "@/assets/password.svg";
+import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
 
 const InputIcons = {
-  text: userIcon,
-  email: emailIcon,
-  password: passwordIcon,
+  name: <User className="w-6 h-6 text-gray-400" />,
+  email: <Mail className="w-6 h-6 text-gray-400" />,
+  password: <Lock className="w-6 h-6 text-gray-400" />,
 };
 
 interface InputProps {
-  type: "text" | "email" | "password";
+  type: "name" | "email" | "password";
   placeholder?: string;
   className?: string;
 }
@@ -32,7 +29,7 @@ export function Input({ type, placeholder, className }: InputProps) {
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
   const defaultPlaceholder = {
-    text: "Nome",
+    name: "Nome",
     email: "E-mail",
     password: "Senha",
   };
@@ -41,14 +38,10 @@ export function Input({ type, placeholder, className }: InputProps) {
     <div
       className={`relative flex items-center bg-gray-800 rounded-lg px-4 py-3 w-[341px] h-[64px] ${className}`}
     >
-      <img
-        src={InputIcons[type]}
-        alt={`${type} icon`}
-        className="w-6 h-6 mr-3"
-      />
+      <div className="mr-3">{InputIcons[type]}</div>
 
       <ShadcnInput
-        type={type === "password" && !showPassword ? "password" : "text"}
+        type={type === "password" && !showPassword ? "password" : "name"}
         value={value}
         onChange={handleChange}
         onFocus={handleFocus}
