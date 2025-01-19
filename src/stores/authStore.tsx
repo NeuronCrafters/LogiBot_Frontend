@@ -5,7 +5,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
-  role: "student" | "teacher" | "course-coordinator" | "admin";
+  role: "student" | "professor" | "course-coordinator" | "admin";
 }
 
 interface AuthState {
@@ -22,7 +22,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoggedIn: !!localStorage.getItem("token"),
   login: async (token: string) => {
     try {
-      const response = await axios.get("/api/user", {
+      localStorage.setItem("token", token);
+      const response = await axios.get("/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
