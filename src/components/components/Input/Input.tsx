@@ -71,7 +71,7 @@ export function Input({ type, placeholder, className }: InputProps) {
           <Typograph
             text={placeholder || defaultPlaceholder[type]}
             colorText="text-gray-400"
-            variant="text2"
+            variant="text6"
             weight="medium"
             fontFamily="poppins"
           />

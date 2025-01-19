@@ -21,7 +21,7 @@ export function ButtonSocialLogin({ className }: SocialLoginButtonProps) {
       <Typograph
         text="Entrar com o Google"
         colorText="text-inherit"
-        variant="text2"
+        variant="text4"
         weight="medium"
         fontFamily="poppins"
       />

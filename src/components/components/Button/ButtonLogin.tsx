@@ -34,7 +34,7 @@ export function ButtonLogin({ type, onClick, className }: ButtonLoginProps) {
       <Typograph
         text={label}
         colorText="text-inherit"
-        variant="text2"
+        variant="text4"
         weight="medium"
         fontFamily="poppins"
       />

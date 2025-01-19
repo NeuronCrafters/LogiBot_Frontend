@@ -18,7 +18,7 @@ export function Footer() {
             <Typograph
               text="Converse com o SAEL"
               colorText="text-[#E4E4E4]"
-              variant="text2"
+              variant="text4"
               weight="regular"
               fontFamily="poppins"
             />
@@ -27,7 +27,7 @@ export function Footer() {
             <Typograph
               text="Admin"
               colorText="text-[#E4E4E4]"
-              variant="text2"
+              variant="text4"
               weight="regular"
               fontFamily="poppins"
             />
@@ -36,7 +36,7 @@ export function Footer() {
             <Typograph
               text="Privacidade"
               colorText="text-[#E4E4E4]"
-              variant="text2"
+              variant="text4"
               weight="regular"
               fontFamily="poppins"
             />
@@ -45,7 +45,7 @@ export function Footer() {
             <Typograph
               text="Termos"
               colorText="text-[#E4E4E4]"
-              variant="text2"
+              variant="text4"
               weight="regular"
               fontFamily="poppins"
             />
@@ -58,7 +58,7 @@ export function Footer() {
           <Typograph
             text="© 2025, SAEL. Todos Os Direitos Reservados."
             colorText="text-[#E4E4E4]"
-            variant="text3"
+            variant="text8"
             weight="regular"
             fontFamily="poppins"
           />
