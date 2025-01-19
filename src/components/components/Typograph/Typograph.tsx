@@ -15,7 +15,7 @@ enum FontFamily {
 interface TypographProps {
   text: string;
   colorText: string;
-  variant: "title1" | "title2" | "text1" | "text2" | "text3" | "text4" | "text5";
+  variant: "title1" | "title2" | "title3" | "text1" | "text2" | "text3" | "text4" | "text5";
   weight: "bold" | "medium" | "regular";
   fontFamily: "montserrat" | "roboto" | "poppins";
   className?: string;
@@ -37,6 +37,14 @@ export function Typograph({ text, colorText, variant, weight, fontFamily, classN
       <h2 className={`${baseClass} text-[25px] md:text-[50px]`}>
         {text}
       </h2>
+    );
+  }
+
+  if (variant === "title3") {
+    return (
+      <h3 className={`${baseClass} text-[24px] md:text-[48px]`}>
+        {text}
+      </h3>
     );
   }
 
