@@ -33,8 +33,8 @@ const VariantStyles = {
   text7: "text-[16px]",
   text8: "text-[14px]",
   text9: "text-[12px]",
-  text10: "text-[11px]",
-  text11: "text-[10px]",
+  text10: "text-[10px]",
+  text11: "text-[8px]",
 };
 
 interface TypographProps {
