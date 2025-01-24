@@ -1,12 +1,19 @@
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import CadastroPage from "@/pages/Cadastro/Cadastro";
-import CadastroForm from "./components/ui/CadastroForm";
+import Login from "@/pages/Login/login";
 
 function App() {
   return (
-    <>
-      
-      <CadastroPage/>
-    </>
+    <Router>
+      <Routes>
+        
+        <Route path="/" element={<Navigate to="/login" />} />
+
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/cadastro" element={<CadastroPage />} />
+      </Routes>
+    </Router>
   );
 }
 

@@ -13,9 +13,9 @@ function CadastroPage() {
       
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-8">
-          <h2 className=" font-Montserrat text-white text-2xl font-bold mb-6">Cadastro</h2>
+          <h2 className=" font-Montserrat text-white text-2xl font-bold mb-6">Entrar</h2>
           <p className="text-gray-400 mb-6">
-            Realize seu cadastro na nossa plataforma.
+            Acesse sua conta
           </p>
 
           
@@ -23,7 +23,7 @@ function CadastroPage() {
             <span className="text-gray-400 mr-3">
               
               <svg
-                xmlns="http://www.w3.org/2000/svg"
+                xmlns="http://www.w3.org/2000/svg" 
                 className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -95,11 +95,9 @@ function CadastroPage() {
               className="bg-transparent text-white w-full focus:outline-none"
             />
           </div>
-
-          
-          <div className="rounded-xl flex items-center bg-[#222222] p-4 rounded-md mb-6 w-full">
+          <div className=" rounded-xl flex items-center bg-[#222222] p-4 rounded-md mb-4 w-full">
             <span className="text-gray-400 mr-3">
-             
+              
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -117,10 +115,13 @@ function CadastroPage() {
             </span>
             <input
               type="password"
-              placeholder="Confirmar Senha"
-              className="bg-transparent text-white w-full focus:outline-none rounded-md"
+              placeholder="Senha"
+              className="bg-transparent text-white w-full focus:outline-none"
             />
           </div>
+
+          
+      
 
           
           <button className="w-full rounded-xl bg-blue-900 text-white px-6 py-4 rounded-md shadow-md hover:bg-blue-[#102A56]">
