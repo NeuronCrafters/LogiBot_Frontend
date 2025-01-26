@@ -13,9 +13,9 @@ function CadastroPage() {
       
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-8">
-          <h2 className=" font-Montserrat text-white text-2xl font-bold mb-6">Entrar</h2>
+          <h2 className=" font-Montserrat text-white text-2xl font-bold mb-6">Cadastro</h2>
           <p className="text-gray-400 mb-6">
-            Acesse sua conta
+            Realize seu cadastro no site
           </p>
 
           
