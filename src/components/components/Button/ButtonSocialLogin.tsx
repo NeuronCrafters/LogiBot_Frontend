@@ -15,7 +15,7 @@ export function ButtonSocialLogin({ className }: SocialLoginButtonProps) {
   return (
     <Button
       onClick={handleClick}
-      className={`rounded-xl flex items-center justify-center w-[341px] h-[64px] bg-white text-black border border-gray-300 hover:bg-gray-100 ${className}`}
+      className={`rounded-xl flex items-center justify-center w-[341px] h-[56px] bg-white text-black border border-gray-300 hover:bg-gray-100 ${className}`}
     >
       <img src={googleLogo} alt="Google Logo" className="w-6 h-6" />
       <Typograph
