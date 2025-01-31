@@ -39,7 +39,7 @@ const AlunosDashboard: React.FC = () => {
   const labelClass = "block text-sm font-medium";
 
   return (
-    <div className="bg-[#141414] text-white min-h-screen p-10">
+    <div className="bg-[#141414] text-white min-h-screen p-20">
       {/* Cabeçalho */}
       <div className="flex-1 items-center mb-8">
 

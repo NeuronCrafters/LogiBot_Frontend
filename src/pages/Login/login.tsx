@@ -25,7 +25,7 @@ function Login() {
 
           <Input type="password" className="bg-neutral-800 mb-4"/>
 
-          <ButtonSocialLogin className="rounded-lg px-6 py-3 w-[341px] h-[64px] mb-4" />
+          <ButtonSocialLogin className="rounded-lg px-6 py-3 mb-4" />
 
           <ButtonLogin type="entrar"/>
 

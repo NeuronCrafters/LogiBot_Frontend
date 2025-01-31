@@ -21,12 +21,12 @@ export function ButtonLogin({ type, onClick, className }: ButtonLoginProps) {
     }
   };
 
-  const label = type === "entrar" ? "Entrar" : "Cadastrar-se";
+  const label = type === "entrar" ? "Entrar" : "Cadastrar-se"
 
   return (
     <Button
       onClick={handleClick}
-      className={`rounded-lg px-6 py-3 w-[341px] h-[64px] ${type === "entrar" || type === "cadastrar"
+      className={`rounded-lg px-6 py-3 w-[320px] h-[64px] ${type === "entrar" || type === "cadastrar"
         ? "bg-blue-800 hover:bg-blue-900 text-white"
         : "bg-transparent border border-white text-white hover:bg-white hover:text-black"
         } ${className}`}
