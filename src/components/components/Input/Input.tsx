@@ -6,7 +6,7 @@ import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
 const InputIcons = {
   name: <User className="w-6 h-6 text-gray-400" />,
   email: <Mail className="w-6 h-6 text-gray-400" />,
-  password: <Lock className="w-6 h-6 text-gray-400" />,
+  password: <Lock className="w-6 h-6 text-gray-400" />
 };
 
 interface InputProps {
@@ -31,7 +31,7 @@ export function Input({ type, placeholder, className }: InputProps) {
   const defaultPlaceholder = {
     name: "Nome",
     email: "E-mail",
-    password: "Senha",
+    password: "Senha"
   };
 
   return (

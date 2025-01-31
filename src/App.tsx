@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import CadastroPage from "@/pages/Cadastro/Cadastro";
 import Login from "@/pages/Login/login";
+import ColetaDeDados from "@/pages/coletaDeDados/coleta";
 
 function App() {
   return (
@@ -12,6 +13,9 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/cadastro" element={<CadastroPage />} />
+
+        <Route path="/coleta" element={<ColetaDeDados />} />
+
       </Routes>
     </Router>
   );
