@@ -1,6 +1,5 @@
 
-import React, { useState } from "react";
-import { Input } from "@/components/components/Input/Input"; // Importando o componente Input
+import React, { useState } from "react";// Importando o componente Input
 
 interface Aluno {
   nome: string;
@@ -35,77 +34,61 @@ const AlunosDashboard: React.FC = () => {
     setAlunosData(updatedAlunos);
   };
 
-  const inputClass =
-    "mt-1 block w-full p-3 bg-[#4a48483b] text-white rounded-lg border border-[#222222] focus:outline-none focus:ring-2 focus:ring-blue-500";
   const cardClass =
-    "bg-gray-800 p-4 rounded-lg shadow-xl hover:bg-gray-700 transition duration-300";
+    "bg-[#181818] p-4 rounded-2xl hover:bg-[#191919] transition duration-300";
   const labelClass = "block text-sm font-medium";
 
   return (
-    <div className="bg-black text-white min-h-screen p-10">
+    <div className="bg-[#141414] text-white min-h-screen p-10">
       {/* Cabeçalho */}
-      <div className="flex items-center mb-8">
-        <div className="flex items-center space-x-4">
+      <div className="flex-1 items-center mb-8">
+
+        <div className="bg-[#181818] p-4 md:w-64 w-full rounded-2xl flex items-center space-x-4">
           <img className="w-14 h-14 rounded-full" src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRUREvlCvHREdbT-Xsf2L2dmgO7AulT-6hqeDRUThJvVKKQwYuPwNatanNGyJiXSwubdlC8iTQHCPxOrsM-uuUCfg" alt="Professor" />
           <div>
             <h1 className="text-xl font-semibold">Professor</h1>
             <p className="text-sm">Turma: 2023-2</p>
-          </div>
-        </div>
+          </div>        
+        </div> 
+
+        <h2 className="md:pt-2 pt-8 w-full text-3xl font-bold text-center md:mb-14">Alunos</h2>
       </div>
 
-      <h2 className="text-3xl font-bold text-center mb-8">Alunos</h2>
 
      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         {alunosData.map((aluno, index) => (
           <div key={index} className={cardClass}>
             {/* Campo de Nome */}
             <div className="mb-4">
               <label className={labelClass}>NOME</label>
-              <Input
-                type="name"
-                value={aluno.nome}
-                placeholder="Nome"
-                onChange={(e) => handleInputChange(e, "nome", index)}  // Passando o campo de nome
-                className={inputClass}
-              />
+                <div className="bg-[#222222] h-12 mt-1 p-3 text-white rounded-lg align-middle flex items-center">
+                  <h1>{aluno.nome}</h1>
+                </div>
             </div>
 
            
-            <div className="mb-4">
+            <div className="bg-[#181818] mb-4">
               <label className={labelClass}>MATRÍCULA</label>
-              <Input
-                type="name"
-                value={aluno.matricula}
-                placeholder="Matrícula"
-                onChange={(e) => handleInputChange(e, "matricula", index)}  // Passando o campo de matrícula
-                className={inputClass}
-              />
+                <div className="bg-[#222222] h-12 mt-1 p-3 text-white rounded-lg align-middle flex items-center">
+                  <h1>{aluno.matricula}</h1>
+                </div>
             </div>
 
            
             <div className="mb-4">
               <label className={labelClass}>TURMA</label>
-              <Input
-                type="name"
-                value={aluno.turma}
-                placeholder="Turma"
-                onChange={(e) => handleInputChange(e, "turma", index)}  // Passando o campo de turma
-                className={inputClass}
-              />
+                <div className="bg-[#222222] h-12 mt-1 p-3 text-white rounded-lg align-middle flex items-center">
+                  <h1>{aluno.turma}</h1>
+                </div>
             </div>
 
             
             <div className="mb-4">
               <label className={labelClass}>PROGRESSO</label>
-              <Input
-                type="name"
-                value={aluno.progresso}
-                placeholder="Progresso"
-                onChange={(e) => handleInputChange(e, "progresso", index)}  
-                className={inputClass}
-              />
+                <div className="bg-[#222222] h-12 mt-1 p-3 text-white rounded-lg align-middle flex items-center">
+                  <h1>{aluno.progresso}</h1>
+                </div>
             </div>
           </div>
         ))}
