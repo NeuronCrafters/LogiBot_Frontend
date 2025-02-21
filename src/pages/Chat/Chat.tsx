@@ -31,7 +31,7 @@ function Chat() {
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full max-w-full px-0 sm:px-8 md:px-16 mx-auto">
       
       <div className="absolute bg-[#141414] w-full justify-center flex border-b-[0.5px] border-neutral-800">
-        <p className="font-Montserrat text-neutral-200 font-semibold text-2xl my-6">SIAC MICA</p>
+        <p className="font-Montserrat text-neutral-200 font-semibold text-2xl my-6">CHAT SAEL</p>
       </div>
 
       {!inputText && (
