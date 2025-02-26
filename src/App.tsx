@@ -3,7 +3,8 @@ import CadastroPage from "@/pages/Cadastro/Cadastro";
 import Login from "@/pages/Login/login";
 import ColetaDeDados from "@/pages/coletaDeDados/coleta";
 import ListagemPage from "@/pages/Listagem/Listagem"; 
-import Chat from "@/pages/Chat/Chat"; // Importe a página de boas-vindas
+import Chat from "@/pages/Chat/Chat";
+import Chart from "@/pages/Chart/Chart";
 
 function App() {
   return (
@@ -21,6 +22,8 @@ function App() {
         <Route path="/listagem" element={<ListagemPage />} />  {/* Nova rota para a listagem */}
         
         <Route path="/Chat" element={<Chat />} />  {/* Rota para a tela de boas-vindas */}
+
+        <Route path="/Chart" element={<Chart />} />
       </Routes>
     </Router>
   );
