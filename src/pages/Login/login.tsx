@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {ButtonSocialLogin}from "@/components/components/Button/ButtonSocialLogin"; // Importe o componente de botão
 import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
+import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 
 function Login() {
   return (
@@ -11,8 +12,9 @@ function Login() {
         className="hidden md:flex flex-1 flex items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900"
         style={{ flex: 2 }}
       >
-        <div className="text-center">
-          <h1 className="text-white text-4xl font-bold">SAEL</h1>
+        <div className="flex items-end gap-4">
+          <AnimatedLogo />
+          <h1 className="text-white text-7xl font-bold mb-12">SAEL</h1>
         </div>
       </div>
 
