@@ -99,19 +99,19 @@ function Signup() {
             <Input type="password" placeholder="Senha" className="bg-neutral-800 mb-4" value={password} onChange={(e) => setPassword(e.target.value)} required />
 
 
-            <select className="w-full bg-neutral-800 text-white p-2 mb-4 rounded" value={selectedUniversity} onChange={(e) => setSelectedUniversity(e.target.value)}>
+            <select className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md" value={selectedUniversity} onChange={(e) => setSelectedUniversity(e.target.value)}>
               <option value="">Selecione a universidade</option>
               {universities.map((univ) => (
                 <option key={univ._id} value={univ._id}>{univ.name}</option>
               ))}
             </select>
 
-            <select className="w-full bg-neutral-800 text-white p-2 mb-4 rounded" value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)} disabled={!selectedUniversity}>
+            <select className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md" value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)} disabled={!selectedUniversity}>
               <option value="">Selecione o curso</option>
               {courses.map((course) => <option key={course._id} value={course._id}>{course.name}</option>)}
             </select>
 
-            <select className="w-full bg-neutral-800 text-white p-2 mb-4 rounded" value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} disabled={!selectedCourse}>
+            <select className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md" value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} disabled={!selectedCourse}>
               <option value="">Selecione a turma</option>
               {classes.map((cls) => (
                 <option key={cls._id} value={cls._id}>{cls.name}</option>
