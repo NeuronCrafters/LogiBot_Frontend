@@ -4,8 +4,6 @@ import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedLogo";
 import { useNavigate, Link } from "react-router-dom";
-import { SelectOptions } from "@/components/components/Select/SelectOptions";
-import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface Class {
   _id: string;
@@ -36,16 +34,16 @@ function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get("/public/institutions")
-      .then(res => setUniversities(res.data))
-      .catch(err => console.error(err));
+    api
+      .get("/public/institutions")
+      .then((res) => setUniversities(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
   useEffect(() => {
@@ -61,19 +59,12 @@ function Signup() {
     setSelectedClass("");
   }, [selectedCourse, courses]);
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const payload = {
-      name,
-      email,
-      password,
-      school: selectedUniversity,
-      course: selectedCourse,
-      class: selectedClass,
-    };
+    const payload = { name, email, password, school: selectedUniversity, course: selectedCourse, class: selectedClass };
 
     try {
       await api.post("/users", payload);
@@ -88,10 +79,7 @@ function Signup() {
 
   return (
     <div className="flex min-h-screen">
-      <div
-        className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900"
-        style={{ flex: 2 }}
-      >
+      <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900" style={{ flex: 2 }}>
         <div className="flex items-end gap-4">
           <AnimatedLogo />
           <h1 className="text-white text-7xl font-bold mb-12">SAEL</h1>
@@ -100,67 +88,40 @@ function Signup() {
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-8">
-          <Typograph text="Cadastro" colorText="text-white" variant="title4" weight="bold" fontFamily="montserrat" />
-          <Typograph text="Realize seu cadastro no site" colorText="text-neutral-300" variant="text7" weight="medium" fontFamily="poppins" className="mb-4" />
+          <h2 className="font-Montserrat text-white text-4xl font-bold">Cadastro</h2>
+          <p className="text-neutral-300 mb-2">Realize seu cadastro no site</p>
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-          <form onSubmit={handleSignup}>
-            <Input
-              type="name"
-              placeholder="Nome"
-              className="bg-neutral-800 mb-4"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+          <form onSubmit={handleRegister}>
+            <Input type="name" placeholder="Nome" className="bg-neutral-800 mb-4" value={name} onChange={(e) => setName(e.target.value)} required />
+            <Input type="email" placeholder="Email" className="bg-neutral-800 mb-4" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input type="password" placeholder="Senha" className="bg-neutral-800 mb-4" value={password} onChange={(e) => setPassword(e.target.value)} required />
 
-            <Input
-              type="email"
-              placeholder="Email"
-              className="bg-neutral-800 mb-4"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
 
-            <Input
-              type="password"
-              placeholder="Senha"
-              className="bg-neutral-800 mb-4"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <select className="w-full bg-neutral-800 text-white p-2 mb-4 rounded" value={selectedUniversity} onChange={(e) => setSelectedUniversity(e.target.value)}>
+              <option value="">Selecione a universidade</option>
+              {universities.map((univ) => (
+                <option key={univ._id} value={univ._id}>{univ.name}</option>
+              ))}
+            </select>
 
-            <SelectOptions
-              universities={universities}
-              selectedUniversity={selectedUniversity}
-              onChange={setSelectedUniversity}
-              placeholder="Selecione a Universidade"
-              className="mb-4"
-            />
+            <select className="w-full bg-neutral-800 text-white p-2 mb-4 rounded" value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)} disabled={!selectedUniversity}>
+              <option value="">Selecione o curso</option>
+              {courses.map((course) => <option key={course._id} value={course._id}>{course.name}</option>)}
+            </select>
 
-            <SelectOptions
-              universities={courses}
-              selectedUniversity={selectedCourse}
-              onChange={setSelectedCourse}
-              placeholder="Selecione o Curso"
-              className="mb-4"
-            />
-
-            <SelectOptions
-              universities={classes}
-              selectedUniversity={selectedClass}
-              onChange={setSelectedClass}
-              placeholder="Selecione a Turma"
-              className="mb-4"
-            />
-
-            <ButtonLogin type="submit" disabled={loading}>
-              {loading ? "Cadastrando..." : "Cadastrar"}
-            </ButtonLogin>
+            <select className="w-full bg-neutral-800 text-white p-2 mb-4 rounded" value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} disabled={!selectedCourse}>
+              <option value="">Selecione a turma</option>
+              {classes.map((cls) => (
+                <option key={cls._id} value={cls._id}>{cls.name}</option>
+              ))}
+            </select>
           </form>
+
+          <ButtonLogin type="submit" disabled={loading}>{loading ? "Cadastrando..." : "Cadastrar"}</ButtonLogin>
+
+          {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
 
           <p className="text-gray-400 text-sm text-center mt-4">
             Já possui conta?{" "}
