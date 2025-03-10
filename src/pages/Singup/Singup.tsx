@@ -1,40 +1,90 @@
 import React, { useState, useEffect } from "react";
+import api from "@/services/api";
 import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedLogo";
-import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
+import { SelectOptions } from "@/components/components/Select/SelectOptions";
+import { Typograph } from "@/components/components/Typograph/Typograph";
+
+interface Class {
+  _id: string;
+  name: string;
+}
+
+interface Course {
+  _id: string;
+  name: string;
+  classes: Class[];
+}
+
+interface University {
+  _id: string;
+  name: string;
+  courses: Course[];
+}
 
 function Signup() {
-  const [schools, setSchools] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [classes, setClasses] = useState([]);
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
 
-  const [selectedSchool, setSelectedSchool] = useState("");
+  const [selectedUniversity, setSelectedUniversity] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate();
+
   useEffect(() => {
-    axios.get("http://localhost:3000/schools").then((response) => {
-      setSchools(response.data);
-    });
+    api.get("/public/institutions")
+      .then(res => setUniversities(res.data))
+      .catch(err => console.error(err));
   }, []);
 
   useEffect(() => {
-    if (selectedSchool) {
-      const school = schools.find((s) => s._id === selectedSchool);
-      setCourses(school ? school.courses : []);
-      setSelectedCourse("");
-      setClasses([]);
-    }
-  }, [selectedSchool, schools]);
+    const uni = universities.find((u) => u._id === selectedUniversity);
+    setCourses(uni ? uni.courses : []);
+    setSelectedCourse("");
+    setClasses([]);
+  }, [selectedUniversity, universities]);
 
   useEffect(() => {
-    if (selectedCourse) {
-      const course = courses.find((c) => c._id === selectedCourse);
-      setClasses(course ? course.classes : []);
-      setSelectedClass("");
-    }
+    const course = courses.find((c) => c._id === selectedCourse);
+    setClasses(course ? course.classes : []);
+    setSelectedClass("");
   }, [selectedCourse, courses]);
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const payload = {
+      name,
+      email,
+      password,
+      school: selectedUniversity,
+      course: selectedCourse,
+      class: selectedClass,
+    };
+
+    try {
+      await api.post("/users", payload);
+      navigate("/signin");
+    } catch (error) {
+      console.error("Erro ao cadastrar:", error);
+      setError("Erro ao realizar o cadastro.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -50,64 +100,73 @@ function Signup() {
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-8">
-          <h2 className="font-Montserrat text-white text-4xl font-bold">
-            Cadastro
-          </h2>
-          <p className="text-neutral-300 mb-2">Realize seu cadastro no site</p>
+          <Typograph text="Cadastro" colorText="text-white" variant="title4" weight="bold" fontFamily="montserrat" />
+          <Typograph text="Realize seu cadastro no site" colorText="text-neutral-300" variant="text7" weight="medium" fontFamily="poppins" className="mb-4" />
 
-          <Input type="text" placeholder="Nome" className="bg-neutral-800 mb-4" />
-          <Input type="email" placeholder="Email" className="bg-neutral-800 mb-4" />
-          <Input type="password" placeholder="Senha" className="bg-neutral-800 mb-4" />
-          <Input type="password" placeholder="Confirmar senha" className="bg-neutral-800 mb-4" />
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-          <select
-            className="w-full bg-neutral-800 text-white p-2 mb-4 rounded"
-            value={selectedSchool}
-            onChange={(e) => setSelectedSchool(e.target.value)}
-          >
-            <option value="">Selecione a escola</option>
-            {schools.map((school) => (
-              <option key={school._id} value={school._id}>
-                {school.name}
-              </option>
-            ))}
-          </select>
+          <form onSubmit={handleSignup}>
+            <Input
+              type="name"
+              placeholder="Nome"
+              className="bg-neutral-800 mb-4"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
 
-          <select
-            className="w-full bg-neutral-800 text-white p-2 mb-4 rounded"
-            value={selectedCourse}
-            onChange={(e) => setSelectedCourse(e.target.value)}
-            disabled={!selectedSchool}
-          >
-            <option value="">Selecione o curso</option>
-            {courses.map((course) => (
-              <option key={course._id} value={course._id}>
-                {course.name}
-              </option>
-            ))}
-          </select>
+            <Input
+              type="email"
+              placeholder="Email"
+              className="bg-neutral-800 mb-4"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
 
-          <select
-            className="w-full bg-neutral-800 text-white p-2 mb-4 rounded"
-            value={selectedClass}
-            onChange={(e) => setSelectedClass(e.target.value)}
-            disabled={!selectedCourse}
-          >
-            <option value="">Selecione a turma</option>
-            {classes.map((cls) => (
-              <option key={cls._id} value={cls._id}>
-                {cls.name}
-              </option>
-            ))}
-          </select>
+            <Input
+              type="password"
+              placeholder="Senha"
+              className="bg-neutral-800 mb-4"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-          <ButtonLogin type="cadastrar" />
+            <SelectOptions
+              universities={universities}
+              selectedUniversity={selectedUniversity}
+              onChange={setSelectedUniversity}
+              placeholder="Selecione a Universidade"
+              className="mb-4"
+            />
+
+            <SelectOptions
+              universities={courses}
+              selectedUniversity={selectedCourse}
+              onChange={setSelectedCourse}
+              placeholder="Selecione o Curso"
+              className="mb-4"
+            />
+
+            <SelectOptions
+              universities={classes}
+              selectedUniversity={selectedClass}
+              onChange={setSelectedClass}
+              placeholder="Selecione a Turma"
+              className="mb-4"
+            />
+
+            <ButtonLogin type="submit" disabled={loading}>
+              {loading ? "Cadastrando..." : "Cadastrar"}
+            </ButtonLogin>
+          </form>
 
           <p className="text-gray-400 text-sm text-center mt-4">
             Já possui conta?{" "}
-            <a href="/signin" className="text-blue-500 hover:underline">
-              Faça o login.
-            </a>
+            <Link to="/signin" className="text-blue-500 no-underline">
+              Faça Login
+            </Link>
           </p>
         </div>
       </div>

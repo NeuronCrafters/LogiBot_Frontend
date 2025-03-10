@@ -85,7 +85,7 @@ function Signin() {
 
           <p className="text-gray-400 text-sm text-center mt-4">
             Não possui conta?{" "}
-            <Link to="/register" className="text-blue-500 hover:underline">
+            <Link to="/signup" className="text-blue-500 no-underline">
               Faça seu cadastro.
             </Link>
           </p>

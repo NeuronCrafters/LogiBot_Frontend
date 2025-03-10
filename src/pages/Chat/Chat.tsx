@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Send, Menu as MenuIcon } from "lucide-react";
-import { Menu } from "@/components/components/Menu/Menu";
+import { Menu } from "@/components/components/Header/Header";
 import { useAuthStore } from "@/stores/authStore";
 
 const subjects: { [key: string]: string[] } = {
