@@ -1,4 +1,3 @@
-import React from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

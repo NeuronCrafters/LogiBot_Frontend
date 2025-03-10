@@ -3,9 +3,6 @@ import api from "./api";
 const RASA_URL = "http://localhost:5005/webhooks/rest/webhook";
 const RASA_ACTION_URL = "http://localhost:5055/webhook";
 
-/**
- * Envia uma mensagem para o chatbot Rasa
- */
 export const sendMessageToRasa = async (message: string, sender = "user") => {
   try {
     const response = await api.post(RASA_URL, { sender, message });
@@ -16,9 +13,6 @@ export const sendMessageToRasa = async (message: string, sender = "user") => {
   }
 };
 
-/**
- * Envia ações para o Action Server do Rasa
- */
 export const sendToActionServer = async (next_action: string, slots = {}) => {
   try {
     const payload = {

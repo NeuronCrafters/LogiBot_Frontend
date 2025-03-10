@@ -15,15 +15,15 @@ function Chat() {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [userLevel, setUserLevel] = useState<string | null>(null);
-  const [options] = useState<string[]>([]);
-  const [subOptions] = useState<string[]>([]);
-  const [questions] = useState<string[]>([]);
+  const [options, setOptions] = useState<string[]>([]);
+  const [subOptions, setSubOptions] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<string[]>([]);
   const [buttons, setButtons] = useState<{ title: string; payload: string }[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const { isAuthenticated } = useAuthStore();
+  const { token } = useAuthStore(); // Usando o token do zustand
 
-  // função para enviar mensagem ao Rasa e atualizar o estado das mensagens
+  // Função para enviar mensagem ao Rasa e atualizar o estado das mensagens
   const sendMessage = async (message: string, role: "user" | "assistant" = "user") => {
     setMessages((prev) => [...prev, { role, content: message }]);
     const response = await sendMessageToRasa(message);
@@ -35,7 +35,7 @@ function Chat() {
     }
   };
 
-  // função para iniciar a conversa
+  // Função para iniciar a conversa
   const startConversation = async () => {
     const response = await sendMessageToRasa("iniciar", "user");
     if (response && response.length > 0) {
@@ -43,28 +43,30 @@ function Chat() {
     }
   };
 
-  // função para definir o nível do usuário
+  // Função para definir o nível do usuário
   const handleLevelSelected = async (level: string) => {
     setUserLevel(level);
     const response = await sendToActionServer("action_definir_nivel", { nivel: level });
     if (response) {
       setMessages((prev) => [...prev, { role: "assistant", content: `Nível definido: ${level}` }]);
-      listOptions();
+      await listOptions(); // Listar opções após definir o nível
     }
   };
 
-  // função para listar opções
+  // Função para listar opções
   const listOptions = async () => {
     const response = await sendToActionServer("action_listar_opcoes", { nivel: userLevel });
     if (response && response.responses && response.responses.length > 0) {
+      setOptions(response.responses[0].buttons?.map((btn: { title: string }) => btn.title) || []);
       setButtons(response.responses[0].buttons || []);
     }
   };
 
-  // função para listar subopções
+  // Função para listar subopções
   const listSubOptions = async (categoria: string) => {
     const response = await sendToActionServer("action_listar_subopcoes", { categoria, nivel: userLevel });
     if (response && response.responses && response.responses.length > 0) {
+      setSubOptions(response.responses[0].buttons?.map((btn: { title: string }) => btn.title) || []);
       setMessages((prev) => [...prev, { role: "assistant", content: response.responses[0].text }]);
       if (response.responses[0].buttons) {
         setButtons(response.responses[0].buttons);
@@ -72,33 +74,34 @@ function Chat() {
     }
   };
 
-  // função para gerar perguntas
+  // Função para gerar perguntas
   const generateQuestions = async (pergunta: string) => {
     const response = await sendToActionServer("action_gerar_perguntas_chatgpt", { pergunta, nivel: userLevel });
     if (response && response.responses && response.responses.length > 0) {
+      setQuestions([response.responses[0].text]);
       setMessages((prev) => [...prev, { role: "assistant", content: response.responses[0].text }]);
     }
   };
 
-  // função para lidar com o clique nos botões
+  // Função para lidar com o clique nos botões
   const handleButtonClick = async (payload: string) => {
     if (payload.startsWith("/listar_subopcoes")) {
       const categoria = JSON.parse(payload.slice(payload.indexOf("{"))).categoria;
       await listSubOptions(categoria);
     } else if (payload.startsWith("/gerar_perguntas")) {
       const pergunta = JSON.parse(payload.slice(payload.indexOf("{"))).pergunta;
-      await generateQuestions(pergunta);
+      await generateQuestions(pergunta); // Chama a API da OpenAI apenas aqui
     } else {
       await sendMessage(payload);
     }
   };
 
-  // função para extrair opções e enviar ao Rasa
+  // Função para extrair opções e enviar ao Rasa
   const handleOptionExtracted = async (option: string) => {
     await sendMessage(option);
   };
 
-  // efeito para iniciar a conversa ao carregar o componente
+  // Efeito para iniciar a conversa ao carregar o componente
   useEffect(() => {
     startConversation();
   }, []);
@@ -107,7 +110,7 @@ function Chat() {
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full max-w-full px-0 sm:px-8 md:px-16 mx-auto">
       <div className="absolute bg-[#141414] w-full justify-between flex border-b-[0.5px] border-neutral-800 px-6 py-4">
         <p className="font-Montserrat text-neutral-200 font-semibold text-2xl">CHAT SAEL</p>
-        {isAuthenticated && (
+        {token && ( // Verifica se o token existe (usuário autenticado)
           <button onClick={() => setMenuOpen(true)} className="text-white">
             <MenuIcon size={28} />
           </button>
