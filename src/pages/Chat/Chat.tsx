@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Send } from 'lucide-react';
+import { Send, Menu as MenuIcon } from "lucide-react";
+import { Menu } from "@/components/components/Menu/Menu";
+import { useAuthStore } from "@/stores/authStore";
 
 const subjects: { [key: string]: string[] } = {
   Programação: ["JavaScript", "Python", "Java"],
@@ -10,28 +12,40 @@ const subjects: { [key: string]: string[] } = {
 function Chat() {
   const [inputText, setInputText] = useState("");
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const { isAuthenticated } = useAuthStore();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(event.target.value);
   };
 
   const handleSubmit = () => {
-    console.log(inputText); // Lógica para o que fazer ao clicar no ícone (por exemplo, enviar o texto)
+    console.log(inputText);
   };
 
   const handleSubjectClick = (subject: string) => {
     setSelectedSubject(subject);
   };
 
-  const handleBackClick = () => {
-    setSelectedSubject(null);
-  };
+  // const handleBackClick = () => {
+  //   setSelectedSubject(null);
+  // };
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full max-w-full px-0 sm:px-8 md:px-16 mx-auto">
 
-      <div className="absolute bg-[#141414] w-full justify-center flex border-b-[0.5px] border-neutral-800">
-        <p className="font-Montserrat text-neutral-200 font-semibold text-2xl my-6">CHAT SAEL</p>
+      {/* Header com botão do menu */}
+      <div className="absolute bg-[#141414] w-full justify-between flex border-b-[0.5px] border-neutral-800 px-6 py-4">
+        <p className="font-Montserrat text-neutral-200 font-semibold text-2xl">
+          CHAT SAEL
+        </p>
+
+        {isAuthenticated && (
+          <button onClick={() => setMenuOpen(true)} className="text-white">
+            <MenuIcon size={28} />
+          </button>
+        )}
       </div>
 
       {!inputText && (
@@ -56,7 +70,7 @@ function Chat() {
           </p>
 
           {!selectedSubject ? (
-            <div className="flex justify-center px-8 gap-2 sm:gap-6 w-full max-w-lg grid grid-cols-2">
+            <div className="justify-center px-8 gap-2 sm:gap-6 w-full max-w-lg grid grid-cols-2">
               {Object.keys(subjects).map((subject) => (
                 <button
                   key={subject}
@@ -69,8 +83,7 @@ function Chat() {
             </div>
           ) : (
             <div className="flex flex-col items-center w-full">
-
-              <div className="flex justify-center px-8 gap-2 sm:gap-6 w-full max-w-lg grid grid-cols-2">
+              <div className="justify-center px-8 gap-2 sm:gap-6 w-full max-w-lg grid grid-cols-2">
                 {subjects[selectedSubject!].map((subsubject) => (
                   <button
                     key={subsubject}
@@ -88,7 +101,7 @@ function Chat() {
       {/* Campo de texto fixado no fundo */}
       <div className="fixed bottom-0 left-0 right-0 mb-8 px-4">
         <div className="flex justify-center bg-[#1a1f27] size-14 rounded-full w-full max-w-lg mx-auto">
-          <div className="flex items-center p-2 rounded-ful w-full">
+          <div className="flex items-center p-2 rounded-full w-full">
             <input
               type="text"
               placeholder="Comece a escrever"
@@ -102,6 +115,9 @@ function Chat() {
           </div>
         </div>
       </div>
+
+      {/* Menu Lateral */}
+      <Menu isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
     </div>
   );
 }

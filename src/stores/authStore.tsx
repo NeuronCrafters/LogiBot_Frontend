@@ -1,39 +1,58 @@
 import { create } from "zustand";
 
-interface AuthState {
+type UserRole = "student" | "teacher" | "course-coordinator" | "admin";
+
+interface User {
   id: string;
   name: string;
   email: string;
-  role: string[];
+  role: UserRole[];
   school: string;
+}
+
+interface AuthState {
+  user: User | null;
   token: string;
   isAuthenticated: boolean;
-  setUser: (userData: Partial<AuthState>) => void;
+  setUser: (userData: User & { token: string }) => void;
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  id: "",
-  name: "",
-  email: "",
-  role: [],
-  school: "",
-  token: "",
-  isAuthenticated: false,
+export const useAuthStore = create<AuthState>((set) => {
+  const token = localStorage.getItem("token");
+  const userStorage = localStorage.getItem("user");
 
-  setUser: (userData) => set((state) => ({
-    ...state,
-    ...userData,
-    isAuthenticated: !!userData.token,
-  })),
+  return {
+    user: userStorage ? JSON.parse(userStorage) : null,
+    token: token || "",
+    isAuthenticated: !!token,
 
-  logout: () => set({
-    id: "",
-    name: "",
-    email: "",
-    role: [],
-    school: "",
-    token: "",
-    isAuthenticated: false,
-  }),
-}));
+    setUser: (userData) => {
+      localStorage.setItem("token", userData.token);
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      set({
+        user: {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          role: userData.role as UserRole[],
+          school: userData.school,
+        },
+        token: userData.token,
+        isAuthenticated: true,
+      });
+    },
+
+    logout: () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      set({
+        user: null,
+        token: "",
+        isAuthenticated: false,
+      });
+    },
+  };
+});

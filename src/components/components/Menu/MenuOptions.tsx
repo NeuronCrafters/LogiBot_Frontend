@@ -1,7 +1,7 @@
 import React from "react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen, BarChart2, User, ChartPie } from "lucide-react";
+import { Users, BookOpen, User, ChartPie, LogOut } from "lucide-react";
 
 interface MenuOptionsProps {
   role: "student" | "teacher" | "course-coordinator" | "admin";
@@ -21,13 +21,23 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
   return (
     <nav className="flex flex-col space-y-4">
       {filteredOptions.map((item) => (
-        <a key={item.label} href={item.href} className="flex items-center space-x-3 hover:text-gray-300">
+        <a key={item.label} href={item.href} className="flex items-center space-x-3 text-gray-300 hover:text-gray-100">
           <Button variant="ghost" className="w-full justify-start">
             {item.icon}
             <Typograph text={item.label} colorText="text-[#E4E4E4]" variant="text4" weight="regular" fontFamily="poppins" />
           </Button>
         </a>
       ))}
+
+      {/* Botão de Logout */}
+      <Button
+        variant="ghost"
+        onClick={logout}
+        className="w-full justify-start text-red-900 hover:text-red-100 mt-4"
+      >
+        <LogOut className="w-5 h-5 text-red-500 mr-2" />
+        <Typograph text="Sair" colorText="text-[#E4E4E4]" variant="text4" weight="regular" fontFamily="poppins" />
+      </Button>
     </nav>
   );
 }

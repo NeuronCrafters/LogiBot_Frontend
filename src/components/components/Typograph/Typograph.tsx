@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 const WeightType = {
   bold: "font-bold",
@@ -38,7 +38,7 @@ const VariantStyles = {
 };
 
 interface TypographProps {
-  text: string;
+  text: ReactNode | string;
   colorText: string;
   variant: keyof typeof VariantStyles;
   weight: keyof typeof WeightType;
@@ -56,8 +56,9 @@ export function Typograph({
 }: TypographProps) {
   const baseClass = `${WeightType[weight]} ${FontFamily[fontFamily]} ${VariantStyles[variant]} ${colorText} ${className}`;
 
-  const Tag = ["title1", "title2", "title3", "title4", "title5", "title6", "title7", "title8", "title9", "title10", "title11"].includes(variant) ? "h1" : "p";
+  const Tag = ["title1", "title2", "title3", "title4", "title5", "title6", "title7", "title8", "title9", "title10", "title11"].includes(variant)
+    ? "h1"
+    : "p";
 
   return <Tag className={baseClass}>{text}</Tag>;
 }
-

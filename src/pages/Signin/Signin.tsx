@@ -1,10 +1,43 @@
-import { Link } from "react-router-dom";
-import { ButtonSocialLogin } from "@/components/components/Button/ButtonSocialLogin"; // Importe o componente de botão
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/stores/authStore";
+import { ButtonSocialLogin } from "@/components/components/Button/ButtonSocialLogin";
 import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
-import { AnimatedLogo } from "../AnimatedLogo/AnimatedLogo";
+import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedLogo";
+import api from "@/services/api";
 
 function Signin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const setUser = useAuthStore((state) => state.setUser);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await api.post("/session", { email, password });
+      const userData = response.data;
+
+      // salvar os dados no Zustand
+      setUser(userData);
+
+      // redirecionar para a página principal
+      navigate("/chat");
+    } catch (err) {
+      console.error("Erro ao fazer login:", err);
+      setError("Email ou senha inválidos.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen">
       <div
@@ -20,19 +53,39 @@ function Signin() {
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-8">
           <h2 className="font-Montserrat text-white text-2xl font-bold">Entrar</h2>
-          <p className="text-neutral-300 mb-2">Prencha os dados e acesse sua conta</p>
+          <p className="text-neutral-300 mb-2">Preencha os dados e acesse sua conta</p>
 
-          <Input type="email" className="bg-neutral-800 mb-4" />
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <Input type="password" className="bg-neutral-800 mb-4" />
+          <form onSubmit={handleLogin}>
+            <Input
+              type="email"
+              className="bg-neutral-800 mb-4"
+              placeholder="E-mail"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
 
-          <ButtonSocialLogin className="rounded-lg px-6 py-3 mb-4" />
+            <Input
+              type="password"
+              className="bg-neutral-800 mb-4"
+              placeholder="Senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-          <ButtonLogin type="entrar" />
+            <ButtonSocialLogin className="rounded-lg px-6 py-3 mb-4" />
+
+            <ButtonLogin type="submit" disabled={loading}>
+              {loading ? "Entrando..." : "Entrar"}
+            </ButtonLogin>
+          </form>
 
           <p className="text-gray-400 text-sm text-center mt-4">
             Não possui conta?{" "}
-            <Link to="/cadastro" className="text-blue-500 hover:underline">
+            <Link to="/register" className="text-blue-500 hover:underline">
               Faça seu cadastro.
             </Link>
           </p>

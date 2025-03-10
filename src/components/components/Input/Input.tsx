@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Input as ShadcnInput } from "@/components/ui/input";
 import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
@@ -9,23 +9,20 @@ const InputIcons = {
   password: <Lock className="w-6 h-6 text-gray-400" />,
 };
 
-interface InputProps {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type: "name" | "email" | "password";
   placeholder?: string;
   className?: string;
+  value?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function Input({ type, placeholder, className }: InputProps) {
-  const [value, setValue] = useState("");
+export function Input({ type, placeholder, className, value, onChange, required, ...props }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
-  };
-
   const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsFocused(value !== "");
+  const handleBlur = () => setIsFocused(!!value);
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
   const defaultPlaceholder = {
@@ -41,12 +38,14 @@ export function Input({ type, placeholder, className }: InputProps) {
       <div className="mr-3">{InputIcons[type]}</div>
 
       <ShadcnInput
-        type={type === "password" && !showPassword ? "password" : "name"}
+        type={type === "password" && !showPassword ? "password" : "text"} // Alterna entre senha oculta e visível
         value={value}
-        onChange={handleChange}
+        onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        required={required}
         className="bg-transparent text-white w-full placeholder-transparent focus:outline-none"
+        {...props}
       />
 
       {type === "password" && (
