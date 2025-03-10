@@ -1,5 +1,6 @@
 interface AskUserLevelProps {
   onLevelSelected: (level: string) => void;
+  levels: string[];
 }
 
 export const LevelUser = ({ onLevelSelected }: AskUserLevelProps) => {
