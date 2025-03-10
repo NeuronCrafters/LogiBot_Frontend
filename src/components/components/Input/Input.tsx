@@ -1,16 +1,17 @@
 import React, { ChangeEvent, useState } from "react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Input as ShadcnInput } from "@/components/ui/input";
-import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, User, Mail, Lock, FileText } from "lucide-react";
 
 const InputIcons = {
   name: <User className="w-6 h-6 text-gray-400" />,
   email: <Mail className="w-6 h-6 text-gray-400" />,
   password: <Lock className="w-6 h-6 text-gray-400" />,
+  text: <FileText className="w-6 h-6 text-gray-400" />,
 };
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  type: "name" | "email" | "password";
+  type: "text" | "name" | "email" | "password";
   placeholder?: string;
   className?: string;
   value?: string;
@@ -29,16 +30,15 @@ export function Input({ type, placeholder, className, value, onChange, required,
     name: "Nome",
     email: "E-mail",
     password: "Senha",
+    text: "Digite aqui...",
   };
 
   return (
-    <div
-      className={`relative flex items-center bg-gray-800 rounded-lg px-4 py-3 w-[341px] h-[64px] ${className}`}
-    >
+    <div className={`relative flex items-center bg-gray-800 rounded-lg px-4 py-3 w-[341px] h-[64px] ${className}`}>
       <div className="mr-3">{InputIcons[type]}</div>
 
       <ShadcnInput
-        type={type === "password" && !showPassword ? "password" : "text"} // Alterna entre senha oculta e visível
+        type={type === "password" && !showPassword ? "password" : "text"}
         value={value}
         onChange={onChange}
         onFocus={handleFocus}

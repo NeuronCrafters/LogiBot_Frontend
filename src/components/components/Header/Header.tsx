@@ -12,7 +12,7 @@ interface MenuProps {
   closeMenu: () => void;
 }
 
-export function Menu({ isOpen, closeMenu }: MenuProps) {
+export function Header({ isOpen, closeMenu }: MenuProps) {
   const { user, logout } = useAuthStore();
 
   if (!user) return null;

@@ -1,7 +1,7 @@
 import React from "react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen, User, ChartPie, LogOut } from "lucide-react";
+import { User, ChartPie, LogOut, Search, Settings } from "lucide-react";
 
 interface MenuOptionsProps {
   role: "student" | "teacher" | "course-coordinator" | "admin";
@@ -11,9 +11,9 @@ interface MenuOptionsProps {
 export function MenuOptions({ role, logout }: MenuOptionsProps) {
   const options = [
     { href: "/me", label: "Detalhes", icon: <User className="w-5 h-5 mr-2" />, roles: ["student", "teacher", "course-coordinator", "admin"] },
-    { href: "/students", label: "Alunos", icon: <Users className="w-5 h-5 mr-2" />, roles: ["teacher", "course-coordinator", "admin"] },
+    { href: "/students", label: "Pesquisar", icon: <Search className="w-5 h-5 mr-2" />, roles: ["teacher", "course-coordinator", "admin"] },
     { href: "/results", label: "Resultados", icon: <ChartPie className="w-5 h-5 mr-2" />, roles: ["teacher", "course-coordinator", "admin"] },
-    { href: "/teachers", label: "Professores", icon: <BookOpen className="w-5 h-5 mr-2" />, roles: ["course-coordinator", "admin"] },
+    { href: "/teachers", label: "Criar", icon: <Settings className="w-5 h-5 mr-2" />, roles: ["course-coordinator", "admin"] },
   ];
 
   const filteredOptions = options.filter((option) => option.roles.includes(role));
