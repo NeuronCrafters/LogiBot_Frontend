@@ -1,16 +1,25 @@
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 import toast from "react-hot-toast";
-import api from "@/services/api";
+import axios from "axios";
+
+interface Filters {
+  university?: string;
+  course?: string;
+  discipline?: string;
+  class?: string;
+  professor?: string;
+  student?: string;
+}
 
 interface FormsTableProps {
   items: any[];
   selectedEntity: string;
-  fetchData: () => void;
+  fetchData: (filters?: Filters) => Promise<void>; // Agora aceita undefined corretamente
 }
 
 export function FormsTable({ items, selectedEntity, fetchData }: FormsTableProps) {
   const handleDelete = async (id: string) => {
-    const confirmDelete = await new Promise((resolve) => {
+    const confirmDelete = await new Promise<boolean>((resolve) => {
       toast((t) => (
         <div>
           <p>Tem certeza que deseja excluir?</p>
@@ -24,9 +33,9 @@ export function FormsTable({ items, selectedEntity, fetchData }: FormsTableProps
 
     if (confirmDelete) {
       try {
-        await api.delete(`/academic-institution/${selectedEntity}/${id}`);
+        await axios.delete(`/academic-institution/${selectedEntity}/${id}`);
         toast.success("Item excluído com sucesso!");
-        fetchData();
+        await fetchData(); // Agora chamamos sem passar argumento
       } catch (error) {
         toast.error("Erro ao excluir item!");
       }

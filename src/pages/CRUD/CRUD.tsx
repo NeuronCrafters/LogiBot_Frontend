@@ -1,25 +1,57 @@
 import { useEffect, useState } from "react";
 import { FormsHeader } from "@/components/components/Forms/FormsHeader";
+import { FormsSectionFilter } from "@/components/components/Forms/FormsSectionFilter";
 import { FormsTable } from "@/components/components/Forms/FormsTable";
-import api from "@/services/api";
+import axios from "axios";
+
+interface Filters {
+  university?: string;
+  course?: string;
+  discipline?: string;
+  class?: string;
+  professor?: string;
+  student?: string;
+}
 
 export function CRUD() {
-  const [selectedEntity, setSelectedEntity] = useState("university");
-  const [selectedUniversity, setSelectedUniversity] = useState<string | null>(null);
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [items, setItems] = useState<any[]>([]);
+  const [filters, setFilters] = useState<Filters>({});
+  const [selectedEntity, setSelectedEntity] = useState<string>("");
 
   useEffect(() => {
-    fetchData();
-  }, [selectedEntity, selectedUniversity, selectedCourse]);
+    fetchData(filters);
+  }, [filters]);
 
-  const fetchData = async () => {
+  const fetchData = async (filters?: Filters) => {
     try {
-      let url = `/academic-institution/${selectedEntity}`;
-      if (selectedEntity === "discipline" && selectedUniversity && selectedCourse) {
-        url = `/academic-institution/discipline/${selectedUniversity}/${selectedCourse}`;
+      let url = "/academic-institution";
+
+      if (filters?.university) {
+        url = `/courses/${filters.university}`;
+        setSelectedEntity("courses");
       }
-      const { data } = await api.get(url);
+      if (filters?.course) {
+        url = `/disciplines/${filters.university}/${filters.course}`;
+        setSelectedEntity("disciplines");
+      }
+      if (filters?.discipline) {
+        url = `/classes/${filters.university}/${filters.course}`;
+        setSelectedEntity("classes");
+      }
+      if (filters?.class) {
+        url = `/students/${filters.university}/${filters.course}/${filters.class}`;
+        setSelectedEntity("students");
+      }
+      if (filters?.professor) {
+        url = `/professors/${filters.university}`;
+        setSelectedEntity("professors");
+      }
+      if (filters?.student) {
+        url = `/students/${filters.university}/${filters.course}`;
+        setSelectedEntity("students");
+      }
+
+      const { data } = await axios.get(url);
       setItems(data);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
@@ -28,17 +60,14 @@ export function CRUD() {
 
   return (
     <div className="w-full h-screen flex flex-col bg-[#141414]">
-      <FormsHeader
-        selectedEntity={selectedEntity}
-        setSelectedEntity={setSelectedEntity}
-        selectedUniversity={selectedUniversity}
-        setSelectedUniversity={setSelectedUniversity}
-        selectedCourse={selectedCourse}
-        setSelectedCourse={setSelectedCourse}
-        fetchData={fetchData}
-        openCreateModal={() => console.log("Abrir modal de criação")}
-      />
-      <FormsTable items={items} selectedEntity={selectedEntity} fetchData={fetchData} />
+      {/* Cabeçalho */}
+      <FormsHeader openCreateModal={() => console.log("Abrir modal de criação")} />
+
+      {/* Filtros */}
+      {/* <FormsSectionFilter fetchData={setFilters} /> */}
+
+      {/* Tabela de Resultados */}
+      {/* <FormsTable items={items} fetchData={() => fetchData(filters)} selectedEntity={selectedEntity} /> */}
     </div>
   );
 }

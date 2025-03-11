@@ -6,12 +6,12 @@ import { MenuOptions } from "@/components/components/Header/HeaderOptions";
 import { Button } from "@/components/ui/button";
 import { HelpCircle, LogOut, X } from "lucide-react";
 
-interface MenuProps {
+interface HeaderProps {
   isOpen: boolean;
   closeMenu: () => void;
 }
 
-export function Header({ isOpen, closeMenu }: MenuProps) {
+export function Header({ isOpen, closeMenu }: HeaderProps) {
   const { user, logout } = useAuthStore();
 
   if (!user) return null;
