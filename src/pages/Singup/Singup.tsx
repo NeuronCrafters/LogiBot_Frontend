@@ -39,7 +39,6 @@ function Signup() {
 
   const navigate = useNavigate();
 
-  // Carrega as universidades ao montar o componente
   useEffect(() => {
     api
       .get("/public/institutions")
@@ -50,7 +49,6 @@ function Signup() {
       });
   }, []);
 
-  // Atualiza a lista de cursos quando uma universidade é selecionada
   useEffect(() => {
     if (selectedUniversity) {
       const selectedUni = universities.find((u) => u._id === selectedUniversity);
@@ -62,7 +60,6 @@ function Signup() {
     setClasses([]);
   }, [selectedUniversity, universities]);
 
-  // Atualiza a lista de turmas quando um curso é selecionado
   useEffect(() => {
     if (selectedCourse) {
       const selectedCrs = courses.find((c) => c._id === selectedCourse);
@@ -73,7 +70,6 @@ function Signup() {
     setSelectedClass("");
   }, [selectedCourse, courses]);
 
-  // Função para lidar com o cadastro
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -141,7 +137,6 @@ function Signup() {
               required
             />
 
-            {/* Seletor de Universidade */}
             <select
               className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
               value={selectedUniversity}
@@ -156,7 +151,6 @@ function Signup() {
               ))}
             </select>
 
-            {/* Seletor de Curso */}
             <select
               className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
               value={selectedCourse}
@@ -172,7 +166,6 @@ function Signup() {
               ))}
             </select>
 
-            {/* Seletor de Turma */}
             <select
               className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
               value={selectedClass}

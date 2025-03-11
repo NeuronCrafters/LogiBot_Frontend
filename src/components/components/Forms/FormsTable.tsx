@@ -14,7 +14,7 @@ interface Filters {
 interface FormsTableProps {
   items: any[];
   selectedEntity: string;
-  fetchData: (filters?: Filters) => Promise<void>; // Agora aceita undefined corretamente
+  fetchData: (filters?: Filters) => Promise<void>;
 }
 
 export function FormsTable({ items, selectedEntity, fetchData }: FormsTableProps) {
@@ -35,7 +35,7 @@ export function FormsTable({ items, selectedEntity, fetchData }: FormsTableProps
       try {
         await axios.delete(`/academic-institution/${selectedEntity}/${id}`);
         toast.success("Item excluído com sucesso!");
-        await fetchData(); // Agora chamamos sem passar argumento
+        await fetchData();
       } catch (error) {
         toast.error("Erro ao excluir item!");
       }

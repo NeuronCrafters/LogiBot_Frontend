@@ -59,7 +59,6 @@ export function About() {
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full max-w-full px-0 sm:px-8 md:px-16 mx-auto">
 
-      {/* Header igual ao do Chat */}
       <div className="absolute bg-[#141414] w-full justify-between flex border-b-[0.5px] border-neutral-800 px-6 py-4">
         <p className="font-Montserrat text-neutral-200 font-semibold text-2xl">SOBRE MIM</p>
         {isAuthenticated && (
@@ -69,11 +68,9 @@ export function About() {
         )}
       </div>
 
-      {/* Conteúdo principal */}
       <div className="flex flex-1 items-center justify-center p-6 w-full">
         <div className="bg-[#2a2a2a] p-8 rounded-lg shadow-lg w-full max-w-lg text-white">
 
-          {/* Avatar centralizado no topo do card */}
           <div className="flex justify-center -mt-20 mb-6">
             <Avatar className="h-32 w-32 bg-gray-700 text-white text-3xl flex items-center justify-center border-4 border-[#2a2a2a]">
               <AvatarFallback>{user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
@@ -92,7 +89,6 @@ export function About() {
                 <strong>Função:</strong> {user.role.map(translateRole).join(", ")}
               </p>
 
-              {/* Campos adicionais */}
               {user.university && <p className="text-lg"><strong>Universidade:</strong> {user.university}</p>}
               {user.course && <p className="text-lg"><strong>Curso:</strong> {user.course}</p>}
             </div>

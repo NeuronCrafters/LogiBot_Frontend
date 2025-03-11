@@ -3,21 +3,20 @@ import { FilterForms } from "./Forms/FilterForms";
 interface Filters {
   university?: string;
   course?: string;
+  discipline?: string;
   class?: string;
+  professor?: string;
+  student?: string;
 }
 
 interface FormsSectionFilterProps {
-  fetchData: (data: any) => void;
+  fetchData: (filters: Filters) => void;
 }
 
 export function FormsSectionFilter({ fetchData }: FormsSectionFilterProps) {
-  const handleFetchData = async (filters: Filters) => {
-    fetchData(filters);
-  };
-
   return (
     <div>
-      <FilterForms fetchData={handleFetchData} />
+      <FilterForms fetchData={fetchData} />
     </div>
   );
 }

@@ -25,10 +25,8 @@ function Signin() {
       const response = await api.post("/session", { email, password });
       const userData = response.data;
 
-      // salvar os dados no Zustand
       setUser(userData);
 
-      // redirecionar para a página principal
       navigate("/chat");
     } catch (err) {
       console.error("Erro ao fazer login:", err);

@@ -9,9 +9,8 @@ interface MenuOptionsProps {
 }
 
 export function MenuOptions({ role, logout }: MenuOptionsProps) {
-  const location = useLocation(); // Obtém a rota atual
+  const location = useLocation();
 
-  // Filtros para esconder certos botões em telas específicas
   const isChatPage = location.pathname === "/chat";
   const isCrudPage = location.pathname === "/crud";
   const isAboutPage = location.pathname === "/about";
@@ -19,7 +18,6 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
 
   return (
     <nav className="flex flex-col space-y-4 bg-[#141414] p-4 rounded-lg shadow-md">
-      {/* Botão "Detalhes" (aparece se NÃO estiver na página About) */}
       {!isAboutPage && (
         <Link to="/about">
           <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100">
@@ -29,7 +27,6 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
         </Link>
       )}
 
-      {/* Botão "Resultados" (só para professores, coordenadores e admin) */}
       {["teacher", "course-coordinator", "admin"].includes(role) && (
         <Link to="/results">
           <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100">
@@ -39,7 +36,6 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
         </Link>
       )}
 
-      {/* Botão "Chat" (aparece se NÃO estiver na página do chat) */}
       {!isChatPage && (
         <Link to="/chat">
           <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100">
@@ -49,7 +45,6 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
         </Link>
       )}
 
-      {/* Botão "Criar" (aparece se NÃO estiver na página CRUD e APENAS para admin e coordenadores) */}
       {!isCrudPage && ["admin", "course-coordinator"].includes(role) && (
         <Link to="/crud">
           <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100">
@@ -59,7 +54,6 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
         </Link>
       )}
 
-      {/* Botão "Dúvidas" (aparece se NÃO estiver na página FAQ) */}
       {!isFaqPage && (
         <Link to="/faq">
           <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100">
@@ -69,7 +63,6 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
         </Link>
       )}
 
-      {/* Botão de Logout */}
       <Button
         variant="ghost"
         onClick={logout}

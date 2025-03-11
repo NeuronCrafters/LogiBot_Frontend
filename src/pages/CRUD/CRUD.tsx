@@ -16,7 +16,7 @@ interface Filters {
 export function CRUD() {
   const [items, setItems] = useState<any[]>([]);
   const [filters, setFilters] = useState<Filters>({});
-  const [selectedEntity, setSelectedEntity] = useState<string>("");
+  const [selectedEntity, setSelectedEntity] = useState<string>("university"); // Adicionando entidade selecionada
 
   useEffect(() => {
     fetchData(filters);
@@ -24,31 +24,27 @@ export function CRUD() {
 
   const fetchData = async (filters?: Filters) => {
     try {
-      let url = "/academic-institution";
+      let url = "";
 
-      if (filters?.university) {
+      if (!filters || Object.keys(filters).length === 0) {
+        url = "/institutions";
+      } else if (filters.university && !filters.course) {
         url = `/courses/${filters.university}`;
-        setSelectedEntity("courses");
-      }
-      if (filters?.course) {
+      } else if (filters.course && !filters.discipline) {
         url = `/disciplines/${filters.university}/${filters.course}`;
-        setSelectedEntity("disciplines");
-      }
-      if (filters?.discipline) {
-        url = `/classes/${filters.university}/${filters.course}`;
-        setSelectedEntity("classes");
-      }
-      if (filters?.class) {
+      } else if (filters.discipline) {
+        url = `/classes/${filters.university}/${filters.course}/${filters.discipline}`;
+      } else if (filters.class) {
         url = `/students/${filters.university}/${filters.course}/${filters.class}`;
-        setSelectedEntity("students");
-      }
-      if (filters?.professor) {
+      } else if (filters.professor) {
         url = `/professors/${filters.university}`;
-        setSelectedEntity("professors");
-      }
-      if (filters?.student) {
+      } else if (filters.student) {
         url = `/students/${filters.university}/${filters.course}`;
-        setSelectedEntity("students");
+      }
+
+      if (!url) {
+        console.warn("Nenhum filtro válido selecionado.");
+        return;
       }
 
       const { data } = await axios.get(url);

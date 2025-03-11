@@ -18,19 +18,16 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
 
   return (
     <>
-      {/* Overlay para fechar ao clicar fora */}
       <div
         className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
           }`}
         onClick={closeMenu}
       />
 
-      {/* Menu lateral */}
       <div
         className={`fixed inset-y-0 right-0 z-50 w-[350px] bg-[#181818] transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
-        {/* Botão de Fechar Menu */}
         <div className="flex justify-end p-4">
           <button onClick={closeMenu} className="text-white hover:text-gray-400">
             <X size={28} />
@@ -49,7 +46,6 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
 
           <Separator className="bg-[#2a2a2a] mb-2" />
 
-          {/* Passando o primeiro papel do array para `MenuOptions` */}
           <MenuOptions role={user.role[0] as "student" | "teacher" | "course-coordinator" | "admin"} logout={logout} />
 
           <div className="mt-auto space-y-4">
