@@ -12,8 +12,9 @@ interface UserData {
   name: string;
   email: string;
   role: string[];
-  university?: string;
+  school?: string;
   course?: string;
+  class?: string;
 }
 
 const translateRole = (role: string) => {
@@ -89,8 +90,9 @@ export function About() {
                 <strong>Função:</strong> {user.role.map(translateRole).join(", ")}
               </p>
 
-              {user.university && <p className="text-lg"><strong>Universidade:</strong> {user.university}</p>}
+              {user.school && <p className="text-lg"><strong>Universidade:</strong> {user.school}</p>}
               {user.course && <p className="text-lg"><strong>Curso:</strong> {user.course}</p>}
+              {user.class && <p className="text-lg"><strong>Turma:</strong> {user.class}</p>}
             </div>
           ) : (
             <p className="text-center text-red-500">Erro ao carregar os dados.</p>
