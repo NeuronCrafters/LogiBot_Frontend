@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "@/services/api";
 import { useNavigate } from "react-router-dom";
-import { Loader2, LogOut, Menu as MenuIcon } from "lucide-react";
+import { Loader2, Menu as MenuIcon } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/stores/authStore";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Header } from "@/components/components/Header/Header";
 
 interface UserData {
@@ -16,6 +15,23 @@ interface UserData {
   university?: string;
   course?: string;
 }
+
+const translateRole = (role: string) => {
+  switch (role) {
+    case "student":
+      return "Estudante";
+    case "professor":
+      return "Professor";
+    case "teacher":
+      return "Professor";
+    case "course-coordinator":
+      return "Professor Coordernador";
+    case "admin":
+      return "Administrador";
+    default:
+      return role;
+  }
+};
 
 export function About() {
   const { isAuthenticated, logout } = useAuthStore();
@@ -57,9 +73,9 @@ export function About() {
       <div className="flex flex-1 items-center justify-center p-6 w-full">
         <div className="bg-[#2a2a2a] p-8 rounded-lg shadow-lg w-full max-w-lg text-white">
 
-          {/* Avatar centralizado */}
-          <div className="flex justify-center mb-6">
-            <Avatar className="h-44 w-44 bg-gray-700 text-white text-3xl flex items-center justify-center">
+          {/* Avatar centralizado no topo do card */}
+          <div className="flex justify-center -mt-20 mb-6">
+            <Avatar className="h-32 w-32 bg-gray-700 text-white text-3xl flex items-center justify-center border-4 border-[#2a2a2a]">
               <AvatarFallback>{user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </div>
@@ -69,10 +85,12 @@ export function About() {
               <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
             </div>
           ) : user ? (
-            <div className="space-y-2 text-left">
+            <div className="space-y-4 text-left">
               <p className="text-lg"><strong>Nome:</strong> {user.name}</p>
               <p className="text-lg"><strong>Email:</strong> {user.email}</p>
-              <p className="text-lg"><strong>Função:</strong> {user.role.join(", ")}</p>
+              <p className="text-lg">
+                <strong>Função:</strong> {user.role.map(translateRole).join(", ")}
+              </p>
 
               {/* Campos adicionais */}
               {user.university && <p className="text-lg"><strong>Universidade:</strong> {user.university}</p>}
@@ -81,12 +99,6 @@ export function About() {
           ) : (
             <p className="text-center text-red-500">Erro ao carregar os dados.</p>
           )}
-
-          <div className="flex justify-between mt-6">
-            <Button variant="outline" onClick={() => navigate("/chat")}>
-              Voltar
-            </Button>
-          </div>
         </div>
       </div>
 
