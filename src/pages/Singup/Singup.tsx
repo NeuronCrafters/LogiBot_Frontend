@@ -105,8 +105,8 @@ function Signup() {
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
-        <div className="w-full max-w-sm p-8">
-          <h2 className="font-Montserrat text-white text-4xl font-bold">Cadastro</h2>
+        <div className="w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
+          <h2 className="text-white text-4xl font-bold text-center">Cadastro</h2>
           <p className="text-neutral-300 mb-2">Realize seu cadastro no site</p>
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
