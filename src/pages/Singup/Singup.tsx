@@ -98,10 +98,10 @@ function Signup() {
   return (
     <div className="flex min-h-screen">
       <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900" style={{ flex: 2 }}>
-        <div className="flex items-end gap-4">
+        <Link to="/" className="flex items-end gap-4 cursor-pointer hover:opacity-80 transition-opacity">
           <AnimatedLogo />
-          <h1 className="text-white text-7xl font-bold mb-12">SAEL</h1>
-        </div>
+          <h1 className="text-white text-5xl lg:text-7xl font-bold">SAEL</h1>
+        </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
