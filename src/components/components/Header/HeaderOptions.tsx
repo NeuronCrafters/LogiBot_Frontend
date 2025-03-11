@@ -13,7 +13,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
   const [isCrudOpen, setIsCrudOpen] = useState(false);
 
   const options = [
-    { href: "/me", label: "Detalhes", icon: <User className="w-5 h-5 mr-2" />, roles: ["student", "teacher", "course-coordinator", "admin"] },
+    { href: "/about", label: "Detalhes", icon: <User className="w-5 h-5 mr-2" />, roles: ["student", "teacher", "course-coordinator", "admin"] },
     { href: "/results", label: "Resultados", icon: <ChartPie className="w-5 h-5 mr-2" />, roles: ["teacher", "course-coordinator", "admin"] },
   ];
 

@@ -39,32 +39,54 @@ function Signup() {
 
   const navigate = useNavigate();
 
+  // Carrega as universidades ao montar o componente
   useEffect(() => {
     api
       .get("/public/institutions")
       .then((res) => setUniversities(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("Erro ao carregar universidades:", err);
+        setError("Erro ao carregar universidades.");
+      });
   }, []);
 
+  // Atualiza a lista de cursos quando uma universidade é selecionada
   useEffect(() => {
-    const uni = universities.find((u) => u._id === selectedUniversity);
-    setCourses(uni ? uni.courses : []);
+    if (selectedUniversity) {
+      const selectedUni = universities.find((u) => u._id === selectedUniversity);
+      setCourses(selectedUni ? selectedUni.courses : []);
+    } else {
+      setCourses([]);
+    }
     setSelectedCourse("");
     setClasses([]);
   }, [selectedUniversity, universities]);
 
+  // Atualiza a lista de turmas quando um curso é selecionado
   useEffect(() => {
-    const course = courses.find((c) => c._id === selectedCourse);
-    setClasses(course ? course.classes : []);
+    if (selectedCourse) {
+      const selectedCrs = courses.find((c) => c._id === selectedCourse);
+      setClasses(selectedCrs ? selectedCrs.classes : []);
+    } else {
+      setClasses([]);
+    }
     setSelectedClass("");
   }, [selectedCourse, courses]);
 
+  // Função para lidar com o cadastro
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const payload = { name, email, password, school: selectedUniversity, course: selectedCourse, class: selectedClass };
+    const payload = {
+      name,
+      email,
+      password,
+      school: selectedUniversity,
+      course: selectedCourse,
+      class: selectedClass,
+    };
 
     try {
       await api.post("/users", payload);
@@ -94,34 +116,82 @@ function Signup() {
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
           <form onSubmit={handleRegister}>
-            <Input type="name" placeholder="Nome" className="bg-neutral-800 mb-4" value={name} onChange={(e) => setName(e.target.value)} required />
-            <Input type="email" placeholder="Email" className="bg-neutral-800 mb-4" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <Input type="password" placeholder="Senha" className="bg-neutral-800 mb-4" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Input
+              type="text"
+              placeholder="Nome"
+              className="bg-neutral-800 mb-4"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <Input
+              type="email"
+              placeholder="Email"
+              className="bg-neutral-800 mb-4"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Senha"
+              className="bg-neutral-800 mb-4"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-
-            <select className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md" value={selectedUniversity} onChange={(e) => setSelectedUniversity(e.target.value)}>
+            {/* Seletor de Universidade */}
+            <select
+              className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
+              value={selectedUniversity}
+              onChange={(e) => setSelectedUniversity(e.target.value)}
+              required
+            >
               <option value="">Selecione a universidade</option>
               {universities.map((univ) => (
-                <option key={univ._id} value={univ._id}>{univ.name}</option>
+                <option key={univ._id} value={univ._id}>
+                  {univ.name}
+                </option>
               ))}
             </select>
 
-            <select className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md" value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)} disabled={!selectedUniversity}>
+            {/* Seletor de Curso */}
+            <select
+              className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
+              value={selectedCourse}
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              disabled={!selectedUniversity}
+              required
+            >
               <option value="">Selecione o curso</option>
-              {courses.map((course) => <option key={course._id} value={course._id}>{course.name}</option>)}
+              {courses.map((course) => (
+                <option key={course._id} value={course._id}>
+                  {course.name}
+                </option>
+              ))}
             </select>
 
-            <select className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md" value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} disabled={!selectedCourse}>
+            {/* Seletor de Turma */}
+            <select
+              className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              disabled={!selectedCourse}
+              required
+            >
               <option value="">Selecione a turma</option>
               {classes.map((cls) => (
-                <option key={cls._id} value={cls._id}>{cls.name}</option>
+                <option key={cls._id} value={cls._id}>
+                  {cls.name}
+                </option>
               ))}
             </select>
+
+            <ButtonLogin type="submit" disabled={loading}>
+              {loading ? "Cadastrando..." : "Cadastrar"}
+            </ButtonLogin>
           </form>
-
-          <ButtonLogin type="submit" disabled={loading}>{loading ? "Cadastrando..." : "Cadastrar"}</ButtonLogin>
-
-          {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
 
           <p className="text-gray-400 text-sm text-center mt-4">
             Já possui conta?{" "}
