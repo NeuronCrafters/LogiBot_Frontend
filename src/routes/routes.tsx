@@ -4,6 +4,7 @@ import { Signin } from "../pages/Signin/Signin";
 import { Chat } from "../pages/Chat/Chat";
 import { Home } from "../pages/Home/Home";
 import { Signup } from "@/pages/Singup/Singup";
+import { CRUD } from "@/pages/CRUD/CRUD";
 
 const AppRoutes = () => {
   return (
@@ -15,6 +16,7 @@ const AppRoutes = () => {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/chat" element={<Chat />} />
+          <Route path="/crud" element={<CRUD />} />
         </Route>
       </Routes>
     </Router>

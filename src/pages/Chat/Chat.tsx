@@ -8,6 +8,7 @@ import { ListOptions } from "@/components/components/Chat/ListOptions";
 import { ListSubOptions } from "@/components/components/Chat/ListSubOptions";
 import { GenerateQuestions } from "@/components/components/Chat/GenerateQuestions";
 import { ChatButtons } from "@/components/components/Chat/ChatButtons";
+import { ExtractOptions } from "@/components/components/Chat/ExtractOptions";
 import { sendMessageToRasa, sendToActionServer } from "@/services/rasaService";
 
 function Chat() {
@@ -16,93 +17,94 @@ function Chat() {
   const [userLevel, setUserLevel] = useState<string | null>(null);
   const [options, setOptions] = useState<string[]>([]);
   const [subOptions, setSubOptions] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [buttons, setButtons] = useState<{ title: string; payload: string }[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { token } = useAuthStore();
 
-  useEffect(() => {
-    console.log("Iniciando a conversa...");
-    startConversation();
-    fetchLevels();
-  }, []);
+  const { token } = useAuthStore(); // Usando o token do zustand
 
+  // Função para enviar mensagem ao Rasa e atualizar o estado das mensagens
   const sendMessage = async (message: string, role: "user" | "assistant" = "user") => {
-    console.log("Enviando mensagem:", message);
     setMessages((prev) => [...prev, { role, content: message }]);
-    try {
-      const response = await sendMessageToRasa(message);
-      console.log("Resposta do Rasa:", response);
-      if (response && response.length > 0) {
-        setMessages((prev) => [...prev, { role: "assistant", content: response[0].text }]);
+    const response = await sendMessageToRasa(message);
+    if (response && response.length > 0) {
+      setMessages((prev) => [...prev, { role: "assistant", content: response[0].text }]);
+      if (response[0].buttons) {
+        setButtons(response[0].buttons);
       }
-    } catch (error) {
-      console.error("Erro ao enviar mensagem:", error);
     }
   };
 
+  // Função para iniciar a conversa
   const startConversation = async () => {
-    try {
-      const response = await sendMessageToRasa("iniciar", "user");
-      console.log("Resposta inicial do Rasa:", response);
-      if (response && response.length > 0) {
-        setMessages([{ role: "assistant", content: response[0].text }]);
-      }
-    } catch (error) {
-      console.error("Erro ao iniciar conversa:", error);
+    const response = await sendMessageToRasa("iniciar", "user");
+    if (response && response.length > 0) {
+      setMessages([{ role: "assistant", content: response[0].text }]);
     }
   };
 
-  const fetchLevels = async () => {
-    try {
-      const response = await sendToActionServer("action_listar_niveis", {});
-      console.log("Níveis recebidos:", response);
-      if (response && response.responses) {
-        const levels = response.responses[0].buttons?.map((btn: { title: string }) => btn.title) || [];
-        setOptions(levels);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar níveis:", error);
-    }
-  };
-
+  // Função para definir o nível do usuário
   const handleLevelSelected = async (level: string) => {
-    console.log("Nível selecionado:", level);
     setUserLevel(level);
-    try {
-      const response = await sendToActionServer("action_definir_nivel", { nivel: level });
-      console.log("Resposta ao definir nível:", response);
-      if (response) {
-        await fetchOptions(level);
-      }
-    } catch (error) {
-      console.error("Erro ao definir nível:", error);
+    const response = await sendToActionServer("action_definir_nivel", { nivel: level });
+    if (response) {
+      setMessages((prev) => [...prev, { role: "assistant", content: `Nível definido: ${level}` }]);
+      await listOptions(); // Listar opções após definir o nível
     }
   };
 
-  const fetchOptions = async (level: string) => {
-    try {
-      console.log("Buscando opções para o nível:", level);
-      const response = await sendToActionServer("action_listar_opcoes", { nivel: level });
-      console.log("Opções recebidas:", response);
-      if (response && response.responses) {
-        setOptions(response.responses[0].buttons?.map((btn: { title: string }) => btn.title) || []);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar opções:", error);
+  // Função para listar opções
+  const listOptions = async () => {
+    const response = await sendToActionServer("action_listar_opcoes", { nivel: userLevel });
+    if (response && response.responses && response.responses.length > 0) {
+      setOptions(response.responses[0].buttons?.map((btn: { title: string }) => btn.title) || []);
+      setButtons(response.responses[0].buttons || []);
     }
   };
 
-  const handleOptionSelected = async (option: string) => {
-    console.log("Opção selecionada:", option);
-    try {
-      const response = await sendToActionServer("action_listar_subopcoes", { categoria: option });
-      console.log("Subopções recebidas:", response);
-      if (response && response.responses) {
-        setSubOptions(response.responses[0].buttons?.map((btn: { title: string }) => btn.title) || []);
+  // Função para listar subopções
+  const listSubOptions = async (categoria: string) => {
+    const response = await sendToActionServer("action_listar_subopcoes", { categoria, nivel: userLevel });
+    if (response && response.responses && response.responses.length > 0) {
+      setSubOptions(response.responses[0].buttons?.map((btn: { title: string }) => btn.title) || []);
+      setMessages((prev) => [...prev, { role: "assistant", content: response.responses[0].text }]);
+      if (response.responses[0].buttons) {
+        setButtons(response.responses[0].buttons);
       }
-    } catch (error) {
-      console.error("Erro ao buscar subopções:", error);
     }
   };
+
+  // Função para gerar perguntas
+  const generateQuestions = async (pergunta: string) => {
+    const response = await sendToActionServer("action_gerar_perguntas_chatgpt", { pergunta, nivel: userLevel });
+    if (response && response.responses && response.responses.length > 0) {
+      setQuestions([response.responses[0].text]);
+      setMessages((prev) => [...prev, { role: "assistant", content: response.responses[0].text }]);
+    }
+  };
+
+  // Função para lidar com o clique nos botões
+  const handleButtonClick = async (payload: string) => {
+    if (payload.startsWith("/listar_subopcoes")) {
+      const categoria = JSON.parse(payload.slice(payload.indexOf("{"))).categoria;
+      await listSubOptions(categoria);
+    } else if (payload.startsWith("/gerar_perguntas")) {
+      const pergunta = JSON.parse(payload.slice(payload.indexOf("{"))).pergunta;
+      await generateQuestions(pergunta); // Chama a API da OpenAI apenas aqui
+    } else {
+      await sendMessage(payload);
+    }
+  };
+
+  // Função para extrair opções e enviar ao Rasa
+  const handleOptionExtracted = async (option: string) => {
+    await sendMessage(option);
+  };
+
+  // Efeito para iniciar a conversa ao carregar o componente
+  useEffect(() => {
+    startConversation();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full max-w-full px-0 sm:px-8 md:px-16 mx-auto">
@@ -118,19 +120,34 @@ function Chat() {
       <div className="flex flex-col items-center w-full h-screen py-32">
         <StartConversation onStart={startConversation} />
 
-        {!userLevel ? (
-          <LevelUser onLevelSelected={handleLevelSelected} levels={options} />
-        ) : subOptions.length === 0 ? (
-          <ListOptions options={options} onOptionSelected={handleOptionSelected} />
-        ) : (
-          <ListSubOptions subOptions={subOptions} onSubOptionSelected={sendMessage} />
-        )}
-
         {messages.map((message, index) => (
           <div key={index} className={`text-${message.role === "user" ? "white" : "blue-300"}`}>
             {message.content}
           </div>
         ))}
+
+        {/* {!userLevel && <LevelUser onLevelSelected={handleLevelSelected} />}
+
+        {userLevel && options.length === 0 && (
+          <ListOptions options={options} onOptionSelected={handleButtonClick} />
+        )}
+
+        {options.length > 0 && subOptions.length === 0 && (
+          <ListSubOptions subOptions={subOptions} onSubOptionSelected={handleButtonClick} />
+        )}
+
+        {subOptions.length > 0 && questions.length === 0 && (
+          <GenerateQuestions questions={questions} />
+        )}
+
+        {buttons.length > 0 && <ChatButtons buttons={buttons} onButtonClick={handleButtonClick} />}
+
+        {messages.some((message) => message.role === "assistant" && message.content.includes("(")) && (
+          <ExtractOptions
+            text={messages.find((message) => message.role === "assistant" && message.content.includes("("))?.content || ""}
+            onOptionSelected={handleOptionExtracted}
+          />
+        )} */}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 mb-8 px-4">

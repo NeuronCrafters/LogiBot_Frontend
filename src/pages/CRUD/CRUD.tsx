@@ -1,48 +1,74 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Typograph } from "@/components/components/Typograph/Typograph";
-import { Button } from "@/components/ui/button";
-import { User, ChartPie, LogOut, Search, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import UniversityForm from "@/components/components/Forms/UniversityForm";
+import CourseForm from "@/components/components/Forms/CourseForm";
+import ClassForm from "@/components/components/Forms/ClassForm";
+import ProfessorForm from "@/components/components/Forms/ProfessorForm";
+import DisciplineForm from "@/components/components/Forms/DisciplineForm";
+import AssignDisciplineForm from "@/components/components/Forms/AssignDisciplineForm";
+import { Header } from "@/components/components/Header/Header";
+import { useAuthStore } from "@/stores/authStore";
 
-interface MenuOptionsProps {
-  role: "student" | "teacher" | "course-coordinator" | "admin";
-  logout: () => void;
-}
+const forms = {
+  university: UniversityForm,
+  course: CourseForm,
+  class: ClassForm,
+  professor: ProfessorForm,
+  discipline: DisciplineForm,
+  assignDiscipline: AssignDisciplineForm,
+};
 
-export function MenuOptions({ role, logout }: MenuOptionsProps) {
-  const navigate = useNavigate();
+function CRUD() {
+  const [searchParams] = useSearchParams();
+  const { isAuthenticated } = useAuthStore();
+  const [selectedForm, setSelectedForm] = useState<keyof typeof forms | "">("");
 
-  const options = [
-    { href: "/me", label: "Detalhes", icon: <User className="w-5 h-5 mr-2" />, roles: ["student", "teacher", "course-coordinator", "admin"] },
-    { href: "/search", label: "Pesquisar", icon: <Search className="w-5 h-5 mr-2" />, roles: ["teacher", "course-coordinator", "admin"] },
-    { href: "/results", label: "Resultados", icon: <ChartPie className="w-5 h-5 mr-2" />, roles: ["teacher", "course-coordinator", "admin"] },
-    { href: "/crud", label: "Criar", icon: <Settings className="w-5 h-5 mr-2" />, roles: ["course-coordinator", "admin"] },
-  ];
+  useEffect(() => {
+    const type = searchParams.get("type") as keyof typeof forms | null;
+    if (type && forms[type]) {
+      setSelectedForm(type);
+    }
+  }, [searchParams]);
 
-  const filteredOptions = options.filter((option) => option.roles.includes(role));
+  const FormComponent = selectedForm ? forms[selectedForm] : null;
 
   return (
-    <nav className="flex flex-col space-y-4 bg-[#141414] p-4 rounded-lg shadow-md">
-      {filteredOptions.map((item) => (
-        <Button
-          key={item.label}
-          variant="ghost"
-          className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100"
-          onClick={() => navigate(item.href)}
-        >
-          {item.icon}
-          <Typograph text={item.label} colorText="text-[#E4E4E4]" variant="text4" weight="regular" fontFamily="poppins" />
-        </Button>
-      ))}
+    <div className="w-full h-screen flex flex-col bg-[#141414]">
+      {isAuthenticated && (
+        <div className="fixed top-0 left-0 w-full z-50 bg-[#141414] shadow-md">
+          <Header isOpen={false} closeMenu={() => { }} />
+        </div>
+      )}
 
-      {/* Botão de Logout */}
-      <Button
-        variant="ghost"
-        onClick={logout}
-        className="w-full justify-start flex items-center gap-2 text-red-500 hover:text-red-300 mt-4"
-      >
-        <LogOut className="w-5 h-5 text-red-500" />
-        <Typograph text="Sair" colorText="text-[#E4E4E4]" variant="text4" weight="regular" fontFamily="poppins" />
-      </Button>
-    </nav>
+      <main className={`flex flex-1 items-center justify-center ${isAuthenticated ? "pt-[80px]" : ""}`}>
+        <div className="bg-[#2a2a2a] shadow-lg rounded-lg p-8 max-w-2xl w-full mx-4">
+          <h1 className="text-2xl font-bold mb-4 text-center text-white">Gerenciamento Acadêmico</h1>
+
+          <div className="flex justify-center">
+            <select
+              className="border p-2 rounded w-[560px] bg-[#3a3a3a] text-white"
+              value={selectedForm}
+              onChange={(e) => setSelectedForm(e.target.value as keyof typeof forms)}
+            >
+              <option value="">Selecione um CRUD</option>
+              <option value="university">Criar Universidade</option>
+              <option value="course">Criar Curso</option>
+              <option value="class">Criar Turma</option>
+              <option value="professor">Criar Professor</option>
+              <option value="discipline">Criar Disciplina</option>
+              <option value="assignDiscipline">Vincular Aluno a Uma Disciplina</option>
+            </select>
+          </div>
+
+          {FormComponent && (
+            <div className="mt-6">
+              <FormComponent />
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
+
+export { CRUD };
