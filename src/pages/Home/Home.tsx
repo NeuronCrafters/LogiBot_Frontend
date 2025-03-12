@@ -1,13 +1,30 @@
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
-import { Link } from "react-router-dom";
+import { useAuthStore } from "@/stores/authStore";
+import { Link, useNavigate } from "react-router-dom";
 
 export function Home() {
+
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handlePlayClick = () => {
+    if (user) {
+      navigate("/chat");
+    } else {
+      navigate("/signin");
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-[#141414] text-white">
       <header className="w-full p-6 flex justify-between items-center bg-[#1F1F1F] shadow-lg">
         <h1 className="text-2xl font-bold">Sistema de Apoio ao Ensino de Lógica</h1>
         <Link to="/signin" className="px-4 py-2 bg-blue-500 rounded hover:bg-blue-600 transition">
-          Jogar
+          <button
+            onClick={handlePlayClick}
+          >
+            Jogar
+          </button>
         </Link>
       </header>
 
