@@ -1,6 +1,7 @@
 import { create } from "zustand";
+import axios from "axios";
 
-type UserRole = "student" | "teacher" | "course-coordinator" | "admin";
+type UserRole = "student" | "teacher" | "professor" | "course-coordinator" | "admin";
 
 interface User {
   id: string;
@@ -44,7 +45,21 @@ export const useAuthStore = create<AuthState>((set) => {
       });
     },
 
-    logout: () => {
+    logout: async () => {
+      try {
+        const storedToken = localStorage.getItem("token");
+
+        if (storedToken) {
+          await axios.post(
+            "http://localhost:3000/auth/logout",
+            {},
+            { headers: { Authorization: `Bearer ${storedToken}` } }
+          );
+        }
+      } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+      }
+
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
