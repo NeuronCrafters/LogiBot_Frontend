@@ -32,7 +32,7 @@ export function Home() {
         <div className="w-full md:w-1/2 flex flex-col items-center">
           <h2 className="text-4xl font-bold mb-4">Bem-vindo ao SAEL</h2>
           <p className="text-lg max-w-md">
-            Nossa plataforma é um sistema de apoio academico. Com a nossa suporte você irá aprender assuntos de lógica de programação, além de reforçar a sua base com atividades.
+            SAEL é um sistema de apoio academico. Com a nossa suporte você irá aprender assuntos de lógica de programação, além de reforçar a sua base com atividades.
           </p>
         </div>
 
