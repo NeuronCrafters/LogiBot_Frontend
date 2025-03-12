@@ -1,22 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
-export type FilterType =
-  | 'universities'
-  | 'courses'
-  | 'disciplines'
-  | 'classes'
-  | 'professors'
-  | 'students-discipline'
-  | 'students-course';
-
-export interface FilterData {
-  filterType: FilterType | '';
-  universityId?: string;
-  courseId?: string;
-  disciplineId?: string;
-  classId?: string;
-}
+import type { FilterData, FilterType } from './FormsFilterTypes';
+import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
 interface FormsFilterProps {
   onSearch: (filterData: FilterData) => void;
@@ -33,7 +18,6 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
   const [classes, setClasses] = useState<{ _id: string; name: string }[]>([]);
   const [selectedClass, setSelectedClass] = useState<string>('');
 
-  // Carrega as universidades ao montar o componente
   useEffect(() => {
     axios.get('http://localhost:3000/public/institutions')
       .then(response => {
@@ -46,7 +30,6 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
       .catch(error => console.error('Erro ao carregar universidades', error));
   }, []);
 
-  // Carrega cursos se o filtro exigir (exceto "universities" e "professors")
   useEffect(() => {
     if (
       selectedUniversity &&
@@ -62,7 +45,6 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
     }
   }, [selectedUniversity, filterType]);
 
-  // Carrega disciplinas se o filtro exigir ("disciplines", "classes" ou "students-discipline")
   useEffect(() => {
     if (
       selectedUniversity &&
@@ -79,7 +61,6 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
     }
   }, [selectedUniversity, selectedCourse, filterType]);
 
-  // Carrega turmas se o filtro for "classes"
   useEffect(() => {
     if (selectedUniversity && selectedCourse && filterType === 'classes') {
       axios.get(`http://localhost:3000/public/classes/${selectedUniversity}/${selectedCourse}`)
@@ -105,7 +86,6 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
   return (
     <div className="mb-4 p-4 border border-white rounded bg-[#141414]">
       <div className="flex flex-wrap gap-2 mb-4">
-        {/* Tipo de Filtro */}
         <div className="flex-1 min-w-[200px]">
           <label className="block mb-1 text-white">Tipo de Filtro:</label>
           <select
@@ -124,7 +104,6 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
           </select>
         </div>
 
-        {/* Exibe o select de Universidade se houver filtro selecionado */}
         {filterType && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Universidade:</label>
@@ -143,47 +122,42 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
           </div>
         )}
 
-        {/* Para filtros que exigem Curso */}
-        {filterType &&
-          ['courses', 'disciplines', 'classes', 'students-discipline', 'students-course'].includes(filterType) && (
-            <div className="flex-1 min-w-[200px]">
-              <label className="block mb-1 text-white">Curso:</label>
-              <select
-                value={selectedCourse}
-                onChange={(e) => setSelectedCourse(e.target.value)}
-                className="border border-white p-2 rounded w-full bg-[#141414] text-white"
-              >
-                <option value="">Selecione o curso</option>
-                {courses.map((course) => (
-                  <option key={course._id} value={course._id}>
-                    {course.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+        {filterType && ['courses', 'disciplines', 'classes', 'students-discipline', 'students-course'].includes(filterType) && (
+          <div className="flex-1 min-w-[200px]">
+            <label className="block mb-1 text-white">Curso:</label>
+            <select
+              value={selectedCourse}
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+            >
+              <option value="">Selecione o curso</option>
+              {courses.map((course) => (
+                <option key={course._id} value={course._id}>
+                  {course.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        {/* Para filtros que exigem Disciplina */}
-        {filterType &&
-          ['disciplines', 'classes', 'students-discipline'].includes(filterType) && (
-            <div className="flex-1 min-w-[200px]">
-              <label className="block mb-1 text-white">Disciplina:</label>
-              <select
-                value={selectedDiscipline}
-                onChange={(e) => setSelectedDiscipline(e.target.value)}
-                className="border border-white p-2 rounded w-full bg-[#141414] text-white"
-              >
-                <option value="">Selecione a disciplina</option>
-                {disciplines.map((disc) => (
-                  <option key={disc._id} value={disc._id}>
-                    {disc.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+        {filterType && ['disciplines', 'classes', 'students-discipline'].includes(filterType) && (
+          <div className="flex-1 min-w-[200px]">
+            <label className="block mb-1 text-white">Disciplina:</label>
+            <select
+              value={selectedDiscipline}
+              onChange={(e) => setSelectedDiscipline(e.target.value)}
+              className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+            >
+              <option value="">Selecione a disciplina</option>
+              {disciplines.map((disc) => (
+                <option key={disc._id} value={disc._id}>
+                  {disc.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        {/* Para filtro de Turmas */}
         {filterType === 'classes' && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Turma:</label>
@@ -203,12 +177,7 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
         )}
       </div>
 
-      <button
-        onClick={handleSearchClick}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Buscar
-      </button>
+      <ButtonCRUD action="search" onClick={handleSearchClick} />
     </div>
   );
 }

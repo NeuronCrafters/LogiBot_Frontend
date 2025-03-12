@@ -3,7 +3,7 @@ import { Plus, Trash, List, Search, Pencil, Eye } from "lucide-react";
 
 interface ButtonCRUDProps {
   action: "create" | "delete" | "list" | "search" | "update" | "details";
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   compact?: boolean;
 }
 

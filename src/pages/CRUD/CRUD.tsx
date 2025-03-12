@@ -5,16 +5,15 @@ import { FormsFilter } from '../../components/components/Forms/FormsFilter';
 import { FormsList } from '../../components/components/Forms/FormsList';
 import type { Item } from '../../components/components/Forms/FormsList';
 import { FormsCrud } from '../../components/components/Forms/FormsCrud';
-import type { FilterData } from '../../components/components/Forms/FormsFilter';
+import type { FilterData, FilterType } from '../../components/components/Forms/FormsFilterTypes';
+
 
 function CRUD() {
   const [items, setItems] = useState<Item[]>([]);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
 
-  // Stub para abrir o modal de criação
   function openCreateModal() {
     console.log('Abrir modal de criação');
-    // Implemente a lógica para abrir o modal conforme necessário
   }
 
   async function handleSearch(filterData: FilterData) {

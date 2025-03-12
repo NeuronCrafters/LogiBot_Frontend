@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
 export type EntityType = 'university' | 'course' | 'class' | 'professor' | 'discipline';
 
@@ -13,31 +14,48 @@ function FormsCrud({ onSubmit, initialData }: FormsCrudProps) {
   const [selectedEntity, setSelectedEntity] = useState<EntityType | ''>('');
 
   const [name, setName] = useState(initialData?.name || '');
-  const [universityId, setUniversityId] = useState(initialData?.universityId || '');
-  const [courseId, setCourseId] = useState(initialData?.courseId || '');
+
+  const [universities, setUniversities] = useState<{ _id: string; name: string }[]>([]);
+  const [selectedUniversity, setSelectedUniversity] = useState(initialData?.universityId || '');
+  const [courses, setCourses] = useState<{ _id: string; name: string }[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState(initialData?.courseId || '');
+
   const [email, setEmail] = useState(initialData?.email || '');
   const [password, setPassword] = useState('');
   const [school, setSchool] = useState(initialData?.school || '');
-  const [classIds, setClassIds] = useState(
-    initialData?.classIds ? initialData.classIds.join(',') : ''
-  );
-  const [professorIds, setProfessorIds] = useState(
-    initialData?.professorIds ? initialData.professorIds.join(',') : ''
-  );
+
+  const [selectedClassIds, setSelectedClassIds] = useState<string>('');
+  const [professorIds, setProfessorIds] = useState(initialData?.professorIds ? initialData.professorIds.join(',') : '');
+
+  useEffect(() => {
+    if (selectedEntity === 'course' || selectedEntity === 'class' || selectedEntity === 'discipline') {
+      axios.get('http://localhost:3000/academic-institution/university')
+        .then(response => setUniversities(response.data))
+        .catch(error => console.error('Erro ao carregar universidades', error));
+    }
+  }, [selectedEntity]);
+
+  useEffect(() => {
+    if ((selectedEntity === 'class' || selectedEntity === 'discipline') && selectedUniversity) {
+      axios.get(`http://localhost:3000/academic-institution/course/${selectedUniversity}`)
+        .then(response => setCourses(response.data))
+        .catch(error => console.error('Erro ao carregar cursos', error));
+    }
+  }, [selectedEntity, selectedUniversity]);
 
   function resetFields() {
     setName('');
-    setUniversityId('');
-    setCourseId('');
+    setSelectedUniversity('');
+    setSelectedCourse('');
     setEmail('');
     setPassword('');
     setSchool('');
-    setClassIds('');
+    setSelectedClassIds('');
     setProfessorIds('');
     setSelectedEntity('');
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     try {
       let payload;
@@ -48,11 +66,11 @@ function FormsCrud({ onSubmit, initialData }: FormsCrudProps) {
           response = await axios.post('http://localhost:3000/academic-institution/university', payload);
           break;
         case 'course':
-          payload = { name, universityId };
+          payload = { name, universityId: selectedUniversity };
           response = await axios.post('http://localhost:3000/academic-institution/course', payload);
           break;
         case 'class':
-          payload = { name, courseId };
+          payload = { name, courseId: selectedCourse };
           response = await axios.post('http://localhost:3000/academic-institution/class', payload);
           break;
         case 'professor':
@@ -60,9 +78,10 @@ function FormsCrud({ onSubmit, initialData }: FormsCrudProps) {
           response = await axios.post('http://localhost:3000/users', payload);
           break;
         case 'discipline':
-          const classIdsArray = classIds.split(',').map(s => s.trim()).filter(s => s);
-          const professorIdsArray = professorIds.split(',').map(s => s.trim()).filter(s => s);
-          payload = { name, courseId, classIds: classIdsArray, professorIds: professorIdsArray };
+          // Converte os IDs inseridos (separados por vírgula) em arrays
+          const classIdsArray = selectedClassIds.split(',').map(s => s.trim()).filter(s => s);
+          const professorIdsArray = professorIds.split(',').map((s: string) => s.trim()).filter((s: any) => s);
+          payload = { name, courseId: selectedCourse, classIds: classIdsArray, professorIds: professorIdsArray };
           response = await axios.post('http://localhost:3000/academic-institution/discipline', payload);
           break;
         default:
@@ -80,7 +99,6 @@ function FormsCrud({ onSubmit, initialData }: FormsCrudProps) {
 
   return (
     <div className="mb-4">
-
       <div
         className="cursor-pointer bg-[#2a2a2a] text-white flex items-center justify-center h-10 rounded-t"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -125,23 +143,56 @@ function FormsCrud({ onSubmit, initialData }: FormsCrudProps) {
               />
 
               {selectedEntity === 'course' && (
-                <input
-                  type="text"
-                  placeholder="ID da Universidade"
-                  value={universityId}
-                  onChange={(e) => setUniversityId(e.target.value)}
-                  className="border border-white p-2 rounded bg-[#141414] text-white"
-                />
+                <div>
+                  <label className="block mb-1">Universidade:</label>
+                  <select
+                    value={selectedUniversity}
+                    onChange={(e) => setSelectedUniversity(e.target.value)}
+                    className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+                  >
+                    <option value="">Selecione a universidade</option>
+                    {universities.map((uni) => (
+                      <option key={uni._id} value={uni._id}>
+                        {uni.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
 
-              {selectedEntity === 'class' && (
-                <input
-                  type="text"
-                  placeholder="ID do Curso"
-                  value={courseId}
-                  onChange={(e) => setCourseId(e.target.value)}
-                  className="border border-white p-2 rounded bg-[#141414] text-white"
-                />
+              {(selectedEntity === 'class' || selectedEntity === 'discipline') && (
+                <>
+                  <div>
+                    <label className="block mb-1">Universidade:</label>
+                    <select
+                      value={selectedUniversity}
+                      onChange={(e) => setSelectedUniversity(e.target.value)}
+                      className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+                    >
+                      <option value="">Selecione a universidade</option>
+                      {universities.map((uni) => (
+                        <option key={uni._id} value={uni._id}>
+                          {uni.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block mb-1">Curso:</label>
+                    <select
+                      value={selectedCourse}
+                      onChange={(e) => setSelectedCourse(e.target.value)}
+                      className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+                    >
+                      <option value="">Selecione o curso</option>
+                      {courses.map((course) => (
+                        <option key={course._id} value={course._id}>
+                          {course.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
               )}
 
               {selectedEntity === 'professor' && (
@@ -172,18 +223,26 @@ function FormsCrud({ onSubmit, initialData }: FormsCrudProps) {
 
               {selectedEntity === 'discipline' && (
                 <>
-                  <input
-                    type="text"
-                    placeholder="ID do Curso"
-                    value={courseId}
-                    onChange={(e) => setCourseId(e.target.value)}
-                    className="border border-white p-2 rounded bg-[#141414] text-white"
-                  />
+                  <div>
+                    <label className="block mb-1">Curso:</label>
+                    <select
+                      value={selectedCourse}
+                      onChange={(e) => setSelectedCourse(e.target.value)}
+                      className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+                    >
+                      <option value="">Selecione o curso</option>
+                      {courses.map((course) => (
+                        <option key={course._id} value={course._id}>
+                          {course.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <input
                     type="text"
                     placeholder="IDs das Turmas (separados por vírgula)"
-                    value={classIds}
-                    onChange={(e) => setClassIds(e.target.value)}
+                    value={selectedClassIds}
+                    onChange={(e) => setSelectedClassIds(e.target.value)}
                     className="border border-white p-2 rounded bg-[#141414] text-white"
                   />
                   <input
@@ -198,9 +257,9 @@ function FormsCrud({ onSubmit, initialData }: FormsCrudProps) {
             </div>
           )}
 
-          <button type="submit" className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-            Criar
-          </button>
+          <div className="mt-4">
+            <ButtonCRUD action={initialData ? "update" : "create"} onClick={handleSubmit} />
+          </div>
         </form>
       )}
     </div>
