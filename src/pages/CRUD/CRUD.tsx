@@ -5,7 +5,7 @@ import { FormsFilter } from '../../components/components/Forms/FormsFilter';
 import { FormsList } from '../../components/components/Forms/FormsList';
 import type { Item } from '../../components/components/Forms/FormsList';
 import { FormsCrud } from '../../components/components/Forms/FormsCrud';
-import type { FilterData, FilterType } from '../../components/components/Forms/FormsFilterTypes';
+import type { FilterData, FilterType } from '../../components/components/Forms/Forms/FormsFilterTypes';
 
 
 function CRUD() {
@@ -102,11 +102,13 @@ function CRUD() {
   return (
     <div className="min-h-screen bg-[#141414] overflow-x-hidden">
       <FormsHeader />
-      <div className="px-4 py-4 max-w-screen-xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4 text-white">Sistema de Gerenciamento do SAEL</h1>
-        <FormsFilter onSearch={handleSearch} />
-        <FormsCrud onSubmit={handleCreateOrUpdate} initialData={editingItem || undefined} />
-        <FormsList items={items} onEdit={handleEdit} onDelete={handleDelete} />
+      <div className="bg-[#141414]">
+        <div className="px-4 py-4 max-w-screen-xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4 text-white">Sistema de Gerenciamento do SAEL</h1>
+          <FormsFilter onSearch={handleSearch} />
+          <FormsCrud onSubmit={handleCreateOrUpdate} initialData={editingItem || undefined} />
+          <FormsList items={items} onEdit={handleEdit} onDelete={handleDelete} />
+        </div>
       </div>
     </div>
   );

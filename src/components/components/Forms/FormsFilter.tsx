@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import type { FilterData, FilterType } from './FormsFilterTypes';
+import type { FilterData, FilterType } from './Forms/FormsFilterTypes';
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
 interface FormsFilterProps {
