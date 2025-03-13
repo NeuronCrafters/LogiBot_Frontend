@@ -1,28 +1,30 @@
 import api from "./api";
+import { useAuthStore } from "@/stores/authStore";
 
-const RASA_URL = "http://localhost:5005/webhooks/rest/webhook";
-const RASA_ACTION_URL = "http://localhost:5055/webhook";
+const BACKEND_URL = "http://localhost:3000/sael/talk";
 
-export const sendMessageToRasa = async (message: string, sender = "user") => {
+export const sendMessageToRasa = async (message: string) => {
   try {
-    const response = await api.post(RASA_URL, { sender, message });
+    const { token } = useAuthStore.getState();
+
+    if (!token) {
+      console.error("Token JWT não encontrado.");
+      throw new Error("Usuário não autenticado.");
+    }
+
+    const response = await api.post(
+      BACKEND_URL,
+      { message },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
     return response.data;
   } catch (error) {
-    console.error("Erro ao enviar mensagem para Rasa:", error);
+    console.error("Erro ao enviar mensagem para o backend:", error);
     return [];
-  }
-};
-
-export const sendToActionServer = async (next_action: string, slots = {}) => {
-  try {
-    const payload = {
-      next_action,
-      tracker: { sender_id: "user", slots },
-    };
-    const response = await api.post(RASA_ACTION_URL, payload);
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao enviar ação para o servidor Rasa:", error);
-    return null;
   }
 };
