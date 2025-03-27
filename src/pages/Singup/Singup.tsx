@@ -98,16 +98,14 @@ function Signup() {
   return (
     <div className="flex min-h-screen">
       <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900" style={{ flex: 2 }}>
-        <Link to="/" className="flex items-end gap-4 cursor-pointer hover:opacity-80 transition-opacity">
-          <AnimatedLogo />
-          <h1 className="text-white text-5xl lg:text-7xl font-bold">SAEL</h1>
-        </Link>
+        <AnimatedLogo />
+        <h1 className="text-slate-100 text-5xl lg:text-6xl font-bold mt-12 ml-8">SAEL</h1>       
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
-          <h2 className="text-white text-4xl font-bold text-center">Cadastro</h2>
-          <p className="text-neutral-300 mb-2">Realize seu cadastro no site</p>
+          <h2 className="text-white text-4xl font-bold text-start">Cadastro</h2>
+          <p className="text-neutral-300 text-start mb-2">Realize seu cadastro no site</p>
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
@@ -115,7 +113,7 @@ function Signup() {
             <Input
               type="text"
               placeholder="Nome"
-              className="bg-neutral-800 mb-4"
+              className="bg-neutral-800 mb-4 py-8"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -138,7 +136,7 @@ function Signup() {
             />
 
             <select
-              className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
+              className="w-[340px] h-[50px] bg-neutral-800 text-slate-300 text-sm font-Montserrat p-2 mb-4 rounded-md"
               value={selectedUniversity}
               onChange={(e) => setSelectedUniversity(e.target.value)}
               required
@@ -152,7 +150,7 @@ function Signup() {
             </select>
 
             <select
-              className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
+              className="w-[340px] h-[50px] bg-neutral-800 text-slate-300 text-sm font-Montserrat p-2 mb-4 rounded-md"
               value={selectedCourse}
               onChange={(e) => setSelectedCourse(e.target.value)}
               disabled={!selectedUniversity}
@@ -167,7 +165,7 @@ function Signup() {
             </select>
 
             <select
-              className="w-[340px] h-[50px] bg-neutral-800 text-white p-2 mb-4 rounded-md"
+              className="w-[340px] h-[50px] bg-neutral-800 text-slate-300 text-sm font-Montserrat p-2 mb-4 rounded-md"
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
               disabled={!selectedCourse}
@@ -181,7 +179,8 @@ function Signup() {
               ))}
             </select>
 
-            <ButtonLogin type="submit" disabled={loading}>
+            <ButtonLogin type="submit" disabled={loading}
+            className="bg-blue-700 hover:bg-blue-80 text-slate-100 hover:text-slate-300">
               {loading ? "Cadastrando..." : "Cadastrar"}
             </ButtonLogin>
           </form>

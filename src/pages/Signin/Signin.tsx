@@ -37,16 +37,14 @@ function Signin() {
   return (
     <div className="flex min-h-screen">
       <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900" style={{ flex: 2 }}>
-        <Link to="/" className="flex items-end gap-4 cursor-pointer hover:opacity-80 transition-opacity">
-          <AnimatedLogo />
-          <h1 className="text-white text-5xl lg:text-7xl font-bold">SAEL</h1>
-        </Link>
+        <AnimatedLogo />
+        <h1 className="text-slate-100 text-5xl lg:text-6xl font-bold mt-12 ml-8">SAEL</h1>       
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
-          <h2 className="text-white text-4xl font-bold text-center">Entrar</h2>
-          <p className="text-neutral-300 text-center mb-4">Preencha os dados e acesse sua conta</p>
+          <h2 className="text-white text-4xl font-bold text-start">Entrar</h2>
+          <p className="text-neutral-300 text-start mb-4">Preencha os dados e acesse sua conta</p>
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
@@ -71,7 +69,7 @@ function Signin() {
 
             <ButtonSocialLogin className="rounded-lg px-6 py-3 w-full" />
 
-            <ButtonLogin type="submit" disabled={loading} className="w-full">
+            <ButtonLogin type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 text-slate-100 hover:text-slate-300">
               {loading ? "Entrando..." : "Entrar"}
             </ButtonLogin>
           </form>

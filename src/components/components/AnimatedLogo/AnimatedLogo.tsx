@@ -10,17 +10,17 @@ export const AnimatedLogo = ({ className = "" }: { className?: string }) => {
       <img
         src={parte}
         alt="Orelha animada esquerda"
-        className="absolute top-4 left-4 w-20 h-16 animate-ear-left"
+        className="absolute top-4 left-6 w-20 h-16 animate-ear-left"
         style={{
-          transformOrigin: 'center',
-          animation: 'moveEarLeft 1.5s 7'
+          transformOrigin: 'bottom',
+          animation: 'moveEarLeft 1.5s 30'
         }}
       />
       {/* Orelha direita */}
       <img
         src={parte}
         alt="Orelha direita"
-        className="absolute top-4 right-4 w-20 h-16 scale-x-[-1]"
+        className="absolute top-4 right-6 w-20 h-16 scale-x-[-1]"
       />
       <style>{`
         @keyframes moveEarLeft {
@@ -31,7 +31,7 @@ export const AnimatedLogo = ({ className = "" }: { className?: string }) => {
             transform: rotate(-15deg);
           }
           75% {
-            transform: rotate(15deg);
+            transform: rotate(0deg);
           }
           100% {
             transform: rotate(0deg);

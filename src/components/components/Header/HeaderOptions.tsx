@@ -37,7 +37,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
         </Link>
       )}
 
-      {!isChatPage && (
+      {(
         <Link to="/chat">
           <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100">
             <MessageSquare className="w-5 h-5" />
@@ -46,7 +46,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
         </Link>
       )}
 
-      {!isCrudPage && ["admin", "course-coordinator"].includes(role) && (
+      {["admin", "course-coordinator"].includes(role) && (
         <Link to="/crud">
           <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100">
             <Settings className="w-5 h-5" />
