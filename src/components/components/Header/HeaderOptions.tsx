@@ -15,6 +15,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
   const isCrudPage = location.pathname === "/crud";
   const isAboutPage = location.pathname === "/about";
   const isFaqPage = location.pathname === "/faq";
+  const isChartPage = location.pathname === "/chart";
 
   return (
     <nav className="flex flex-col space-y-4 bg-[#141414] p-4 rounded-lg shadow-md">
@@ -28,7 +29,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
       )}
 
       {["teacher", "course-coordinator", "admin"].includes(role) && (
-        <Link to="/results">
+        <Link to="/chart">
           <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100">
             <ChartPie className="w-5 h-5" />
             <Typograph text="Resultados" colorText="text-[#E4E4E4]" variant="text4" weight="regular" fontFamily="poppins" />

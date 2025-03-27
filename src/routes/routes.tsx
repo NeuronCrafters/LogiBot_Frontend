@@ -7,6 +7,7 @@ import { Home } from "../pages/Home/Home.tsx";
 import { Signup } from "@/pages/Singup/Singup";
 import { CRUD } from "@/pages/CRUD/CRUD";
 import { About } from "@/pages/About/About";
+import Chart from "@/pages/Chart/Chart";
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
           <Route path="/chat" element={<Chat />} />
           <Route path="/crud" element={<CRUD />} />
           <Route path="/about" element={<About />} />
+          <Route path="/chart" element={<Chart />} />
         </Route>
       </Routes>
     </Router>
