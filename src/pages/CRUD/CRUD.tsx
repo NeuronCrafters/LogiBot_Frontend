@@ -68,11 +68,11 @@ function CRUD() {
 
   return (
     <div className="min-h-screen bg-[#141414] overflow-x-hidden">
-      <FormsHeader />
+      <FormsHeader/>
       <div className="bg-[#141414]">
-        <div className="px-4 py-4 max-w-screen-xl mx-auto">
-          <h1 className="text-2xl font-bold mb-4 text-white">Sistema de Gerenciamento do SAEL</h1>
-          <FormsFilter onSearch={handleSearch} />
+        <div className="px-4 py-8 max-w-screen-xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4 text-white font-Montserrat">Sistema de Gerenciamento do SAEL</h1>
+          <FormsFilter onSearch={handleSearch}/>
           <FormsCrud onSubmit={handleCreateOrUpdate} initialData={editingItem || undefined} />
           <FormsList entity={currentEntity} items={items} onEdit={handleEdit} onDelete={handleDelete} />
         </div>

@@ -16,13 +16,13 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
   const [selectedEntity, setSelectedEntity] = React.useState<EntityType | "">("");
 
   return (
-    <div className="mb-4 p-4 bg-[#141414] text-white rounded">
-      <h2 className="text-lg font-bold mb-2">Cadastro</h2>
+    <div className="mb-4 p-4 bg-[#181818] text-white rounded-md">
+      <h2 className="text-lg font-bold">Cadastro</h2>
       <label className="block mb-2">Selecione a Entidade:</label>
       <select
         value={selectedEntity}
         onChange={(e) => setSelectedEntity(e.target.value as EntityType)}
-        className="border p-2 rounded w-full bg-[#141414] text-white"
+        className="p-2 rounded w-full bg-[#202020] text-white"
       >
         <option value="">Selecione</option>
         <option value="university">Universidade</option>

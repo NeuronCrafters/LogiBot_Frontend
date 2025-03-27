@@ -84,14 +84,14 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
   }
 
   return (
-    <div className="mb-4 p-4 border border-white rounded bg-[#141414]">
+    <div className="mb-4 p-4 rounded-md bg-[#181818]">
       <div className="flex flex-wrap gap-2 mb-4">
         <div className="flex-1 min-w-[200px]">
           <label className="block mb-1 text-white">Tipo de Filtro:</label>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="border border-white p-2 rounded w-full bg-[#2a2a2a] text-white"
+            className="font-Montserrat font-medium p-2 rounded-md w-full bg-[#202020] text-slate-100"
           >
             <option value="">Selecione o tipo de filtro</option>
             <option value="universities">Universidades</option>
@@ -106,11 +106,11 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
 
         {filterType && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white">Universidade:</label>
+            <label className="block mb-1 text-slate-100">Universidade:</label>
             <select
               value={selectedUniversity}
               onChange={(e) => setSelectedUniversity(e.target.value)}
-              className="border border-white p-2 rounded w-full bg-[#2a2a2a] text-white"
+              className="p-2 rounded-md w-full bg-[#202020] text-slate-100 font-Montserrat font-medium"
             >
               <option value="">Selecione a universidade</option>
               {universities.map((uni) => (
@@ -177,7 +177,7 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
         )}
       </div>
 
-      <ButtonCRUD action="search" onClick={handleSearchClick} />
+      <ButtonCRUD action="search" onClick={handleSearchClick}/>
     </div>
   );
 }

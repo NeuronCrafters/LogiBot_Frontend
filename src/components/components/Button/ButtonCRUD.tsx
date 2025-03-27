@@ -11,8 +11,8 @@ const actionConfig = {
   create: { label: "Criar", icon: <Plus className="w-5 h-5" />, color: "bg-blue-500" },
   delete: { label: "Deletar", icon: <Trash className="w-5 h-5" />, color: "bg-red-500" },
   list: { label: "Listar", icon: <List className="w-5 h-5" />, color: "bg-gray-500" },
-  search: { label: "Buscar", icon: <Search className="w-5 h-5" />, color: "bg-green-500" },
-  update: { label: "Atualizar", icon: <Pencil className="w-5 h-5" />, color: "bg-yellow-500" },
+  search: { label: "Pesquisar", icon: <Search className="w-5 h-5" />, color: "bg-blue-700" },
+  update: { label: "Atualizar", icon: <Pencil className="w-5 h-5 rounded-md" />, color: "bg-yellow-600" },
   details: { label: "Detalhes", icon: <Eye className="w-5 h-5" />, color: "bg-purple-500" },
 };
 

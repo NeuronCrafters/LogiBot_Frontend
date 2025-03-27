@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Menu as MenuIcon } from "lucide-react";
+import { Send, ChevronLeft, PanelRightOpen } from "lucide-react";
 import { Header } from "@/components/components/Header/Header";
 import { useAuthStore } from "@/stores/authStore";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -55,21 +55,26 @@ function Chat() {
 
       <div className="absolute bg-[#141414] w-full flex justify-between border-b-[0.5px] border-neutral-800 px-24 py-6">
 
-        <Button className="bg-blue-600 rounded-md text-slate-100 px-12 py-4"
-        onClick={() => navigate("/")}
-        >Voltar</Button>
+        <Button 
+          variant="outline" size="icon"
+          className="border-neutral-400 border rounded-md text-slate-100"
+          onClick={() => navigate("/")}>
+          <ChevronLeft />
+        </Button>
 
         <p className="font-Montserrat text-neutral-200 font-semibold text-2xl">CHAT SAEL</p>
 
         {token && (
           <button onClick={() => setMenuOpen(true)} className="text-white">
-            <MenuIcon size={28} />
+            <PanelRightOpen size={28} strokeWidth={0.75}/>
           </button>
         )}
 
       </div>
 
       <div className="flex flex-col items-center w-full h-screen py-32">
+
+        
         {messages.map((message, index) => (
           <div
             key={index}

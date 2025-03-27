@@ -10,10 +10,10 @@ export function FormsHeader() {
   return (
     <>
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
-      <div className="p-6 bg-[#2a2a2a] flex items-center justify-between">
+      <div className="p-6 bg-[#141414] border-b border-neutral-700 flex items-center justify-between">
         <div>
           {/* Exibe texto completo em telas a partir de "sm" e versão reduzida em telas menores */}
-          <h1 className="text-xl font-bold text-white hidden sm:block">
+          <h1 className="text-xl font-bold text-white hidden sm:block font-Montserrat font-semibold">
             Gerenciamento Acadêmico
           </h1>
           <h1 className="text-xl font-bold text-white block sm:hidden">

@@ -55,8 +55,8 @@ function FormsList({ items, entity, onEdit, onDelete }: FormsListProps) {
   };
 
   return (
-    <div className="bg-[#141414] text-white p-4 rounded border border-white">
-      <h2 className="text-xl font-semibold mb-4">Entidades Encontradas:</h2>
+    <div className="bg-[#181818] text-white p-4 rounded-md">
+      <h2 className="text-xl font-semibold mb-4">{entity} encontradas:</h2>
       <ul>
         {items.map((item) => {
           const id = (item as any).id || (item as any)._id;
@@ -64,7 +64,7 @@ function FormsList({ items, entity, onEdit, onDelete }: FormsListProps) {
           return (
             <li
               key={id}
-              className="flex flex-col sm:flex-row justify-between items-start sm:items-center border border-white p-2 rounded mb-2"
+              className="bg-[#202020] flex flex-col sm:flex-row justify-between items-start sm:items-center rounded-md p-2  mb-2"
             >
               <span className="mb-2 sm:mb-0">{name}</span>
               <div className="flex gap-2">
@@ -72,6 +72,7 @@ function FormsList({ items, entity, onEdit, onDelete }: FormsListProps) {
                   action="update"
                   onClick={() => onEdit({ id, name })}
                   compact={isMobile}
+                  
                 />
                 <ButtonCRUD
                   action="delete"
