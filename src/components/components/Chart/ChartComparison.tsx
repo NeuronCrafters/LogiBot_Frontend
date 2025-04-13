@@ -1,3 +1,4 @@
+// ChartComparison.tsx
 import { useEffect, useRef, useState } from "react";
 import {
   BarChart,
@@ -33,7 +34,19 @@ interface ChartComparisonProps {
   metric: "correct" | "wrong" | "usage";
 }
 
-export function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
+// Helper para converter tempo (em segundos) para um formato legível
+function formatTimeUsage(seconds: number): string {
+  const totalSeconds = seconds;
+  const mins = Math.floor(totalSeconds / 60);
+  const hrs = Math.floor(mins / 60);
+  const days = Math.floor(hrs / 24);
+  const weeks = (days / 7).toFixed(1);
+  const months = (days / 30.44).toFixed(1);
+  const years = (days / 365).toFixed(1);
+  return `${totalSeconds} seg / ${mins} min / ${hrs} hrs / ${days} dias / ${weeks} sem / ${months} mes / ${years} anos`;
+}
+
+function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
   const [data, setData] = useState<ComparisonData[]>([]);
   const [labelA, setLabelA] = useState("Grupo A");
   const [labelB, setLabelB] = useState("Grupo B");
@@ -62,9 +75,12 @@ export function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
         const getMetricValue = (log?: UserAnalysisLog): number => {
           if (!log) return 0;
           switch (metric) {
-            case "correct": return log.totalCorrectAnswers;
-            case "wrong": return log.totalWrongAnswers;
-            case "usage": return Math.floor(log.totalUsageTime);
+            case "correct":
+              return log.totalCorrectAnswers;
+            case "wrong":
+              return log.totalWrongAnswers;
+            case "usage":
+              return Math.floor(log.totalUsageTime);
           }
         };
 
@@ -128,8 +144,12 @@ export function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
       </h2>
 
       <div className="flex flex-wrap justify-center gap-4 mb-4">
-        <Button variant="outline" onClick={handleExportCSV}>Exportar CSV</Button>
-        <Button variant="outline" onClick={handleExportPNG}>Exportar PNG</Button>
+        <Button variant="outline" onClick={handleExportCSV}>
+          Exportar CSV
+        </Button>
+        <Button variant="outline" onClick={handleExportPNG}>
+          Exportar PNG
+        </Button>
       </div>
 
       <div ref={chartRef}>
@@ -138,9 +158,14 @@ export function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
             <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
             <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
             <Tooltip
-              formatter={(value: number, name, props) =>
-                `${value} (${data[props?.payload?.index]?.variation ?? "0%"})`
-              }
+              formatter={(value: number, name: string, props: any) => {
+                if (metric === "usage") {
+                  return formatTimeUsage(value);
+                }
+                // Exibe o valor e a variação (se existir)
+                const variation = data[props?.payload?.index]?.variation ?? "0%";
+                return `${value} (${variation})`;
+              }}
               contentStyle={{ backgroundColor: "#2a2a2a", borderRadius: "8px" }}
               labelStyle={{ color: "#fff" }}
               itemStyle={{ color: "#fff" }}
@@ -154,3 +179,5 @@ export function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
     </div>
   );
 }
+
+export { ChartComparison }

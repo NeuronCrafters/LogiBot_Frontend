@@ -3,24 +3,25 @@ import { AcademicFilter } from "./AcademicFilter";
 import { ChartGraphics } from "./ChartGraphic";
 import { ChartComparison } from "./ChartComparison";
 import { ChartModeSelector } from "./ChartModeSelector";
-import { MetricSelector } from "./MetricSelector";
-import { ChartMode, Metric, ChartType } from "@/@types/ChartsType";
+import { MetricCheckboxSelector, MetricOption } from "./MetricCheckboxSelector";
+import { ChartMode, ChartType } from "@/@types/ChartsType";
 
 export function ChartView() {
   const [mode, setMode] = useState<ChartMode>("visualizar");
   const [selectedType, setSelectedType] = useState<ChartType>("course");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [metric, setMetric] = useState<Metric>("correct");
+  const [selectedMetrics, setSelectedMetrics] = useState<MetricOption[]>(["correct", "wrong", "usage", "sessions"]);
 
   const handleFilterChange = (filter: {
     universityId: string | null;
     courseId: string | null;
     classId: string | null;
     disciplineId: string | null;
+    startDate?: string;
+    endDate?: string;
   }) => {
     const ids: string[] = [];
     let type: ChartType = "course";
-
     if (filter.disciplineId) {
       ids.push(filter.disciplineId);
       type = "discipline";
@@ -31,7 +32,6 @@ export function ChartView() {
       ids.push(filter.courseId);
       type = "course";
     }
-
     setSelectedType(type);
     setSelectedIds(ids);
   };
@@ -56,21 +56,15 @@ export function ChartView() {
   return (
     <div className="space-y-6 px-4 md:px-12">
       <ChartModeSelector mode={mode} setMode={setMode} />
-
-      <MetricSelector metric={metric} setMetric={setMetric} />
-
+      <MetricCheckboxSelector selectedMetrics={selectedMetrics} setSelectedMetrics={setSelectedMetrics} />
       <AcademicFilter onFilterChange={handleFilterChange} />
-
       <p className="text-center text-sm text-gray-400">{selectedLabel}</p>
-
       {shouldShowGraphics && (
-        <ChartGraphics type={selectedType} id={selectedIds[0]} />
+        <ChartGraphics type={selectedType} id={selectedIds[0]} metrics={selectedMetrics} />
       )}
-
       {shouldShowComparison && (
-        <ChartComparison type={selectedType} ids={selectedIds} metric={metric} />
+        <ChartComparison type={selectedType} ids={selectedIds} metric={"usage"} />
       )}
-
       {mode === "comparar" && selectedIds.length !== 2 && (
         <p className="text-center text-sm text-yellow-400">
           Selecione dois grupos para realizar a comparação.

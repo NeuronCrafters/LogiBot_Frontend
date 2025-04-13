@@ -46,16 +46,16 @@ function AcademicFilter({ onFilterChange, show }: AcademicFilterProps) {
   const [selectedDiscipline, setSelectedDiscipline] = useState<AcademicEntity | null>(null);
 
   useEffect(() => {
-    api.get<AcademicEntity[]>("/public/institutions").then((res) => setUniversities(res.data));
+    api.get<AcademicEntity[]>("/academic-institution/university").then((res) => setUniversities(res.data));
   }, []);
 
   useEffect(() => {
     if (selectedUniversity) {
       api
-        .get<AcademicEntity[]>(`/public/courses/${selectedUniversity._id}`)
+        .get<AcademicEntity[]>(`/academic-institution/course/${selectedUniversity._id}`)
         .then((res) => setCourses(res.data));
     } else {
-      if (courses.length > 0) setCourses([]);
+      setCourses([]);
     }
     setSelectedCourse(null);
     setSelectedClass(null);
@@ -65,14 +65,12 @@ function AcademicFilter({ onFilterChange, show }: AcademicFilterProps) {
   useEffect(() => {
     if (selectedUniversity && selectedCourse) {
       api
-        .get<AcademicEntity[]>(`/public/classes/${selectedUniversity._id}/${selectedCourse._id}`)
+        .get<AcademicEntity[]>(`/academic-institution/class/${selectedCourse._id}`)
         .then((res) => setClasses(res.data));
-      api
-        .get<AcademicEntity[]>(`/public/disciplines/${selectedUniversity._id}/${selectedCourse._id}`)
-        .then((res) => setDisciplines(res.data));
+      api.get<AcademicEntity[]>(`/academic-institution/discipline`).then((res) => setDisciplines(res.data));
     } else {
-      if (classes.length > 0) setClasses([]);
-      if (disciplines.length > 0) setDisciplines([]);
+      setClasses([]);
+      setDisciplines([]);
     }
     setSelectedClass(null);
     setSelectedDiscipline(null);
@@ -88,12 +86,7 @@ function AcademicFilter({ onFilterChange, show }: AcademicFilterProps) {
   }, [selectedUniversity, selectedCourse, selectedClass, selectedDiscipline, onFilterChange]);
 
   const renderCombo = useCallback(
-    (
-      label: string,
-      items: AcademicEntity[],
-      selected: AcademicEntity | null,
-      onSelect: (item: AcademicEntity) => void
-    ) => {
+    (label: string, items: AcademicEntity[], selected: AcademicEntity | null, onSelect: (item: AcademicEntity) => void) => {
       return (
         <Popover>
           <PopoverTrigger asChild>
@@ -132,14 +125,14 @@ function AcademicFilter({ onFilterChange, show }: AcademicFilterProps) {
   );
 
   return (
-    <div className="flex flex-wrap gap-4 justify-center mb-6">
-      {renderCombo("Universidade", universities, selectedUniversity, setSelectedUniversity)}
-      {selectedUniversity && show?.course !== false &&
-        renderCombo("Curso", courses, selectedCourse, setSelectedCourse)}
-      {selectedCourse && show?.class !== false &&
-        renderCombo("Turma", classes, selectedClass, setSelectedClass)}
-      {selectedCourse && show?.discipline !== false &&
-        renderCombo("Disciplina", disciplines, selectedDiscipline, setSelectedDiscipline)}
+    <div className="space-y-6 px-4 md:px-12">
+      {/* Filtros acadêmicos */}
+      <div className="flex flex-wrap gap-4 justify-center mb-6">
+        {renderCombo("Universidade", universities, selectedUniversity, setSelectedUniversity)}
+        {selectedUniversity && show?.course !== false && renderCombo("Curso", courses, selectedCourse, setSelectedCourse)}
+        {selectedCourse && show?.class !== false && renderCombo("Turma", classes, selectedClass, setSelectedClass)}
+        {selectedCourse && show?.discipline !== false && renderCombo("Disciplina", disciplines, selectedDiscipline, setSelectedDiscipline)}
+      </div>
     </div>
   );
 }
