@@ -14,7 +14,7 @@ import {
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useEffect, useState } from "react";
-import api from "@/services/api";
+import { api } from "@/services/api";
 
 
 // Interface para os dados do gráfico de barras
@@ -59,11 +59,11 @@ const getBarChartData = async (): Promise<BarChartData[]> => {
   try {
     const response = await api.get("/public/institutions");
     const institutions: Institution[] = response.data;
-    
+
     if (!institutions || institutions.length === 0) {
       throw new Error("Nenhum dado de instituição foi encontrado");
     }
-    
+
     // Transformando os dados de instituições para o formato do gráfico de barras
     // Usamos o número de estudantes como valor para o gráfico
     return institutions.map(institution => ({
@@ -82,11 +82,11 @@ const getPieChartData = async (): Promise<PieChartData[]> => {
   try {
     const response = await api.get("/public/institutions");
     const institutions: Institution[] = response.data;
-    
+
     if (!institutions || institutions.length === 0) {
       throw new Error("Nenhum dado de instituição foi encontrado");
     }
-    
+
     // Transformando os dados de instituições para o formato do gráfico de pizza
     // Usamos o número de cursos como valor para o gráfico
     return institutions.map((institution, index) => ({
@@ -106,26 +106,26 @@ const getProgressData = async (): Promise<ProgressData | null> => {
   try {
     const response = await api.get("/public/institutions");
     const institutions: Institution[] = response.data;
-    
+
     if (!institutions || institutions.length === 0) {
       throw new Error("Nenhum dado de instituição foi encontrado");
     }
-    
+
     // Calcular a média das avaliações das instituições
     const totalRating = institutions.reduce((acc, inst) => acc + inst.rating, 0);
     const averageRating = institutions.length > 0 ? (totalRating / institutions.length) : 0;
-    
+
     // Convertendo a média (que provavelmente é de 0-10 ou 0-5) para porcentagem (0-100)
     // Assumindo que a nota máxima é 5
     const progressPercentage = Math.round((averageRating / 5) * 100);
-    
+
     return { value: progressPercentage };
   } catch (error) {
     console.error("Erro ao buscar dados de progresso:", error);
     // Não retorna dados mockados, apenas null
     return null;
   }
-}; 
+};
 
 function Chart() {
   const [barData, setBarData] = useState<BarChartData[]>([]);
@@ -147,7 +147,7 @@ function Chart() {
         setBarData(barDataResponse);
         setPieData(pieDataResponse);
         setProgressValue(progressDataResponse?.value || null);
-        
+
         if (
           (!barDataResponse || barDataResponse.length === 0) &&
           (!pieDataResponse || pieDataResponse.length === 0) &&
@@ -185,7 +185,7 @@ function Chart() {
     );
   }
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: TooltipProps<any, string>) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-[#222] p-3 border border-gray-700 rounded">
@@ -194,7 +194,7 @@ function Chart() {
         </div>
       );
     }
-  
+
     return null;
   };
 
@@ -206,7 +206,7 @@ function Chart() {
 
   return (
     <div className="bg-[#141414] text-white min-h-screen p-6 flex flex-col gap-6 items-center lg:p-12">
-  
+
       <h1 className="text-center pb-8 text-xl font-bold tracking-wide lg:text-4xl">
         Dashboard Institucional
       </h1>
@@ -240,7 +240,7 @@ function Chart() {
           </CardContent>
         </Card>
 
-        
+
         <Card className="bg-[#181818] p-6 border-transparent w-full rounded-xl flex flex-col justify-center">
           <CardContent>
             <h2 className="text-lg font-bold mb-4 text-center lg:text-2xl">
@@ -274,7 +274,7 @@ function Chart() {
           </CardContent>
         </Card>
 
-        
+
         <Card className="bg-[#181818] border-transparent p-6 w-full rounded-xl flex flex-col justify-center mt-6 lg:mt-12">
           <CardContent className="flex flex-col items-center">
             <h2 className="text-lg font-bold mb-4 text-center lg:text-2xl">

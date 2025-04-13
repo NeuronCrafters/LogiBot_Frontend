@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Send, ChevronLeft, PanelRightOpen } from "lucide-react";
 import { Header } from "@/components/components/Header/Header";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuth } from "@/hooks/use-Auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import logo from "../../assets/logo.svg";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,11 @@ function Chat() {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { token } = useAuthStore();
+
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const userName = "User";
+
+  const userName = user?.name || "User";
 
   const sendMessage = async (message: string) => {
     if (!message.trim()) return;
@@ -22,17 +24,12 @@ function Chat() {
     setInputText("");
 
     try {
-      if (!token) {
-        console.error("Token JWT não encontrado.");
-        return;
-      }
-
       const response = await fetch("http://localhost:3000/sael/talk", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include", // usa cookie httpOnly
         body: JSON.stringify({ message }),
       });
 
@@ -52,29 +49,26 @@ function Chat() {
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full max-w-full px-0 sm:px-8 md:px-16 mx-auto">
-
       <div className="absolute bg-[#141414] w-full flex justify-between border-b-[0.5px] border-neutral-800 px-24 py-6">
-
-        <Button 
-          variant="outline" size="icon"
+        <Button
+          variant="outline"
+          size="icon"
           className="border-neutral-400 border rounded-md text-slate-100"
-          onClick={() => navigate("/")}>
+          onClick={() => navigate("/")}
+        >
           <ChevronLeft />
         </Button>
 
         <p className="font-Montserrat text-neutral-200 font-semibold text-2xl">CHAT SAEL</p>
 
-        {token && (
+        {user && (
           <button onClick={() => setMenuOpen(true)} className="text-white">
-            <PanelRightOpen size={28} strokeWidth={0.75}/>
+            <PanelRightOpen size={28} strokeWidth={0.75} />
           </button>
         )}
-
       </div>
 
       <div className="flex flex-col items-center w-full h-screen py-32">
-
-        
         {messages.map((message, index) => (
           <div
             key={index}
@@ -98,7 +92,9 @@ function Chat() {
 
             {message.role === "user" && (
               <Avatar className="ml-2 bg-gray-700 w-10 h-10">
-                <AvatarFallback className="text-white font-semibold">{userName.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="text-white font-semibold">
+                  {userName.charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             )}
           </div>

@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/stores/authStore";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/use-Auth";
 import { ButtonSocialLogin } from "@/components/components/Button/ButtonSocialLogin";
 import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedLogo";
-import api from "@/services/api";
 
 function Signin() {
   const [email, setEmail] = useState("");
@@ -13,8 +12,7 @@ function Signin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const setUser = useAuthStore((state) => state.setUser);
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,10 +20,7 @@ function Signin() {
     setError("");
 
     try {
-      const response = await api.post("/session", { email, password });
-      const userData = response.data;
-      setUser(userData);
-      navigate("/chat");
+      await login(email, password);
     } catch (err) {
       console.error("Erro ao fazer login:", err);
       setError("Email ou senha inválidos.");
@@ -36,9 +31,12 @@ function Signin() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900" style={{ flex: 2 }}>
+      <div
+        className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900"
+        style={{ flex: 2 }}
+      >
         <AnimatedLogo />
-        <h1 className="text-slate-100 text-5xl lg:text-6xl font-bold mt-12 ml-8">SAEL</h1>       
+        <h1 className="text-slate-100 text-5xl lg:text-6xl font-bold mt-12 ml-8">SAEL</h1>
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
@@ -69,7 +67,11 @@ function Signin() {
 
             <ButtonSocialLogin className="rounded-lg px-6 py-3 w-full" />
 
-            <ButtonLogin type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 text-slate-100 hover:text-slate-300">
+            <ButtonLogin
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-700 hover:bg-blue-800 text-slate-100 hover:text-slate-300"
+            >
               {loading ? "Entrando..." : "Entrar"}
             </ButtonLogin>
           </form>

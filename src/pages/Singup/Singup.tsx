@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import api from "@/services/api";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/use-Auth";
+import { api } from "@/services/api";
 import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
-import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedLogo";
-import { useNavigate, Link } from "react-router-dom";
+import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 
 interface Class {
   _id: string;
@@ -37,7 +38,7 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
     api
@@ -86,7 +87,7 @@ function Signup() {
 
     try {
       await api.post("/users", payload);
-      navigate("/signin");
+      await login(email, password); // login automático após cadastro
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
       setError("Erro ao realizar o cadastro.");
@@ -99,7 +100,7 @@ function Signup() {
     <div className="flex min-h-screen">
       <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900" style={{ flex: 2 }}>
         <AnimatedLogo />
-        <h1 className="text-slate-100 text-5xl lg:text-6xl font-bold mt-12 ml-8">SAEL</h1>       
+        <h1 className="text-slate-100 text-5xl lg:text-6xl font-bold mt-12 ml-8">SAEL</h1>
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
@@ -179,8 +180,11 @@ function Signup() {
               ))}
             </select>
 
-            <ButtonLogin type="submit" disabled={loading}
-            className="bg-blue-700 hover:bg-blue-80 text-slate-100 hover:text-slate-300">
+            <ButtonLogin
+              type="submit"
+              disabled={loading}
+              className="bg-blue-700 hover:bg-blue-800 text-slate-100 hover:text-slate-300"
+            >
               {loading ? "Cadastrando..." : "Cadastrar"}
             </ButtonLogin>
           </form>

@@ -1,32 +1,18 @@
-import { useEffect, useState } from "react";
-import api from "@/services/api";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Loader2, Menu as MenuIcon } from "lucide-react";
-import { toast } from "react-hot-toast";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuth } from "@/hooks/use-Auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Header } from "@/components/components/Header/Header";
-
-interface UserData {
-  _id: string;
-  name: string;
-  email: string;
-  role: string[];
-  school?: string;
-  course?: string;
-  class?: string;
-}
 
 const translateRole = (role: string) => {
   switch (role) {
     case "student":
       return "Estudante";
     case "professor":
-      return "Professor";
     case "teacher":
       return "Professor";
     case "course-coordinator":
-      return "Professor Coordernador";
+      return "Professor Coordenador";
     case "admin":
       return "Administrador";
     default:
@@ -35,27 +21,8 @@ const translateRole = (role: string) => {
 };
 
 export function About() {
-  const { isAuthenticated, logout } = useAuthStore();
-  const navigate = useNavigate();
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, isAuthenticated, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const { data } = await api.get("/me");
-      setUser(data);
-    } catch (error) {
-      toast.error("Erro ao carregar seus dados!");
-      console.error("Erro ao buscar dados do usuário:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full max-w-full px-0 sm:px-8 md:px-16 mx-auto">
@@ -87,7 +54,9 @@ export function About() {
               <p className="text-lg"><strong>Nome:</strong> {user.name}</p>
               <p className="text-lg"><strong>Email:</strong> {user.email}</p>
               <p className="text-lg">
-                <strong>Função:</strong> {user.role.map(translateRole).join(", ")}
+                <strong>Função:</strong> {Array.isArray(user.role)
+                  ? user.role.map(translateRole).join(", ")
+                  : translateRole(user.role)}
               </p>
 
               {user.school && <p className="text-lg"><strong>Universidade:</strong> {user.school}</p>}

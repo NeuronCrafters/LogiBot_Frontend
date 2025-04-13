@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/stores/authStore";
+import { useAuth } from "@/hooks/use-Auth";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -12,21 +12,21 @@ interface HeaderProps {
 }
 
 export function Header({ isOpen, closeMenu }: HeaderProps) {
-  const { user, logout } = useAuthStore();
+  const { user, logout } = useAuth();
 
   if (!user) return null;
+
+  const userRole = Array.isArray(user.role) ? user.role[0] : user.role;
 
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
+        className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
         onClick={closeMenu}
       />
 
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-[350px] bg-[#181818] transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        className={`fixed inset-y-0 right-0 z-50 w-[350px] bg-[#181818] transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex justify-end p-4">
           <button onClick={closeMenu} className="text-white hover:text-gray-400">
@@ -37,16 +37,25 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
         <div className="h-full p-6 flex flex-col">
           <div className="flex flex-col items-center space-y-2 mb-4">
             <Avatar className="h-36 w-36 bg-white">
-              <AvatarImage src={"/default-avatar.png"} alt={user.name || "Usuário"} />
+              <AvatarImage src="/default-avatar.png" alt={user.name || "Usuário"} />
               <AvatarFallback>{user.name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
             </Avatar>
             <Typograph text={user.name || "Usuário"} colorText="text-[#E4E4E4]" variant="text2" weight="bold" fontFamily="poppins" />
-            <Typograph text={user.role.join(", ") || "Sem função"} colorText="text-gray-400" variant="text4" weight="regular" fontFamily="poppins" />
+            <Typograph
+              text={Array.isArray(user.role) ? user.role.join(", ") : user.role}
+              colorText="text-gray-400"
+              variant="text4"
+              weight="regular"
+              fontFamily="poppins"
+            />
           </div>
 
           <Separator className="bg-[#2a2a2a] mb-2" />
 
-          <MenuOptions role={user.role[0] as "student" | "teacher" | "course-coordinator" | "admin"} logout={logout} />
+          <MenuOptions
+            role={userRole as "student" | "teacher" | "course-coordinator" | "admin"}
+            logout={logout}
+          />
 
           <div className="mt-auto space-y-4">
             <a href="/help" className="flex items-center space-x-3 hover:text-gray-300">
