@@ -14,9 +14,8 @@ function ChartFilter({ onSelect }: ChartFilterProps) {
   const [courses, setCourses] = useState<NamedItem[]>([]);
   const [classes, setClasses] = useState<NamedItem[]>([]);
   const [disciplines, setDisciplines] = useState<NamedItem[]>([]);
-
   const [selectedType, setSelectedType] = useState<"course" | "class" | "discipline">("course");
-  const [selectedId, setSelectedId] = useState("");
+  const [selectedId, setSelectedId] = useState<string>("");
 
   useEffect(() => {
     async function fetchAll() {
@@ -26,7 +25,6 @@ function ChartFilter({ onSelect }: ChartFilterProps) {
           api.get("/public/classes"),
           api.get("/public/disciplines"),
         ]);
-
         setCourses(coursesRes.data);
         setClasses(classesRes.data);
         setDisciplines(disciplinesRes.data);
@@ -50,15 +48,17 @@ function ChartFilter({ onSelect }: ChartFilterProps) {
     return disciplines;
   };
 
+  const handleTypeChange = (type: "course" | "class" | "discipline") => {
+    setSelectedType(type);
+    setSelectedId(""); // limpa o ID ao trocar o tipo
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-4 items-center justify-center mb-8">
       <select
         className="bg-[#1F1F1F] text-white border border-neutral-700 rounded px-4 py-2"
         value={selectedType}
-        onChange={(e) => {
-          setSelectedType(e.target.value as "course" | "class" | "discipline");
-          setSelectedId("");
-        }}
+        onChange={(e) => handleTypeChange(e.target.value as "course" | "class" | "discipline")}
       >
         <option value="course">Curso</option>
         <option value="class">Turma</option>
@@ -69,6 +69,7 @@ function ChartFilter({ onSelect }: ChartFilterProps) {
         className="bg-[#1F1F1F] text-white border border-neutral-700 rounded px-4 py-2"
         value={selectedId}
         onChange={(e) => setSelectedId(e.target.value)}
+        disabled={getOptions().length === 0}
       >
         <option value="">Selecione uma opção</option>
         {getOptions().map((item) => (

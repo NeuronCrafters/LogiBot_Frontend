@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import {
-  Bar,
   BarChart,
-  ResponsiveContainer,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
+  ResponsiveContainer,
   Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/services/api";
 
-interface ShadcnBarChartProps {
+interface ChartGraphicsProps {
   type: "course" | "class" | "discipline";
   id: string;
+}
+
+interface LogResponse {
+  logs?: UserAnalysisLog[];
 }
 
 interface UserAnalysisLog {
@@ -30,7 +34,7 @@ interface ChartData {
   usage: number;
 }
 
-function ChartGraphics({ type, id }: ShadcnBarChartProps) {
+function ChartGraphics({ type, id }: ChartGraphicsProps) {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -38,12 +42,15 @@ function ChartGraphics({ type, id }: ShadcnBarChartProps) {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await api.get(`/logs/${type}/${id}`, {
-          withCredentials: true,
-        });
 
-        const logs: UserAnalysisLog[] =
-          type === "class" ? response.data : response.data.logs;
+        const response = await api.get<LogResponse | UserAnalysisLog[]>(
+          `/logs/${type}/${id}`,
+          { withCredentials: true }
+        );
+
+        const logs: UserAnalysisLog[] = Array.isArray(response.data)
+          ? response.data
+          : response.data.logs || [];
 
         const formatted: ChartData[] = logs.map((log) => ({
           name: log.name,
@@ -54,7 +61,7 @@ function ChartGraphics({ type, id }: ShadcnBarChartProps) {
 
         setData(formatted);
       } catch (error) {
-        console.error("Erro ao buscar dados:", error);
+        console.error("Erro ao buscar dados de logs:", error);
         setData([]);
       } finally {
         setLoading(false);
@@ -84,7 +91,11 @@ function ChartGraphics({ type, id }: ShadcnBarChartProps) {
           <BarChart data={data}>
             <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
             <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
-            <Tooltip />
+            <Tooltip
+              formatter={(value: number) => `${value}`}
+              labelStyle={{ color: "#fff" }}
+              contentStyle={{ backgroundColor: "#222", borderRadius: "8px" }}
+            />
             <Legend wrapperStyle={{ color: "#fff" }} />
             <Bar dataKey="correct" fill="#4ade80" name="Corretas" />
             <Bar dataKey="wrong" fill="#f87171" name="Incorretas" />
@@ -96,4 +107,4 @@ function ChartGraphics({ type, id }: ShadcnBarChartProps) {
   );
 }
 
-export { ChartGraphics }
+export { ChartGraphics };
