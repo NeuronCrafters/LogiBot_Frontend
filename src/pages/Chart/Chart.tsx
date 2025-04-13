@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChartFilter } from "@/components/components/Chart/ChartFilter";
-import { ChartLogs } from "@/components/components/Chart/ChartsLogs";
+import { ChartGraphics } from "@/components/components/Chart/ChatGraphic";
+import { Card, CardContent } from "@/components/ui/card";
 
 function Chart() {
   const [selectedType, setSelectedType] = useState<"course" | "class" | "discipline" | null>(null);
@@ -20,7 +21,11 @@ function Chart() {
       <ChartFilter onSelect={handleSelect} />
 
       {selectedType && selectedId && (
-        <ChartLogs type={selectedType} id={selectedId} />
+        <Card className="w-full max-w-5xl bg-[#1F1F1F] rounded-xl p-6 shadow-lg mt-6">
+          <CardContent>
+            <ChartGraphics type={selectedType} id={selectedId} />
+          </CardContent>
+        </Card>
       )}
     </div>
   );
