@@ -12,8 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { api } from "@/services/api";
-import { saveAs } from "file-saver";
 import { toPng } from "html-to-image";
+import { downloadCSV } from "@/lib/downloadCSV";
 
 interface ChartGraphicsProps {
   type: "course" | "class" | "discipline";
@@ -45,14 +45,12 @@ export function ChartGraphics({ type, id }: ChartGraphicsProps) {
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
-
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
         setLoading(true);
-
         const response = await api.get(`/logs/${type}/${id}`, {
           withCredentials: true,
         });
@@ -61,7 +59,7 @@ export function ChartGraphics({ type, id }: ChartGraphicsProps) {
           ? response.data
           : response.data.logs || [];
 
-        const formatted = logsArray.map((log) => ({
+        const formatted: ChartData[] = logsArray.map((log) => ({
           name: log.name,
           correct: log.totalCorrectAnswers ?? 0,
           wrong: log.totalWrongAnswers ?? 0,
@@ -80,18 +78,21 @@ export function ChartGraphics({ type, id }: ChartGraphicsProps) {
     fetchLogs();
   }, [type, id]);
 
-  const exportCSV = () => {
-    const headers = ["Nome", "Corretas", "Incorretas", "Tempo de Uso (s)"];
-    const rows = data.map((item) =>
-      [item.name, item.correct, item.wrong, item.usage].join(",")
-    );
-    const csv = [headers.join(","), ...rows].join("\n");
+  const handleExportCSV = () => {
+    const rows = data.map((item) => ({
+      Nome: item.name,
+      Corretas: item.correct,
+      Incorretas: item.wrong,
+      "Tempo de Uso (s)": item.usage,
+    }));
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    saveAs(blob, `interacoes_${type}_${format(new Date(), "yyyyMMdd_HHmmss")}.csv`);
+    downloadCSV(
+      `interacoes_${type}_${format(new Date(), "yyyyMMdd_HHmmss")}.csv`,
+      rows
+    );
   };
 
-  const exportPNG = () => {
+  const handleExportPNG = () => {
     if (!chartRef.current) return;
     toPng(chartRef.current)
       .then((dataUrl) => {
@@ -105,17 +106,16 @@ export function ChartGraphics({ type, id }: ChartGraphicsProps) {
       });
   };
 
-  const handleClickBar = (entry: any) => {
+  const handleClickBar = (entry: ChartData) => {
     console.log("Clique em:", entry.name);
-    // Aqui você pode abrir modal, detalhar aluno, etc.
   };
 
-  const filteredData = data.filter((item) => {
+  const filteredData = data.filter(() => {
+    // Placeholder: lógica para filtrar por datas (a ser aprimorada com dados reais)
     if (!startDate || !endDate) return true;
-    const itemDate = new Date(); // Substitua se tiver data real em logs
-    return (
-      itemDate >= new Date(startDate) && itemDate <= new Date(endDate)
-    );
+    // Substitua por uma propriedade real, se disponível.
+    const itemDate = new Date();
+    return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
   });
 
   return (
@@ -138,10 +138,10 @@ export function ChartGraphics({ type, id }: ChartGraphicsProps) {
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
-          <Button variant="outline" onClick={exportCSV}>
+          <Button variant="outline" onClick={handleExportCSV}>
             Exportar CSV
           </Button>
-          <Button variant="outline" onClick={exportPNG}>
+          <Button variant="outline" onClick={handleExportPNG}>
             Exportar PNG
           </Button>
         </div>
@@ -174,21 +174,21 @@ export function ChartGraphics({ type, id }: ChartGraphicsProps) {
                   fill={colors.correct}
                   name="Corretas"
                   animationDuration={600}
-                  onClick={handleClickBar}
+                  onClick={(entry) => handleClickBar(entry as ChartData)}
                 />
                 <Bar
                   dataKey="wrong"
                   fill={colors.wrong}
                   name="Incorretas"
                   animationDuration={600}
-                  onClick={handleClickBar}
+                  onClick={(entry) => handleClickBar(entry as ChartData)}
                 />
                 <Bar
                   dataKey="usage"
                   fill={colors.usage}
                   name="Tempo de Uso (s)"
                   animationDuration={600}
-                  onClick={handleClickBar}
+                  onClick={(entry) => handleClickBar(entry as ChartData)}
                 />
               </BarChart>
             </ResponsiveContainer>

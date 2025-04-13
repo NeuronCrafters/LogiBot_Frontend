@@ -1,14 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LayoutList, BarChart3 } from "lucide-react"; // Ícones explicativos
-import { cn } from "@/lib/utils"; // Se estiver usando Tailwind helper para classnames
-
-// Enum extensível para múltiplos modos
-export enum ChartMode {
-  VISUALIZAR = "visualizar",
-  COMPARAR = "comparar",
-  // Adicione outros modos aqui se necessário futuramente
-}
+import { LayoutList, BarChart3 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ChartMode } from "@/@types/ChartsType";
 
 interface ChartModeSelectorProps {
   mode: ChartMode;
@@ -16,15 +10,15 @@ interface ChartModeSelectorProps {
 }
 
 export function ChartModeSelector({ mode, setMode }: ChartModeSelectorProps) {
-  const modes = [
+  const modes: { key: ChartMode; label: string; icon: JSX.Element; tooltip: string }[] = [
     {
-      key: ChartMode.VISUALIZAR,
+      key: "visualizar",
       label: "Visualizar",
       icon: <LayoutList className="mr-2 h-4 w-4" />,
       tooltip: "Visualize os dados de um grupo ou aluno individualmente.",
     },
     {
-      key: ChartMode.COMPARAR,
+      key: "comparar",
       label: "Comparar",
       icon: <BarChart3 className="mr-2 h-4 w-4" />,
       tooltip: "Compare o desempenho entre dois grupos.",
@@ -47,9 +41,7 @@ export function ChartModeSelector({ mode, setMode }: ChartModeSelectorProps) {
                 {label}
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="bg-muted text-white">
-              {tooltip}
-            </TooltipContent>
+            <TooltipContent className="bg-muted text-white">{tooltip}</TooltipContent>
           </Tooltip>
         ))}
       </div>

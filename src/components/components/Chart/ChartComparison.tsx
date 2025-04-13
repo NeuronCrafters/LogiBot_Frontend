@@ -10,8 +10,8 @@ import {
 } from "recharts";
 import { api } from "@/services/api";
 import { Button } from "@/components/ui/button";
-import { saveAs } from "file-saver";
 import { toPng } from "html-to-image";
+import { downloadCSV } from "@/lib/downloadCSV";
 
 interface UserAnalysisLog {
   name: string;
@@ -29,15 +29,12 @@ interface ComparisonData {
 
 interface ChartComparisonProps {
   type: "course" | "class" | "discipline";
-  ids: string[]; // dois IDs no máximo
-  defaultMetric?: "correct" | "wrong" | "usage";
+  ids: string[];
+  metric: "correct" | "wrong" | "usage";
 }
 
-export function ChartComparison({ type, ids, defaultMetric = "correct" }: ChartComparisonProps) {
+export function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
   const [data, setData] = useState<ComparisonData[]>([]);
-  const [metric, setMetric] = useState<"correct" | "wrong" | "usage">(
-    defaultMetric
-  );
   const [labelA, setLabelA] = useState("Grupo A");
   const [labelB, setLabelB] = useState("Grupo B");
   const chartRef = useRef<HTMLDivElement>(null);
@@ -95,15 +92,18 @@ export function ChartComparison({ type, ids, defaultMetric = "correct" }: ChartC
     fetchData();
   }, [type, ids, metric]);
 
-  const exportCSV = () => {
-    const headers = ["Nome", labelA, labelB, "Variação"];
-    const rows = data.map((item) => [item.name, item.groupA, item.groupB, item.variation].join(","));
-    const csv = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    saveAs(blob, `comparativo_${metric}.csv`);
+  const handleExportCSV = () => {
+    const rows = data.map((item) => ({
+      Nome: item.name,
+      [labelA]: item.groupA,
+      [labelB]: item.groupB,
+      Variação: item.variation,
+    }));
+
+    downloadCSV(`comparativo_${metric}.csv`, rows);
   };
 
-  const exportPNG = () => {
+  const handleExportPNG = () => {
     if (!chartRef.current) return;
     toPng(chartRef.current).then((dataUrl) => {
       const link = document.createElement("a");
@@ -128,27 +128,19 @@ export function ChartComparison({ type, ids, defaultMetric = "correct" }: ChartC
       </h2>
 
       <div className="flex flex-wrap justify-center gap-4 mb-4">
-        <select
-          value={metric}
-          onChange={(e) => setMetric(e.target.value as typeof metric)}
-          className="bg-[#2a2a2a] text-white border border-gray-600 rounded p-2"
-        >
-          <option value="correct">Corretas</option>
-          <option value="wrong">Incorretas</option>
-          <option value="usage">Tempo de Uso</option>
-        </select>
-
-        <Button variant="outline" onClick={exportCSV}>Exportar CSV</Button>
-        <Button variant="outline" onClick={exportPNG}>Exportar PNG</Button>
+        <Button variant="outline" onClick={handleExportCSV}>Exportar CSV</Button>
+        <Button variant="outline" onClick={handleExportPNG}>Exportar PNG</Button>
       </div>
 
       <div ref={chartRef}>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
-            <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} interval={0} minTickGap={10} />
+            <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
             <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
             <Tooltip
-              formatter={(value: number, name: string, props) => `${value} (${data[props.payload.index].variation})`}
+              formatter={(value: number, name, props) =>
+                `${value} (${data[props?.payload?.index]?.variation ?? "0%"})`
+              }
               contentStyle={{ backgroundColor: "#2a2a2a", borderRadius: "8px" }}
               labelStyle={{ color: "#fff" }}
               itemStyle={{ color: "#fff" }}

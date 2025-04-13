@@ -1,9 +1,8 @@
 import { ChartView } from "@/components/components/Chart/ChartView";
 
-export default function Chart() {
+function Chart() {
   return (
     <main className="bg-[#141414] min-h-screen text-white px-4 py-8 lg:px-12 lg:py-16">
-      {/* Título principal */}
       <header className="mb-10 text-center">
         <h1 className="text-3xl lg:text-4xl font-bold tracking-tight">
           📊 Dashboard de Interações
@@ -13,8 +12,9 @@ export default function Chart() {
         </p>
       </header>
 
-      {/* Corpo do dashboard */}
       <ChartView />
     </main>
   );
 }
+
+export { Chart };

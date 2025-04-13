@@ -21,7 +21,7 @@ interface AcademicEntity {
 }
 
 interface AcademicFilterProps {
-  onChange: (filter: {
+  onFilterChange: (filter: {
     universityId: string | null;
     courseId: string | null;
     classId: string | null;
@@ -34,7 +34,7 @@ interface AcademicFilterProps {
   };
 }
 
-function AcademicFilter({ onChange, show }: AcademicFilterProps) {
+function AcademicFilter({ onFilterChange, show }: AcademicFilterProps) {
   const [universities, setUniversities] = useState<AcademicEntity[]>([]);
   const [courses, setCourses] = useState<AcademicEntity[]>([]);
   const [classes, setClasses] = useState<AcademicEntity[]>([]);
@@ -60,7 +60,7 @@ function AcademicFilter({ onChange, show }: AcademicFilterProps) {
     setSelectedCourse(null);
     setSelectedClass(null);
     setSelectedDiscipline(null);
-  }, [courses.length, selectedUniversity]);
+  }, [selectedUniversity]);
 
   useEffect(() => {
     if (selectedUniversity && selectedCourse) {
@@ -76,16 +76,16 @@ function AcademicFilter({ onChange, show }: AcademicFilterProps) {
     }
     setSelectedClass(null);
     setSelectedDiscipline(null);
-  }, [classes.length, disciplines.length, selectedCourse, selectedUniversity]);
+  }, [selectedUniversity, selectedCourse]);
 
   useEffect(() => {
-    onChange({
+    onFilterChange({
       universityId: selectedUniversity?._id || null,
       courseId: selectedCourse?._id || null,
       classId: selectedClass?._id || null,
       disciplineId: selectedDiscipline?._id || null,
     });
-  }, [selectedUniversity, selectedCourse, selectedClass, selectedDiscipline, onChange]);
+  }, [selectedUniversity, selectedCourse, selectedClass, selectedDiscipline, onFilterChange]);
 
   const renderCombo = useCallback(
     (
@@ -127,7 +127,8 @@ function AcademicFilter({ onChange, show }: AcademicFilterProps) {
           </PopoverContent>
         </Popover>
       );
-    }, []
+    },
+    []
   );
 
   return (

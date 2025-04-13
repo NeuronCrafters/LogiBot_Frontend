@@ -1,22 +1,15 @@
 import { Button } from "@/components/ui/button";
-
-// Definindo um enum para melhor controle e legibilidade
-export enum Metric {
-  CORRECT = "correct",
-  WRONG = "wrong",
-  USAGE = "usage",
-}
+import { Metric } from "@/@types/ChartsType";
 
 interface MetricSelectorProps {
   metric: Metric;
   setMetric: (value: Metric) => void;
 }
 
-// Mapeando os rótulos com os valores
-const metrics = [
-  { label: "Corretas", value: Metric.CORRECT },
-  { label: "Incorretas", value: Metric.WRONG },
-  { label: "Tempo de Uso", value: Metric.USAGE },
+const metrics: { label: string; value: Metric }[] = [
+  { label: "Corretas", value: "correct" },
+  { label: "Incorretas", value: "wrong" },
+  { label: "Tempo de Uso", value: "usage" },
 ];
 
 function MetricSelector({ metric, setMetric }: MetricSelectorProps) {
