@@ -1,20 +1,69 @@
-import { api } from "./api";
+import { api } from "@/services/api";
 
-const BACKEND_URL = "http://localhost:3000/sael/talk";
-
-export const sendMessageToRasa = async (message: string) => {
-  try {
+export const rasaService = {
+  async sendMessage(message: string) {
     const response = await api.post(
-      BACKEND_URL,
+      "/sael/talk",
       { message },
-      {
-        withCredentials: true,
-      }
+      { withCredentials: true }
     );
-
     return response.data;
-  } catch (error) {
-    console.error("Erro ao enviar mensagem para o backend:", error);
-    return [];
-  }
+  },
+
+  async listarNiveis() {
+    const response = await api.get("/sael/action/listar_niveis", {
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  async definirNivel(nivel: string) {
+    const response = await api.post(
+      "/sael/action/definir_nivel",
+      { nivel },
+      { withCredentials: true }
+    );
+    return response.data;
+  },
+
+  async listarOpcoes() {
+    const response = await api.get("/sael/action/listar_opcoes", {
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  async listarSubopcoes(categoria: string) {
+    const response = await api.post(
+      "/sael/action/listar_subopcoes",
+      { categoria },
+      { withCredentials: true }
+    );
+    return response.data;
+  },
+
+  async gerarPerguntas(pergunta: string) {
+    const response = await api.post(
+      "/sael/action/gerar_perguntas",
+      { pergunta },
+      { withCredentials: true }
+    );
+    return response.data;
+  },
+
+  async getGabarito() {
+    const response = await api.get("/sael/action/gabarito", {
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  async verificarRespostas(respostas: string[]) {
+    const response = await api.post(
+      "/sael/action/send",
+      { respostas },
+      { withCredentials: true }
+    );
+    return response.data;
+  },
 };
