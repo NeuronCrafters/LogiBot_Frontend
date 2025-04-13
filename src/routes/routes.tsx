@@ -1,31 +1,20 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./ProtectedRoute";
-import { Signin } from "../pages/Signin/Signin";
-import { Chat } from "../pages/Chat/Chat";
-// import { Home } from "../pages/Home/Home.tsxx";
-import { Home } from "../pages/Home/Home.tsx";
+import { Routes, Route } from "react-router-dom";
+import { Home } from "@/pages/Home/Home";
 import { Signup } from "@/pages/Singup/Singup";
-import { CRUD } from "@/pages/CRUD/CRUD";
-import { About } from "@/pages/About/About";
-import Chart from "@/pages/Chart/Chart";
+import { Signin } from "@/pages/Signin/Signin";
+import ProtectedRoute from "@/routes/ProtectedRoute";
+import { Chat } from "@/pages/Chat/Chat";
 
-const AppRoutes = () => {
+export default function AppRoutes() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/signin" element={<Signin />} />
-        <Route path="/signup" element={<Signup />} />
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/signin" element={<Signin />} />
+      <Route path="/signup" element={<Signup />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/crud" element={<CRUD />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/chart" element={<Chart />} />
-        </Route>
-      </Routes>
-    </Router>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/chat" element={<Chat />} />
+      </Route>
+    </Routes>
   );
-};
-
-export default AppRoutes;
+}

@@ -185,7 +185,13 @@ function Chart() {
     );
   }
 
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<any, string>) => {
+  interface CustomTooltipProps {
+    active?: boolean;
+    payload?: { name: string; value: number }[];
+    label?: string;
+  }
+
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-[#222] p-3 border border-gray-700 rounded">
@@ -312,4 +318,4 @@ function Chart() {
   );
 }
 
-export default Chart;
+export { Chart };
