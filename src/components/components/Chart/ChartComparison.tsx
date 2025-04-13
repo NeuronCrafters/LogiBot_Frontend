@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,6 +9,9 @@ import {
   Legend,
 } from "recharts";
 import { api } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { saveAs } from "file-saver";
+import { toPng } from "html-to-image";
 
 interface UserAnalysisLog {
   name: string;
@@ -21,20 +24,34 @@ interface ComparisonData {
   name: string;
   groupA: number;
   groupB: number;
+  variation: string;
 }
 
 interface ChartComparisonProps {
   type: "course" | "class" | "discipline";
-  ids: string[];
-  metric: "correct" | "wrong" | "usage";
+  ids: string[]; // dois IDs no máximo
+  defaultMetric?: "correct" | "wrong" | "usage";
 }
 
-export function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
+export function ChartComparison({ type, ids, defaultMetric = "correct" }: ChartComparisonProps) {
   const [data, setData] = useState<ComparisonData[]>([]);
+  const [metric, setMetric] = useState<"correct" | "wrong" | "usage">(
+    defaultMetric
+  );
   const [labelA, setLabelA] = useState("Grupo A");
   const [labelB, setLabelB] = useState("Grupo B");
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const title =
+    metric === "correct"
+      ? "Respostas Corretas"
+      : metric === "wrong"
+        ? "Respostas Incorretas"
+        : "Tempo de Uso";
 
   useEffect(() => {
+    if (ids.length !== 2) return;
+
     async function fetchData() {
       try {
         const [resA, resB] = await Promise.all([
@@ -45,60 +62,103 @@ export function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
         const logsA: UserAnalysisLog[] = resA.data.logs || resA.data;
         const logsB: UserAnalysisLog[] = resB.data.logs || resB.data;
 
+        const getMetricValue = (log?: UserAnalysisLog): number => {
+          if (!log) return 0;
+          switch (metric) {
+            case "correct": return log.totalCorrectAnswers;
+            case "wrong": return log.totalWrongAnswers;
+            case "usage": return Math.floor(log.totalUsageTime);
+          }
+        };
+
         const mergedData: ComparisonData[] = logsA.map((log, i) => {
-          const bLog = logsB[i];
-          const getMetricValue = (log: UserAnalysisLog | undefined) => {
-            if (!log) return 0;
-            if (metric === "correct") return log.totalCorrectAnswers;
-            if (metric === "wrong") return log.totalWrongAnswers;
-            return Math.floor(log.totalUsageTime);
-          };
+          const valueA = getMetricValue(log);
+          const valueB = getMetricValue(logsB[i]);
+          const variation = valueA === 0 ? "0%" : `${(((valueB - valueA) / valueA) * 100).toFixed(1)}%`;
 
           return {
             name: log.name,
-            groupA: getMetricValue(log),
-            groupB: getMetricValue(bLog),
+            groupA: valueA,
+            groupB: valueB,
+            variation,
           };
         });
 
-        setLabelA(logsA[0]?.name || "Grupo A");
-        setLabelB(logsB[0]?.name || "Grupo B");
+        setLabelA(`Grupo 1 (${logsA.length} registros)`);
+        setLabelB(`Grupo 2 (${logsB.length} registros)`);
         setData(mergedData);
-      } catch (err) {
-        console.error("Erro ao buscar dados comparativos", err);
+      } catch (error) {
+        console.error("Erro ao buscar dados comparativos:", error);
       }
     }
 
-    if (ids.length === 2) fetchData();
+    fetchData();
   }, [type, ids, metric]);
 
-  if (ids.length !== 2)
-    return <p className="text-red-400">Selecione dois grupos para comparar.</p>;
-  if (data.length === 0)
-    return <p className="text-white">Carregando comparativo...</p>;
+  const exportCSV = () => {
+    const headers = ["Nome", labelA, labelB, "Variação"];
+    const rows = data.map((item) => [item.name, item.groupA, item.groupB, item.variation].join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    saveAs(blob, `comparativo_${metric}.csv`);
+  };
 
-  const title =
-    metric === "correct"
-      ? "Respostas Corretas"
-      : metric === "wrong"
-        ? "Respostas Incorretas"
-        : "Tempo de Uso";
+  const exportPNG = () => {
+    if (!chartRef.current) return;
+    toPng(chartRef.current).then((dataUrl) => {
+      const link = document.createElement("a");
+      link.download = `comparativo_${metric}.png`;
+      link.href = dataUrl;
+      link.click();
+    });
+  };
+
+  if (ids.length !== 2) {
+    return <p className="text-red-400">Selecione dois grupos para comparar.</p>;
+  }
+
+  if (data.length === 0) {
+    return <p className="text-white text-center">Carregando comparativo...</p>;
+  }
 
   return (
     <div className="w-full max-w-5xl bg-[#1F1F1F] rounded-xl p-6 shadow-lg">
       <h2 className="text-white text-2xl font-bold mb-4 text-center">
         Comparativo de {title}
       </h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
-          <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
-          <Tooltip />
-          <Legend wrapperStyle={{ color: "#fff" }} />
-          <Bar dataKey="groupA" fill="#4ade80" name={labelA} />
-          <Bar dataKey="groupB" fill="#60a5fa" name={labelB} />
-        </BarChart>
-      </ResponsiveContainer>
+
+      <div className="flex flex-wrap justify-center gap-4 mb-4">
+        <select
+          value={metric}
+          onChange={(e) => setMetric(e.target.value as typeof metric)}
+          className="bg-[#2a2a2a] text-white border border-gray-600 rounded p-2"
+        >
+          <option value="correct">Corretas</option>
+          <option value="wrong">Incorretas</option>
+          <option value="usage">Tempo de Uso</option>
+        </select>
+
+        <Button variant="outline" onClick={exportCSV}>Exportar CSV</Button>
+        <Button variant="outline" onClick={exportPNG}>Exportar PNG</Button>
+      </div>
+
+      <div ref={chartRef}>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} interval={0} minTickGap={10} />
+            <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
+            <Tooltip
+              formatter={(value: number, name: string, props) => `${value} (${data[props.payload.index].variation})`}
+              contentStyle={{ backgroundColor: "#2a2a2a", borderRadius: "8px" }}
+              labelStyle={{ color: "#fff" }}
+              itemStyle={{ color: "#fff" }}
+            />
+            <Legend wrapperStyle={{ color: "#fff" }} />
+            <Bar dataKey="groupA" fill="#4ade80" name={labelA} />
+            <Bar dataKey="groupB" fill="#60a5fa" name={labelB} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,15 +9,15 @@ import {
   Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 import { api } from "@/services/api";
+import { saveAs } from "file-saver";
+import { toPng } from "html-to-image";
 
 interface ChartGraphicsProps {
   type: "course" | "class" | "discipline";
   id: string;
-}
-
-interface LogResponse {
-  logs?: UserAnalysisLog[];
 }
 
 interface UserAnalysisLog {
@@ -34,29 +34,38 @@ interface ChartData {
   usage: number;
 }
 
-function ChartGraphics({ type, id }: ChartGraphicsProps) {
+const colors = {
+  correct: "#4ade80",
+  wrong: "#f87171",
+  usage: "#60a5fa",
+};
+
+export function ChartGraphics({ type, id }: ChartGraphicsProps) {
   const [data, setData] = useState<ChartData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchLogs = async () => {
       try {
         setLoading(true);
 
-        const response = await api.get<LogResponse | UserAnalysisLog[]>(
-          `/logs/${type}/${id}`,
-          { withCredentials: true }
-        );
+        const response = await api.get(`/logs/${type}/${id}`, {
+          withCredentials: true,
+        });
 
-        const logs: UserAnalysisLog[] = Array.isArray(response.data)
+        const logsArray: UserAnalysisLog[] = Array.isArray(response.data)
           ? response.data
           : response.data.logs || [];
 
-        const formatted: ChartData[] = logs.map((log) => ({
+        const formatted = logsArray.map((log) => ({
           name: log.name,
-          correct: log.totalCorrectAnswers || 0,
-          wrong: log.totalWrongAnswers || 0,
-          usage: Math.floor(log.totalUsageTime || 0),
+          correct: log.totalCorrectAnswers ?? 0,
+          wrong: log.totalWrongAnswers ?? 0,
+          usage: Math.floor(log.totalUsageTime ?? 0),
         }));
 
         setData(formatted);
@@ -66,45 +75,126 @@ function ChartGraphics({ type, id }: ChartGraphicsProps) {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    fetchData();
+    fetchLogs();
   }, [type, id]);
 
-  if (loading) {
-    return <p className="text-white text-lg">Carregando dados...</p>;
-  }
+  const exportCSV = () => {
+    const headers = ["Nome", "Corretas", "Incorretas", "Tempo de Uso (s)"];
+    const rows = data.map((item) =>
+      [item.name, item.correct, item.wrong, item.usage].join(",")
+    );
+    const csv = [headers.join(","), ...rows].join("\n");
 
-  if (data.length === 0) {
-    return <p className="text-red-500 text-lg">Sem dados disponíveis</p>;
-  }
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    saveAs(blob, `interacoes_${type}_${format(new Date(), "yyyyMMdd_HHmmss")}.csv`);
+  };
+
+  const exportPNG = () => {
+    if (!chartRef.current) return;
+    toPng(chartRef.current)
+      .then((dataUrl) => {
+        const link = document.createElement("a");
+        link.download = `grafico_${type}_${format(new Date(), "yyyyMMdd_HHmmss")}.png`;
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.error("Erro ao exportar imagem:", err);
+      });
+  };
+
+  const handleClickBar = (entry: any) => {
+    console.log("Clique em:", entry.name);
+    // Aqui você pode abrir modal, detalhar aluno, etc.
+  };
+
+  const filteredData = data.filter((item) => {
+    if (!startDate || !endDate) return true;
+    const itemDate = new Date(); // Substitua se tiver data real em logs
+    return (
+      itemDate >= new Date(startDate) && itemDate <= new Date(endDate)
+    );
+  });
 
   return (
     <Card className="bg-[#1F1F1F] text-white">
       <CardHeader>
-        <CardTitle className="text-center text-2xl font-bold">
+        <CardTitle className="text-center text-2xl font-bold mb-4">
           Gráfico de Interações
         </CardTitle>
+        <div className="flex flex-wrap justify-center gap-4 mt-2">
+          <input
+            type="date"
+            className="bg-[#1F1F1F] border border-gray-600 rounded p-1 text-white"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+          <span className="text-white">até</span>
+          <input
+            type="date"
+            className="bg-[#1F1F1F] border border-gray-600 rounded p-1 text-white"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+          <Button variant="outline" onClick={exportCSV}>
+            Exportar CSV
+          </Button>
+          <Button variant="outline" onClick={exportPNG}>
+            Exportar PNG
+          </Button>
+        </div>
       </CardHeader>
+
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data}>
-            <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
-            <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
-            <Tooltip
-              formatter={(value: number) => `${value}`}
-              labelStyle={{ color: "#fff" }}
-              contentStyle={{ backgroundColor: "#222", borderRadius: "8px" }}
-            />
-            <Legend wrapperStyle={{ color: "#fff" }} />
-            <Bar dataKey="correct" fill="#4ade80" name="Corretas" />
-            <Bar dataKey="wrong" fill="#f87171" name="Incorretas" />
-            <Bar dataKey="usage" fill="#60a5fa" name="Tempo de Uso (s)" />
-          </BarChart>
-        </ResponsiveContainer>
+        {loading ? (
+          <p className="text-white text-lg text-center">Carregando dados...</p>
+        ) : filteredData.length === 0 ? (
+          <p className="text-red-500 text-lg text-center">Sem dados disponíveis</p>
+        ) : (
+          <div ref={chartRef}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={filteredData}>
+                <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
+                <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
+                <Tooltip
+                  formatter={(value: number) => value.toString()}
+                  labelStyle={{ color: "#fff" }}
+                  contentStyle={{
+                    backgroundColor: "#222",
+                    borderRadius: "8px",
+                    border: "none",
+                  }}
+                  cursor={{ fill: "#333" }}
+                />
+                <Legend wrapperStyle={{ color: "#fff" }} />
+                <Bar
+                  dataKey="correct"
+                  fill={colors.correct}
+                  name="Corretas"
+                  animationDuration={600}
+                  onClick={handleClickBar}
+                />
+                <Bar
+                  dataKey="wrong"
+                  fill={colors.wrong}
+                  name="Incorretas"
+                  animationDuration={600}
+                  onClick={handleClickBar}
+                />
+                <Bar
+                  dataKey="usage"
+                  fill={colors.usage}
+                  name="Tempo de Uso (s)"
+                  animationDuration={600}
+                  onClick={handleClickBar}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
-
-export { ChartGraphics };

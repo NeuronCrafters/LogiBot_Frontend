@@ -1,33 +1,39 @@
 import { Button } from "@/components/ui/button";
 
-interface MetricSelectorProps {
-  metric: "correct" | "wrong" | "usage";
-  setMetric: (value: "correct" | "wrong" | "usage") => void;
+// Definindo um enum para melhor controle e legibilidade
+export enum Metric {
+  CORRECT = "correct",
+  WRONG = "wrong",
+  USAGE = "usage",
 }
+
+interface MetricSelectorProps {
+  metric: Metric;
+  setMetric: (value: Metric) => void;
+}
+
+// Mapeando os rótulos com os valores
+const metrics = [
+  { label: "Corretas", value: Metric.CORRECT },
+  { label: "Incorretas", value: Metric.WRONG },
+  { label: "Tempo de Uso", value: Metric.USAGE },
+];
 
 function MetricSelector({ metric, setMetric }: MetricSelectorProps) {
   return (
     <div className="flex gap-3 justify-center mb-6">
-      <Button
-        variant={metric === "correct" ? "default" : "outline"}
-        onClick={() => setMetric("correct")}
-      >
-        Corretas
-      </Button>
-      <Button
-        variant={metric === "wrong" ? "default" : "outline"}
-        onClick={() => setMetric("wrong")}
-      >
-        Incorretas
-      </Button>
-      <Button
-        variant={metric === "usage" ? "default" : "outline"}
-        onClick={() => setMetric("usage")}
-      >
-        Tempo de Uso
-      </Button>
+      {metrics.map(({ label, value }) => (
+        <Button
+          key={value}
+          variant={metric === value ? "default" : "outline"}
+          onClick={() => setMetric(value)}
+          className="capitalize"
+        >
+          {label}
+        </Button>
+      ))}
     </div>
   );
 }
 
-export { MetricSelector }
+export { MetricSelector };
