@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { rasaService } from "@/services/rasaService";
+import { rasaService } from "@/hooks/use-Rasa";
 import { Button } from "@/components/ui/button";
 
 interface ChatResponseHandlerProps {
