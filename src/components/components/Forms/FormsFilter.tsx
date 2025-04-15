@@ -5,9 +5,10 @@ import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
 interface FormsFilterProps {
   onSearch: (filterData: FilterData) => void;
+  onReset: () => void;
 }
 
-function FormsFilter({ onSearch }: FormsFilterProps) {
+function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   const [filterType, setFilterType] = useState<FilterType | ''>('');
   const [universities, setUniversities] = useState<{ _id: string; name: string }[]>([]);
   const [selectedUniversity, setSelectedUniversity] = useState<string>('');
@@ -19,8 +20,9 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
   const [selectedClass, setSelectedClass] = useState<string>('');
 
   useEffect(() => {
-    axios.get('http://localhost:3000/public/institutions')
-      .then(response => {
+    axios
+      .get('http://localhost:3000/public/institutions')
+      .then((response) => {
         const unis = response.data.map((uni: any) => ({
           _id: uni._id,
           name: uni.name,
@@ -36,7 +38,8 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
       filterType &&
       ['courses', 'disciplines', 'classes', 'students-discipline', 'students-course'].includes(filterType)
     ) {
-      axios.get(`http://localhost:3000/public/courses/${selectedUniversity}`)
+      axios
+        .get(`http://localhost:3000/public/courses/${selectedUniversity}`)
         .then(response => setCourses(response.data))
         .catch(error => console.error('Erro ao carregar cursos', error));
     } else {
@@ -52,7 +55,8 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
       filterType &&
       ['disciplines', 'classes', 'students-discipline'].includes(filterType)
     ) {
-      axios.get(`http://localhost:3000/public/disciplines/${selectedUniversity}/${selectedCourse}`)
+      axios
+        .get(`http://localhost:3000/public/disciplines/${selectedUniversity}/${selectedCourse}`)
         .then(response => setDisciplines(response.data))
         .catch(error => console.error('Erro ao carregar disciplinas', error));
     } else {
@@ -63,7 +67,8 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
 
   useEffect(() => {
     if (selectedUniversity && selectedCourse && filterType === 'classes') {
-      axios.get(`http://localhost:3000/public/classes/${selectedUniversity}/${selectedCourse}`)
+      axios
+        .get(`http://localhost:3000/public/classes/${selectedUniversity}/${selectedCourse}`)
         .then(response => setClasses(response.data))
         .catch(error => console.error('Erro ao carregar turmas', error));
     } else {
@@ -81,6 +86,20 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
       classId: selectedClass || undefined,
     };
     onSearch(filterData);
+  }
+
+  // Função que reseta os estados internos sem disparar requisições
+  function handleResetFilter() {
+    setFilterType('');
+    setSelectedUniversity('');
+    setCourses([]);
+    setSelectedCourse('');
+    setDisciplines([]);
+    setSelectedDiscipline('');
+    setClasses([]);
+    setSelectedClass('');
+    // Chama o callback do componente pai para limpar a listagem
+    onReset();
   }
 
   return (
@@ -177,9 +196,17 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
         )}
       </div>
 
-      <ButtonCRUD action="search" onClick={handleSearchClick}/>
+      <div className="flex gap-2">
+        <ButtonCRUD action="search" onClick={handleSearchClick} />
+        <button
+          onClick={handleResetFilter}
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+        >
+          Recarregar
+        </button>
+      </div>
     </div>
   );
 }
 
-export {FormsFilter, type FilterData};
+export { FormsFilter };
