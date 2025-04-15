@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import type { FilterData, FilterType } from './Forms/FormsFilterTypes';
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
@@ -182,4 +182,4 @@ function FormsFilter({ onSearch }: FormsFilterProps) {
   );
 }
 
-export { FormsFilter };
+export {FormsFilter, type FilterData};

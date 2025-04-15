@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
@@ -10,7 +10,7 @@ export interface Item {
 
 export interface FormsListProps {
   items: Item[];
-  entity: 'university' | 'course' | 'discipline';
+  entity: 'university' | 'course' | 'discipline' | 'class' | 'professor' | 'student';
   onEdit: (item: Item) => void;
   onDelete: (id: number | string) => void;
 }
@@ -25,23 +25,23 @@ function FormsList({ items, entity, onEdit, onDelete }: FormsListProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleDelete = async (id: number | string) => {
+  const handleDeleteAction = async (id: number | string) => {
     const confirmed = window.confirm("Tem certeza que deseja deletar?");
     if (!confirmed) return;
 
     let deletePromise;
     if (entity === 'university') {
-      // Rota para deletar universidade: DELETE com payload, enviando o id no campo "universityId"
       deletePromise = axios.delete('http://localhost:3000/academic-institution/university', {
         data: { universityId: id }
       });
     } else if (entity === 'course') {
-      // Rota para deletar curso: DELETE passando o id na URL
       deletePromise = axios.delete(`http://localhost:3000/academic-institution/course/${id}`);
     } else if (entity === 'discipline') {
-      // Rota para deletar disciplina: DELETE passando o id na URL
       deletePromise = axios.delete(`http://localhost:3000/academic-institution/discipline/${id}`);
+    } else if (entity === 'class') {
+      deletePromise = axios.delete(`http://localhost:3000/academic-institution/class/${id}`);
     }
+    // Para 'professor' e 'student' não há rotas de edição/exclusão via esse CRUD
 
     if (deletePromise) {
       toast.promise(deletePromise, {
@@ -55,36 +55,45 @@ function FormsList({ items, entity, onEdit, onDelete }: FormsListProps) {
   };
 
   return (
-    <div className="bg-[#181818] text-white p-4 rounded-md">
-      <h2 className="text-xl font-semibold mb-4">{entity} encontradas:</h2>
-      <ul>
-        {items.map((item) => {
-          const id = (item as any).id || (item as any)._id;
-          const name = item.name;
-          return (
-            <li
-              key={id}
-              className="bg-[#202020] flex flex-col sm:flex-row justify-between items-start sm:items-center rounded-md p-2  mb-2"
-            >
-              <span className="mb-2 sm:mb-0">{name}</span>
-              <div className="flex gap-2">
-                <ButtonCRUD
-                  action="update"
-                  onClick={() => onEdit({ id, name })}
-                  compact={isMobile}
-                  
-                />
-                <ButtonCRUD
-                  action="delete"
-                  onClick={() => handleDelete(id)}
-                  compact={isMobile}
-                />
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+      <div className="bg-[#181818] text-white p-4 rounded-md">
+        <h2 className="text-xl font-semibold mb-4">
+          {entity === 'student'
+              ? 'Alunos'
+              : entity === 'professor'
+                  ? 'Professores'
+                  : `${entity.charAt(0).toUpperCase() + entity.slice(1)}s`}{" "}
+          encontrad{entity === 'university' ? 'as' : 'os'}:
+        </h2>
+        <ul>
+          {items.map((item) => {
+            const id = (item as any).id || (item as any)._id;
+            const name = item.name;
+            return (
+                <li
+                    key={id}
+                    className="bg-[#202020] flex flex-col sm:flex-row justify-between items-start sm:items-center rounded-md p-2 mb-2"
+                >
+                  <span className="mb-2 sm:mb-0">{name}</span>
+                  {/* Somente para entidades editáveis, exibe os botões de edição e deleção */}
+                  {(entity !== "student" && entity !== "professor") && (
+                      <div className="flex gap-2">
+                        <ButtonCRUD
+                            action="update"
+                            onClick={() => onEdit({ id, name })}
+                            compact={isMobile}
+                        />
+                        <ButtonCRUD
+                            action="delete"
+                            onClick={() => handleDeleteAction(id)}
+                            compact={isMobile}
+                        />
+                      </div>
+                  )}
+                </li>
+            );
+          })}
+        </ul>
+      </div>
   );
 }
 
