@@ -59,20 +59,14 @@ function CRUD() {
           break;
         case "classes":
           if (filterData.universityId && filterData.courseId) {
-            data = await publicApi.getClasses<RawItem[]>(
-              filterData.universityId,
-              filterData.courseId
-            );
+            data = await publicApi.getClasses<RawItem[]>(filterData.universityId, filterData.courseId);
             setCurrentEntity("class");
           }
           break;
         case "professors":
           if (filterData.universityId) {
             if (filterData.courseId) {
-              data = await publicApi.getProfessors<RawItem[]>(
-                filterData.universityId,
-                filterData.courseId
-              );
+              data = await publicApi.getProfessors<RawItem[]>(filterData.universityId, filterData.courseId);
             } else {
               data = await publicApi.getProfessors<RawItem[]>(filterData.universityId);
             }
@@ -95,17 +89,14 @@ function CRUD() {
           break;
         case "students-course":
           if (filterData.universityId && filterData.courseId) {
-            data = await publicApi.getStudentsByCourse<RawItem[]>(
-              filterData.universityId,
-              filterData.courseId
-            );
+            data = await publicApi.getStudentsByCourse<RawItem[]>(filterData.universityId, filterData.courseId);
             setCurrentEntity("student");
           }
           break;
         default:
           console.error("Filtro inválido");
       }
-      // Garante que cada objeto tenha a propriedade "id"
+      // Mapeia os dados para garantir que cada objeto tenha uma chave 'id'
       const mappedData: Item[] = data.map((item, index) => ({
         id: item.id ?? item._id ?? index,
         name: item.name,
@@ -116,7 +107,9 @@ function CRUD() {
     }
   }
 
+  // O onSubmit do FormsCrud agora recebe a entidade selecionada junto com os dados.
   async function handleCreateOrUpdate(
+    entity: Entity,
     item:
       | UniversityData
       | CourseData
@@ -131,7 +124,7 @@ function CRUD() {
         | ProfessorData
         | ClassData
         | DisciplineData;
-      switch (currentEntity) {
+      switch (entity) {
         case "university":
           response = await academicApi.post<UniversityData>("university", item);
           break;
@@ -148,10 +141,10 @@ function CRUD() {
           response = await academicApi.post<ProfessorData>("professor", item);
           break;
         default:
-          console.error("Entidade não suportada para criação:", currentEntity);
+          console.error("Entidade não suportada para criação:", entity);
           return;
       }
-      // Garante que o objeto retornado possua um id, usando _id se necessário
+      // Utiliza o id retornado ou, se não houver, gera um id temporário.
       const newItem: Item = {
         id: response.id ?? response._id ?? new Date().getTime(),
         name: response.name,
@@ -183,11 +176,28 @@ function CRUD() {
             Sistema de Gerenciamento do SAEL
           </h1>
           <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
-          {currentEntity !== "student" && currentEntity !== "professor" && (
+          {/* Apenas entidades que podem ser criadas (professor, university, course, class, discipline) */}
+          {currentEntity !== "student" && currentEntity !== "professor" ? (
             <FormsCrud
-              onSubmit={handleCreateOrUpdate}
+              onSubmit={(entity, data) => {
+                console.log("Formulário submetido para:", entity, data);
+                handleCreateOrUpdate(entity, data);
+              }}
               initialData={editingItem || undefined}
             />
+          ) : (
+            // Para professor, mesmo que ele não renderize o formulário no CRUD (se for listado somente via filtro), você pode optar por renderizar um formulário separado.
+            <>
+              {currentEntity === "professor" && (
+                <FormsCrud
+                  onSubmit={(entity, data) => {
+                    console.log("Formulário submetido para:", entity, data);
+                    handleCreateOrUpdate(entity, data);
+                  }}
+                  initialData={editingItem || undefined}
+                />
+              )}
+            </>
           )}
           <FormsList
             entity={currentEntity}

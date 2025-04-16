@@ -16,12 +16,8 @@ export type EntityType = "university" | "course" | "class" | "professor" | "disc
 
 interface FormsCrudProps {
   onSubmit: (
-    item:
-      | UniversityData
-      | CourseData
-      | ProfessorData
-      | ClassData
-      | DisciplineData
+    entity: EntityType,
+    item: UniversityData | CourseData | ProfessorData | ClassData | DisciplineData
   ) => void;
   initialData?:
   | UniversityData
@@ -36,7 +32,7 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value as EntityType;
-    console.log("Entidade selecionada:", value);
+    console.log("Entidade selecionada no FormsCrud:", value);
     setSelectedEntity(value);
   };
 
@@ -60,7 +56,7 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
         <UniversityForm
           onSubmit={(data) => {
             console.log("UniversityForm onSubmit:", data);
-            onSubmit(data);
+            onSubmit("university", data);
           }}
           initialData={initialData as UniversityData | undefined}
         />
@@ -69,7 +65,7 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
         <CourseForm
           onSubmit={(data) => {
             console.log("CourseForm onSubmit:", data);
-            onSubmit(data);
+            onSubmit("course", data);
           }}
           initialData={initialData as CourseData | undefined}
         />
@@ -78,7 +74,7 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
         <ClassForm
           onSubmit={(data) => {
             console.log("ClassForm onSubmit:", data);
-            onSubmit(data);
+            onSubmit("class", data);
           }}
           initialData={initialData as ClassData | undefined}
         />
@@ -87,7 +83,7 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
         <ProfessorForm
           onSubmit={(data) => {
             console.log("ProfessorForm onSubmit:", data);
-            onSubmit(data);
+            onSubmit("professor", data);
           }}
           initialData={initialData as ProfessorData | undefined}
         />
@@ -96,7 +92,7 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
         <DisciplineForm
           onSubmit={(data) => {
             console.log("DisciplineForm onSubmit:", data);
-            onSubmit(data);
+            onSubmit("discipline", data);
           }}
           initialData={initialData as DisciplineData | undefined}
         />

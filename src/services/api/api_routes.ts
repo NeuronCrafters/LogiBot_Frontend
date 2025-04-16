@@ -23,7 +23,7 @@ export const ACADEMIC_ROUTES: Record<EntityType, { post: string; get: string; de
     delete: "/academic-institution/discipline",
   },
   professor: {
-    post: "/academic-institution/professor",
+    post: "/admin/professor",
     get: "/academic-institution/professor",
     delete: "/academic-institution/professor",
   },
