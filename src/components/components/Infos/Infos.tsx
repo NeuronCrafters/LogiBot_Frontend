@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { ButtonInfo } from "@/components/components/Button/ButtonInfo";

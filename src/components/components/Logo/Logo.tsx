@@ -1,4 +1,3 @@
-import React from "react";
 import logoSimples from "@/assets/logo.svg";
 import logoSAEL from "@/assets/logoSAEL.svg";
 
