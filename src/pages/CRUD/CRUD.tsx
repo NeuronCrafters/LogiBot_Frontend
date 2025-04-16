@@ -14,6 +14,12 @@ import {
   DisciplineData,
 } from "@/@types/FormsDataTypes";
 
+interface RawItem {
+  id?: string | number;
+  _id?: string | number;
+  name: string;
+}
+
 type Entity =
   | "university"
   | "course"
@@ -27,23 +33,23 @@ function CRUD() {
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [currentEntity, setCurrentEntity] = useState<Entity>("university");
 
-  async function handleSearch(filterData: FilterData) {
+  async function handleSearch(filterData: FilterData): Promise<void> {
     try {
-      let data: Item[] = [];
+      let data: RawItem[] = [];
       switch (filterData.filterType) {
         case "universities":
-          data = await publicApi.getInstitutions<Item[]>();
+          data = await publicApi.getInstitutions<RawItem[]>();
           setCurrentEntity("university");
           break;
         case "courses":
           if (filterData.universityId) {
-            data = await publicApi.getCourses<Item[]>(filterData.universityId);
+            data = await publicApi.getCourses<RawItem[]>(filterData.universityId);
             setCurrentEntity("course");
           }
           break;
         case "disciplines":
           if (filterData.universityId && filterData.courseId) {
-            data = await publicApi.getDisciplines<Item[]>(
+            data = await publicApi.getDisciplines<RawItem[]>(
               filterData.universityId,
               filterData.courseId
             );
@@ -52,7 +58,7 @@ function CRUD() {
           break;
         case "classes":
           if (filterData.universityId && filterData.courseId) {
-            data = await publicApi.getClasses<Item[]>(
+            data = await publicApi.getClasses<RawItem[]>(
               filterData.universityId,
               filterData.courseId
             );
@@ -62,12 +68,12 @@ function CRUD() {
         case "professors":
           if (filterData.universityId) {
             if (filterData.courseId) {
-              data = await publicApi.getProfessors<Item[]>(
+              data = await publicApi.getProfessors<RawItem[]>(
                 filterData.universityId,
                 filterData.courseId
               );
             } else {
-              data = await publicApi.getProfessors<Item[]>(filterData.universityId);
+              data = await publicApi.getProfessors<RawItem[]>(filterData.universityId);
             }
             setCurrentEntity("professor");
           }
@@ -78,7 +84,7 @@ function CRUD() {
             filterData.courseId &&
             filterData.disciplineId
           ) {
-            data = await publicApi.getStudentsByDiscipline<Item[]>(
+            data = await publicApi.getStudentsByDiscipline<RawItem[]>(
               filterData.universityId,
               filterData.courseId,
               filterData.disciplineId
@@ -88,7 +94,7 @@ function CRUD() {
           break;
         case "students-course":
           if (filterData.universityId && filterData.courseId) {
-            data = await publicApi.getStudentsByCourse<Item[]>(
+            data = await publicApi.getStudentsByCourse<RawItem[]>(
               filterData.universityId,
               filterData.courseId
             );
@@ -98,7 +104,12 @@ function CRUD() {
         default:
           console.error("Filtro inválido");
       }
-      setItems(data);
+
+      const mappedData: Item[] = data.map((item, index) => ({
+        id: item.id ?? item._id ?? index,
+        name: item.name,
+      }));
+      setItems(mappedData);
     } catch (error) {
       console.error("Erro ao buscar itens:", error);
     }
@@ -111,12 +122,14 @@ function CRUD() {
       | ProfessorData
       | ClassData
       | DisciplineData
-  ) {
+  ): void {
     const newId = item.id !== undefined ? item.id : new Date().getTime();
     const newItem: Item = { id: newId, name: item.name };
     if (items.some((it) => it.id === newItem.id)) {
       setItems((prevItems) =>
-        prevItems.map((it) => (it.id === newItem.id ? { ...it, name: newItem.name } : it))
+        prevItems.map((it) =>
+          it.id === newItem.id ? { ...it, name: newItem.name } : it
+        )
       );
       setEditingItem(null);
     } else {
@@ -124,15 +137,15 @@ function CRUD() {
     }
   }
 
-  function handleEdit(item: Item) {
+  function handleEdit(item: Item): void {
     setEditingItem(item);
   }
 
-  function handleDelete(id: string | number) {
+  function handleDelete(id: string | number): void {
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));
   }
 
-  function handleResetList() {
+  function handleResetList(): void {
     setItems([]);
   }
 
