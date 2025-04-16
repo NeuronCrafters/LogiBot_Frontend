@@ -1,7 +1,7 @@
+// apiClient.ts
 import { api } from "@/services/api/api";
 import { ACADEMIC_ROUTES, PUBLIC_ROUTES, RASA_ROUTES, EntityType } from "./api/api_routes";
 
-// Funções genéricas com generics – evita o uso de any
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
   return response.data;
@@ -17,25 +17,23 @@ const deleteRequest = async <T>(url: string): Promise<T> => {
   return response.data;
 };
 
-// API para rotas acadêmicas (protegidas)
 export const academicApi = {
   async post<T>(entity: EntityType, data: object): Promise<T> {
-    const url: string = ACADEMIC_ROUTES[entity].post;
+    const url = ACADEMIC_ROUTES[entity].post;
     return postRequest<T>(url, data);
   },
   async get<T>(entity: EntityType, id?: string): Promise<T> {
-    const baseUrl: string = ACADEMIC_ROUTES[entity].get;
+    const baseUrl = ACADEMIC_ROUTES[entity].get;
     const url = id ? `${baseUrl}/${id}` : baseUrl;
     return getRequest<T>(url);
   },
   async delete<T>(entity: EntityType, id: string): Promise<T> {
-    const baseUrl: string = ACADEMIC_ROUTES[entity].delete;
+    const baseUrl = ACADEMIC_ROUTES[entity].delete;
     const url = `${baseUrl}/${id}`;
     return deleteRequest<T>(url);
   },
 };
 
-// API para rotas públicas
 export const publicApi = {
   async getInstitutions<T>(): Promise<T> {
     return getRequest<T>(PUBLIC_ROUTES.institutions);
@@ -66,7 +64,6 @@ export const publicApi = {
   },
 };
 
-// API para rotas do Rasa 
 export const rasaApi = {
   async sendMessage<T>(message: string): Promise<T> {
     return postRequest<T>(RASA_ROUTES.talk, { message });

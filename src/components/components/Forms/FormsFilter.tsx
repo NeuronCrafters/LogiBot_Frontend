@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { publicApi } from "@/services/apiClient";
-import type { FilterData, FilterType } from "./Forms/FormsFilterTypes";
+import type { FilterData, FilterType } from "../../../@types/FormsFilterTypes";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
 interface FormsFilterProps {

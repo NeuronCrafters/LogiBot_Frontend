@@ -4,10 +4,23 @@ import { FormsFilter } from "../../components/components/Forms/FormsFilter";
 import { FormsList } from "../../components/components/Forms/FormsList";
 import type { Item } from "../../components/components/Forms/FormsList";
 import { FormsCrud } from "../../components/components/Forms/FormsCrud";
-import type { FilterData } from "../../components/components/Forms/FormsFilter";
+import type { FilterData } from "../../@types/FormsFilterTypes";
 import { publicApi } from "@/services/apiClient";
+import {
+  UniversityData,
+  CourseData,
+  ProfessorData,
+  ClassData,
+  DisciplineData,
+} from "@/@types/FormsDataTypes";
 
-type Entity = "university" | "course" | "discipline" | "class" | "professor" | "student";
+type Entity =
+  | "university"
+  | "course"
+  | "discipline"
+  | "class"
+  | "professor"
+  | "student";
 
 function CRUD() {
   const [items, setItems] = useState<Item[]>([]);
@@ -91,14 +104,23 @@ function CRUD() {
     }
   }
 
-  function handleCreateOrUpdate(item: Item) {
-    if (item.id && items.some((it) => it.id === item.id)) {
+  function handleCreateOrUpdate(
+    item:
+      | UniversityData
+      | CourseData
+      | ProfessorData
+      | ClassData
+      | DisciplineData
+  ) {
+    const newId = item.id !== undefined ? item.id : new Date().getTime();
+    const newItem: Item = { id: newId, name: item.name };
+    if (items.some((it) => it.id === newItem.id)) {
       setItems((prevItems) =>
-        prevItems.map((it) => (it.id === item.id ? { ...it, name: item.name } : it))
+        prevItems.map((it) => (it.id === newItem.id ? { ...it, name: newItem.name } : it))
       );
       setEditingItem(null);
     } else {
-      setItems((prevItems) => [...prevItems, item]);
+      setItems((prevItems) => [...prevItems, newItem]);
     }
   }
 
@@ -122,7 +144,6 @@ function CRUD() {
           <h1 className="text-2xl font-bold mb-4 text-white font-Montserrat">
             Sistema de Gerenciamento do SAEL
           </h1>
-          {/* O FormsFilter recebe as funções onSearch e onReset */}
           <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
           {currentEntity !== "student" && currentEntity !== "professor" && (
             <FormsCrud

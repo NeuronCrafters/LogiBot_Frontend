@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { publicApi } from "@/services/apiClient";
 
 export interface CourseData {
+  id?: string | number;
   name: string;
   universityId: string;
 }
 
-export interface University {
+interface University {
   _id: string;
   name: string;
 }
@@ -18,18 +19,24 @@ export interface CourseFormProps {
 
 function CourseForm({ onSubmit, initialData }: CourseFormProps) {
   const [name, setName] = useState<string>(initialData ? initialData.name : "");
-  const [universityId, setUniversityId] = useState<string>(initialData ? initialData.universityId : "");
+  const [universityId, setUniversityId] = useState<string>(
+    initialData ? initialData.universityId : ""
+  );
   const [universities, setUniversities] = useState<University[]>([]);
 
   useEffect(() => {
-    publicApi.getInstitutions<University[]>()
+    publicApi
+      .getInstitutions<University[]>()
       .then((data) => setUniversities(data))
-      .catch(err => console.error("Erro ao carregar universidades:", err));
+      .catch((err) =>
+        console.error("Erro ao carregar universidades:", err)
+      );
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !universityId) return;
+    // Chama o onSubmit com os dados do curso. O campo "id" é opcional.
     onSubmit({ name: name.trim(), universityId });
     setName("");
     setUniversityId("");
@@ -53,11 +60,16 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
         className="p-2 rounded w-full bg-[#202020] text-white"
       >
         <option value="">Selecione a universidade</option>
-        {universities.map(uni => (
-          <option key={uni._id} value={uni._id}>{uni.name}</option>
+        {universities.map((uni) => (
+          <option key={uni._id} value={uni._id}>
+            {uni.name}
+          </option>
         ))}
       </select>
-      <button type="submit" className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+      <button
+        type="submit"
+        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
         {initialData ? "Atualizar" : "Cadastrar"}
       </button>
     </form>
