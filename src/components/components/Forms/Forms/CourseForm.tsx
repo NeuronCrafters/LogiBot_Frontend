@@ -1,52 +1,76 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
-interface CourseFormProps {
-  onSubmit: (item: any) => void;
-  initialData?: any;
+export interface CourseData {
+  name: string;
+  universityId: string;
 }
 
-const CourseForm: React.FC<CourseFormProps> = ({ onSubmit, initialData }) => {
-  const [name, setName] = useState(initialData?.name || "");
-  const [universities, setUniversities] = useState<{ _id: string; name: string }[]>([]);
-  const [selectedUniversity, setSelectedUniversity] = useState(initialData?.universityId || "");
+interface University {
+  _id: string;
+  name: string;
+}
+
+interface CourseFormProps {
+  onSubmit: (data: CourseData) => void;
+  initialData?: CourseData;
+}
+
+function CourseForm({ onSubmit, initialData }: CourseFormProps) {
+  const [name, setName] = useState<string>(initialData ? initialData.name : "");
+  const [universityId, setUniversityId] = useState<string>(initialData ? initialData.universityId : "");
+  const [universities, setUniversities] = useState<University[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/academic-institution/university")
-      .then(response => setUniversities(response.data))
-      .catch(error => console.error("Erro ao carregar universidades", error));
+    axios.get("http://localhost:3000/public/institutions")
+      .then(response => {
+        const data = response.data.map((uni: any) => ({
+          _id: uni._id,
+          name: uni.name
+        }));
+        setUniversities(data);
+      })
+      .catch(err => console.error("Erro ao carregar universidades:", err));
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:3000/academic-institution/course", { name, universityId: selectedUniversity });
-      setName("");
-      setSelectedUniversity("");
-      onSubmit(response.data);
-    } catch (error) {
-      console.error("Erro ao cadastrar curso:", error);
-    }
-  }
+    if (!name.trim() || !universityId) return;
+    onSubmit({ name: name.trim(), universityId });
+    setName("");
+    setUniversityId("");
+  };
 
   return (
     <form onSubmit={handleSubmit} className="mt-4">
-      <input type="text" placeholder="Nome do Curso" value={name} onChange={(e) => setName(e.target.value)}
-        className="border p-2 rounded w-full bg-[#141414] text-white" />
-
-      <label className="block mt-2">Universidade:</label>
-      <select value={selectedUniversity} onChange={(e) => setSelectedUniversity(e.target.value)}
-        className="border p-2 rounded w-full bg-[#141414] text-white">
+      <label className="block text-white mb-2">Nome do Curso:</label>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        className="p-2 rounded w-full bg-[#202020] text-white"
+      />
+      <label className="block text-white mt-4 mb-2">Universidade:</label>
+      <select
+        value={universityId}
+        onChange={(e) => setUniversityId(e.target.value)}
+        required
+        className="p-2 rounded w-full bg-[#202020] text-white"
+      >
         <option value="">Selecione a universidade</option>
-        {universities.map((uni) => (
+        {universities.map(uni => (
           <option key={uni._id} value={uni._id}>{uni.name}</option>
         ))}
       </select>
-
-      <ButtonCRUD action="create" onClick={handleSubmit} />
+      <button
+        type="submit"
+        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        {initialData ? "Atualizar" : "Cadastrar"}
+      </button>
     </form>
   );
-};
+}
 
-export { CourseForm };
+export { CourseForm }

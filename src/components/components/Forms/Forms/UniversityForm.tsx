@@ -1,33 +1,43 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
-interface UniversityFormProps {
-  onSubmit: (item: any) => void;
-  initialData?: any;
+export interface UniversityData {
+  name: string;
 }
 
-const UniversityForm: React.FC<UniversityFormProps> = ({ onSubmit, initialData }) => {
-  const [name, setName] = useState(initialData?.name || "");
+interface UniversityFormProps {
+  onSubmit: (data: UniversityData) => void;
+  initialData?: UniversityData;
+}
 
-  async function handleSubmit(e: React.FormEvent) {
+function UniversityForm({ onSubmit, initialData }: UniversityFormProps) {
+  const [name, setName] = useState<string>(initialData ? initialData.name : "");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:3000/academic-institution/university", { name });
-      setName("");
-      onSubmit(response.data);
-    } catch (error) {
-      console.error("Erro ao cadastrar universidade:", error);
-    }
-  }
+    if (!name.trim()) return;
+    onSubmit({ name: name.trim() });
+    setName("");
+  };
 
   return (
     <form onSubmit={handleSubmit} className="mt-4">
-      <input type="text" placeholder="Nome da Universidade" value={name} onChange={(e) => setName(e.target.value)}
-        className="border p-2 rounded w-full bg-[#141414] text-white" />
-      <ButtonCRUD action="create" onClick={handleSubmit} />
+      <label className="block text-white mb-2">Nome da Universidade:</label>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        className="p-2 rounded w-full bg-[#202020] text-white"
+      />
+      <button
+        type="submit"
+        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        {initialData ? "Atualizar" : "Cadastrar"}
+      </button>
     </form>
   );
-};
+}
 
-export { UniversityForm };
+export { UniversityForm }

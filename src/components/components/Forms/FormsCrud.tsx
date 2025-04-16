@@ -1,15 +1,15 @@
 import React from "react";
-import { UniversityForm } from "./Forms/UniversityForm";
-import { CourseForm } from "./Forms/CourseForm";
-import { ProfessorForm } from "./Forms/ProfessorForm";
-import { ClassForm } from "./Forms/ClassForm";
-import { DisciplineForm } from "./Forms/DisciplineForm";
+import { UniversityForm, UniversityData } from "./Forms/UniversityForm";
+import { CourseForm, CourseData } from "./Forms/CourseForm";
+import { ProfessorForm, ProfessorData } from "./Forms/ProfessorForm";
+import { ClassForm, ClassData } from "./Forms/ClassForm";
+import { DisciplineForm, DisciplineData } from "./Forms/DisciplineForm";
 
 export type EntityType = "university" | "course" | "class" | "professor" | "discipline";
 
 interface FormsCrudProps {
-  onSubmit: (item: any) => void;
-  initialData?: any;
+  onSubmit: (item: UniversityData | CourseData | ProfessorData | ClassData | DisciplineData) => void;
+  initialData?: UniversityData | CourseData | ProfessorData | ClassData | DisciplineData;
 }
 
 const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
@@ -32,11 +32,36 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
         <option value="discipline">Disciplina</option>
       </select>
 
-      {selectedEntity === "university" && <UniversityForm onSubmit={onSubmit} initialData={initialData} />}
-      {selectedEntity === "course" && <CourseForm onSubmit={onSubmit} initialData={initialData} />}
-      {selectedEntity === "professor" && <ProfessorForm onSubmit={onSubmit} initialData={initialData} />}
-      {selectedEntity === "class" && <ClassForm onSubmit={onSubmit} initialData={initialData} />}
-      {selectedEntity === "discipline" && <DisciplineForm onSubmit={onSubmit} initialData={initialData} />}
+      {selectedEntity === "university" && (
+        <UniversityForm
+          onSubmit={onSubmit}
+          initialData={initialData as UniversityData | undefined}
+        />
+      )}
+      {selectedEntity === "course" && (
+        <CourseForm
+          onSubmit={onSubmit}
+          initialData={initialData as CourseData | undefined}
+        />
+      )}
+      {selectedEntity === "class" && (
+        <ClassForm
+          onSubmit={onSubmit}
+          initialData={initialData as ClassData | undefined}
+        />
+      )}
+      {selectedEntity === "professor" && (
+        <ProfessorForm
+          onSubmit={onSubmit}
+          initialData={initialData as ProfessorData | undefined}
+        />
+      )}
+      {selectedEntity === "discipline" && (
+        <DisciplineForm
+          onSubmit={onSubmit}
+          initialData={initialData as DisciplineData | undefined}
+        />
+      )}
     </div>
   );
 };

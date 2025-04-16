@@ -1,72 +1,112 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
-interface ClassFormProps {
-  onSubmit: (item: any) => void;
-  initialData?: any;
+export interface ClassData {
+  name: string;
+  courseId: string;
 }
 
-const ClassForm: React.FC<ClassFormProps> = ({ onSubmit, initialData }) => {
-  const [name, setName] = useState(initialData?.name || "");
-  const [universities, setUniversities] = useState<{ _id: string; name: string }[]>([]);
-  const [selectedUniversity, setSelectedUniversity] = useState(initialData?.universityId || "");
-  const [courses, setCourses] = useState<{ _id: string; name: string }[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState(initialData?.courseId || "");
+interface University {
+  _id: string;
+  name: string;
+}
+
+interface Course {
+  _id: string;
+  name: string;
+}
+
+interface ClassFormProps {
+  onSubmit: (data: ClassData) => void;
+  initialData?: ClassData;
+}
+
+function ClassForm({ onSubmit, initialData }: ClassFormProps) {
+  const [name, setName] = useState<string>(initialData ? initialData.name : "");
+  const [selectedUniversity, setSelectedUniversity] = useState<string>("");
+  const [selectedCourse, setSelectedCourse] = useState<string>(initialData ? initialData.courseId : "");
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/academic-institution/university")
-      .then(response => setUniversities(response.data))
-      .catch(error => console.error("Erro ao carregar universidades", error));
+    axios.get("http://localhost:3000/public/institutions")
+      .then(response => {
+        const data = response.data.map((uni: any) => ({
+          _id: uni._id,
+          name: uni.name
+        }));
+        setUniversities(data);
+      })
+      .catch(err => console.error("Erro ao carregar universidades:", err));
   }, []);
 
   useEffect(() => {
     if (selectedUniversity) {
-      axios.get(`http://localhost:3000/academic-institution/course/${selectedUniversity}`)
+      axios.get(`http://localhost:3000/public/courses/${selectedUniversity}`)
         .then(response => setCourses(response.data))
-        .catch(error => console.error("Erro ao carregar cursos", error));
+        .catch(err => console.error("Erro ao carregar cursos:", err));
+    } else {
+      setCourses([]);
+      setSelectedCourse("");
     }
   }, [selectedUniversity]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:3000/academic-institution/class", { name, courseId: selectedCourse });
-      setName("");
-      setSelectedUniversity("");
-      setSelectedCourse("");
-      onSubmit(response.data);
-    } catch (error) {
-      console.error("Erro ao cadastrar turma:", error);
-    }
-  }
+    if (!name.trim() || !selectedCourse) return;
+    onSubmit({ name: name.trim(), courseId: selectedCourse });
+    setName("");
+    setSelectedUniversity("");
+    setSelectedCourse("");
+  };
 
   return (
     <form onSubmit={handleSubmit} className="mt-4">
-      <input type="text" placeholder="Nome da Turma" value={name} onChange={(e) => setName(e.target.value)}
-        className="border p-2 rounded w-full bg-[#141414] text-white" />
-
-      <label className="block mt-2">Universidade:</label>
-      <select value={selectedUniversity} onChange={(e) => setSelectedUniversity(e.target.value)}
-        className="border p-2 rounded w-full bg-[#141414] text-white">
+      <label className="block text-white mb-2">Nome da Turma:</label>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        className="p-2 rounded w-full bg-[#202020] text-white"
+      />
+      <label className="block text-white mt-4 mb-2">Universidade:</label>
+      <select
+        value={selectedUniversity}
+        onChange={(e) => setSelectedUniversity(e.target.value)}
+        required
+        className="p-2 rounded w-full bg-[#202020] text-white"
+      >
         <option value="">Selecione a universidade</option>
-        {universities.map((uni) => (
+        {universities.map(uni => (
           <option key={uni._id} value={uni._id}>{uni.name}</option>
         ))}
       </select>
-
-      <label className="block mt-2">Curso:</label>
-      <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}
-        className="border p-2 rounded w-full bg-[#141414] text-white" disabled={!selectedUniversity}>
-        <option value="">Selecione o curso</option>
-        {courses.map((course) => (
-          <option key={course._id} value={course._id}>{course.name}</option>
-        ))}
-      </select>
-
-      <ButtonCRUD action="create" onClick={handleSubmit} />
+      {selectedUniversity && (
+        <>
+          <label className="block text-white mt-4 mb-2">Curso:</label>
+          <select
+            value={selectedCourse}
+            onChange={(e) => setSelectedCourse(e.target.value)}
+            required
+            className="p-2 rounded w-full bg-[#202020] text-white"
+          >
+            <option value="">Selecione o curso</option>
+            {courses.map(course => (
+              <option key={course._id} value={course._id}>{course.name}</option>
+            ))}
+          </select>
+        </>
+      )}
+      <button
+        type="submit"
+        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        {initialData ? "Atualizar" : "Cadastrar"}
+      </button>
     </form>
   );
-};
+}
+
 
 export { ClassForm };
