@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
+import { academicApi } from "@/services/apiClient";
 
 export interface Item {
-  id: number | string;
+  id: string | number;
   name: string;
 }
 
@@ -11,7 +12,7 @@ export interface FormsListProps {
   items: Item[];
   entity: "university" | "course" | "discipline" | "class" | "professor" | "student";
   onEdit: (item: Item) => void;
-  onDelete: (id: number | string) => void;
+  onDelete: (id: string | number) => void;
 }
 
 function FormsList({ items, entity, onEdit, onDelete }: FormsListProps) {
@@ -24,47 +25,26 @@ function FormsList({ items, entity, onEdit, onDelete }: FormsListProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleDeleteAction = async (id: number | string) => {
+  const handleDeleteAction = async (id: string | number) => {
     const confirmed = window.confirm("Tem certeza que deseja deletar?");
     if (!confirmed) return;
 
-    let deletePromise;
-    if (entity === "university") {
-      deletePromise = fetch("http://localhost:3000/academic-institution/university", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ universityId: id }),
-        credentials: "include"
-      });
-    } else if (entity === "course") {
-      deletePromise = fetch(`http://localhost:3000/academic-institution/course/${id}`, {
-        method: "DELETE",
-        credentials: "include"
-      });
-    } else if (entity === "discipline") {
-      deletePromise = fetch(`http://localhost:3000/academic-institution/discipline/${id}`, {
-        method: "DELETE",
-        credentials: "include"
-      });
-    } else if (entity === "class") {
-      deletePromise = fetch(`http://localhost:3000/academic-institution/class/${id}`, {
-        method: "DELETE",
-        credentials: "include"
-      });
-    }
-    // Professores e alunos podem ter outro fluxo se necessário
-
-    if (deletePromise) {
-      toast.promise(
-        deletePromise,
-        {
-          loading: "Deletando...",
-          success: "Item deletado!",
-          error: "Erro ao deletar item."
-        }
-      ).then(() => {
+    if (
+      entity === "university" ||
+      entity === "course" ||
+      entity === "discipline" ||
+      entity === "class"
+    ) {
+      try {
+        await academicApi.delete(entity, id.toString());
+        toast.success("Item deletado!");
         onDelete(id);
-      });
+      } catch (error) {
+        toast.error("Erro ao deletar item.");
+        console.error("Erro ao deletar item:", error);
+      }
+    } else {
+      onDelete(id);
     }
   };
 
@@ -79,21 +59,28 @@ function FormsList({ items, entity, onEdit, onDelete }: FormsListProps) {
         encontrad{entity === "university" ? "as" : "os"}:
       </h2>
       <ul>
-        {items.map((item) => {
-          const id = item.id;
-          const name = item.name;
-          return (
-            <li key={id} className="bg-[#202020] flex flex-col sm:flex-row justify-between items-start sm:items-center rounded-md p-2 mb-2">
-              <span className="mb-2 sm:mb-0">{name}</span>
-              {(entity !== "student" && entity !== "professor") && (
-                <div className="flex gap-2">
-                  <ButtonCRUD action="update" onClick={() => onEdit({ id, name })} compact={isMobile} />
-                  <ButtonCRUD action="delete" onClick={() => handleDeleteAction(id)} compact={isMobile} />
-                </div>
-              )}
-            </li>
-          );
-        })}
+        {items.map((item) => (
+          <li
+            key={item.id}
+            className="bg-[#202020] flex flex-col sm:flex-row justify-between items-start sm:items-center rounded-md p-2 mb-2"
+          >
+            <span className="mb-2 sm:mb-0">{item.name}</span>
+            {(entity !== "student" && entity !== "professor") && (
+              <div className="flex gap-2">
+                <ButtonCRUD
+                  action="update"
+                  onClick={() => onEdit(item)}
+                  compact={isMobile}
+                />
+                <ButtonCRUD
+                  action="delete"
+                  onClick={() => handleDeleteAction(item.id)}
+                  compact={isMobile}
+                />
+              </div>
+            )}
+          </li>
+        ))}
       </ul>
     </div>
   );
