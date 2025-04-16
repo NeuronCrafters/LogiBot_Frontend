@@ -17,9 +17,7 @@ export function CRUDModal({ isOpen, onClose, type, title, children, onConfirm }:
       <DialogContent className="w-[672px] h-[450px] bg-[#2a2a2a] text-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center">
           <DialogTitle className="text-lg font-bold">
-            {type === "create" && "Criar Novo Item"}
-            {type === "update" && "Atualizar Item"}
-            {type === "delete" && "Confirmar Exclusão"}
+            {type === "delete" ? "Confirmar Exclusão" : title}
           </DialogTitle>
           <DialogClose asChild>
             <Button onClick={onClose} className="text-white">
@@ -27,7 +25,6 @@ export function CRUDModal({ isOpen, onClose, type, title, children, onConfirm }:
             </Button>
           </DialogClose>
         </div>
-
         <DialogDescription className="mt-4">
           {type === "delete" ? (
             <div className="text-center">
@@ -38,7 +35,6 @@ export function CRUDModal({ isOpen, onClose, type, title, children, onConfirm }:
             children
           )}
         </DialogDescription>
-
         {type === "delete" && (
           <div className="flex justify-end gap-4 mt-6">
             <Button variant="outline" onClick={onClose}>

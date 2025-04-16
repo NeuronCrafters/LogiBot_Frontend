@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 export type MetricOption = "correct" | "wrong" | "usage" | "sessions";
 
 const options: { label: string; value: MetricOption }[] = [

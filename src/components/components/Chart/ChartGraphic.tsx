@@ -1,37 +1,14 @@
-// src/components/ChartGraphic.tsx
 import { useEffect, useRef, useState } from "react";
+import { api } from "@/services/api/api";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { api } from "@/services/api/api";
 import { toPng } from "html-to-image";
 import { downloadCSV } from "@/lib/downloadCSV";
-import { MetricOption } from "./MetricCheckboxSelector";
+import { format } from "date-fns";
 
-// Definindo as cores para cada métrica
-const metricsColors: Record<string, string> = {
-  correct: "#4ade80",
-  wrong: "#f87171",
-  usage: "#60a5fa",
-  sessions: "#fbbf24",
-};
-
-export interface ChartGraphicsProps {
-  type: "course" | "class" | "discipline" | "student";
-  id: string;
-  metrics?: MetricOption[];
-}
-
-interface UserAnalysisLog {
-  name: string;
-  totalCorrectAnswers: number;
-  totalWrongAnswers: number;
-  totalUsageTime: number;
-  sessions?: any[];
-}
-
-interface ChartData {
+// Definição para os dados do gráfico
+export interface ChartData {
   name: string;
   correct: number;
   wrong: number;
@@ -39,7 +16,19 @@ interface ChartData {
   sessions: number;
 }
 
-// Helper para converter segundos em um formato amigável
+interface ChartGraphicProps {
+  type: "course" | "class" | "discipline" | "student";
+  id: string;
+  metrics: ("correct" | "wrong" | "usage" | "sessions")[];
+}
+
+const metricsColors: Record<string, string> = {
+  correct: "#4ade80",
+  wrong: "#f87171",
+  usage: "#60a5fa",
+  sessions: "#fbbf24",
+};
+
 function formatTimeUsage(seconds: number): string {
   if (seconds < 60) return `${seconds} seg`;
   const mins = seconds / 60;
@@ -56,60 +45,43 @@ function formatTimeUsage(seconds: number): string {
   return `${years.toFixed(1)} anos`;
 }
 
-export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage", "sessions"] }: ChartGraphicsProps) {
+function ChartGraphic({ type, id, metrics }: ChartGraphicProps) {
   const [data, setData] = useState<ChartData[]>([]);
-  const [loading, setLoading] = useState(true);
-  // Filtros de data (que já são passados para a API, supondo que o back-end use aggregation para filtrar sessions)
+  const [loading, setLoading] = useState<boolean>(true);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchLogs = async () => {
+    async function fetchData() {
       try {
         setLoading(true);
-        // Envia query params para que o back-end filtre as sessões conforme necessário
-        const params: Record<string, string> = {};
-        if (startDate) params.startDate = startDate;
-        if (endDate) params.endDate = endDate;
+
         const response = await api.get(`/logs/${type}/${id}`, {
           withCredentials: true,
-          params,
+          params: { startDate, endDate },
         });
-        const logsArray: UserAnalysisLog[] = Array.isArray(response.data)
-          ? response.data
-          : response.data.logs || [];
-        const formatted: ChartData[] = logsArray.map((log) => ({
-          name: log.name,
-          correct: log.totalCorrectAnswers ?? 0,
-          wrong: log.totalWrongAnswers ?? 0,
-          usage: Math.floor(log.totalUsageTime ?? 0),
-          sessions: log.sessions ? log.sessions.length : 0,
-        }));
-        setData(formatted);
+        const logsArray: ChartData[] = response.data.logs || response.data;
+        setData(logsArray);
       } catch (error) {
         console.error("Erro ao buscar dados de logs:", error);
         setData([]);
       } finally {
         setLoading(false);
       }
-    };
-    fetchLogs();
+    }
+    fetchData();
   }, [type, id, startDate, endDate]);
 
   const handleExportCSV = () => {
-    // Cria as colunas a partir das métricas selecionadas
-    const rows = data.map((item) => {
-      const row: any = { Nome: item.name };
-      metrics.forEach((metric) => {
-        if (metric === "correct") row["Questões Certas"] = item.correct;
-        if (metric === "wrong") row["Questões Erradas"] = item.wrong;
-        if (metric === "usage") row["Tempo de Uso (s)"] = item.usage;
-        if (metric === "sessions") row["Sessões"] = item.sessions;
-      });
-      return row;
-    });
-    downloadCSV(`interacoes_${type}_${format(new Date(), "yyyyMMdd_HHmmss")}.csv`, rows);
+    const rows = data.map((item) => ({
+      Nome: item.name,
+      "Questões Certas": item.correct,
+      "Questões Erradas": item.wrong,
+      "Tempo de Uso (s)": item.usage,
+      Sessões: item.sessions,
+    }));
+    downloadCSV(`grafico_${type}_${format(new Date(), "yyyyMMdd_HHmmss")}.csv`, rows);
   };
 
   const handleExportPNG = () => {
@@ -121,15 +93,15 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
         link.href = dataUrl;
         link.click();
       })
-      .catch((err) => {
-        console.error("Erro ao exportar imagem:", err);
-      });
+      .catch((err) => console.error("Erro ao exportar imagem:", err));
   };
 
   return (
     <Card className="bg-[#1F1F1F] text-white">
       <CardHeader>
-        <CardTitle className="text-center text-2xl font-bold mb-4">Gráfico de Interações</CardTitle>
+        <CardTitle className="text-center text-2xl font-bold mb-4">
+          Gráfico de Interações
+        </CardTitle>
         <div className="flex flex-wrap justify-center gap-4 mt-2">
           <input
             type="date"
@@ -144,8 +116,12 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
-          <Button variant="outline" onClick={handleExportCSV}>Exportar CSV</Button>
-          <Button variant="outline" onClick={handleExportPNG}>Exportar PNG</Button>
+          <Button variant="outline" onClick={handleExportCSV}>
+            Exportar CSV
+          </Button>
+          <Button variant="outline" onClick={handleExportPNG}>
+            Exportar PNG
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -167,7 +143,11 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
                     return value.toString();
                   }}
                   labelStyle={{ color: "#fff" }}
-                  contentStyle={{ backgroundColor: "#222", borderRadius: "8px", border: "none" }}
+                  contentStyle={{
+                    backgroundColor: "#222",
+                    borderRadius: "8px",
+                    border: "none",
+                  }}
                   cursor={{ fill: "#333" }}
                 />
                 <Legend wrapperStyle={{ color: "#fff" }} />
@@ -191,3 +171,5 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
     </Card>
   );
 }
+
+export { ChartGraphic };
