@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { publicApi } from "@/services/apiClient";
 
 export interface DisciplineData {
   name: string;
@@ -8,27 +8,27 @@ export interface DisciplineData {
   professorIds: string[];
 }
 
-interface University {
+export interface University {
   _id: string;
   name: string;
 }
 
-interface Course {
+export interface Course {
   _id: string;
   name: string;
 }
 
-interface ClassItem {
+export interface ClassItem {
   _id: string;
   name: string;
 }
 
-interface Professor {
+export interface Professor {
   _id: string;
   name: string;
 }
 
-interface DisciplineFormProps {
+export interface DisciplineFormProps {
   onSubmit: (data: DisciplineData) => void;
   initialData?: DisciplineData;
 }
@@ -46,21 +46,15 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
   const [professors, setProfessors] = useState<Professor[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/public/institutions")
-      .then(response => {
-        const data = response.data.map((uni: any) => ({
-          _id: uni._id,
-          name: uni.name
-        }));
-        setUniversities(data);
-      })
+    publicApi.getInstitutions<University[]>()
+      .then((data) => setUniversities(data))
       .catch(err => console.error("Erro ao carregar universidades:", err));
   }, []);
 
   useEffect(() => {
     if (selectedUniversity) {
-      axios.get(`http://localhost:3000/public/courses/${selectedUniversity}`)
-        .then(response => setCourses(response.data))
+      publicApi.getCourses<Course[]>(selectedUniversity)
+        .then((data) => setCourses(data))
         .catch(err => console.error("Erro ao carregar cursos:", err));
     } else {
       setCourses([]);
@@ -70,12 +64,11 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
 
   useEffect(() => {
     if (selectedUniversity && selectedCourse) {
-      axios.get(`http://localhost:3000/public/classes/${selectedUniversity}/${selectedCourse}`)
-        .then(response => setClasses(response.data))
+      publicApi.getClasses<ClassItem[]>(selectedUniversity, selectedCourse)
+        .then((data) => setClasses(data))
         .catch(err => console.error("Erro ao carregar turmas:", err));
-
-      axios.get(`http://localhost:3000/public/professors/${selectedUniversity}/${selectedCourse}`)
-        .then(response => setProfessors(response.data))
+      publicApi.getProfessors<Professor[]>(selectedUniversity, selectedCourse)
+        .then((data) => setProfessors(data))
         .catch(err => console.error("Erro ao carregar professores:", err));
     } else {
       setClasses([]);
@@ -121,7 +114,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
         required
         className="p-2 rounded w-full bg-[#202020] text-white"
       />
-
       <label className="block text-white mt-4 mb-2">Universidade:</label>
       <select
         value={selectedUniversity}
@@ -134,7 +126,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
           <option key={uni._id} value={uni._id}>{uni.name}</option>
         ))}
       </select>
-
       {selectedUniversity && (
         <>
           <label className="block text-white mt-4 mb-2">Curso:</label>
@@ -151,7 +142,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
           </select>
         </>
       )}
-
       {selectedCourse && (
         <>
           <label className="block text-white mt-4 mb-2">Turmas (Selecione uma ou mais):</label>
@@ -165,7 +155,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               <option key={cls._id} value={cls._id}>{cls.name}</option>
             ))}
           </select>
-
           <label className="block text-white mt-4 mb-2">Professores (Selecione um ou mais):</label>
           <select
             multiple
@@ -179,16 +168,11 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
           </select>
         </>
       )}
-
-      <button
-        type="submit"
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
+      <button type="submit" className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
         {initialData ? "Atualizar" : "Cadastrar"}
       </button>
     </form>
   );
 }
-
 
 export { DisciplineForm };

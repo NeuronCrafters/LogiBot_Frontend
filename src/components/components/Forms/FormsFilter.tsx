@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import type { FilterData, FilterType } from './Forms/FormsFilterTypes';
+import { useState, useEffect } from "react";
+import { publicApi } from "@/services/apiClient";
+import type { FilterData, FilterType } from "./Forms/FormsFilterTypes";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
 interface FormsFilterProps {
@@ -8,27 +8,40 @@ interface FormsFilterProps {
   onReset: () => void;
 }
 
+interface Institution {
+  _id: string;
+  name: string;
+}
+
+interface Course {
+  _id: string;
+  name: string;
+}
+
+interface Discipline {
+  _id: string;
+  name: string;
+}
+
+interface ClassDataItem {
+  _id: string;
+  name: string;
+}
+
 function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   const [filterType, setFilterType] = useState<FilterType | ''>('');
-  const [universities, setUniversities] = useState<{ _id: string; name: string }[]>([]);
+  const [universities, setUniversities] = useState<Institution[]>([]);
   const [selectedUniversity, setSelectedUniversity] = useState<string>('');
-  const [courses, setCourses] = useState<{ _id: string; name: string }[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>('');
-  const [disciplines, setDisciplines] = useState<{ _id: string; name: string }[]>([]);
+  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('');
-  const [classes, setClasses] = useState<{ _id: string; name: string }[]>([]);
+  const [classes, setClasses] = useState<ClassDataItem[]>([]);
   const [selectedClass, setSelectedClass] = useState<string>('');
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3000/public/institutions')
-      .then((response) => {
-        const unis = response.data.map((uni: any) => ({
-          _id: uni._id,
-          name: uni.name,
-        }));
-        setUniversities(unis);
-      })
+    publicApi.getInstitutions<Institution[]>()
+      .then(data => setUniversities(data))
       .catch(error => console.error('Erro ao carregar universidades', error));
   }, []);
 
@@ -38,9 +51,8 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       filterType &&
       ['courses', 'disciplines', 'classes', 'students-discipline', 'students-course'].includes(filterType)
     ) {
-      axios
-        .get(`http://localhost:3000/public/courses/${selectedUniversity}`)
-        .then(response => setCourses(response.data))
+      publicApi.getCourses<Course[]>(selectedUniversity)
+        .then(data => setCourses(data))
         .catch(error => console.error('Erro ao carregar cursos', error));
     } else {
       setCourses([]);
@@ -55,9 +67,8 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       filterType &&
       ['disciplines', 'classes', 'students-discipline'].includes(filterType)
     ) {
-      axios
-        .get(`http://localhost:3000/public/disciplines/${selectedUniversity}/${selectedCourse}`)
-        .then(response => setDisciplines(response.data))
+      publicApi.getDisciplines<Discipline[]>(selectedUniversity, selectedCourse)
+        .then(data => setDisciplines(data))
         .catch(error => console.error('Erro ao carregar disciplinas', error));
     } else {
       setDisciplines([]);
@@ -67,9 +78,8 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
 
   useEffect(() => {
     if (selectedUniversity && selectedCourse && filterType === 'classes') {
-      axios
-        .get(`http://localhost:3000/public/classes/${selectedUniversity}/${selectedCourse}`)
-        .then(response => setClasses(response.data))
+      publicApi.getClasses<ClassDataItem[]>(selectedUniversity, selectedCourse)
+        .then(data => setClasses(data))
         .catch(error => console.error('Erro ao carregar turmas', error));
     } else {
       setClasses([]);
@@ -88,7 +98,7 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     onSearch(filterData);
   }
 
-  // Função que reseta os estados internos sem disparar requisições
+  // Reseta os estados do filtro e limpa a listagem
   function handleResetFilter() {
     setFilterType('');
     setSelectedUniversity('');
@@ -98,7 +108,6 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     setSelectedDiscipline('');
     setClasses([]);
     setSelectedClass('');
-    // Chama o callback do componente pai para limpar a listagem
     onReset();
   }
 
@@ -122,7 +131,6 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
             <option value="students-course">Alunos do Curso</option>
           </select>
         </div>
-
         {filterType && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-slate-100">Universidade:</label>
@@ -140,7 +148,6 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
             </select>
           </div>
         )}
-
         {filterType && ['courses', 'disciplines', 'classes', 'students-discipline', 'students-course'].includes(filterType) && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Curso:</label>
@@ -158,7 +165,6 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
             </select>
           </div>
         )}
-
         {filterType && ['disciplines', 'classes', 'students-discipline'].includes(filterType) && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Disciplina:</label>
@@ -176,7 +182,6 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
             </select>
           </div>
         )}
-
         {filterType === 'classes' && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Turma:</label>
@@ -195,7 +200,6 @@ function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
           </div>
         )}
       </div>
-
       <div className="flex gap-2">
         <ButtonCRUD action="search" onClick={handleSearchClick} />
         <button

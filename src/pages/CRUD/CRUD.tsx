@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import { FormsHeader } from "../../components/components/Forms/FormsHeader";
 import { FormsFilter } from "../../components/components/Forms/FormsFilter";
 import { FormsList } from "../../components/components/Forms/FormsList";
 import type { Item } from "../../components/components/Forms/FormsList";
 import { FormsCrud } from "../../components/components/Forms/FormsCrud";
 import type { FilterData } from "../../components/components/Forms/FormsFilter";
+import { publicApi } from "@/services/apiClient";
 
 type Entity = "university" | "course" | "discipline" | "class" | "professor" | "student";
 
@@ -16,52 +16,68 @@ function CRUD() {
 
   async function handleSearch(filterData: FilterData) {
     try {
-      let response;
+      let data: Item[] = [];
       switch (filterData.filterType) {
         case "universities":
-          response = await axios.get<Item[]>("http://localhost:3000/public/institutions");
+          data = await publicApi.getInstitutions<Item[]>();
           setCurrentEntity("university");
           break;
         case "courses":
           if (filterData.universityId) {
-            response = await axios.get<Item[]>(`http://localhost:3000/public/courses/${filterData.universityId}`);
+            data = await publicApi.getCourses<Item[]>(filterData.universityId);
             setCurrentEntity("course");
           }
           break;
         case "disciplines":
           if (filterData.universityId && filterData.courseId) {
-            response = await axios.get<Item[]>(`http://localhost:3000/public/disciplines/${filterData.universityId}/${filterData.courseId}`);
+            data = await publicApi.getDisciplines<Item[]>(
+              filterData.universityId,
+              filterData.courseId
+            );
             setCurrentEntity("discipline");
           }
           break;
         case "classes":
           if (filterData.universityId && filterData.courseId) {
-            response = await axios.get<Item[]>(`http://localhost:3000/public/classes/${filterData.universityId}/${filterData.courseId}`);
+            data = await publicApi.getClasses<Item[]>(
+              filterData.universityId,
+              filterData.courseId
+            );
             setCurrentEntity("class");
           }
           break;
         case "professors":
           if (filterData.universityId) {
             if (filterData.courseId) {
-              response = await axios.get<Item[]>(`http://localhost:3000/public/professors/${filterData.universityId}/${filterData.courseId}`);
+              data = await publicApi.getProfessors<Item[]>(
+                filterData.universityId,
+                filterData.courseId
+              );
             } else {
-              response = await axios.get<Item[]>(`http://localhost:3000/public/professors/${filterData.universityId}`);
+              data = await publicApi.getProfessors<Item[]>(filterData.universityId);
             }
             setCurrentEntity("professor");
           }
           break;
         case "students-discipline":
-          if (filterData.universityId && filterData.courseId && filterData.disciplineId) {
-            response = await axios.get<Item[]>(
-              `http://localhost:3000/public/students/by-discipline/${filterData.universityId}/${filterData.courseId}/${filterData.disciplineId}`
+          if (
+            filterData.universityId &&
+            filterData.courseId &&
+            filterData.disciplineId
+          ) {
+            data = await publicApi.getStudentsByDiscipline<Item[]>(
+              filterData.universityId,
+              filterData.courseId,
+              filterData.disciplineId
             );
             setCurrentEntity("student");
           }
           break;
         case "students-course":
           if (filterData.universityId && filterData.courseId) {
-            response = await axios.get<Item[]>(
-              `http://localhost:3000/public/students/by-course/${filterData.universityId}/${filterData.courseId}`
+            data = await publicApi.getStudentsByCourse<Item[]>(
+              filterData.universityId,
+              filterData.courseId
             );
             setCurrentEntity("student");
           }
@@ -69,9 +85,7 @@ function CRUD() {
         default:
           console.error("Filtro inválido");
       }
-      if (response) {
-        setItems(response.data);
-      }
+      setItems(data);
     } catch (error) {
       console.error("Erro ao buscar itens:", error);
     }
@@ -96,7 +110,6 @@ function CRUD() {
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));
   }
 
-  // Função para resetar os itens (fazendo com que a listagem desapareça)
   function handleResetList() {
     setItems([]);
   }
@@ -109,12 +122,20 @@ function CRUD() {
           <h1 className="text-2xl font-bold mb-4 text-white font-Montserrat">
             Sistema de Gerenciamento do SAEL
           </h1>
-          {/* Passamos a função handleResetList como onReset */}
+          {/* O FormsFilter recebe as funções onSearch e onReset */}
           <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
           {currentEntity !== "student" && currentEntity !== "professor" && (
-            <FormsCrud onSubmit={handleCreateOrUpdate} initialData={editingItem || undefined} />
+            <FormsCrud
+              onSubmit={handleCreateOrUpdate}
+              initialData={editingItem || undefined}
+            />
           )}
-          <FormsList entity={currentEntity} items={items} onEdit={handleEdit} onDelete={handleDelete} />
+          <FormsList
+            entity={currentEntity}
+            items={items}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </div>
       </div>
     </div>

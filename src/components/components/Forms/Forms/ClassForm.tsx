@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { publicApi } from "@/services/apiClient";
 
 export interface ClassData {
   name: string;
   courseId: string;
 }
 
-interface University {
+export interface University {
   _id: string;
   name: string;
 }
 
-interface Course {
+export interface Course {
   _id: string;
   name: string;
 }
 
-interface ClassFormProps {
+export interface ClassFormProps {
   onSubmit: (data: ClassData) => void;
   initialData?: ClassData;
 }
@@ -29,21 +29,15 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
   const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/public/institutions")
-      .then(response => {
-        const data = response.data.map((uni: any) => ({
-          _id: uni._id,
-          name: uni.name
-        }));
-        setUniversities(data);
-      })
+    publicApi.getInstitutions<University[]>()
+      .then((data) => setUniversities(data))
       .catch(err => console.error("Erro ao carregar universidades:", err));
   }, []);
 
   useEffect(() => {
     if (selectedUniversity) {
-      axios.get(`http://localhost:3000/public/courses/${selectedUniversity}`)
-        .then(response => setCourses(response.data))
+      publicApi.getCourses<Course[]>(selectedUniversity)
+        .then((data) => setCourses(data))
         .catch(err => console.error("Erro ao carregar cursos:", err));
     } else {
       setCourses([]);
@@ -78,7 +72,7 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
         className="p-2 rounded w-full bg-[#202020] text-white"
       >
         <option value="">Selecione a universidade</option>
-        {universities.map(uni => (
+        {universities.map((uni) => (
           <option key={uni._id} value={uni._id}>{uni.name}</option>
         ))}
       </select>
@@ -98,15 +92,11 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
           </select>
         </>
       )}
-      <button
-        type="submit"
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
+      <button type="submit" className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
         {initialData ? "Atualizar" : "Cadastrar"}
       </button>
     </form>
   );
 }
-
 
 export { ClassForm };

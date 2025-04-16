@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { publicApi } from "@/services/apiClient";
 
 export interface ProfessorData {
   name: string;
   email: string;
   universityId: string;
-  courseId?: string; // opcional
+  courseId?: string;
 }
 
-interface University {
+export interface University {
   _id: string;
   name: string;
 }
 
-interface Course {
+export interface Course {
   _id: string;
   name: string;
 }
 
-interface ProfessorFormProps {
+export interface ProfessorFormProps {
   onSubmit: (data: ProfessorData) => void;
   initialData?: ProfessorData;
 }
@@ -27,26 +27,20 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
   const [name, setName] = useState<string>(initialData ? initialData.name : "");
   const [email, setEmail] = useState<string>(initialData ? initialData.email : "");
   const [universityId, setUniversityId] = useState<string>(initialData ? initialData.universityId : "");
-  const [courseId, setCourseId] = useState<string>(initialData ? (initialData.courseId || "") : "");
+  const [courseId, setCourseId] = useState<string>(initialData ? initialData.courseId || "" : "");
   const [universities, setUniversities] = useState<University[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/public/institutions")
-      .then(response => {
-        const data = response.data.map((uni: any) => ({
-          _id: uni._id,
-          name: uni.name
-        }));
-        setUniversities(data);
-      })
+    publicApi.getInstitutions<University[]>()
+      .then((data) => setUniversities(data))
       .catch(err => console.error("Erro ao carregar universidades:", err));
   }, []);
 
   useEffect(() => {
     if (universityId) {
-      axios.get(`http://localhost:3000/public/courses/${universityId}`)
-        .then(response => setCourses(response.data))
+      publicApi.getCourses<Course[]>(universityId)
+        .then((data) => setCourses(data))
         .catch(err => console.error("Erro ao carregar cursos:", err));
     } else {
       setCourses([]);
@@ -61,7 +55,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       name: name.trim(),
       email: email.trim(),
       universityId,
-      courseId: courseId || undefined
+      courseId: courseId || undefined,
     });
     setName("");
     setEmail("");
@@ -95,7 +89,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         className="p-2 rounded w-full bg-[#202020] text-white"
       >
         <option value="">Selecione a universidade</option>
-        {universities.map(uni => (
+        {universities.map((uni) => (
           <option key={uni._id} value={uni._id}>{uni.name}</option>
         ))}
       </select>
@@ -108,21 +102,17 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
             className="p-2 rounded w-full bg-[#202020] text-white"
           >
             <option value="">Selecione o curso (opcional)</option>
-            {courses.map(course => (
+            {courses.map((course) => (
               <option key={course._id} value={course._id}>{course.name}</option>
             ))}
           </select>
         </>
       )}
-      <button
-        type="submit"
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
+      <button type="submit" className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
         {initialData ? "Atualizar" : "Cadastrar"}
       </button>
     </form>
   );
 }
-
 
 export { ProfessorForm };

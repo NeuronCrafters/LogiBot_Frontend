@@ -1,6 +1,7 @@
 import { api } from "@/services/api/api";
 import { ACADEMIC_ROUTES, PUBLIC_ROUTES, RASA_ROUTES, EntityType } from "./api/api_routes";
 
+// Funções genéricas com generics – evita o uso de any
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
   return response.data;
@@ -16,7 +17,7 @@ const deleteRequest = async <T>(url: string): Promise<T> => {
   return response.data;
 };
 
-// Objeto para as rotas acadêmicas (protegidas)
+// API para rotas acadêmicas (protegidas)
 export const academicApi = {
   async post<T>(entity: EntityType, data: object): Promise<T> {
     const url: string = ACADEMIC_ROUTES[entity].post;
@@ -34,7 +35,7 @@ export const academicApi = {
   },
 };
 
-// Objeto para as rotas públicas
+// API para rotas públicas
 export const publicApi = {
   async getInstitutions<T>(): Promise<T> {
     return getRequest<T>(PUBLIC_ROUTES.institutions);
@@ -54,18 +55,10 @@ export const publicApi = {
       : `${PUBLIC_ROUTES.professors}/${universityId}`;
     return getRequest<T>(url);
   },
-  async getStudentsByClass<T>(
-    universityId: string,
-    courseId: string,
-    classId: string
-  ): Promise<T> {
+  async getStudentsByClass<T>(universityId: string, courseId: string, classId: string): Promise<T> {
     return getRequest<T>(`${PUBLIC_ROUTES.studentsByClass}/${universityId}/${courseId}/${classId}`);
   },
-  async getStudentsByDiscipline<T>(
-    universityId: string,
-    courseId: string,
-    disciplineId: string
-  ): Promise<T> {
+  async getStudentsByDiscipline<T>(universityId: string, courseId: string, disciplineId: string): Promise<T> {
     return getRequest<T>(`${PUBLIC_ROUTES.studentsByDiscipline}/${universityId}/${courseId}/${disciplineId}`);
   },
   async getStudentsByCourse<T>(universityId: string, courseId: string): Promise<T> {
@@ -73,8 +66,7 @@ export const publicApi = {
   },
 };
 
-
-// API para rotas do Rasa
+// API para rotas do Rasa 
 export const rasaApi = {
   async sendMessage<T>(message: string): Promise<T> {
     return postRequest<T>(RASA_ROUTES.talk, { message });

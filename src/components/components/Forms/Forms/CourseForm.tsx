@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { publicApi } from "@/services/apiClient";
 
 export interface CourseData {
   name: string;
   universityId: string;
 }
 
-interface University {
+export interface University {
   _id: string;
   name: string;
 }
 
-interface CourseFormProps {
+export interface CourseFormProps {
   onSubmit: (data: CourseData) => void;
   initialData?: CourseData;
 }
@@ -22,14 +22,8 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
   const [universities, setUniversities] = useState<University[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/public/institutions")
-      .then(response => {
-        const data = response.data.map((uni: any) => ({
-          _id: uni._id,
-          name: uni.name
-        }));
-        setUniversities(data);
-      })
+    publicApi.getInstitutions<University[]>()
+      .then((data) => setUniversities(data))
       .catch(err => console.error("Erro ao carregar universidades:", err));
   }, []);
 
@@ -63,14 +57,11 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
           <option key={uni._id} value={uni._id}>{uni.name}</option>
         ))}
       </select>
-      <button
-        type="submit"
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
+      <button type="submit" className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
         {initialData ? "Atualizar" : "Cadastrar"}
       </button>
     </form>
   );
 }
 
-export { CourseForm }
+export { CourseForm };

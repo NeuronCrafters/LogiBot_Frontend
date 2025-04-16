@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Header } from "@/components/components/Header/Header";
 import { useAuth } from "@/hooks/use-Auth";
 
-export function FormsHeader() {
+function FormsHeader() {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -12,7 +12,6 @@ export function FormsHeader() {
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
       <div className="p-6 bg-[#141414] border-b border-neutral-700 flex items-center justify-between">
         <div>
-          {/* Exibe texto completo em telas a partir de "sm" e versão reduzida em telas menores */}
           <h1 className="text-xl font-bold text-white hidden sm:block font-Montserrat">
             Gerenciamento Acadêmico
           </h1>
@@ -33,3 +32,5 @@ export function FormsHeader() {
     </>
   );
 }
+
+export { FormsHeader }
