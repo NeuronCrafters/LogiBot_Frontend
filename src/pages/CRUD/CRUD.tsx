@@ -1,11 +1,11 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { FormsHeader } from "../../components/components/Forms/FormsHeader";
 import { FormsFilter } from "../../components/components/Forms/FormsFilter";
 import { FormsList } from "../../components/components/Forms/FormsList";
 import type { Item } from "../../components/components/Forms/FormsList";
 import { FormsCrud } from "../../components/components/Forms/FormsCrud";
 import type { FilterData } from "../../@types/FormsFilterTypes";
-import { publicApi } from "@/services/apiClient";
+import { publicApi, academicApi } from "@/services/apiClient";
 import {
   UniversityData,
   CourseData,
@@ -14,12 +14,6 @@ import {
   DisciplineData,
 } from "@/@types/FormsDataTypes";
 
-interface RawItem {
-  id?: string | number;
-  _id?: string | number;
-  name: string;
-}
-
 type Entity =
   | "university"
   | "course"
@@ -27,6 +21,13 @@ type Entity =
   | "class"
   | "professor"
   | "student";
+
+// Interface auxiliar para os dados brutos retornados pela API
+interface RawItem {
+  id?: string | number;
+  _id?: string | number;
+  name: string;
+}
 
 function CRUD() {
   const [items, setItems] = useState<Item[]>([]);
@@ -104,7 +105,7 @@ function CRUD() {
         default:
           console.error("Filtro inválido");
       }
-
+      // Garante que cada objeto tenha a propriedade "id"
       const mappedData: Item[] = data.map((item, index) => ({
         id: item.id ?? item._id ?? index,
         name: item.name,
@@ -115,25 +116,49 @@ function CRUD() {
     }
   }
 
-  function handleCreateOrUpdate(
+  async function handleCreateOrUpdate(
     item:
       | UniversityData
       | CourseData
       | ProfessorData
       | ClassData
       | DisciplineData
-  ): void {
-    const newId = item.id !== undefined ? item.id : new Date().getTime();
-    const newItem: Item = { id: newId, name: item.name };
-    if (items.some((it) => it.id === newItem.id)) {
-      setItems((prevItems) =>
-        prevItems.map((it) =>
-          it.id === newItem.id ? { ...it, name: newItem.name } : it
-        )
-      );
-      setEditingItem(null);
-    } else {
+  ): Promise<void> {
+    try {
+      let response:
+        | UniversityData
+        | CourseData
+        | ProfessorData
+        | ClassData
+        | DisciplineData;
+      switch (currentEntity) {
+        case "university":
+          response = await academicApi.post<UniversityData>("university", item);
+          break;
+        case "course":
+          response = await academicApi.post<CourseData>("course", item);
+          break;
+        case "class":
+          response = await academicApi.post<ClassData>("class", item);
+          break;
+        case "discipline":
+          response = await academicApi.post<DisciplineData>("discipline", item);
+          break;
+        case "professor":
+          response = await academicApi.post<ProfessorData>("professor", item);
+          break;
+        default:
+          console.error("Entidade não suportada para criação:", currentEntity);
+          return;
+      }
+      // Garante que o objeto retornado possua um id, usando _id se necessário
+      const newItem: Item = {
+        id: response.id ?? response._id ?? new Date().getTime(),
+        name: response.name,
+      };
       setItems((prevItems) => [...prevItems, newItem]);
+    } catch (error) {
+      console.error("Erro ao criar item:", error);
     }
   }
 
