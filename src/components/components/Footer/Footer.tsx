@@ -1,4 +1,3 @@
-import React from "react";
 import { Logo } from "@/components/components/Logo/Logo";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 

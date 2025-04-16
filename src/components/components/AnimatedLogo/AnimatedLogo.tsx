@@ -1,4 +1,3 @@
-import React from 'react';
 import boneco from '@/assets/boneco.svg';
 import parte from '@/assets/parte.svg';
 

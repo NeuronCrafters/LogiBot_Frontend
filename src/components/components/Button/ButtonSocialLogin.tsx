@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
 import googleLogo from "@/assets/googleLogo.svg";
 import { Typograph } from "@/components/components/Typograph/Typograph";
