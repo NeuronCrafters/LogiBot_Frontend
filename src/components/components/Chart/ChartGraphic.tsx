@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } fro
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { api } from "@/services/api";
+import { api } from "@/services/api/api";
 import { toPng } from "html-to-image";
 import { downloadCSV } from "@/lib/downloadCSV";
 import { MetricOption } from "./MetricCheckboxSelector";

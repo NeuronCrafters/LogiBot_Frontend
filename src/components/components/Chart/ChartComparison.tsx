@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { api } from "@/services/api";
+import { api } from "@/services/api/api";
 import { Button } from "@/components/ui/button";
 import { toPng } from "html-to-image";
 import { downloadCSV } from "@/lib/downloadCSV";

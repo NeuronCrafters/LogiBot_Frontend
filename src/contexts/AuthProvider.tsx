@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "@/services/api";
+import { api } from "@/services/api/api";
 import { AuthContext, AuthContextData, User } from "./AuthContext";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { api } from "@/services/api";
+import { api } from "@/services/api/api";
 import { format } from "date-fns";
 
 interface SessionData {
