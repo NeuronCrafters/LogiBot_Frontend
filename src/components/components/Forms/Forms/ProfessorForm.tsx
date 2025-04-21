@@ -14,6 +14,11 @@ interface University {
   name: string;
 }
 
+interface UniversityResponse {
+  _id: string;
+  name: string;
+}
+
 interface Course {
   _id: string;
   name: string;
@@ -38,7 +43,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     axios
       .get("http://localhost:3000/public/institutions")
       .then((response) => {
-        const data = response.data.map((uni: any) => ({
+        const data = response.data.map((uni: UniversityResponse) => ({
           _id: uni._id,
           name: uni.name,
         }));

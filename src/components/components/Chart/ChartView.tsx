@@ -1,15 +1,24 @@
 import { useState, useMemo } from "react";
-import { AcademicFilter } from "./AcademicFilter";
+import { CascadingFilter } from "./CascadingFilter";
 import { ChartGraphics } from "./ChartGraphic";
 import { ChartComparison } from "./ChartComparison";
 import { ChartComparisonLine } from "./ChartComparisonLine";
 import { ChartModeSelector } from "./ChartModeSelector";
 import { MetricCheckboxSelector, MetricOption } from "./MetricCheckboxSelector";
-import { ChartMode, ChartType } from "@/@types/ChartsType";
+import { ChartMode } from "@/@types/ChartsType";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Filter, Calendar as CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, addDays } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export function ChartView() {
   const [mode, setMode] = useState<ChartMode>("visualizar");
-  const [selectedType, setSelectedType] = useState<ChartType>("course");
+  const [selectedType, setSelectedType] = useState<"university" | "course" | "discipline" | "class" | "student">("university");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedMetrics, setSelectedMetrics] = useState<MetricOption[]>([
     "correct",
@@ -17,27 +26,34 @@ export function ChartView() {
     "usage",
     "sessions",
   ]);
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+    from: addDays(new Date(), -30),
+    to: new Date(),
+  });
 
   const [comparisonView, setComparisonView] = useState<"bar" | "line">("line");
 
   const handleFilterChange = (filter: {
-    universityId: string | null;
-    courseId: string | null;
-    classId: string | null;
-    disciplineId: string | null;
+    type: "university" | "course" | "discipline" | "class" | "student";
+    universityId?: string;
+    courseId?: string;
+    classId?: string;
+    disciplineId?: string;
+    studentId?: string;
   }) => {
     const ids: string[] = [];
-    let type: ChartType = "course";
+    const type = filter.type;
 
-    if (filter.disciplineId) {
+    if (filter.studentId) {
+      ids.push(filter.studentId);
+    } else if (filter.disciplineId) {
       ids.push(filter.disciplineId);
-      type = "discipline";
     } else if (filter.classId) {
       ids.push(filter.classId);
-      type = "class";
     } else if (filter.courseId) {
       ids.push(filter.courseId);
-      type = "course";
+    } else if (filter.universityId) {
+      ids.push(filter.universityId);
     }
 
     setSelectedType(type);
@@ -45,11 +61,12 @@ export function ChartView() {
   };
 
   const shouldShowGraphics = useMemo(
-    () => mode === "visualizar" && selectedIds.length === 1,
+    () => mode === "visualizar" && selectedIds.length > 0,
     [mode, selectedIds]
   );
+
   const shouldShowComparison = useMemo(
-    () => mode === "comparar" && selectedIds.length === 2,
+    () => mode === "comparar" && selectedIds.length > 1,
     [mode, selectedIds]
   );
 
@@ -57,71 +74,142 @@ export function ChartView() {
     if (selectedIds.length === 0) return "Nenhum item selecionado";
     if (selectedIds.length === 1)
       return `Selecionado: ${selectedType} - ${selectedIds[0]}`;
-    return `Comparando ${selectedType}s: ${selectedIds[0]} vs ${selectedIds[1]}`;
+    return `Comparando ${selectedType}s: ${selectedIds.join(" vs ")}`;
   }, [selectedIds, selectedType]);
 
   return (
-    <div className="space-y-6 px-4 md:px-12">
-      <ChartModeSelector mode={mode} setMode={setMode} />
-      <MetricCheckboxSelector
-        selectedMetrics={selectedMetrics}
-        setSelectedMetrics={setSelectedMetrics}
-      />
-      <AcademicFilter onFilterChange={handleFilterChange} />
-      <p className="text-center text-sm text-gray-400">{selectedLabel}</p>
-
-      {/* Modo visualizar: exibe apenas um gráfico */}
-      {shouldShowGraphics && (
-        <ChartGraphics
-          type={selectedType}
-          id={selectedIds[0]}
-          metrics={selectedMetrics}
-        />
-      )}
-
-      {/* Modo comparar: dependendo da visualização selecionada, exibe gráfico em barras ou linhas */}
-      {shouldShowComparison && (
-        <div>
-          <div className="flex justify-center gap-4 mb-4">
-            <label className="text-white">
-              <input
-                type="radio"
-                name="comparisonView"
-                checked={comparisonView === "bar"}
-                onChange={() => setComparisonView("bar")}
-              />
-              Barra
-            </label>
-            <label className="text-white">
-              <input
-                type="radio"
-                name="comparisonView"
-                checked={comparisonView === "line"}
-                onChange={() => setComparisonView("line")}
-              />
-              Linha
-            </label>
+    <div className="space-y-6">
+      <Card className="bg-[#1f1f1f] border-neutral-700">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-2xl font-bold text-white">Análise de Dados</CardTitle>
+          <div className="flex items-center gap-4">
+            <ChartModeSelector mode={mode} setMode={setMode} />
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="bg-[#2a2a2a] border-neutral-700 text-white hover:bg-[#333333]"
+                >
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="bg-[#1f1f1f] border-neutral-700">
+                <SheetHeader>
+                  <SheetTitle className="text-white">Filtros</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white">Período</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal bg-[#2a2a2a] border-neutral-700 text-white hover:bg-[#333333]",
+                            !dateRange && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dateRange?.from ? (
+                            dateRange.to ? (
+                              <>
+                                {format(dateRange.from, "dd/MM/yyyy")} -{" "}
+                                {format(dateRange.to, "dd/MM/yyyy")}
+                              </>
+                            ) : (
+                              format(dateRange.from, "dd/MM/yyyy")
+                            )
+                          ) : (
+                            <span>Selecione um período</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          initialFocus
+                          mode="range"
+                          defaultMonth={dateRange.from}
+                          selected={dateRange}
+                          onSelect={(range) => {
+                            if (range?.from && range.to) {
+                              setDateRange({ from: range.from, to: range.to });
+                            }
+                          }}
+                          numberOfMonths={2}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <CascadingFilter onFilterChange={handleFilterChange} />
+                  <div className="mt-4">
+                    <MetricCheckboxSelector
+                      selectedMetrics={selectedMetrics}
+                      setSelectedMetrics={setSelectedMetrics}
+                    />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
-          {comparisonView === "bar" ? (
-            <ChartComparison
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-400">{selectedLabel}</p>
+        </CardContent>
+      </Card>
+
+      {shouldShowGraphics && (
+        <Card className="bg-[#1f1f1f] border-neutral-700">
+          <CardContent className="pt-6">
+            <ChartGraphics
               type={selectedType}
-              ids={selectedIds}
-              metric={"usage"}
+              id={selectedIds[0]}
+              metrics={selectedMetrics}
+              dateRange={dateRange}
             />
-          ) : (
-            <ChartComparisonLine
-              type={selectedType}
-              ids={selectedIds}
-              metric={"usage"}
-            />
-          )}
-        </div>
+          </CardContent>
+        </Card>
       )}
 
-      {mode === "comparar" && selectedIds.length !== 2 && (
-        <p className="text-center text-sm text-yellow-400">
-          Selecione dois grupos para realizar a comparação.
-        </p>
+      {shouldShowComparison && (
+        <Card className="bg-[#1f1f1f] border-neutral-700">
+          <CardContent className="pt-6">
+            <Tabs defaultValue={comparisonView} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-[#2a2a2a]">
+                <TabsTrigger
+                  value="line"
+                  onClick={() => setComparisonView("line")}
+                  className="text-white data-[state=active]:bg-[#333333]"
+                >
+                  Gráfico de Linha
+                </TabsTrigger>
+                <TabsTrigger
+                  value="bar"
+                  onClick={() => setComparisonView("bar")}
+                  className="text-white data-[state=active]:bg-[#333333]"
+                >
+                  Gráfico de Barras
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="line">
+                <ChartComparisonLine
+                  type={selectedType}
+                  ids={selectedIds}
+                  metric={selectedMetrics[0]}
+                  dateRange={dateRange}
+                />
+              </TabsContent>
+              <TabsContent value="bar">
+                <ChartComparison
+                  type={selectedType}
+                  ids={selectedIds}
+                  metric={selectedMetrics[0]}
+                  dateRange={dateRange}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

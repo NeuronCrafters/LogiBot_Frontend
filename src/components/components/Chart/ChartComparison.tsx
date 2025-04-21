@@ -12,6 +12,10 @@ import { api } from "@/services/api/api";
 import { Button } from "@/components/ui/button";
 import { toPng } from "html-to-image";
 import { downloadCSV } from "@/lib/downloadCSV";
+import type { Payload } from "recharts/types/component/DefaultTooltipContent";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Download } from "lucide-react";
+import { MetricOption } from "./MetricCheckboxSelector";
 
 interface UserAnalysisLog {
   name: string;
@@ -28,24 +32,23 @@ interface ComparisonData {
 }
 
 interface ChartComparisonProps {
-  type: "course" | "class" | "discipline";
+  type: "university" | "course" | "discipline" | "class" | "student";
   ids: string[];
-  metric: "correct" | "wrong" | "usage";
+  metric: MetricOption;
+  dateRange: { from: Date; to: Date };
 }
 
-// Helper para converter tempo (em segundos) para um formato legível
 function formatTimeUsage(seconds: number): string {
-  const totalSeconds = seconds;
-  const mins = Math.floor(totalSeconds / 60);
+  const mins = Math.floor(seconds / 60);
   const hrs = Math.floor(mins / 60);
   const days = Math.floor(hrs / 24);
   const weeks = (days / 7).toFixed(1);
   const months = (days / 30.44).toFixed(1);
   const years = (days / 365).toFixed(1);
-  return `${totalSeconds} seg / ${mins} min / ${hrs} hrs / ${days} dias / ${weeks} sem / ${months} mes / ${years} anos`;
+  return `${seconds} seg / ${mins} min / ${hrs} hrs / ${days} dias / ${weeks} sem / ${months} mes / ${years} anos`;
 }
 
-function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
+function ChartComparison({ type, ids, metric, dateRange }: ChartComparisonProps) {
   const [data, setData] = useState<ComparisonData[]>([]);
   const [labelA, setLabelA] = useState("Grupo A");
   const [labelB, setLabelB] = useState("Grupo B");
@@ -56,7 +59,9 @@ function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
       ? "Respostas Corretas"
       : metric === "wrong"
         ? "Respostas Incorretas"
-        : "Tempo de Uso";
+        : metric === "usage"
+          ? "Tempo de Uso"
+          : "Sessões";
 
   useEffect(() => {
     if (ids.length !== 2) return;
@@ -73,20 +78,24 @@ function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
 
         const getMetricValue = (log?: UserAnalysisLog): number => {
           if (!log) return 0;
-          switch (metric) {
-            case "correct":
-              return log.totalCorrectAnswers;
-            case "wrong":
-              return log.totalWrongAnswers;
-            case "usage":
-              return Math.floor(log.totalUsageTime);
-          }
+          return metric === "correct"
+            ? log.totalCorrectAnswers
+            : metric === "wrong"
+              ? log.totalWrongAnswers
+              : metric === "usage"
+                ? Math.floor(log.totalUsageTime)
+                : 0;
         };
 
         const mergedData: ComparisonData[] = logsA.map((log, i) => {
           const valueA = getMetricValue(log);
           const valueB = getMetricValue(logsB[i]);
-          const variation = valueA === 0 ? "0%" : `${(((valueB - valueA) / valueA) * 100).toFixed(1)}%`;
+          const variation =
+            valueA === 0 && valueB !== 0
+              ? "+100%"
+              : valueA === 0 && valueB === 0
+                ? "0%"
+                : `${(((valueB - valueA) / valueA) * 100).toFixed(1)}%`;
 
           return {
             name: log.name,
@@ -137,46 +146,49 @@ function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
   }
 
   return (
-    <div className="w-full max-w-5xl bg-[#1F1F1F] rounded-xl p-6 shadow-lg">
-      <h2 className="text-white text-2xl font-bold mb-4 text-center">
-        Comparativo de {title}
-      </h2>
-
-      <div className="flex flex-wrap justify-center gap-4 mb-4">
-        <Button variant="outline" onClick={handleExportCSV}>
-          Exportar CSV
-        </Button>
-        <Button variant="outline" onClick={handleExportPNG}>
-          Exportar PNG
-        </Button>
-      </div>
-
-      <div ref={chartRef}>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data}>
-            <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
-            <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
-            <Tooltip
-              formatter={(value: number, name: string, props: any) => {
-                if (metric === "usage") {
-                  return formatTimeUsage(value);
-                }
-                // Exibe o valor e a variação (se existir)
-                const variation = data[props?.payload?.index]?.variation ?? "0%";
-                return `${value} (${variation})`;
-              }}
-              contentStyle={{ backgroundColor: "#2a2a2a", borderRadius: "8px" }}
-              labelStyle={{ color: "#fff" }}
-              itemStyle={{ color: "#fff" }}
-            />
-            <Legend wrapperStyle={{ color: "#fff" }} />
-            <Bar dataKey="groupA" fill="#4ade80" name={labelA} />
-            <Bar dataKey="groupB" fill="#60a5fa" name={labelB} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-bold">Comparativo de {title}</CardTitle>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={handleExportCSV}>
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={handleExportPNG}>
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div ref={chartRef}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data}>
+              <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
+              <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
+              <Tooltip
+                formatter={(
+                  value: number,
+                  name: string,
+                  payload: Payload<number, string>
+                ) => {
+                  const index = data.findIndex((d) => d.name === payload.payload.name);
+                  const variation = data[index]?.variation ?? "0%";
+                  return metric === "usage"
+                    ? formatTimeUsage(value)
+                    : `${value} (${variation})`;
+                }}
+                contentStyle={{ backgroundColor: "#2a2a2a", borderRadius: "8px" }}
+                labelStyle={{ color: "#fff" }}
+                itemStyle={{ color: "#fff" }}
+              />
+              <Legend wrapperStyle={{ color: "#fff" }} />
+              <Bar dataKey="groupA" fill="#4ade80" name={labelA} />
+              <Bar dataKey="groupB" fill="#60a5fa" name={labelB} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-export { ChartComparison }
+export { ChartComparison };

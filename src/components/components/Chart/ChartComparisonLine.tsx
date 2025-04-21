@@ -2,11 +2,12 @@ import { useEffect, useState, useRef } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { api } from "@/services/api/api";
 import { format } from "date-fns";
-
-interface SessionData {
-  sessionStart: string;
-  metricValue: number;
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toPng } from "html-to-image";
+import { downloadCSV } from "@/lib/downloadCSV";
+import { MetricOption } from "./MetricCheckboxSelector";
 
 interface UserAnalysisLog {
   name: string;
@@ -20,9 +21,13 @@ interface UserAnalysisLog {
 }
 
 interface ChartComparisonLineProps {
-  type: "course" | "class" | "discipline" | "student";
+  type: "university" | "course" | "discipline" | "class" | "student";
   ids: string[];
-  metric: "correct" | "wrong" | "usage";
+  metric: MetricOption;
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
 }
 
 interface CombinedData {
@@ -92,24 +97,59 @@ export function ChartComparisonLine({ type, ids, metric }: ChartComparisonLinePr
     fetchData();
   }, [type, ids, metric]);
 
+  const handleExportCSV = () => {
+    const rows = data.map((item) => ({
+      Data: item.date,
+      "Grupo 1": item.groupA,
+      "Grupo 2": item.groupB,
+    }));
+
+    downloadCSV(`comparativo_${metric}_linha.csv`, rows);
+  };
+
+  const handleExportPNG = () => {
+    if (!chartRef.current) return;
+    toPng(chartRef.current).then((dataUrl) => {
+      const link = document.createElement("a");
+      link.download = `comparativo_${metric}_linha.png`;
+      link.href = dataUrl;
+      link.click();
+    });
+  };
+
   return (
-    <div ref={chartRef} className="w-full max-w-5xl bg-[#1F1F1F] rounded-xl p-6 shadow-lg">
-      {loading ? (
-        <p className="text-white text-lg text-center">Carregando comparativo (Line)...</p>
-      ) : data.length === 0 ? (
-        <p className="text-red-500 text-lg text-center">Sem dados disponíveis para o período.</p>
-      ) : (
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <XAxis dataKey="date" stroke="#fff" tick={{ fontSize: 12 }} />
-            <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
-            <Tooltip contentStyle={{ backgroundColor: "#222", borderRadius: "8px", border: "none" }} labelStyle={{ color: "#fff" }} />
-            <Legend wrapperStyle={{ color: "#fff" }} />
-            <Line type="monotone" dataKey="groupA" stroke="#4ade80" name="Grupo 1" />
-            <Line type="monotone" dataKey="groupB" stroke="#f87171" name="Grupo 2" />
-          </LineChart>
-        </ResponsiveContainer>
-      )}
-    </div>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-bold">Comparativo Temporal</CardTitle>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={handleExportCSV}>
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={handleExportPNG}>
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div ref={chartRef}>
+          {loading ? (
+            <p className="text-center text-muted-foreground">Carregando comparativo...</p>
+          ) : data.length === 0 ? (
+            <p className="text-center text-destructive">Sem dados disponíveis para o período.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data}>
+                <XAxis dataKey="date" stroke="#fff" tick={{ fontSize: 12 }} />
+                <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
+                <Tooltip contentStyle={{ backgroundColor: "#222", borderRadius: "8px", border: "none" }} labelStyle={{ color: "#fff" }} />
+                <Legend wrapperStyle={{ color: "#fff" }} />
+                <Line type="monotone" dataKey="groupA" stroke="#4ade80" name="Grupo 1" />
+                <Line type="monotone" dataKey="groupB" stroke="#f87171" name="Grupo 2" />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

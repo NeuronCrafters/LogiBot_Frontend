@@ -17,9 +17,10 @@ const metricsColors: Record<string, string> = {
 };
 
 export interface ChartGraphicsProps {
-  type: "course" | "class" | "discipline" | "student";
+  type: "university" | "course" | "discipline" | "class" | "student";
   id: string;
-  metrics?: MetricOption[];
+  metrics: MetricOption[];
+  dateRange: { from: Date; to: Date };
 }
 
 interface UserAnalysisLog {
@@ -27,7 +28,7 @@ interface UserAnalysisLog {
   totalCorrectAnswers: number;
   totalWrongAnswers: number;
   totalUsageTime: number;
-  sessions?: any[];
+  sessions?: Array<{ id: string; startTime: string; endTime: string }>;
 }
 
 interface ChartData {
@@ -55,7 +56,7 @@ function formatTimeUsage(seconds: number): string {
   return `${years.toFixed(1)} anos`;
 }
 
-export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage", "sessions"] }: ChartGraphicsProps) {
+export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage", "sessions"], dateRange }: ChartGraphicsProps) {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   // Filtros de data (que já são passados para a API, supondo que o back-end use aggregation para filtrar sessions)
@@ -99,7 +100,7 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
   const handleExportCSV = () => {
     // Cria as colunas a partir das métricas selecionadas
     const rows = data.map((item) => {
-      const row: any = { Nome: item.name };
+      const row: Record<string, string | number> = { Nome: item.name };
       metrics.forEach((metric) => {
         if (metric === "correct") row["Questões Certas"] = item.correct;
         if (metric === "wrong") row["Questões Erradas"] = item.wrong;
