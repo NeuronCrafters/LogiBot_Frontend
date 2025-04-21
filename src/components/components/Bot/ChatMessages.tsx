@@ -12,12 +12,29 @@ interface ChatMessagesProps {
 }
 
 function ChatMessages({ messages, userName }: ChatMessagesProps) {
+  const formatMessage = (content: string) => {
+    // Verifica se a mensagem é um nível selecionado
+    if (content.includes("Nível")) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="bg-blue-600 text-white px-4 py-2 rounded-lg mb-2">
+            {content}
+          </div>
+          <div className="text-gray-400 text-sm">
+            Agora você pode começar a interagir com o SAEL!
+          </div>
+        </div>
+      );
+    }
+    return content;
+  };
+
   return (
-    <div className="flex flex-col items-center w-full h-screen py-32">
+    <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
       {messages.map((message, index) => (
         <div
           key={index}
-          className={`flex items-end w-full max-w-lg mb-3 ${message.role === "user" ? "justify-end" : "justify-start"
+          className={`flex items-end w-full mb-3 ${message.role === "user" ? "justify-end" : "justify-start"
             } animate-fade-in`}
         >
           {message.role === "assistant" && (
@@ -36,7 +53,7 @@ function ChatMessages({ messages, userName }: ChatMessagesProps) {
               : "bg-gray-800 text-gray-200 mr-auto rounded-bl-none"
               }`}
           >
-            {message.content}
+            {formatMessage(message.content)}
           </div>
 
           {message.role === "user" && (

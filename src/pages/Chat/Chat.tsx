@@ -5,8 +5,8 @@ import { useAuth } from "@/hooks/use-Auth";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ChatMessages } from "../../components/components/Bot/ChatMessages";
-import { ChatResponseHandler } from "../../components/components/Bot/ChatResponseHandler";
-import {ChatInput} from "@/components/components/Input/ChatInput.tsx";
+import { LevelSelector } from "../../components/components/Bot/LevelSelector";
+import { ChatInput } from "@/components/components/Input/ChatInput.tsx";
 
 function Chat() {
   const [inputText, setInputText] = useState("");
@@ -26,6 +26,10 @@ function Chat() {
 
     setMessages((prev) => [...prev, { role: "user", content: message }]);
     setInputText("");
+  };
+
+  const handleLevelSelect = (level: string) => {
+    sendMessage(level);
   };
 
   return (
@@ -50,24 +54,31 @@ function Chat() {
         )}
       </div>
 
-      <ChatMessages
-          messages={messages}
-          userName={userName}
-      />
+      <div className="flex flex-col items-center w-full h-full pt-32 pb-24">
+        <div className="w-full max-w-2xl mx-auto">
+          <ChatMessages
+            messages={messages}
+            userName={userName}
+          />
 
-      <ChatResponseHandler
-          onSend={sendMessage}
-      />
+          <LevelSelector
+            onSelectLevel={handleLevelSelect}
+          />
+        </div>
 
-      <ChatInput
-          inputText={inputText}
-          setInputText={setInputText}
-          sendMessage={sendMessage}
-      />
+        <div className="fixed bottom-0 left-0 right-0 mb-8">
+          <ChatInput
+            inputText={inputText}
+            setInputText={setInputText}
+            sendMessage={sendMessage}
+          />
+        </div>
+      </div>
 
       <Header
-          isOpen={menuOpen}
-          closeMenu={() => setMenuOpen(false)} />
+        isOpen={menuOpen}
+        closeMenu={() => setMenuOpen(false)}
+      />
     </div>
   );
 }
