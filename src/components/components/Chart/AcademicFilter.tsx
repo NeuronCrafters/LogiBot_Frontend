@@ -78,6 +78,7 @@ export function AcademicFilter({ chartType, setChartType, onFilterChange }: Acad
       publicApi.getCourses<AcademicEntity[]>(selectedUniversity).then(setCourses).catch(console.error);
     } else {
       setCourses([]);
+      setSelectedCourse(null);
     }
   }, [selectedUniversity]);
 
@@ -86,6 +87,7 @@ export function AcademicFilter({ chartType, setChartType, onFilterChange }: Acad
       publicApi.getClasses<AcademicEntity[]>(selectedUniversity, selectedCourse).then(setClasses).catch(console.error);
     } else {
       setClasses([]);
+      setSelectedClass(null);
     }
   }, [selectedUniversity, selectedCourse]);
 
@@ -94,6 +96,7 @@ export function AcademicFilter({ chartType, setChartType, onFilterChange }: Acad
       publicApi.getStudentsByClass<AcademicEntity[]>(selectedUniversity, selectedCourse, selectedClass).then(setStudents).catch(console.error);
     } else {
       setStudents([]);
+      setSelectedStudent(null);
     }
   }, [selectedUniversity, selectedCourse, selectedClass]);
 
@@ -105,7 +108,7 @@ export function AcademicFilter({ chartType, setChartType, onFilterChange }: Acad
       disciplineId: null,
       studentId: selectedStudent,
     });
-  }, [selectedUniversity, selectedCourse, selectedClass, selectedStudent]);
+  }, [selectedUniversity, selectedCourse, selectedClass, selectedStudent, onFilterChange]);
 
   const renderSelect = (
     label: string,
