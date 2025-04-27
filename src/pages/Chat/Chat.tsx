@@ -1,86 +1,83 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, PanelRightOpen } from "lucide-react";
-import { Header } from "@/components/components/Header/Header";
-import { useAuth } from "@/hooks/use-Auth";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-Auth";
 import { useNavigate } from "react-router-dom";
-import { ChatMessages } from "../../components/components/Bot/ChatMessages";
-import { LevelSelector } from "../../components/components/Bot/LevelSelector";
-import { ChatInput } from "@/components/components/Input/ChatInput.tsx";
+import { ChatMessages } from "@/components/components/Bot/ChatMessages";
+import { LevelStep } from "@/components/components/Bot/LevelStep";
+import { CategoryStep } from "@/components/components/Bot/CategoryStep";
+import { SubsubjectStep } from "@/components/components/Bot/QuestionStep";
+import { QuestionsDisplay } from "@/components/components/Bot/QuestionDisplay";
+import { rasaService } from "@/services/api/api_rasa";
+import { Question } from "@/components/components/Bot/Question";
+interface ChatMsg { role: "user" | "assistant"; content: string; }
 
-function Chat() {
-  const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
-  const [menuOpen, setMenuOpen] = useState(false);
+export function Chat() {
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [step, setStep] = useState<"levels" | "categories" | "subsubjects" | "questions" | "results">("levels");
+
+  const [categoryButtons, setCategoryButtons] = useState<any[]>([]);
+  const [subsubjectButtons, setSubsubjectButtons] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [resultData, setResultData] = useState<any>(null);
 
   const { user } = useAuth();
   const navigate = useNavigate();
-  const userName = user?.name || "User";
+  const userName = user?.name || "Usuário";
 
   useEffect(() => {
     setMessages([{ role: "assistant", content: "Olá! Escolha seu nível abaixo 👇" }]);
   }, []);
 
-  const sendMessage = async (message: string) => {
-    if (!message.trim()) return;
-
-    setMessages((prev) => [...prev, { role: "user", content: message }]);
-    setInputText("");
+  const handleLevelNext = (btns: any[], text: string) => {
+    setMessages(m => [...m, { role: "assistant", content: text }]);
+    if (btns.length) { setCategoryButtons(btns); setStep("categories"); }
   };
 
-  const handleLevelSelect = (level: string) => {
-    sendMessage(level);
+  const handleCategoryNext = (btns: any[], text: string) => {
+    setMessages(m => [...m, { role: "assistant", content: text }]);
+    if (btns.length) { setSubsubjectButtons(btns); setStep("subsubjects"); }
+  };
+
+  const handleSubsubjectNext = (qs: Question[], text: string) => {
+    setMessages(m => [...m, { role: "assistant", content: text }]);
+    if (qs.length) { setQuestions(qs); setStep("questions"); }
+  };
+
+  const handleSubmitAnswers = async (answers: string[]) => {
+    answers.forEach(ans => setMessages(m => [...m, { role: "user", content: ans }]));
+    try {
+      const res = await rasaService.verificarRespostas(answers);
+      setMessages(m => [...m, { role: "assistant", content: res.message }]);
+      setResultData(res);
+      setStep("results");
+    } catch (err) {
+      console.error(err);
+      setMessages(m => [...m, { role: "assistant", content: "Erro ao verificar respostas." }]);
+    }
   };
 
   return (
-    <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full max-w-full px-0 sm:px-8 md:px-16 mx-auto">
-      {/* header */}
-      <div className="absolute bg-[#141414] w-full flex justify-between border-b-[0.5px] border-neutral-800 px-24 py-6">
-        <Button
-          variant="outline"
-          size="icon"
-          className="border-neutral-400 border rounded-md text-slate-100"
-          onClick={() => navigate("/")}
-        >
-          <ChevronLeft />
-        </Button>
+    <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
+      <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4">
+        <Button variant="outline" size="icon" onClick={() => navigate("/")}> <ChevronLeft /> </Button>
+        <p className="text-white text-xl font-semibold">CHAT SAEL</p>
+        {user && <Button variant="outline" size="icon"><PanelRightOpen /></Button>}
+      </div>
+      <div className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-32">
+        <ChatMessages messages={messages} userName={userName} />
 
-        <p className="font-Montserrat text-neutral-200 font-semibold text-2xl">CHAT SAEL</p>
-
-        {user && (
-          <button onClick={() => setMenuOpen(true)} className="text-white">
-            <PanelRightOpen size={28} strokeWidth={0.75} />
-          </button>
+        {step === "levels" && <LevelStep onNext={handleLevelNext} />}
+        {step === "categories" && <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />}
+        {step === "subsubjects" && <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />}
+        {step === "questions" && <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />}
+        {step === "results" && resultData && (
+          <div className="mt-6 p-4 bg-gray-800 rounded">
+            <p className="text-white font-semibold">Acertos: {resultData.totalCorrectAnswers}</p>
+            <p className="text-white font-semibold">Erros: {resultData.totalWrongAnswers}</p>
+          </div>
         )}
       </div>
-
-      <div className="flex flex-col items-center w-full h-full pt-32 pb-24">
-        <div className="w-full max-w-2xl mx-auto">
-          <ChatMessages
-            messages={messages}
-            userName={userName}
-          />
-
-          <LevelSelector
-            onSelectLevel={handleLevelSelect}
-          />
-        </div>
-
-        <div className="fixed bottom-0 left-0 right-0 mb-8">
-          <ChatInput
-            inputText={inputText}
-            setInputText={setInputText}
-            sendMessage={sendMessage}
-          />
-        </div>
-      </div>
-
-      <Header
-        isOpen={menuOpen}
-        closeMenu={() => setMenuOpen(false)}
-      />
     </div>
   );
 }
-
-export { Chat };
