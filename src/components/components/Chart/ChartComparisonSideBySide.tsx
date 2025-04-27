@@ -3,7 +3,7 @@ import { MetricOption } from "./MetricCheckboxSelector";
 
 interface ChartComparisonSideBySideProps {
   type: "course" | "class" | "discipline" | "student";
-  ids: string[]; // Precisamos de exatamente dois IDs
+  ids: string[];
   metrics?: MetricOption[];
 }
 

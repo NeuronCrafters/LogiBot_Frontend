@@ -13,7 +13,6 @@ interface ChatMessagesProps {
 
 function ChatMessages({ messages, userName }: ChatMessagesProps) {
   const formatMessage = (content: string) => {
-    // Verifica se a mensagem é um nível selecionado
     if (content.includes("Nível")) {
       return (
         <div className="flex flex-col items-center">

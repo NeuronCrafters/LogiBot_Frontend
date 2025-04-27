@@ -1,4 +1,3 @@
-// api_routes.ts
 export type EntityType = "university" | "course" | "class" | "professor" | "discipline";
 
 export const ACADEMIC_ROUTES: Record<EntityType, { post: string; get: string; delete: string }> = {
