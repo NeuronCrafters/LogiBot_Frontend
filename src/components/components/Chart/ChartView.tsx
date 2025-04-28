@@ -79,7 +79,7 @@ export function ChartView() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-[#1f1f1f] border-neutral-700">
+      <Card className="bg-[#181818] border-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold text-white">Análise de Dados</CardTitle>
           <div className="flex items-center gap-4">
@@ -87,14 +87,13 @@ export function ChartView() {
             <Sheet>
               <SheetTrigger asChild>
                 <Button
-                  variant="outline"
                   size="icon"
-                  className="bg-[#2a2a2a] border-neutral-700 text-white hover:bg-[#333333]"
+                  className="bg-[#2a2a2a] text-slate-200 hover:bg-[#333333]"
                 >
                   <Filter className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent className="bg-[#1f1f1f] border-neutral-700">
+              <SheetContent className="bg-[#181818] border-0">
                 <SheetHeader>
                   <SheetTitle className="text-white">Filtros</SheetTitle>
                 </SheetHeader>
@@ -159,8 +158,8 @@ export function ChartView() {
       </Card>
 
       {shouldShowGraphics && (
-        <Card className="bg-[#1f1f1f] border-neutral-700">
-          <CardContent className="pt-6">
+        <Card className="bg-[#181818] border-0">
+          <CardContent className="pt-6 ">
             <ChartGraphics
               type={selectedType}
               id={selectedIds[0]}
@@ -172,7 +171,7 @@ export function ChartView() {
       )}
 
       {shouldShowComparison && (
-        <Card className="bg-[#1f1f1f] border-neutral-700">
+        <Card className="bg-[#181818] border-0">
           <CardContent className="pt-6">
             <Tabs defaultValue={comparisonView} className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-[#2a2a2a]">

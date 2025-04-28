@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, PanelRightOpen } from "lucide-react";
+import { AlignJustify, ChevronLeft, PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
 import { useNavigate } from "react-router-dom";
@@ -98,22 +98,18 @@ export function Chat() {
       {/* Header */}
       <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4">
         <Button
-          variant="outline"
-          size="icon"
           onClick={() => navigate("/")}
         >
-          <ChevronLeft />
+          <ChevronLeft stroke="white" />
         </Button>
 
         <p className="text-white text-xl font-semibold">CHAT SAEL</p>
 
         {user && (
           <Button
-            variant="outline"
-            size="icon"
             onClick={() => setMenuOpen(true)}
           >
-            <PanelRightOpen />
+            <AlignJustify stroke="white"/>
           </Button>
         )}
       </div>

@@ -273,34 +273,34 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
     switch (chartType) {
       case "bar":
         return (
-          <BarChart data={data}>
-            <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
-            <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
+            <BarChart data={data}>
+            
+            <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 14 }} />
+            <YAxis stroke="#fff" tick={{ fontSize: 14 }} />
             <Tooltip
               formatter={(value: number, name: string) => {
-                if (name === "Tempo de Uso (s)") {
-                  return formatTimeUsage(value);
-                }
-                return value.toString();
+              if (name === "Tempo de Uso (s)") {
+                return formatTimeUsage(value);
+              }
+              return value.toString();
               }}
-              labelStyle={{ color: "#fff" }}
               contentStyle={{ backgroundColor: "#222", borderRadius: "8px", border: "none" }}
-              cursor={{ fill: "#333" }}
+              cursor={{ fill: "#242424" }}
             />
             <Legend wrapperStyle={{ color: "#fff" }} />
             {metrics.includes("correct") && (
-              <Bar dataKey="correct" fill={metricsColors.correct} name="Questões Certas" animationDuration={600} />
+              <Bar dataKey="correct" fill="#34d399" name="Questões Certas" animationDuration={600} />
             )}
             {metrics.includes("wrong") && (
-              <Bar dataKey="wrong" fill={metricsColors.wrong} name="Questões Erradas" animationDuration={600} />
+              <Bar dataKey="wrong" fill="#f43f5e" name="Questões Erradas" animationDuration={600} />
             )}
             {metrics.includes("usage") && (
-              <Bar dataKey="usage" fill={metricsColors.usage} name="Tempo de Uso" animationDuration={600} />
+              <Bar dataKey="usage" fill="#8901AB"  name="Tempo de Uso" animationDuration={600} />
             )}
             {metrics.includes("sessions") && (
-              <Bar dataKey="sessions" fill={metricsColors.sessions} name="Sessões" animationDuration={600} />
+              <Bar dataKey="sessions" fill="#f59e0b" name="Sessões" animationDuration={600} />
             )}
-          </BarChart>
+            </BarChart>
         );
       case "line":
         return renderLineChart();
@@ -310,7 +310,7 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
   };
 
   return (
-    <Card className="bg-[#1F1F1F] text-white">
+    <Card className="bg-[#181818] border-0 text-slate-200">
       <CardHeader>
         <CardTitle className="text-center text-2xl font-bold mb-4">Gráfico de Interações</CardTitle>
         <div className="flex flex-wrap justify-center gap-4 mt-2">
@@ -349,16 +349,16 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
               Pizza
             </Button>
           </div>
-          <Button variant="outline" onClick={handleExportCSV}>Exportar CSV</Button>
-          <Button variant="outline" onClick={handleExportPNG}>Exportar PNG</Button>
-          <Button variant="outline" onClick={handleExportJSON}>Exportar JSON</Button>
+          <Button onClick={handleExportCSV} className="bg-blue-700">Exportar CSV</Button>
+          <Button onClick={handleExportPNG} className="bg-blue-700">Exportar PNG</Button>
+          <Button onClick={handleExportJSON} className="bg-blue-700">Exportar JSON</Button>
         </div>
       </CardHeader>
-      <CardContent className="overflow-auto max-h-[calc(100vh-200px)]">
+      <CardContent className="overflow-auto max-h-[calc(100vh-200px)] mt-12">
         {loading ? (
-          <p className="text-white text-lg text-center">Carregando dados...</p>
+          <p className="text-slate-200 text-lg text-center">Carregando dados...</p>
         ) : data.length === 0 ? (
-          <p className="text-red-500 text-lg text-center">Sem dados disponíveis</p>
+          <p className="text-slate-200 text-lg text-center">Sem dados disponíveis</p>
         ) : (
           <div ref={chartRef} className="min-h-[300px]">
             {chartType === "pie" ? (
