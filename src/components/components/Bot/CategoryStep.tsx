@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { rasaService } from "@/services/api/api_rasa";
 
 /**
@@ -13,56 +14,85 @@ export interface ButtonData {
 }
 
 interface CategoryStepProps {
-  /**
-   * Botões de assunto (ex.: Variáveis, Listas, Condicionais)
-   */
   buttons: ButtonData[];
-  /**
-   * Callback quando o usuário escolhe um assunto:
-   * @param subSubjects - botões de sub-assunto retornados pelo Rasa
-   * @param botText - texto da resposta do bot (ex.: "Escolha um tópico dentro de ...")
-   */
   onNext: (subSubjects: ButtonData[], botText: string) => void;
 }
 
 export function CategoryStep({ buttons, onNext }: CategoryStepProps) {
   const [loading, setLoading] = useState(false);
+  const [categoriaAtual, setCategoriaAtual] = useState("");
+  const [showButtons, setShowButtons] = useState(false);
 
   const handleClick = async (btn: ButtonData) => {
     setLoading(true);
+    setShowButtons(false);
     try {
-      // Extrai a categoria do payload: {"categoria":"valor"}
-      const match = btn.payload.match(/\{"categoria":"(.+)"\}/);
+      const match = btn.payload.match(/\{"categoria":"(.+?)"\}/);
       const categoria = match?.[1] ?? "";
+      setCategoriaAtual(categoria);
 
       const res = await rasaService.listarSubopcoes(categoria);
       const subSubjects = res.responses?.[0]?.buttons || [];
       const botText = res.responses?.[0]?.text || "";
 
-      onNext(subSubjects, botText);
+      // Delay controlado para exibir botões com leve suspense visual
+      setTimeout(() => {
+        onNext(subSubjects, botText);
+      }, 500);
     } catch (err) {
       console.error("Erro em CategoryStep:", err);
       onNext([], "Erro ao obter tópicos");
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 500);
     }
   };
 
-  if (loading) {
-    return <p className="text-center text-gray-400 p-4">Carregando tópicos...</p>;
-  }
+  useEffect(() => {
+    if (buttons.length > 0) {
+      const timer = setTimeout(() => {
+        setShowButtons(true);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [buttons]);
+
+  const categoriaFormatada = categoriaAtual
+    ? categoriaAtual.charAt(0).toUpperCase() + categoriaAtual.slice(1).toLowerCase()
+    : "";
 
   return (
-    <div className="flex flex-wrap justify-center gap-3 mt-4">
-      {buttons.map((btn, idx) => (
-        <Button
-          key={idx}
-          onClick={() => handleClick(btn)}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2"
-        >
-          {btn.title}
-        </Button>
-      ))}
+    <div className="w-full px-2">
+      {/* Mensagem de instrução do bot */}
+      {categoriaAtual && (
+        <div className="w-full px-4 mt-4">
+          <div className="bg-gray-800 text-white px-4 py-2 rounded-2xl shadow-md max-w-fit animate-fade-in">
+            Escolha um tópico dentro de{" "}
+            <span className="text-blue-400 font-semibold">{categoriaFormatada}</span>:
+          </div>
+        </div>
+      )}
+
+      {/* Loading de busca por subassuntos */}
+      {loading && (
+        <div className="flex justify-center items-center w-full py-6">
+          <Loader2 className="animate-spin text-gray-400 w-5 h-5" />
+        </div>
+      )}
+
+      {/* Lista de botões após carregamento */}
+      {!loading && showButtons && (
+        <div className="flex flex-col items-center gap-4 mt-6 animate-fade-in">
+          {buttons.map((btn, idx) => (
+            <Button
+              key={idx}
+              onClick={() => handleClick(btn)}
+              className="bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-400 text-white rounded-2xl px-5 py-2.5 shadow transition-all w-full max-w-sm"
+            >
+              {btn.title}
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
