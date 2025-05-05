@@ -1,36 +1,28 @@
-// src/components/components/Bot/QuestionsDisplay.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Question } from "./Question";
 
 interface QuestionsDisplayProps {
-  /** Array de perguntas com suas opções */
   questions: Question[];
-  /** Callback quando usuário submete todas as respostas */
   onSubmitAnswers: (answers: string[]) => void;
 }
 
 export function QuestionsDisplay({ questions, onSubmitAnswers }: QuestionsDisplayProps) {
-  // Estado local para armazenar a resposta de cada pergunta
-  const [answers, setAnswers] = useState<string[]>(
-    Array(questions.length).fill("")
-  );
+  const [answers, setAnswers] = useState<string[]>(Array(questions.length).fill(""));
 
-  // Marca a opção selecionada para a pergunta idx
   const handleSelect = (idx: number, opt: string) => {
     const next = [...answers];
     next[idx] = opt;
     setAnswers(next);
   };
 
-  // Verifica se todas as perguntas foram respondidas
   const allAnswered = answers.every((ans) => ans !== "");
 
   return (
     <div className="space-y-6">
       {questions.map((q, idx) => (
-        <div key={idx} className="p-4 bg-gray-800 rounded-lg">
-          <p className="text-white text-lg font-medium mb-3">
+        <div key={idx} className="p-6 bg-[#1e1e2f] rounded-2xl shadow-md animate-fade-in">
+          <p className="text-white text-lg font-semibold mb-4">
             {idx + 1}. {q.question}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -39,7 +31,10 @@ export function QuestionsDisplay({ questions, onSubmitAnswers }: QuestionsDispla
                 key={i}
                 variant={answers[idx] === opt ? "default" : "outline"}
                 onClick={() => handleSelect(idx, opt)}
-                className="text-left"
+                className={`text-left transition-all ${answers[idx] === opt
+                  ? "bg-blue-700 hover:bg-blue-800 text-white"
+                  : "bg-transparent text-white border border-white/20 hover:bg-white/10"
+                  }`}
               >
                 {opt}
               </Button>
@@ -48,10 +43,11 @@ export function QuestionsDisplay({ questions, onSubmitAnswers }: QuestionsDispla
         </div>
       ))}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mt-4">
         <Button
           onClick={() => onSubmitAnswers(answers)}
           disabled={!allAnswered}
+          className="bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-400 text-white font-semibold rounded-2xl px-6 py-2.5 shadow transition-all disabled:opacity-50"
         >
           Enviar respostas
         </Button>
