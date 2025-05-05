@@ -13,6 +13,7 @@ import { Header } from "@/components/components/Header/Header";
 import { rasaService } from "@/services/api/api_rasa";
 import { Question } from "@/components/components/Bot/Question";
 import { BotGreetingMessage } from "@/components/components/Bot/BotGreetingMessage";
+import { ResultDisplay } from "@/components/components/Bot/ResultDisplay"; // novo componente
 
 interface ChatMsg {
   role: "user" | "assistant";
@@ -26,6 +27,8 @@ export function Chat() {
   const [subsubjectButtons, setSubsubjectButtons] = useState<any[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [resultData, setResultData] = useState<any>(null);
+  const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
+  const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [inputText, setInputText] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [greetingDone, setGreetingDone] = useState(false);
@@ -74,9 +77,11 @@ export function Chat() {
 
   const handleSubmitAnswers = async (answers: string[]) => {
     answers.forEach((ans) => setMessages((m) => [...m, { role: "user", content: ans }]));
+    setUserAnswers(answers);
     try {
       const res = await rasaService.verificarRespostas(answers);
-      setMessages((m) => [...m, { role: "assistant", content: res.message }]);
+      setMessages((m) => [...m, { role: "assistant", content: "⚠️ Confira seu resultado:" }]);
+      setCorrectAnswers(res.correctAnswers || []);
       setResultData(res);
       setStep("results");
     } catch (err) {
@@ -114,7 +119,7 @@ export function Chat() {
               setGreetingDone(true);
               setTimeout(() => {
                 setShowLevels(true);
-              }, 800); // Delay para exibir os níveis depois da mensagem
+              }, 800);
             }}
           />
         )}
@@ -128,21 +133,22 @@ export function Chat() {
         {step === "categories" && (
           <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />
         )}
+
         {step === "subsubjects" && (
           <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />
         )}
+
         {step === "questions" && (
           <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />
         )}
+
         {step === "results" && resultData && (
-          <div className="mt-6 p-4 bg-gray-800 rounded">
-            <p className="text-white font-semibold">
-              Acertos: {resultData.totalCorrectAnswers}
-            </p>
-            <p className="text-white font-semibold">
-              Erros: {resultData.totalWrongAnswers}
-            </p>
-          </div>
+          <ResultDisplay
+            userAnswers={userAnswers}
+            correctAnswers={correctAnswers}
+            totalCorrectAnswers={resultData.totalCorrectAnswers}
+            totalWrongAnswers={resultData.totalWrongAnswers}
+          />
         )}
       </div>
 
