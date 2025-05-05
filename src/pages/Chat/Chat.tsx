@@ -1,3 +1,4 @@
+// Chat.tsx
 import { useState } from "react";
 import { AlignJustify, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,16 +77,17 @@ export function Chat() {
   };
 
   const handleSubmitAnswers = async (answers: string[]) => {
-    answers.forEach((ans) =>
-      setMessages((m) => [...m, { role: "user", content: ans }])
-    );
+    answers.forEach((ans) => setMessages((m) => [...m, { role: "user", content: ans }]));
     setUserAnswers(answers);
     try {
       const res = await rasaService.verificarRespostas(answers);
+      console.log("Retorno da API:", res);
+
       setMessages((m) => [
         ...m,
         { role: "assistant", content: "⚠️ Confira seu resultado:" },
       ]);
+
       setCorrectAnswers(res.correctAnswers || []);
       setResultData(res);
       setStep("results");
@@ -115,6 +117,7 @@ export function Chat() {
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
+      {/* Top Header */}
       <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4 z-10">
         <Button onClick={() => navigate("/")}>
           <ChevronLeft stroke="white" />
@@ -129,8 +132,10 @@ export function Chat() {
         )}
       </div>
 
+      {/* Side Menu */}
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
+      {/* Main Chat Section */}
       <div className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2">
         {!greetingDone && (
           <BotGreetingMessage
@@ -183,6 +188,7 @@ export function Chat() {
         )}
       </div>
 
+      {/* Chat input fixo na base */}
       <div className="w-full max-w-2xl fixed bottom-0 left-0 right-0 px-4 pb-6 z-10">
         <ChatInput
           inputText={inputText}
