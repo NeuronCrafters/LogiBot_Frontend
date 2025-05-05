@@ -47,12 +47,12 @@ export function SubsubjectStep({ buttons, onNext }: SubsubjectStepProps) {
 
   return (
     <div className="w-full px-2">
-      <div className="animate-fade-in max-w-2xl mx-auto flex flex-col items-center gap-4">
+      <div className="animate-fade-in max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         {buttons.map((btn, i) => (
           <Button
             key={i}
             onClick={() => handleClick(btn)}
-            className="bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-400 text-white rounded-2xl px-5 py-2.5 shadow transition-all w-full max-w-sm min-w-[140px]"
+            className="bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-400 text-white rounded-2xl px-5 py-2.5 shadow transition-all w-full"
           >
             {btn.title}
           </Button>

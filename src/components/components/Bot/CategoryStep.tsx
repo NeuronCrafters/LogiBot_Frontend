@@ -35,7 +35,6 @@ export function CategoryStep({ buttons, onNext }: CategoryStepProps) {
       const subSubjects = res.responses?.[0]?.buttons || [];
       const botText = res.responses?.[0]?.text || "";
 
-      // Delay controlado para exibir botões com leve suspense visual
       setTimeout(() => {
         onNext(subSubjects, botText);
       }, 500);
@@ -72,21 +71,21 @@ export function CategoryStep({ buttons, onNext }: CategoryStepProps) {
         </div>
       )}
 
-      {/* Loading de busca por subassuntos */}
+      {/* Loading visual */}
       {loading && (
         <div className="flex justify-center items-center w-full py-6">
           <Loader2 className="animate-spin text-gray-400 w-5 h-5" />
         </div>
       )}
 
-      {/* Lista de botões após carregamento */}
+      {/* Grade de botões responsiva */}
       {!loading && showButtons && (
-        <div className="flex flex-col items-center gap-4 mt-6 animate-fade-in">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto animate-fade-in">
           {buttons.map((btn, idx) => (
             <Button
               key={idx}
               onClick={() => handleClick(btn)}
-              className="bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-400 text-white rounded-2xl px-5 py-2.5 shadow transition-all w-full max-w-sm"
+              className="bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-400 text-white rounded-2xl px-5 py-2.5 shadow transition-all w-full"
             >
               {btn.title}
             </Button>
