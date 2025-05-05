@@ -1,4 +1,4 @@
-import { BadgeAlert, CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 interface ResultDisplayProps {
   userAnswers: string[];
@@ -15,7 +15,7 @@ export function ResultDisplay({
 }: ResultDisplayProps) {
   return (
     <div className="w-full mt-6 max-w-2xl mx-auto space-y-6 animate-fade-in">
-      <div className="p-4 bg-[#1e1e2f] rounded-2xl shadow">
+      <div className="p-4 bg-[#1f2937] rounded-2xl shadow">
         <p className="text-white font-bold mb-1">Resumo:</p>
         <p className="text-green-400 font-semibold">✅ Acertos: {totalCorrectAnswers}</p>
         <p className="text-red-400 font-semibold">❌ Erros: {totalWrongAnswers}</p>
@@ -29,8 +29,8 @@ export function ResultDisplay({
             <div
               key={i}
               className={`p-4 rounded-xl flex items-start gap-3 ${isCorrect
-                  ? "bg-green-800/20 border border-green-500"
-                  : "bg-red-800/20 border border-red-500"
+                ? "bg-green-800/20 border border-green-500"
+                : "bg-red-800/20 border border-red-500"
                 }`}
             >
               {isCorrect ? (

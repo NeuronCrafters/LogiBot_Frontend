@@ -13,7 +13,7 @@ import { Header } from "@/components/components/Header/Header";
 import { rasaService } from "@/services/api/api_rasa";
 import { Question } from "@/components/components/Bot/Question";
 import { BotGreetingMessage } from "@/components/components/Bot/BotGreetingMessage";
-import { ResultDisplay } from "@/components/components/Bot/ResultDisplay"; // novo componente
+import { ResultDisplay } from "@/components/components/Bot/ResultDisplay";
 
 interface ChatMsg {
   role: "user" | "assistant";
@@ -52,7 +52,7 @@ export function Chat() {
   };
 
   const handleLevelNext = (btns: any[], text: string) => {
-    setMessages((m) => [...m, { role: "assistant", content: text }]);
+    setMessages((prev) => [...prev, { role: "assistant", content: text }]);
     if (btns.length) {
       setCategoryButtons(btns);
       setStep("categories");
@@ -60,7 +60,7 @@ export function Chat() {
   };
 
   const handleCategoryNext = (btns: any[], text: string) => {
-    setMessages((m) => [...m, { role: "assistant", content: text }]);
+    setMessages((prev) => [...prev, { role: "assistant", content: text }]);
     if (btns.length) {
       setSubsubjectButtons(btns);
       setStep("subsubjects");
@@ -68,7 +68,7 @@ export function Chat() {
   };
 
   const handleSubsubjectNext = (qs: Question[], text: string) => {
-    setMessages((m) => [...m, { role: "assistant", content: text }]);
+    setMessages((prev) => [...prev, { role: "assistant", content: text }]);
     if (qs.length) {
       setQuestions(qs);
       setStep("questions");
@@ -76,24 +76,47 @@ export function Chat() {
   };
 
   const handleSubmitAnswers = async (answers: string[]) => {
-    answers.forEach((ans) => setMessages((m) => [...m, { role: "user", content: ans }]));
+    answers.forEach((ans) =>
+      setMessages((m) => [...m, { role: "user", content: ans }])
+    );
     setUserAnswers(answers);
     try {
       const res = await rasaService.verificarRespostas(answers);
-      setMessages((m) => [...m, { role: "assistant", content: "⚠️ Confira seu resultado:" }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: "⚠️ Confira seu resultado:" },
+      ]);
       setCorrectAnswers(res.correctAnswers || []);
       setResultData(res);
       setStep("results");
     } catch (err) {
       console.error(err);
-      setMessages((m) => [...m, { role: "assistant", content: "Erro ao verificar respostas." }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: "Erro ao verificar respostas." },
+      ]);
     }
+  };
+
+  const handleRestart = () => {
+    setMessages((m) => [
+      ...m,
+      { role: "assistant", content: "Vamos praticar mais! Escolha seu nível abaixo 👇" },
+    ]);
+    setStep("levels");
+    setCategoryButtons([]);
+    setSubsubjectButtons([]);
+    setQuestions([]);
+    setResultData(null);
+    setCorrectAnswers([]);
+    setUserAnswers([]);
+    setShowLevels(true);
   };
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
       {/* Header */}
-      <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4">
+      <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4 z-10">
         <Button onClick={() => navigate("/")}>
           <ChevronLeft stroke="white" />
         </Button>
@@ -111,11 +134,11 @@ export function Chat() {
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
       {/* Chat body */}
-      <div className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-32">
+      <div className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2">
         {!greetingDone && (
           <BotGreetingMessage
             onFinish={(msg) => {
-              setMessages([{ role: "assistant", content: msg }]);
+              setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
               setGreetingDone(true);
               setTimeout(() => {
                 setShowLevels(true);
@@ -143,17 +166,28 @@ export function Chat() {
         )}
 
         {step === "results" && resultData && (
-          <ResultDisplay
-            userAnswers={userAnswers}
-            correctAnswers={correctAnswers}
-            totalCorrectAnswers={resultData.totalCorrectAnswers}
-            totalWrongAnswers={resultData.totalWrongAnswers}
-          />
+          <div className="mt-6 space-y-4">
+            <ResultDisplay
+              userAnswers={userAnswers}
+              correctAnswers={correctAnswers}
+              totalCorrectAnswers={resultData.totalCorrectAnswers}
+              totalWrongAnswers={resultData.totalWrongAnswers}
+            />
+
+            <div className="flex justify-center">
+              <Button
+                onClick={handleRestart}
+                className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2.5 rounded-2xl mt-2 shadow"
+              >
+                Continuar praticando
+              </Button>
+            </div>
+          </div>
         )}
       </div>
 
       {/* Chat input */}
-      <div className="w-full max-w-2xl fixed bottom-0 left-0 right-0 p-4 bg-[#141414]">
+      <div className="w-full max-w-2xl fixed bottom-0 left-0 right-0 px-4 pb-6 z-10">
         <ChatInput
           inputText={inputText}
           setInputText={setInputText}

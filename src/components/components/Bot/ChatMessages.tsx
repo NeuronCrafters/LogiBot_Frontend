@@ -25,7 +25,16 @@ function ChatMessages({ messages, userName }: ChatMessagesProps) {
         </div>
       );
     }
-    return content;
+
+    if (content.includes("\n")) {
+      return content.split("\n").map((line, idx) => (
+        <p key={idx} className="mb-1 leading-snug text-left whitespace-pre-wrap">
+          {line}
+        </p>
+      ));
+    }
+
+    return <p className="text-left whitespace-pre-wrap">{content}</p>;
   };
 
   return (
@@ -48,8 +57,8 @@ function ChatMessages({ messages, userName }: ChatMessagesProps) {
 
           <div
             className={`p-3 rounded-lg max-w-[75%] ${message.role === "user"
-              ? "bg-blue-600 text-white ml-auto rounded-br-none"
-              : "bg-gray-800 text-gray-200 mr-auto rounded-bl-none"
+                ? "bg-blue-600 text-white ml-auto rounded-br-none"
+                : "bg-gray-800 text-gray-200 mr-auto rounded-bl-none"
               }`}
           >
             {formatMessage(message.content)}
@@ -68,4 +77,4 @@ function ChatMessages({ messages, userName }: ChatMessagesProps) {
   );
 }
 
-export { ChatMessages }
+export { ChatMessages };
