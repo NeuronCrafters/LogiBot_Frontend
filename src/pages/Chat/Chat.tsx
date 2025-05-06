@@ -88,28 +88,22 @@ export function Chat() {
 
     const formattedAnswers = answers.map(convertToOptionKey);
 
+    answers.forEach((answer, index) => {
+      setMessages((m) => [...m, { role: "user", content: `Pergunta ${index + 1}: ${answer}` }]);
+    });
+
     try {
       const res = await rasaService.verificarRespostas(formattedAnswers);
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: res.message },
-      ]);
+      setMessages((m) => [...m, { role: "assistant", content: res.message }]);
       setResultData(res);
       setStep("results");
     } catch (err) {
       console.error(err);
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: "Erro ao verificar respostas." },
-      ]);
+      setMessages((m) => [...m, { role: "assistant", content: "Erro ao verificar respostas." }]);
     }
   };
 
   const handleRestart = () => {
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: "Vamos praticar mais! Escolha seu nível abaixo 👇" },
-    ]);
     setStep("levels");
     setCategoryButtons([]);
     setSubsubjectButtons([]);
@@ -121,17 +115,9 @@ export function Chat() {
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
       <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4 z-10">
-        <Button onClick={() => navigate("/")}>
-          <ChevronLeft stroke="white" />
-        </Button>
-
+        <Button onClick={() => navigate("/")}> <ChevronLeft stroke="white" /> </Button>
         <p className="text-white text-xl font-semibold">CHAT SAEL</p>
-
-        {user && (
-          <Button onClick={() => setMenuOpen(true)}>
-            <AlignJustify stroke="white" />
-          </Button>
-        )}
+        {user && <Button onClick={() => setMenuOpen(true)}> <AlignJustify stroke="white" /> </Button>}
       </div>
 
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
@@ -142,30 +128,17 @@ export function Chat() {
             onFinish={(msg) => {
               setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
               setGreetingDone(true);
-              setTimeout(() => {
-                setShowLevels(true);
-              }, 800);
+              setTimeout(() => setShowLevels(true), 800);
             }}
           />
         )}
 
         {greetingDone && <ChatMessages messages={messages} userName={userName} />}
 
-        {greetingDone && showLevels && step === "levels" && (
-          <LevelStep onNext={handleLevelNext} />
-        )}
-
-        {step === "categories" && (
-          <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />
-        )}
-
-        {step === "subsubjects" && (
-          <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />
-        )}
-
-        {step === "questions" && (
-          <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />
-        )}
+        {greetingDone && showLevels && step === "levels" && <LevelStep onNext={handleLevelNext} />}
+        {step === "categories" && <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />}
+        {step === "subsubjects" && <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />}
+        {step === "questions" && <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />}
 
         {step === "results" && resultData && (
           <div className="mt-6 space-y-4">
