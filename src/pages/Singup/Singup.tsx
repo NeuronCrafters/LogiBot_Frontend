@@ -6,31 +6,15 @@ import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 
-interface Class {
-  _id: string;
-  name: string;
-}
-
-interface Course {
-  _id: string;
-  name: string;
-  classes: Class[];
-}
-
 interface University {
   _id: string;
   name: string;
-  courses: Course[];
 }
 
 function Signup() {
   const [universities, setUniversities] = useState<University[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [classes, setClasses] = useState<Class[]>([]);
-
   const [selectedUniversity, setSelectedUniversity] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [selectedClass, setSelectedClass] = useState("");
+  const [disciplineCode, setDisciplineCode] = useState("");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -50,27 +34,6 @@ function Signup() {
       });
   }, []);
 
-  useEffect(() => {
-    if (selectedUniversity) {
-      const selectedUni = universities.find((u) => u._id === selectedUniversity);
-      setCourses(selectedUni ? selectedUni.courses : []);
-    } else {
-      setCourses([]);
-    }
-    setSelectedCourse("");
-    setClasses([]);
-  }, [selectedUniversity, universities]);
-
-  useEffect(() => {
-    if (selectedCourse) {
-      const selectedCrs = courses.find((c) => c._id === selectedCourse);
-      setClasses(selectedCrs ? selectedCrs.classes : []);
-    } else {
-      setClasses([]);
-    }
-    setSelectedClass("");
-  }, [selectedCourse, courses]);
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -81,8 +44,7 @@ function Signup() {
       email,
       password,
       school: selectedUniversity,
-      course: selectedCourse,
-      class: selectedClass,
+      disciplineCode,
     };
 
     try {
@@ -98,7 +60,10 @@ function Signup() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900" style={{ flex: 2 }}>
+      <div
+        className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900"
+        style={{ flex: 2 }}
+      >
         <AnimatedLogo />
         <h1 className="text-slate-100 text-5xl lg:text-6xl font-bold mt-12 ml-8">SAEL</h1>
       </div>
@@ -150,35 +115,14 @@ function Signup() {
               ))}
             </select>
 
-            <select
-              className="w-[340px] h-[50px] bg-neutral-800 text-slate-300 text-sm font-Montserrat p-2 mb-4 rounded-md"
-              value={selectedCourse}
-              onChange={(e) => setSelectedCourse(e.target.value)}
-              disabled={!selectedUniversity}
+            <Input
+              type="text"
+              placeholder="Código da Disciplina"
+              className="bg-neutral-800 mb-4"
+              value={disciplineCode}
+              onChange={(e) => setDisciplineCode(e.target.value)}
               required
-            >
-              <option value="">Selecione o curso</option>
-              {courses.map((course) => (
-                <option key={course._id} value={course._id}>
-                  {course.name}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="w-[340px] h-[50px] bg-neutral-800 text-slate-300 text-sm font-Montserrat p-2 mb-4 rounded-md"
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
-              disabled={!selectedCourse}
-              required
-            >
-              <option value="">Selecione a turma</option>
-              {classes.map((cls) => (
-                <option key={cls._id} value={cls._id}>
-                  {cls.name}
-                </option>
-              ))}
-            </select>
+            />
 
             <ButtonLogin
               type="submit"
