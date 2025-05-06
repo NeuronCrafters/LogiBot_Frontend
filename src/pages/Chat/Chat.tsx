@@ -1,4 +1,3 @@
-// Chat.tsx
 import { useState } from "react";
 import { AlignJustify, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,8 +27,6 @@ export function Chat() {
   const [subsubjectButtons, setSubsubjectButtons] = useState<any[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [resultData, setResultData] = useState<any>(null);
-  const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
-  const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [inputText, setInputText] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [greetingDone, setGreetingDone] = useState(false);
@@ -77,18 +74,26 @@ export function Chat() {
   };
 
   const handleSubmitAnswers = async (answers: string[]) => {
-    answers.forEach((ans) => setMessages((m) => [...m, { role: "user", content: ans }]));
-    setUserAnswers(answers);
-    try {
-      const res = await rasaService.verificarRespostas(answers);
-      console.log("Retorno da API:", res);
+    const convertToOptionKey = (answer: string) => {
+      const prefix = answer.trim().toLowerCase().charAt(0);
+      switch (prefix) {
+        case "a": return "options A";
+        case "b": return "options B";
+        case "c": return "options C";
+        case "d": return "options D";
+        case "e": return "options E";
+        default: return "options A";
+      }
+    };
 
+    const formattedAnswers = answers.map(convertToOptionKey);
+
+    try {
+      const res = await rasaService.verificarRespostas(formattedAnswers);
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: "⚠️ Confira seu resultado:" },
+        { role: "assistant", content: res.message },
       ]);
-
-      setCorrectAnswers(res.correctAnswers || []);
       setResultData(res);
       setStep("results");
     } catch (err) {
@@ -110,14 +115,11 @@ export function Chat() {
     setSubsubjectButtons([]);
     setQuestions([]);
     setResultData(null);
-    setCorrectAnswers([]);
-    setUserAnswers([]);
     setShowLevels(true);
   };
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
-      {/* Top Header */}
       <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4 z-10">
         <Button onClick={() => navigate("/")}>
           <ChevronLeft stroke="white" />
@@ -132,10 +134,8 @@ export function Chat() {
         )}
       </div>
 
-      {/* Side Menu */}
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
-      {/* Main Chat Section */}
       <div className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2">
         {!greetingDone && (
           <BotGreetingMessage
@@ -170,12 +170,10 @@ export function Chat() {
         {step === "results" && resultData && (
           <div className="mt-6 space-y-4">
             <ResultDisplay
-              userAnswers={userAnswers}
-              correctAnswers={correctAnswers}
+              detalhes={resultData.detalhes}
               totalCorrectAnswers={resultData.totalCorrectAnswers}
               totalWrongAnswers={resultData.totalWrongAnswers}
             />
-
             <div className="flex justify-center">
               <Button
                 onClick={handleRestart}
@@ -188,7 +186,6 @@ export function Chat() {
         )}
       </div>
 
-      {/* Chat input fixo na base */}
       <div className="w-full max-w-2xl fixed bottom-0 left-0 right-0 px-4 pb-6 z-10">
         <ChatInput
           inputText={inputText}
