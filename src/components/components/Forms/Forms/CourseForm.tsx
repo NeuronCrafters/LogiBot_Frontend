@@ -18,9 +18,9 @@ export interface CourseFormProps {
 }
 
 function CourseForm({ onSubmit, initialData }: CourseFormProps) {
-  const [name, setName] = useState<string>(initialData ? initialData.name : "");
+  const [name, setName] = useState<string>(initialData?.name || "");
   const [universityId, setUniversityId] = useState<string>(
-    initialData ? initialData.universityId : ""
+    initialData?.universityId || ""
   );
   const [universities, setUniversities] = useState<University[]>([]);
 
@@ -36,7 +36,6 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !universityId) return;
-    // Chama o onSubmit com os dados do curso. O campo "id" é opcional.
     onSubmit({ name: name.trim(), universityId });
     setName("");
     setUniversityId("");

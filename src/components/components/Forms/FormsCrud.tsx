@@ -12,12 +12,22 @@ import type {
   DisciplineData,
 } from "@/@types/FormsDataTypes";
 
-export type EntityType = "university" | "course" | "class" | "professor" | "discipline";
+export type EntityType =
+  | "university"
+  | "course"
+  | "class"
+  | "professor"
+  | "discipline";
 
 interface FormsCrudProps {
   onSubmit: (
     entity: EntityType,
-    item: UniversityData | CourseData | ProfessorData | ClassData | DisciplineData
+    item:
+      | UniversityData
+      | CourseData
+      | ProfessorData
+      | ClassData
+      | DisciplineData
   ) => void;
   initialData?:
   | UniversityData
@@ -28,11 +38,12 @@ interface FormsCrudProps {
 }
 
 const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
-  const [selectedEntity, setSelectedEntity] = React.useState<EntityType | "">("");
+  const [selectedEntity, setSelectedEntity] = React.useState<EntityType | "">(
+    ""
+  );
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value as EntityType;
-    console.log("Entidade selecionada no FormsCrud:", value);
     setSelectedEntity(value);
   };
 
@@ -54,46 +65,31 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
       </select>
       {selectedEntity === "university" && (
         <UniversityForm
-          onSubmit={(data) => {
-            console.log("UniversityForm onSubmit:", data);
-            onSubmit("university", data);
-          }}
+          onSubmit={(data) => onSubmit("university", data)}
           initialData={initialData as UniversityData | undefined}
         />
       )}
       {selectedEntity === "course" && (
         <CourseForm
-          onSubmit={(data) => {
-            console.log("CourseForm onSubmit:", data);
-            onSubmit("course", data);
-          }}
+          onSubmit={(data) => onSubmit("course", data)}
           initialData={initialData as CourseData | undefined}
         />
       )}
       {selectedEntity === "class" && (
         <ClassForm
-          onSubmit={(data) => {
-            console.log("ClassForm onSubmit:", data);
-            onSubmit("class", data);
-          }}
+          onSubmit={(data) => onSubmit("class", data)}
           initialData={initialData as ClassData | undefined}
         />
       )}
       {selectedEntity === "professor" && (
         <ProfessorForm
-          onSubmit={(data) => {
-            console.log("ProfessorForm onSubmit:", data);
-            onSubmit("professor", data);
-          }}
+          onSubmit={(data) => onSubmit("professor", data)}
           initialData={initialData as ProfessorData | undefined}
         />
       )}
       {selectedEntity === "discipline" && (
         <DisciplineForm
-          onSubmit={(data) => {
-            console.log("DisciplineForm onSubmit:", data);
-            onSubmit("discipline", data);
-          }}
+          onSubmit={(data) => onSubmit("discipline", data)}
           initialData={initialData as DisciplineData | undefined}
         />
       )}
