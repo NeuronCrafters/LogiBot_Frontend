@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { AlignJustify, ChevronLeft } from "lucide-react";
+import { useState, useEffect } from "react";
+import { AlignJustify, ChevronLeft, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ import { rasaService } from "@/services/api/api_rasa";
 import { Question } from "@/components/components/Bot/Question";
 import { BotGreetingMessage } from "@/components/components/Bot/BotGreetingMessage";
 import { ResultDisplay } from "@/components/components/Bot/ResultDisplay";
+import { InitialChoiceStep } from "@/components/components/Bot/InitialChoiceStep";
 
 interface ChatMsg {
   role: "user" | "assistant";
@@ -23,6 +24,7 @@ interface ChatMsg {
 export function Chat() {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [step, setStep] = useState<"levels" | "categories" | "subsubjects" | "questions" | "results">("levels");
+  const [mode, setMode] = useState<"none" | "quiz" | "chat">("none");
   const [categoryButtons, setCategoryButtons] = useState<any[]>([]);
   const [subsubjectButtons, setSubsubjectButtons] = useState<any[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -31,6 +33,7 @@ export function Chat() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [greetingDone, setGreetingDone] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
+  const [pendingLevelIntro, setPendingLevelIntro] = useState(false);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -46,6 +49,19 @@ export function Chat() {
     } catch (err) {
       console.error(err);
       setMessages((m) => [...m, { role: "assistant", content: "Erro no chat." }]);
+    }
+  };
+
+  const handleInitialChoice = (choice: "quiz" | "chat") => {
+    setMessages([]);
+    if (choice === "quiz") {
+      setMode("quiz");
+      setStep("levels");
+      setPendingLevelIntro(true);
+    } else {
+      setMode("chat");
+      setShowLevels(false);
+      setMessages([{ role: "assistant", content: "Vamos conversar, sobre o que quer falar?" }]);
     }
   };
 
@@ -105,12 +121,24 @@ export function Chat() {
 
   const handleRestart = () => {
     setStep("levels");
+    setMode("none");
     setCategoryButtons([]);
     setSubsubjectButtons([]);
     setQuestions([]);
     setResultData(null);
-    setShowLevels(true);
+    setShowLevels(false);
+    setMessages([]);
   };
+
+  useEffect(() => {
+    if (pendingLevelIntro && mode === "quiz") {
+      const timer = setTimeout(() => {
+        setMessages((prev) => [...prev, { role: "assistant", content: "Olá! Escolha seu nível abaixo 👇" }]);
+        setTimeout(() => setShowLevels(true), 1000);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingLevelIntro, mode]);
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
@@ -124,23 +152,27 @@ export function Chat() {
 
       <div className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2">
         {!greetingDone && (
-          <BotGreetingMessage
-            onFinish={(msg) => {
-              setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
-              setGreetingDone(true);
-              setTimeout(() => setShowLevels(true), 800);
-            }}
-          />
+          <BotGreetingMessage onFinish={() => setGreetingDone(true)} />
         )}
 
-        {greetingDone && <ChatMessages messages={messages} userName={userName} />}
+        {greetingDone && mode === "none" && <InitialChoiceStep onChoose={handleInitialChoice} />}
 
-        {greetingDone && showLevels && step === "levels" && <LevelStep onNext={handleLevelNext} />}
-        {step === "categories" && <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />}
-        {step === "subsubjects" && <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />}
-        {step === "questions" && <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />}
+        {mode !== "none" && (
+          <div className="flex justify-center mt-4 mb-4">
+            <Button onClick={handleRestart} className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-xl flex items-center gap-2">
+              <RefreshCcw className="w-4 h-4" /> Trocar modo (quiz/conversa)
+            </Button>
+          </div>
+        )}
 
-        {step === "results" && resultData && (
+        {greetingDone && mode !== "none" && <ChatMessages messages={messages} userName={userName} />}
+
+        {mode === "quiz" && showLevels && step === "levels" && <LevelStep onNext={handleLevelNext} />}
+        {mode === "quiz" && step === "categories" && <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />}
+        {mode === "quiz" && step === "subsubjects" && <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />}
+        {mode === "quiz" && step === "questions" && <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />}
+
+        {mode === "quiz" && step === "results" && resultData && (
           <div className="mt-6 space-y-4">
             <ResultDisplay
               detalhes={resultData.detalhes}
@@ -160,11 +192,13 @@ export function Chat() {
       </div>
 
       <div className="w-full max-w-2xl fixed bottom-0 left-0 right-0 px-4 pb-6 z-10">
-        <ChatInput
-          inputText={inputText}
-          setInputText={setInputText}
-          sendMessage={sendMessage}
-        />
+        {greetingDone && mode === "chat" && (
+          <ChatInput
+            inputText={inputText}
+            setInputText={setInputText}
+            sendMessage={sendMessage}
+          />
+        )}
       </div>
     </div>
   );
