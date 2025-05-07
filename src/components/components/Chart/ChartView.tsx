@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import { DateRangeFilter } from "./DateRangeFilter";
 
 export function ChartView() {
   const [mode, setMode] = useState<ChartMode>("visualizar");
@@ -30,7 +31,6 @@ export function ChartView() {
     from: addDays(new Date(), -30),
     to: new Date(),
   });
-
   const [comparisonView, setComparisonView] = useState<"bar" | "line">("line");
 
   const handleFilterChange = (filter: {
@@ -44,45 +44,31 @@ export function ChartView() {
     const ids: string[] = [];
     const type = filter.type;
 
-    if (filter.studentId) {
-      ids.push(filter.studentId);
-    } else if (filter.disciplineId) {
-      ids.push(filter.disciplineId);
-    } else if (filter.classId) {
-      ids.push(filter.classId);
-    } else if (filter.courseId) {
-      ids.push(filter.courseId);
-    } else if (filter.universityId) {
-      ids.push(filter.universityId);
-    }
+    if (filter.studentId) ids.push(filter.studentId);
+    else if (filter.disciplineId) ids.push(filter.disciplineId);
+    else if (filter.classId) ids.push(filter.classId);
+    else if (filter.courseId) ids.push(filter.courseId);
+    else if (filter.universityId) ids.push(filter.universityId);
 
     setSelectedType(type);
     setSelectedIds(ids);
   };
 
-  const shouldShowGraphics = useMemo(
-    () => mode === "visualizar" && selectedIds.length > 0,
-    [mode, selectedIds]
-  );
-
-  const shouldShowComparison = useMemo(
-    () => mode === "comparar" && selectedIds.length > 1,
-    [mode, selectedIds]
-  );
+  const shouldShowGraphics = useMemo(() => mode === "visualizar" && selectedIds.length > 0, [mode, selectedIds]);
+  const shouldShowComparison = useMemo(() => mode === "comparar" && selectedIds.length > 1, [mode, selectedIds]);
 
   const selectedLabel = useMemo(() => {
     if (selectedIds.length === 0) return "Nenhum item selecionado";
-    if (selectedIds.length === 1)
-      return `Selecionado: ${selectedType} - ${selectedIds[0]}`;
+    if (selectedIds.length === 1) return `Selecionado: ${selectedType} - ${selectedIds[0]}`;
     return `Comparando ${selectedType}s: ${selectedIds.join(" vs ")}`;
   }, [selectedIds, selectedType]);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <Card className="bg-[#181818] border-0">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-2">
           <CardTitle className="text-2xl font-bold text-white">Análise de Dados</CardTitle>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <ChartModeSelector mode={mode} setMode={setMode} />
             <Sheet>
               <SheetTrigger asChild>
@@ -98,48 +84,7 @@ export function ChartView() {
                   <SheetTitle className="text-white">Filtros</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white">Período</label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal bg-[#2a2a2a] border-neutral-700 text-white hover:bg-[#333333]",
-                            !dateRange && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {dateRange?.from ? (
-                            dateRange.to ? (
-                              <>
-                                {format(dateRange.from, "dd/MM/yyyy")} -{" "}
-                                {format(dateRange.to, "dd/MM/yyyy")}
-                              </>
-                            ) : (
-                              format(dateRange.from, "dd/MM/yyyy")
-                            )
-                          ) : (
-                            <span>Selecione um período</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          initialFocus
-                          mode="range"
-                          defaultMonth={dateRange.from}
-                          selected={dateRange}
-                          onSelect={(range) => {
-                            if (range?.from && range.to) {
-                              setDateRange({ from: range.from, to: range.to });
-                            }
-                          }}
-                          numberOfMonths={2}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                  <DateRangeFilter dateRange={dateRange} setDateRange={setDateRange} />
                   <CascadingFilter onFilterChange={handleFilterChange} />
                   <div className="mt-4">
                     <MetricCheckboxSelector
@@ -159,7 +104,7 @@ export function ChartView() {
 
       {shouldShowGraphics && (
         <Card className="bg-[#181818] border-0">
-          <CardContent className="pt-6 ">
+          <CardContent className="pt-6">
             <ChartGraphics
               type={selectedType}
               id={selectedIds[0]}

@@ -15,6 +15,7 @@ import { Question } from "@/components/components/Bot/Question";
 import { BotGreetingMessage } from "@/components/components/Bot/BotGreetingMessage";
 import { ResultDisplay } from "@/components/components/Bot/ResultDisplay";
 import { InitialChoiceStep } from "@/components/components/Bot/InitialChoiceStep";
+import { TypingBubble } from "@/components/components/Bot/TypingBubble";
 
 interface ChatMsg {
   role: "user" | "assistant";
@@ -34,6 +35,8 @@ export function Chat() {
   const [greetingDone, setGreetingDone] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
   const [pendingLevelIntro, setPendingLevelIntro] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [fakeTypingDelay, setFakeTypingDelay] = useState(false);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -43,12 +46,20 @@ export function Chat() {
     if (!message.trim()) return;
     setMessages((m) => [...m, { role: "user", content: message }]);
     setInputText("");
+    setTyping(true);
+    setFakeTypingDelay(true);
     try {
       const res = await rasaService.sendMessage(message);
-      setMessages((m) => [...m, { role: "assistant", content: res.response }]);
+      setTimeout(() => {
+        setFakeTypingDelay(false);
+        setMessages((m) => [...m, { role: "assistant", content: res.response }]);
+        setTyping(false);
+      }, 1200);
     } catch (err) {
       console.error(err);
+      setFakeTypingDelay(false);
       setMessages((m) => [...m, { role: "assistant", content: "Erro no chat." }]);
+      setTyping(false);
     }
   };
 
@@ -61,9 +72,14 @@ export function Chat() {
     } else {
       setMode("chat");
       setShowLevels(false);
-      setMessages([{ role: "assistant", content: "Vamos conversar, sobre o que quer falar?" }]);
+
+      setMessages([{ role: "assistant", content: "Digitando..." }]);
+      setTimeout(() => {
+        setMessages([{ role: "assistant", content: "Vamos conversar, sobre o que quer falar?" }]);
+      }, 2000);
     }
   };
+
 
   const handleLevelNext = (btns: any[], text: string) => {
     setMessages((prev) => [...prev, { role: "assistant", content: text }]);
@@ -151,14 +167,12 @@ export function Chat() {
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
       <div className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2">
-        {!greetingDone && (
-          <BotGreetingMessage onFinish={() => setGreetingDone(true)} />
-        )}
+        {!greetingDone && <BotGreetingMessage onFinish={() => setGreetingDone(true)} />}
 
         {greetingDone && mode === "none" && <InitialChoiceStep onChoose={handleInitialChoice} />}
 
         {mode !== "none" && (
-          <div className="flex justify-center mt-4 mb-4">
+          <div className="flex justify-center mt-2 mb-4">
             <Button onClick={handleRestart} className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-xl flex items-center gap-2">
               <RefreshCcw className="w-4 h-4" /> Trocar modo (quiz/conversa)
             </Button>
@@ -166,6 +180,7 @@ export function Chat() {
         )}
 
         {greetingDone && mode !== "none" && <ChatMessages messages={messages} userName={userName} />}
+        {greetingDone && mode === "chat" && typing && fakeTypingDelay && <TypingBubble />}
 
         {mode === "quiz" && showLevels && step === "levels" && <LevelStep onNext={handleLevelNext} />}
         {mode === "quiz" && step === "categories" && <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -25,7 +25,8 @@ interface CascadingFilterProps {
 }
 
 export function CascadingFilter({ onFilterChange }: CascadingFilterProps) {
-  const [selectedType, setSelectedType] = useState<"university" | "course" | "discipline" | "class" | "student">("university");
+  const [type, setType] = useState<"university" | "course" | "discipline" | "class" | "student">("university");
+
   const [universities, setUniversities] = useState<AcademicEntity[]>([]);
   const [courses, setCourses] = useState<AcademicEntity[]>([]);
   const [classes, setClasses] = useState<AcademicEntity[]>([]);
@@ -39,28 +40,16 @@ export function CascadingFilter({ onFilterChange }: CascadingFilterProps) {
   const [selectedStudent, setSelectedStudent] = useState<string>();
 
   useEffect(() => {
-    const fetchUniversities = async () => {
-      try {
-        const data = await publicApi.getInstitutions<AcademicEntity[]>();
-        setUniversities(data);
-      } catch (error) {
-        console.error("Erro ao buscar universidades:", error);
-      }
-    };
-    fetchUniversities();
+    publicApi.getInstitutions<AcademicEntity[]>()
+      .then(setUniversities)
+      .catch((err) => console.error("Erro ao buscar universidades:", err));
   }, []);
 
   useEffect(() => {
     if (selectedUniversity) {
-      const fetchCourses = async () => {
-        try {
-          const data = await publicApi.getCourses<AcademicEntity[]>(selectedUniversity);
-          setCourses(data);
-        } catch (error) {
-          console.error("Erro ao buscar cursos:", error);
-        }
-      };
-      fetchCourses();
+      publicApi.getCourses<AcademicEntity[]>(selectedUniversity)
+        .then(setCourses)
+        .catch((err) => console.error("Erro ao buscar cursos:", err));
     } else {
       setCourses([]);
       setSelectedCourse(undefined);
@@ -69,33 +58,16 @@ export function CascadingFilter({ onFilterChange }: CascadingFilterProps) {
 
   useEffect(() => {
     if (selectedUniversity && selectedCourse) {
-      const fetchClasses = async () => {
-        try {
-          const data = await publicApi.getClasses<AcademicEntity[]>(selectedUniversity, selectedCourse);
-          setClasses(data);
-        } catch (error) {
-          console.error("Erro ao buscar turmas:", error);
-        }
-      };
-      fetchClasses();
+      publicApi.getClasses<AcademicEntity[]>(selectedUniversity, selectedCourse)
+        .then(setClasses)
+        .catch((err) => console.error("Erro ao buscar turmas:", err));
+
+      publicApi.getDisciplines<AcademicEntity[]>(selectedUniversity, selectedCourse)
+        .then(setDisciplines)
+        .catch((err) => console.error("Erro ao buscar disciplinas:", err));
     } else {
       setClasses([]);
       setSelectedClass(undefined);
-    }
-  }, [selectedUniversity, selectedCourse]);
-
-  useEffect(() => {
-    if (selectedUniversity && selectedCourse) {
-      const fetchDisciplines = async () => {
-        try {
-          const data = await publicApi.getDisciplines<AcademicEntity[]>(selectedUniversity, selectedCourse);
-          setDisciplines(data);
-        } catch (error) {
-          console.error("Erro ao buscar disciplinas:", error);
-        }
-      };
-      fetchDisciplines();
-    } else {
       setDisciplines([]);
       setSelectedDiscipline(undefined);
     }
@@ -103,19 +75,9 @@ export function CascadingFilter({ onFilterChange }: CascadingFilterProps) {
 
   useEffect(() => {
     if (selectedUniversity && selectedCourse && selectedClass) {
-      const fetchStudents = async () => {
-        try {
-          const data = await publicApi.getStudentsByClass<AcademicEntity[]>(
-            selectedUniversity,
-            selectedCourse,
-            selectedClass
-          );
-          setStudents(data);
-        } catch (error) {
-          console.error("Erro ao buscar alunos:", error);
-        }
-      };
-      fetchStudents();
+      publicApi.getStudentsByClass<AcademicEntity[]>(selectedUniversity, selectedCourse, selectedClass)
+        .then(setStudents)
+        .catch((err) => console.error("Erro ao buscar alunos:", err));
     } else {
       setStudents([]);
       setSelectedStudent(undefined);
@@ -124,23 +86,32 @@ export function CascadingFilter({ onFilterChange }: CascadingFilterProps) {
 
   useEffect(() => {
     onFilterChange({
-      type: selectedType,
+      type,
       universityId: selectedUniversity,
       courseId: selectedCourse,
       classId: selectedClass,
       disciplineId: selectedDiscipline,
       studentId: selectedStudent,
     });
-  }, [selectedType, selectedUniversity, selectedCourse, selectedClass, selectedDiscipline, selectedStudent]);
+  }, [
+    type,
+    selectedUniversity,
+    selectedCourse,
+    selectedClass,
+    selectedDiscipline,
+    selectedStudent,
+    onFilterChange,
+  ]);
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
+      {/* Tipo */}
+      <div className="space-y-1">
         <label className="text-sm font-medium text-white">Tipo de Visualização</label>
         <Select
-          value={selectedType}
-          onValueChange={(value: "university" | "course" | "discipline" | "class" | "student") => {
-            setSelectedType(value);
+          value={type}
+          onValueChange={(value) => {
+            setType(value as typeof type);
             setSelectedUniversity(undefined);
             setSelectedCourse(undefined);
             setSelectedClass(undefined);
@@ -149,145 +120,95 @@ export function CascadingFilter({ onFilterChange }: CascadingFilterProps) {
           }}
         >
           <SelectTrigger className="w-full bg-[#2a2a2a] border-neutral-700 text-white">
-            <SelectValue placeholder="Selecione o tipo" />
+            <SelectValue placeholder="Escolha um tipo" />
           </SelectTrigger>
-          <SelectContent className="bg-[#2a2a2a] border-neutral-700">
-            <SelectItem value="university" className="text-white hover:bg-[#333333]">
-              Universidade
-            </SelectItem>
-            <SelectItem value="course" className="text-white hover:bg-[#333333]">
-              Curso
-            </SelectItem>
-            <SelectItem value="discipline" className="text-white hover:bg-[#333333]">
-              Disciplina
-            </SelectItem>
-            <SelectItem value="class" className="text-white hover:bg-[#333333]">
-              Turma
-            </SelectItem>
-            <SelectItem value="student" className="text-white hover:bg-[#333333]">
-              Aluno
-            </SelectItem>
+          <SelectContent className="bg-[#2a2a2a] border-neutral-700 text-white">
+            <SelectItem value="university">Universidade</SelectItem>
+            <SelectItem value="course">Curso</SelectItem>
+            <SelectItem value="discipline">Disciplina</SelectItem>
+            <SelectItem value="class">Turma</SelectItem>
+            <SelectItem value="student">Aluno</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="space-y-2">
+      {/* Universidade */}
+      <div className="space-y-1">
         <label className="text-sm font-medium text-white">Universidade</label>
-        <Select
-          value={selectedUniversity}
-          onValueChange={setSelectedUniversity}
-        >
+        <Select value={selectedUniversity} onValueChange={setSelectedUniversity}>
           <SelectTrigger className="w-full bg-[#2a2a2a] border-neutral-700 text-white">
             <SelectValue placeholder="Selecione uma universidade" />
           </SelectTrigger>
-          <SelectContent className="bg-[#2a2a2a] border-neutral-700">
-            {universities.map((university) => (
-              <SelectItem
-                key={university._id}
-                value={university._id}
-                className="text-white hover:bg-[#333333]"
-              >
-                {university.name}
-              </SelectItem>
+          <SelectContent className="bg-[#2a2a2a] border-neutral-700 text-white">
+            {universities.map((u) => (
+              <SelectItem key={u._id} value={u._id}>{u.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      {(selectedType === "course" || selectedType === "discipline" || selectedType === "class" || selectedType === "student") && selectedUniversity && (
-        <div className="space-y-2">
+      {/* Curso */}
+      {(type !== "university" && selectedUniversity) && (
+        <div className="space-y-1">
           <label className="text-sm font-medium text-white">Curso</label>
-          <Select
-            value={selectedCourse}
-            onValueChange={setSelectedCourse}
-          >
+          <Select value={selectedCourse} onValueChange={setSelectedCourse}>
             <SelectTrigger className="w-full bg-[#2a2a2a] border-neutral-700 text-white">
               <SelectValue placeholder="Selecione um curso" />
             </SelectTrigger>
-            <SelectContent className="bg-[#2a2a2a] border-neutral-700">
-              {courses.map((course) => (
-                <SelectItem
-                  key={course._id}
-                  value={course._id}
-                  className="text-white hover:bg-[#333333]"
-                >
-                  {course.name}
-                </SelectItem>
+            <SelectContent className="bg-[#2a2a2a] border-neutral-700 text-white">
+              {courses.map((c) => (
+                <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
       )}
 
-      {(selectedType === "class" || selectedType === "student") && selectedUniversity && selectedCourse && (
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-white">Turma</label>
-          <Select
-            value={selectedClass}
-            onValueChange={setSelectedClass}
-          >
-            <SelectTrigger className="w-full bg-[#2a2a2a] border-neutral-700 text-white">
-              <SelectValue placeholder="Selecione uma turma" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2a2a2a] border-neutral-700">
-              {classes.map((class_) => (
-                <SelectItem
-                  key={class_._id}
-                  value={class_._id}
-                  className="text-white hover:bg-[#333333]"
-                >
-                  {class_.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {selectedType === "student" && selectedUniversity && selectedCourse && selectedClass && (
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-white">Aluno</label>
-          <Select
-            value={selectedStudent}
-            onValueChange={setSelectedStudent}
-          >
-            <SelectTrigger className="w-full bg-[#2a2a2a] border-neutral-700 text-white">
-              <SelectValue placeholder="Selecione um aluno" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2a2a2a] border-neutral-700">
-              {students.map((student) => (
-                <SelectItem
-                  key={student._id}
-                  value={student._id}
-                  className="text-white hover:bg-[#333333]"
-                >
-                  {student.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {selectedType === "discipline" && selectedUniversity && selectedCourse && (
-        <div className="space-y-2">
+      {/* Disciplina */}
+      {type === "discipline" && selectedCourse && (
+        <div className="space-y-1">
           <label className="text-sm font-medium text-white">Disciplina</label>
-          <Select
-            value={selectedDiscipline}
-            onValueChange={setSelectedDiscipline}
-          >
+          <Select value={selectedDiscipline} onValueChange={setSelectedDiscipline}>
             <SelectTrigger className="w-full bg-[#2a2a2a] border-neutral-700 text-white">
               <SelectValue placeholder="Selecione uma disciplina" />
             </SelectTrigger>
-            <SelectContent className="bg-[#2a2a2a] border-neutral-700">
-              {disciplines.map((discipline) => (
-                <SelectItem
-                  key={discipline._id}
-                  value={discipline._id}
-                  className="text-white hover:bg-[#333333]"
-                >
-                  {discipline.name}
-                </SelectItem>
+            <SelectContent className="bg-[#2a2a2a] border-neutral-700 text-white">
+              {disciplines.map((d) => (
+                <SelectItem key={d._id} value={d._id}>{d.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Turma */}
+      {(type === "class" || type === "student") && selectedCourse && (
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-white">Turma</label>
+          <Select value={selectedClass} onValueChange={setSelectedClass}>
+            <SelectTrigger className="w-full bg-[#2a2a2a] border-neutral-700 text-white">
+              <SelectValue placeholder="Selecione uma turma" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2a2a2a] border-neutral-700 text-white">
+              {classes.map((t) => (
+                <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Aluno */}
+      {type === "student" && selectedClass && (
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-white">Aluno</label>
+          <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+            <SelectTrigger className="w-full bg-[#2a2a2a] border-neutral-700 text-white">
+              <SelectValue placeholder="Selecione um aluno" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2a2a2a] border-neutral-700 text-white">
+              {students.map((s) => (
+                <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -295,4 +216,4 @@ export function CascadingFilter({ onFilterChange }: CascadingFilterProps) {
       )}
     </div>
   );
-} 
+}
