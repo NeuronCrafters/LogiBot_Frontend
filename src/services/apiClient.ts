@@ -89,4 +89,10 @@ export const rasaApi = {
   async verificarRespostas<T>(respostas: string[]): Promise<T> {
     return postRequest<T>(RASA_ROUTES.verificarRespostas, { respostas });
   },
+  async actionConversar<T>(): Promise<T> {
+    return postRequest<T>(RASA_ROUTES.actionConversar, { text: "conversar" });
+  },
+  async actionPerguntar<T>(message: string): Promise<T> {
+    return postRequest<T>(RASA_ROUTES.actionPerguntar, { message });
+  },
 };

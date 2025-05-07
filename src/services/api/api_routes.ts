@@ -48,4 +48,6 @@ export const RASA_ROUTES = {
   gerarPerguntas: "/sael/action/gerar_perguntas",
   getGabarito: "/sael/action/gabarito",
   verificarRespostas: "/sael/action/send",
+  actionConversar: "/sael/action/conversar",
+  actionPerguntar: "/sael/action/perguntar",
 };
