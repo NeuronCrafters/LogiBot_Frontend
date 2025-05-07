@@ -1,5 +1,10 @@
 import { api } from "@/services/api/api";
 
+interface RasaActionResponse {
+  responses: { text: string }[];
+}
+
+
 export const rasaService = {
   async sendMessage(message: string) {
     const response = await api.post(
@@ -73,4 +78,19 @@ export const rasaService = {
     );
     return response.data;
   },
+  async perguntar(text: string): Promise<RasaActionResponse> {
+    const response = await api.post(
+      "/sael/action/perguntar",
+      { text },
+      { withCredentials: true }
+    );
+    return response.data;
+  },
+  async conversar() {
+    const response = await api.post("/sael/action/conversar", {
+      withCredentials: true,
+    });
+    return response.data;
+  },
 };
+

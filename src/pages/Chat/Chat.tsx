@@ -49,10 +49,10 @@ export function Chat() {
     setTyping(true);
     setFakeTypingDelay(true);
     try {
-      const res = await rasaService.sendMessage(message);
+      const res = await rasaService.perguntar(message);
       setTimeout(() => {
         setFakeTypingDelay(false);
-        setMessages((m) => [...m, { role: "assistant", content: res.response }]);
+        setMessages((m) => [...m, { role: "assistant", content: res.responses[0]?.text || "..." }]);
         setTyping(false);
       }, 1200);
     } catch (err) {
@@ -63,7 +63,7 @@ export function Chat() {
     }
   };
 
-  const handleInitialChoice = (choice: "quiz" | "chat") => {
+  const handleInitialChoice = async (choice: "quiz" | "chat") => {
     setMessages([]);
     if (choice === "quiz") {
       setMode("quiz");
@@ -73,13 +73,18 @@ export function Chat() {
       setMode("chat");
       setShowLevels(false);
 
+      try {
+        await rasaService.conversar();
+      } catch (e) {
+        console.error("Erro ao iniciar modo conversa:", e);
+      }
+
       setMessages([{ role: "assistant", content: "Digitando..." }]);
       setTimeout(() => {
         setMessages([{ role: "assistant", content: "Vamos conversar, sobre o que quer falar?" }]);
       }, 2000);
     }
   };
-
 
   const handleLevelNext = (btns: any[], text: string) => {
     setMessages((prev) => [...prev, { role: "assistant", content: text }]);
@@ -180,7 +185,7 @@ export function Chat() {
         )}
 
         {greetingDone && mode !== "none" && <ChatMessages messages={messages} userName={userName} />}
-        {greetingDone && mode === "chat" && typing && fakeTypingDelay && <TypingBubble />}
+        {greetingDone && mode === "chat" && typing && fakeTypingDelay && <TypingBubble onDone={() => { }} text="Só um momento..." />}
 
         {mode === "quiz" && showLevels && step === "levels" && <LevelStep onNext={handleLevelNext} />}
         {mode === "quiz" && step === "categories" && <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />}
