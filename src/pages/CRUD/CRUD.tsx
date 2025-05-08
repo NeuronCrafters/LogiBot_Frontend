@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/use-Auth";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,6 @@ import {
   ClassData,
   DisciplineData,
 } from "@/@types/FormsDataTypes";
-
 import toast from "react-hot-toast";
 
 interface Item extends OriginalItem {
@@ -43,11 +43,31 @@ interface RawItem {
 }
 
 function CRUD() {
+  const { user } = useAuth();
   const [items, setItems] = useState<Item[]>([]);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [currentEntity, setCurrentEntity] = useState<Entity>("university");
   const [modalOpen, setModalOpen] = useState(false);
   const [createdData, setCreatedData] = useState<any | null>(null);
+  const [isAllowed, setIsAllowed] = useState(false);
+
+  useEffect(() => {
+    const roles = Array.isArray(user?.role) ? user.role : [user?.role];
+
+    if (roles.includes("admin") || roles.includes("coordinator") || roles.includes("course-coordinator")) {
+      setIsAllowed(true);
+    } else {
+      setIsAllowed(false);
+    }
+  }, [user]);
+
+  if (!isAllowed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#141414] text-white">
+        <p>Você não tem permissão para acessar esta página.</p>
+      </div>
+    );
+  }
 
   async function handleSearch(filterData: FilterData): Promise<void> {
     try {
@@ -153,37 +173,15 @@ function CRUD() {
           response = await academicApi.post<DisciplineData>("discipline", item);
           break;
         case "professor":
-          if ("email" in item && "password" in item && "universityId" in item && "courseId" in item) {
-            response = await academicApi.post<ProfessorData>("professor", {
-              name: item.name,
-              email: item.email,
-              password: item.password,
-              school: item.universityId,
-              courses: [item.courseId],
-            });
-          } else {
-            console.error("Dados inválidos para criação de professor");
-            return;
-          }
+          response = await academicApi.post<ProfessorData>("professor", item);
           break;
-
         default:
           console.error("Entidade não suportada para criação:", entity);
           return;
       }
 
-      const newItem: Item = {
-        id: response.id ?? (response as any)._id ?? new Date().getTime(),
-        name: response.name,
-        code: (response as any).code ?? undefined,
-      };
-      setItems((prevItems) => [...prevItems, newItem]);
-
-      if (entity === "class") {
-        setCreatedData(response);
-        setModalOpen(true);
-      }
-
+      setCreatedData(response);
+      setModalOpen(true);
       toast.success("Registro criado com sucesso!");
     } catch (error) {
       console.error("Erro ao criar item:", error);
@@ -214,24 +212,16 @@ function CRUD() {
           <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
           {currentEntity !== "student" && currentEntity !== "professor" ? (
             <FormsCrud
-              onSubmit={(entity, data) => {
-                console.log("Formulário submetido para:", entity, data);
-                handleCreateOrUpdate(entity, data);
-              }}
+              onSubmit={(entity, data) => handleCreateOrUpdate(entity, data)}
               initialData={editingItem || undefined}
             />
           ) : (
-            <>
-              {currentEntity === "professor" && (
-                <FormsCrud
-                  onSubmit={(entity, data) => {
-                    console.log("Formulário submetido para:", entity, data);
-                    handleCreateOrUpdate(entity, data);
-                  }}
-                  initialData={editingItem || undefined}
-                />
-              )}
-            </>
+            currentEntity === "professor" && (
+              <FormsCrud
+                onSubmit={(entity, data) => handleCreateOrUpdate(entity, data)}
+                initialData={editingItem || undefined}
+              />
+            )
           )}
           <FormsList
             entity={currentEntity}
@@ -245,9 +235,9 @@ function CRUD() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="bg-[#1f1f1f] text-white max-w-md">
           <DialogHeader>
-            <DialogTitle>Turma Criada</DialogTitle>
+            <DialogTitle>Cadastro Realizado</DialogTitle>
             <DialogDescription className="text-slate-400">
-              Veja abaixo os dados da turma criada com sucesso.
+              Veja abaixo os dados do item criado com sucesso.
             </DialogDescription>
           </DialogHeader>
           {createdData && (

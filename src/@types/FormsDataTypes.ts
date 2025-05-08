@@ -17,8 +17,8 @@ export interface ProfessorData {
   name: string;
   email: string;
   password: string;
-  universityId: string;
-  courseId?: string;
+  school: string;
+  courses: string[];
 }
 
 export interface ClassData {

@@ -21,10 +21,10 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
   const [name, setName] = useState(initialData?.name ?? "");
   const [email, setEmail] = useState(initialData?.email ?? "");
   const [password, setPassword] = useState(initialData?.password ?? "");
-  const [universityId, setUniversityId] = useState(initialData?.universityId ?? "");
-  const [courseId, setCourseId] = useState(initialData?.courseId ?? "");
+  const [school, setSchool] = useState(initialData?.school ?? "");
+  const [courses, setCourses] = useState<string[]>(initialData?.courses ?? []);
   const [universities, setUniversities] = useState<University[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -34,33 +34,33 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
   }, []);
 
   useEffect(() => {
-    if (universityId) {
-      publicApi.getCourses<Course[]>(universityId)
-        .then((data) => setCourses(data))
+    if (school) {
+      publicApi.getCourses<Course[]>(school)
+        .then((data) => setAvailableCourses(data))
         .catch((err) => console.error("Erro ao carregar cursos:", err));
     } else {
+      setAvailableCourses([]);
       setCourses([]);
-      setCourseId("");
     }
-  }, [universityId]);
+  }, [school]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !password.trim() || !universityId || !courseId) return;
+    if (!name.trim() || !email.trim() || !password.trim() || !school || courses.length === 0) return;
 
     onSubmit({
       name: name.trim(),
       email: email.trim(),
       password: password.trim(),
-      universityId,
-      courseId,
+      school,
+      courses,
     });
 
     setName("");
     setEmail("");
     setPassword("");
-    setUniversityId("");
-    setCourseId("");
+    setSchool("");
+    setCourses([]);
   };
 
   return (
@@ -103,8 +103,8 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
       <label className="block text-white mt-4 mb-2">Universidade:</label>
       <select
-        value={universityId}
-        onChange={(e) => setUniversityId(e.target.value)}
+        value={school}
+        onChange={(e) => setSchool(e.target.value)}
         required
         className="p-2 rounded w-full bg-[#202020] text-white"
       >
@@ -116,17 +116,17 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         ))}
       </select>
 
-      {universityId && courses.length > 0 && (
+      {school && availableCourses.length > 0 && (
         <>
           <label className="block text-white mt-4 mb-2">Curso:</label>
           <select
-            value={courseId}
-            onChange={(e) => setCourseId(e.target.value)}
+            value={courses[0] ?? ""}
+            onChange={(e) => setCourses([e.target.value])}
             required
             className="p-2 rounded w-full bg-[#202020] text-white"
           >
             <option value="">Selecione o curso</option>
-            {courses.map((course) => (
+            {availableCourses.map((course) => (
               <option key={course._id} value={course._id}>
                 {course.name}
               </option>
