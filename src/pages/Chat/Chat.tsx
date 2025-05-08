@@ -49,7 +49,7 @@ export function Chat() {
     setTyping(true);
     setFakeTypingDelay(true);
     try {
-      const res = await rasaService.perguntar(message, user?.id || "user");
+      const res = await rasaService.perguntar(message, user?._id || "user");
       setTimeout(() => {
         setFakeTypingDelay(false);
         setMessages((m) => [...m, { role: "assistant", content: res.responses[0]?.text || "..." }]);
