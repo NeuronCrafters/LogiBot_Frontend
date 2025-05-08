@@ -18,11 +18,8 @@ interface MenuOptionsProps {
 export function MenuOptions({ role, logout }: MenuOptionsProps) {
   const location = useLocation();
 
-  const isChatPage = location.pathname === "/chat";
-  const isCrudPage = location.pathname === "/crud";
   const isAboutPage = location.pathname === "/about";
   const isFaqPage = location.pathname === "/faq";
-  const isChartPage = location.pathname === "/chart";
 
   return (
     <nav className="flex flex-col space-y-4 bg-[#141414] p-4 rounded-lg shadow-md">

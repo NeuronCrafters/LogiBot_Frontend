@@ -48,7 +48,7 @@ function formatTimeUsage(seconds: number): string {
   return `${seconds} seg / ${mins} min / ${hrs} hrs / ${days} dias / ${weeks} sem / ${months} mes / ${years} anos`;
 }
 
-function ChartComparison({ type, ids, metric, dateRange }: ChartComparisonProps) {
+function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
   const [data, setData] = useState<ComparisonData[]>([]);
   const [labelA, setLabelA] = useState("Grupo A");
   const [labelB, setLabelB] = useState("Grupo B");
@@ -167,7 +167,7 @@ function ChartComparison({ type, ids, metric, dateRange }: ChartComparisonProps)
               <Tooltip
                 formatter={(
                   value: number,
-                  name: string,
+                  _name: string,
                   payload: Payload<number, string>
                 ) => {
                   const index = data.findIndex((d) => d.name === payload.payload.name);

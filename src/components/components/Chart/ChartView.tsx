@@ -10,11 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Filter, Calendar as CalendarIcon } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format, addDays } from "date-fns";
-import { cn } from "@/lib/utils";
+import { Filter } from "lucide-react";
+import { addDays } from "date-fns";
 import { DateRangeFilter } from "./DateRangeFilter";
 
 export function ChartView() {
@@ -109,7 +106,6 @@ export function ChartView() {
               type={selectedType}
               id={selectedIds[0]}
               metrics={selectedMetrics}
-              dateRange={dateRange}
             />
           </CardContent>
         </Card>

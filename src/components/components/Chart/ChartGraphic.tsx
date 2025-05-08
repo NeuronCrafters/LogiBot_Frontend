@@ -175,7 +175,7 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
                     nameKey="name"
                     label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                   >
-                    {data.map((entry, index) => (
+                    {data.map((_entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={userColors[index % userColors.length]}
@@ -248,7 +248,7 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
           cursor={{ fill: "#333" }}
         />
         <Legend wrapperStyle={{ color: "#fff" }} />
-        {lineData.map((metricData, index) => (
+        {lineData.map((metricData, _index) => (
           <Line
             key={metricData.metric}
             type="monotone"
@@ -273,16 +273,16 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
     switch (chartType) {
       case "bar":
         return (
-            <BarChart data={data}>
-            
+          <BarChart data={data}>
+
             <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 14 }} />
             <YAxis stroke="#fff" tick={{ fontSize: 14 }} />
             <Tooltip
               formatter={(value: number, name: string) => {
-              if (name === "Tempo de Uso (s)") {
-                return formatTimeUsage(value);
-              }
-              return value.toString();
+                if (name === "Tempo de Uso (s)") {
+                  return formatTimeUsage(value);
+                }
+                return value.toString();
               }}
               contentStyle={{ backgroundColor: "#222", borderRadius: "8px", border: "none" }}
               cursor={{ fill: "#242424" }}
@@ -295,12 +295,12 @@ export function ChartGraphics({ type, id, metrics = ["correct", "wrong", "usage"
               <Bar dataKey="wrong" fill="#f43f5e" name="Questões Erradas" animationDuration={600} />
             )}
             {metrics.includes("usage") && (
-              <Bar dataKey="usage" fill="#8901AB"  name="Tempo de Uso" animationDuration={600} />
+              <Bar dataKey="usage" fill="#8901AB" name="Tempo de Uso" animationDuration={600} />
             )}
             {metrics.includes("sessions") && (
               <Bar dataKey="sessions" fill="#f59e0b" name="Sessões" animationDuration={600} />
             )}
-            </BarChart>
+          </BarChart>
         );
       case "line":
         return renderLineChart();
