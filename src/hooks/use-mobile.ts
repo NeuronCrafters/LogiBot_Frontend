@@ -12,7 +12,7 @@ interface ScreenInfo {
   type: ScreenType;
 }
 
-export function useResponsive() {
+export function useResponsive(): ScreenInfo {
   const [screen, setScreen] = useState<ScreenInfo>({
     isSmartwatch: false,
     isMobile: false,
@@ -62,4 +62,9 @@ export function useResponsive() {
   }, []);
 
   return screen;
+}
+
+export function useIsMobile(): boolean {
+  const { isMobile } = useResponsive();
+  return isMobile;
 }

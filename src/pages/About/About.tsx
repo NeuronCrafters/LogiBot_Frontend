@@ -30,10 +30,17 @@ export function About() {
       <div className="absolute bg-[#141414] w-full justify-between flex border-b-[0.5px] border-neutral-800 px-6 py-4">
         <p className="font-Montserrat text-neutral-200 font-semibold text-2xl">SOBRE MIM</p>
         {isAuthenticated && (
-          <button onClick={() => setMenuOpen(true)} className="text-white">
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className="text-white"
+            aria-label="Abrir menu de navegação"
+            title="Abrir menu de navegação"
+          >
             <MenuIcon size={28} />
           </button>
         )}
+
       </div>
 
       <div className="flex flex-1 items-center justify-center p-6 w-full">
