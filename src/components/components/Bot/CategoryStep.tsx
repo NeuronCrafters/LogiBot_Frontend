@@ -3,11 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { rasaService } from "@/services/api/api_rasa";
 
-/**
- * Dados de cada botão:
- * - title: texto exibido
- * - payload: string bruta do Rasa
- */
 export interface ButtonData {
   title: string;
   payload: string;
