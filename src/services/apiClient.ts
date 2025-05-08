@@ -1,4 +1,3 @@
-// apiClient.ts
 import { api } from "@/services/api/api";
 import { ACADEMIC_ROUTES, PUBLIC_ROUTES, RASA_ROUTES, EntityType } from "./api/api_routes";
 
