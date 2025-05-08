@@ -4,7 +4,6 @@ interface RasaActionResponse {
   responses: { text: string }[];
 }
 
-
 export const rasaService = {
   async sendMessage(message: string) {
     const response = await api.post(
@@ -78,19 +77,22 @@ export const rasaService = {
     );
     return response.data;
   },
-  async perguntar(text: string): Promise<RasaActionResponse> {
+
+  async perguntar(message: string, senderId: string): Promise<RasaActionResponse> {
     const response = await api.post(
       "/sael/action/perguntar",
-      { text },
+      { message, senderId },
       { withCredentials: true }
     );
     return response.data;
   },
+
   async conversar() {
-    const response = await api.post("/sael/action/conversar", {
-      withCredentials: true,
-    });
+    const response = await api.post(
+      "/sael/action/conversar",
+      {},
+      { withCredentials: true }
+    );
     return response.data;
   },
 };
-
