@@ -1,8 +1,15 @@
 import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { FormsHeader } from "../../components/components/Forms/FormsHeader";
 import { FormsFilter } from "../../components/components/Forms/FormsFilter";
 import { FormsList } from "../../components/components/Forms/FormsList";
-import type { Item } from "../../components/components/Forms/FormsList";
+import type { Item as OriginalItem } from "../../components/components/Forms/FormsList";
 import { FormsCrud } from "../../components/components/Forms/FormsCrud";
 import type { FilterData } from "../../@types/FormsFilterTypes";
 import { publicApi, academicApi } from "@/services/apiClient";
@@ -14,6 +21,12 @@ import {
   DisciplineData,
 } from "@/@types/FormsDataTypes";
 
+import toast from "react-hot-toast";
+
+interface Item extends OriginalItem {
+  code?: string;
+}
+
 type Entity =
   | "university"
   | "course"
@@ -22,17 +35,19 @@ type Entity =
   | "professor"
   | "student";
 
-// Interface auxiliar para os dados brutos retornados pela API
 interface RawItem {
   id?: string | number;
   _id?: string | number;
   name: string;
+  code?: string;
 }
 
 function CRUD() {
   const [items, setItems] = useState<Item[]>([]);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [currentEntity, setCurrentEntity] = useState<Entity>("university");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [createdData, setCreatedData] = useState<any | null>(null);
 
   async function handleSearch(filterData: FilterData): Promise<void> {
     try {
@@ -96,10 +111,10 @@ function CRUD() {
         default:
           console.error("Filtro inválido");
       }
-      // Mapeia os dados para garantir que cada objeto tenha uma chave 'id'
       const mappedData: Item[] = data.map((item, index) => ({
         id: item.id ?? item._id ?? index,
         name: item.name,
+        code: item.code ?? undefined,
       }));
       setItems(mappedData);
     } catch (error) {
@@ -107,7 +122,6 @@ function CRUD() {
     }
   }
 
-  // O onSubmit do FormsCrud agora recebe a entidade selecionada junto com os dados.
   async function handleCreateOrUpdate(
     entity: Entity,
     item:
@@ -124,6 +138,7 @@ function CRUD() {
         | ProfessorData
         | ClassData
         | DisciplineData;
+
       switch (entity) {
         case "university":
           response = await academicApi.post<UniversityData>("university", item);
@@ -138,20 +153,41 @@ function CRUD() {
           response = await academicApi.post<DisciplineData>("discipline", item);
           break;
         case "professor":
-          response = await academicApi.post<ProfessorData>("professor", item);
+          if ("email" in item && "password" in item && "universityId" in item && "courseId" in item) {
+            response = await academicApi.post<ProfessorData>("professor", {
+              name: item.name,
+              email: item.email,
+              password: item.password,
+              school: item.universityId,
+              courses: [item.courseId],
+            });
+          } else {
+            console.error("Dados inválidos para criação de professor");
+            return;
+          }
           break;
+
         default:
           console.error("Entidade não suportada para criação:", entity);
           return;
       }
-      // Utiliza o id retornado ou, se não houver, gera um id temporário.
+
       const newItem: Item = {
-        id: response.id ?? response._id ?? new Date().getTime(),
+        id: response.id ?? (response as any)._id ?? new Date().getTime(),
         name: response.name,
+        code: (response as any).code ?? undefined,
       };
       setItems((prevItems) => [...prevItems, newItem]);
+
+      if (entity === "class") {
+        setCreatedData(response);
+        setModalOpen(true);
+      }
+
+      toast.success("Registro criado com sucesso!");
     } catch (error) {
       console.error("Erro ao criar item:", error);
+      toast.error("Erro ao criar item.");
     }
   }
 
@@ -176,7 +212,6 @@ function CRUD() {
             Sistema de Gerenciamento do SAEL
           </h1>
           <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
-          {/* Apenas entidades que podem ser criadas (professor, university, course, class, discipline) */}
           {currentEntity !== "student" && currentEntity !== "professor" ? (
             <FormsCrud
               onSubmit={(entity, data) => {
@@ -186,7 +221,6 @@ function CRUD() {
               initialData={editingItem || undefined}
             />
           ) : (
-            // Para professor, mesmo que ele não renderize o formulário no CRUD (se for listado somente via filtro), você pode optar por renderizar um formulário separado.
             <>
               {currentEntity === "professor" && (
                 <FormsCrud
@@ -207,6 +241,25 @@ function CRUD() {
           />
         </div>
       </div>
+
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="bg-[#1f1f1f] text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle>Turma Criada</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Veja abaixo os dados da turma criada com sucesso.
+            </DialogDescription>
+          </DialogHeader>
+          {createdData && (
+            <div className="space-y-2 mt-2">
+              <p><strong>ID:</strong> {createdData._id || createdData.id}</p>
+              <p><strong>Nome:</strong> {createdData.name}</p>
+              {createdData.code && <p><strong>Código:</strong> {createdData.code}</p>}
+              {createdData.courseId && <p><strong>ID do Curso:</strong> {createdData.courseId}</p>}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

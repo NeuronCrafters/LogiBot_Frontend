@@ -1,5 +1,5 @@
 import { api } from "@/services/api/api";
-import { ACADEMIC_ROUTES, PUBLIC_ROUTES, RASA_ROUTES, EntityType } from "./api/api_routes";
+import { ACADEMIC_ROUTES, PUBLIC_ROUTES, RASA_ROUTES, AcademicEntityType } from "./api/api_routes";
 
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
@@ -17,16 +17,16 @@ const deleteRequest = async <T>(url: string): Promise<T> => {
 };
 
 export const academicApi = {
-  async post<T>(entity: EntityType, data: object): Promise<T> {
+  async post<T>(entity: AcademicEntityType, data: object): Promise<T> {
     const url = ACADEMIC_ROUTES[entity].post;
     return postRequest<T>(url, data);
   },
-  async get<T>(entity: EntityType, id?: string): Promise<T> {
+  async get<T>(entity: AcademicEntityType, id?: string): Promise<T> {
     const baseUrl = ACADEMIC_ROUTES[entity].get;
     const url = id ? `${baseUrl}/${id}` : baseUrl;
     return getRequest<T>(url);
   },
-  async delete<T>(entity: EntityType, id: string): Promise<T> {
+  async delete<T>(entity: AcademicEntityType, id: string): Promise<T> {
     const baseUrl = ACADEMIC_ROUTES[entity].delete;
     const url = `${baseUrl}/${id}`;
     return deleteRequest<T>(url);

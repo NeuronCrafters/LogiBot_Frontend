@@ -1,6 +1,14 @@
-export type EntityType = "university" | "course" | "class" | "professor" | "discipline";
+export type AcademicEntityType =
+  | "university"
+  | "course"
+  | "class"
+  | "professor"
+  | "discipline";
 
-export const ACADEMIC_ROUTES: Record<EntityType, { post: string; get: string; delete: string }> = {
+export const ACADEMIC_ROUTES: Record<
+  AcademicEntityType,
+  { post: string; get: string; delete: string }
+> = {
   university: {
     post: "/academic-institution/university",
     get: "/academic-institution/university",
