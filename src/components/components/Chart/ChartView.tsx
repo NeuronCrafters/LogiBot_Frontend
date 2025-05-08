@@ -1,3 +1,4 @@
+// ChartView.tsx
 import { useState, useMemo } from "react";
 import { CascadingFilter } from "./CascadingFilter";
 import { ChartGraphics } from "./ChartGraphic";
@@ -13,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Filter } from "lucide-react";
 import { addDays } from "date-fns";
 import { DateRangeFilter } from "./DateRangeFilter";
+import { DateRange } from "react-day-picker";
 
 export function ChartView() {
   const [mode, setMode] = useState<ChartMode>("visualizar");
@@ -24,7 +26,7 @@ export function ChartView() {
     "usage",
     "sessions",
   ]);
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: addDays(new Date(), -30),
     to: new Date(),
   });
@@ -106,6 +108,7 @@ export function ChartView() {
               type={selectedType}
               id={selectedIds[0]}
               metrics={selectedMetrics}
+              dateRange={dateRange}
             />
           </CardContent>
         </Card>

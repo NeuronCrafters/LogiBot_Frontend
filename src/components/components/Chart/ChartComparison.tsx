@@ -13,9 +13,15 @@ import { Button } from "@/components/ui/button";
 import { toPng } from "html-to-image";
 import { downloadCSV } from "@/lib/downloadCSV";
 import type { Payload } from "recharts/types/component/DefaultTooltipContent";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Download } from "lucide-react";
 import { MetricOption } from "./MetricCheckboxSelector";
+import { DateRange } from "react-day-picker";
 
 interface UserAnalysisLog {
   name: string;
@@ -35,7 +41,7 @@ interface ChartComparisonProps {
   type: "university" | "course" | "discipline" | "class" | "student";
   ids: string[];
   metric: MetricOption;
-  dateRange: { from: Date; to: Date };
+  dateRange: DateRange;
 }
 
 function formatTimeUsage(seconds: number): string {
@@ -48,7 +54,7 @@ function formatTimeUsage(seconds: number): string {
   return `${seconds} seg / ${mins} min / ${hrs} hrs / ${days} dias / ${weeks} sem / ${months} mes / ${years} anos`;
 }
 
-function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
+function ChartComparison({ type, ids, metric, dateRange }: ChartComparisonProps) {
   const [data, setData] = useState<ComparisonData[]>([]);
   const [labelA, setLabelA] = useState("Grupo A");
   const [labelB, setLabelB] = useState("Grupo B");
@@ -69,8 +75,14 @@ function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
     async function fetchData() {
       try {
         const [resA, resB] = await Promise.all([
-          api.get(`/logs/${type}/${ids[0]}`, { withCredentials: true }),
-          api.get(`/logs/${type}/${ids[1]}`, { withCredentials: true }),
+          api.get(`/logs/${type}/${ids[0]}`, {
+            withCredentials: true,
+            params: dateRange,
+          }),
+          api.get(`/logs/${type}/${ids[1]}`, {
+            withCredentials: true,
+            params: dateRange,
+          }),
         ]);
 
         const logsA: UserAnalysisLog[] = resA.data.logs || resA.data;
@@ -114,7 +126,7 @@ function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
     }
 
     fetchData();
-  }, [type, ids, metric]);
+  }, [type, ids, metric, dateRange]);
 
   const handleExportCSV = () => {
     const rows = data.map((item) => ({
@@ -165,11 +177,7 @@ function ChartComparison({ type, ids, metric }: ChartComparisonProps) {
               <XAxis dataKey="name" stroke="#fff" tick={{ fontSize: 12 }} />
               <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(
-                  value: number,
-                  _name: string,
-                  payload: Payload<number, string>
-                ) => {
+                formatter={(value: number, _name: string, payload: Payload<number, string>) => {
                   const index = data.findIndex((d) => d.name === payload.payload.name);
                   const variation = data[index]?.variation ?? "0%";
                   return metric === "usage"

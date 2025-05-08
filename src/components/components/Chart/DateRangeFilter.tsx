@@ -1,20 +1,29 @@
-import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { useState } from "react";
+import { DateRange } from "react-day-picker";
 
-function DateRangeFilter({ dateRange, setDateRange }) {
+interface DateRangeFilterProps {
+  dateRange: DateRange;
+  setDateRange: (range: DateRange) => void;
+}
+
+function DateRangeFilter({ dateRange, setDateRange }: DateRangeFilterProps) {
   const [open, setOpen] = useState(false);
-  const [tempRange, setTempRange] = useState({ from: dateRange.from, to: dateRange.to });
+  const [tempRange, setTempRange] = useState<DateRange>({
+    from: dateRange?.from,
+    to: dateRange?.to,
+  });
 
-  const handleSelect = (range) => {
+  const handleSelect = (range: DateRange | undefined) => {
+    if (!range?.from || !range?.to) return;
+
     setTempRange(range);
-    if (range.from && range.to) {
-      setDateRange({ from: range.from, to: range.to });
-      setOpen(false);
-    }
+    setDateRange(range);
+    setOpen(false);
   };
 
   return (

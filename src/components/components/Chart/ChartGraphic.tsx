@@ -16,7 +16,7 @@ const metricsColors: Record<string, string> = {
   sessions: "#fbbf24",
 };
 
-// Adicionando uma paleta de cores mais ampla para os usuários
+
 const userColors = [
   "#4ade80", "#f87171", "#60a5fa", "#fbbf24", // cores originais
   "#a78bfa", "#fb7185", "#2dd4bf", "#f472b6", // novas cores
@@ -26,11 +26,15 @@ const userColors = [
 
 type ChartType = "bar" | "line" | "pie";
 
+import { DateRange } from "react-day-picker";
+
 export interface ChartGraphicsProps {
   type: "university" | "course" | "discipline" | "class" | "student";
   id: string;
   metrics: MetricOption[];
+  dateRange?: DateRange;
 }
+
 
 interface UserAnalysisLog {
   name: string;

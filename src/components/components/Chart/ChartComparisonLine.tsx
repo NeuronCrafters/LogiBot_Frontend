@@ -1,5 +1,13 @@
-import { useEffect, useState, useRef } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { useEffect, useRef, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { api } from "@/services/api/api";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { toPng } from "html-to-image";
 import { downloadCSV } from "@/lib/downloadCSV";
 import { MetricOption } from "./MetricCheckboxSelector";
+import { DateRange } from "react-day-picker";
 
 interface UserAnalysisLog {
   name: string;
@@ -24,10 +33,7 @@ interface ChartComparisonLineProps {
   type: "university" | "course" | "discipline" | "class" | "student";
   ids: string[];
   metric: MetricOption;
-  dateRange: {
-    from: Date;
-    to: Date;
-  };
+  dateRange: DateRange;
 }
 
 interface CombinedData {
@@ -36,13 +42,13 @@ interface CombinedData {
   groupB: number;
 }
 
-export function ChartComparisonLine({ type, ids, metric }: ChartComparisonLineProps) {
+export function ChartComparisonLine({ type, ids, metric, dateRange }: ChartComparisonLineProps) {
   const [data, setData] = useState<CombinedData[]>([]);
   const [loading, setLoading] = useState(true);
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (ids.length !== 2) return;
+    if (ids.length !== 2 || !dateRange.from || !dateRange.to) return;
     async function fetchData() {
       try {
         setLoading(true);
@@ -53,39 +59,57 @@ export function ChartComparisonLine({ type, ids, metric }: ChartComparisonLinePr
         const logA: UserAnalysisLog = resA.data.logs || resA.data;
         const logB: UserAnalysisLog = resB.data.logs || resB.data;
 
-        // Extrai as sessões para cada log, calculando o valor da métrica
-        const sessionsA = (logA.sessions || []).map((s) => {
-          let metricValue = 0;
-          if (metric === "correct") metricValue = s.totalCorrectAnswers;
-          else if (metric === "wrong") metricValue = s.totalWrongAnswers;
-          else if (metric === "usage") metricValue = s.sessionDuration ? Math.floor(s.sessionDuration) : 0;
-          return { sessionStart: s.sessionStart, metricValue };
-        });
-        const sessionsB = (logB.sessions || []).map((s) => {
-          let metricValue = 0;
-          if (metric === "correct") metricValue = s.totalCorrectAnswers;
-          else if (metric === "wrong") metricValue = s.totalWrongAnswers;
-          else if (metric === "usage") metricValue = s.sessionDuration ? Math.floor(s.sessionDuration) : 0;
-          return { sessionStart: s.sessionStart, metricValue };
-        });
+        const filterSessions = (sessions: UserAnalysisLog["sessions"]) =>
+          sessions.filter((s) => {
+            const date = new Date(s.sessionStart);
+            return date >= dateRange.from! && date <= dateRange.to!;
+          });
 
-        // Agrupa por data (formato yyyy-MM-dd)
+        const sessionsA = filterSessions(logA.sessions || []).map((s) => ({
+          sessionStart: s.sessionStart,
+          metricValue:
+            metric === "correct"
+              ? s.totalCorrectAnswers
+              : metric === "wrong"
+                ? s.totalWrongAnswers
+                : metric === "usage"
+                  ? Math.floor(s.sessionDuration || 0)
+                  : 0,
+        }));
+
+        const sessionsB = filterSessions(logB.sessions || []).map((s) => ({
+          sessionStart: s.sessionStart,
+          metricValue:
+            metric === "correct"
+              ? s.totalCorrectAnswers
+              : metric === "wrong"
+                ? s.totalWrongAnswers
+                : metric === "usage"
+                  ? Math.floor(s.sessionDuration || 0)
+                  : 0,
+        }));
+
         const combinedMap: Record<string, { groupA: number; groupB: number }> = {};
+
         sessionsA.forEach(({ sessionStart, metricValue }) => {
           const dateKey = format(new Date(sessionStart), "yyyy-MM-dd");
           if (!combinedMap[dateKey]) combinedMap[dateKey] = { groupA: 0, groupB: 0 };
           combinedMap[dateKey].groupA += metricValue;
         });
+
         sessionsB.forEach(({ sessionStart, metricValue }) => {
           const dateKey = format(new Date(sessionStart), "yyyy-MM-dd");
           if (!combinedMap[dateKey]) combinedMap[dateKey] = { groupA: 0, groupB: 0 };
           combinedMap[dateKey].groupB += metricValue;
         });
+
         const combinedData: CombinedData[] = Object.entries(combinedMap).map(([date, values]) => ({
           date,
           ...values,
         }));
+
         combinedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
         setData(combinedData);
       } catch (error) {
         console.error("Erro ao buscar dados comparativos (line):", error);
@@ -95,7 +119,7 @@ export function ChartComparisonLine({ type, ids, metric }: ChartComparisonLinePr
       }
     }
     fetchData();
-  }, [type, ids, metric]);
+  }, [type, ids, metric, dateRange]);
 
   const handleExportCSV = () => {
     const rows = data.map((item) => ({
@@ -103,7 +127,6 @@ export function ChartComparisonLine({ type, ids, metric }: ChartComparisonLinePr
       "Grupo 1": item.groupA,
       "Grupo 2": item.groupB,
     }));
-
     downloadCSV(`comparativo_${metric}_linha.csv`, rows);
   };
 
@@ -141,7 +164,10 @@ export function ChartComparisonLine({ type, ids, metric }: ChartComparisonLinePr
               <LineChart data={data}>
                 <XAxis dataKey="date" stroke="#fff" tick={{ fontSize: 12 }} />
                 <YAxis stroke="#fff" tick={{ fontSize: 12 }} />
-                <Tooltip contentStyle={{ backgroundColor: "#222", borderRadius: "8px", border: "none" }} labelStyle={{ color: "#fff" }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#222", borderRadius: "8px", border: "none" }}
+                  labelStyle={{ color: "#fff" }}
+                />
                 <Legend wrapperStyle={{ color: "#fff" }} />
                 <Line type="monotone" dataKey="groupA" stroke="#4ade80" name="Grupo 1" />
                 <Line type="monotone" dataKey="groupB" stroke="#f87171" name="Grupo 2" />
