@@ -20,9 +20,11 @@ function ChatInput({ inputText, setInputText, sendMessage }: ChatInputProps) {
                 <button
                     onClick={() => sendMessage(inputText)}
                     className="text-neutral-200 bg-blue-700 rounded-full p-2 ml-2"
+                    aria-label="Enviar mensagem"
                 >
                     <Send strokeWidth={1.5} />
                 </button>
+
             </div>
         </div>
     );
