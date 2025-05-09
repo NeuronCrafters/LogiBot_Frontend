@@ -12,6 +12,7 @@ export interface CourseData {
 }
 
 export interface ProfessorData {
+  role?: string[];
   id?: string | number;
   _id?: string | number;
   name: string;

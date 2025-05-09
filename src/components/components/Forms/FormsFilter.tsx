@@ -1,56 +1,65 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-Auth";
 import { publicApi } from "@/services/apiClient";
 import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
-interface Institution {
-  _id: string;
-  name: string;
-}
+interface Institution { _id: string; name: string; }
+interface Course { _id: string; name: string; }
+interface Discipline { _id: string; name: string; }
+interface ClassDataItem { _id: string; name: string; }
 
-interface Course {
-  _id: string;
-  name: string;
-}
+const showUniversitySelectFor: FilterType[] = [
+  "courses",
+  "disciplines",
+  "classes",
+  "professors",
+  "students-course",
+  "students-discipline",
+];
+const showCourseSelectFor: FilterType[] = [
+  "disciplines",
+  "classes",
+  "students-course",
+  "students-discipline",
+];
+const showDisciplineSelectFor: FilterType[] = ["students-discipline"];
+const showClassSelectFor: FilterType[] = ["classes"];
 
-interface Discipline {
-  _id: string;
-  name: string;
-}
+function FormsFilter({
+  onSearch,
+  onReset,
+}: {
+  onSearch: (data: FilterData) => void;
+  onReset: () => void;
+}) {
+  const { user } = useAuth();
+  const isAdmin = user?.role && (Array.isArray(user.role) ? user.role.includes("admin") : user.role === "admin");
 
-interface ClassDataItem {
-  _id: string;
-  name: string;
-}
-
-function FormsFilter({ onSearch, onReset }: { onSearch: (data: FilterData) => void; onReset: () => void; }) {
   const [filterType, setFilterType] = useState<FilterType | "">("");
   const [universities, setUniversities] = useState<Institution[]>([]);
-  const [selectedUniversity, setSelectedUniversity] = useState<string>("");
+  const [selectedUniversity, setSelectedUniversity] = useState("");
   const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<string>("");
+  const [selectedCourse, setSelectedCourse] = useState("");
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
-  const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
+  const [selectedDiscipline, setSelectedDiscipline] = useState("");
   const [classes, setClasses] = useState<ClassDataItem[]>([]);
-  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState("");
 
   useEffect(() => {
-    publicApi
-      .getInstitutions<Institution[]>()
-      .then((data) => setUniversities(data))
-      .catch((error) => console.error("Erro ao carregar universidades", error));
+    publicApi.getInstitutions<Institution[]>()
+      .then(setUniversities)
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
     if (
       selectedUniversity &&
-      filterType &&
-      ["courses", "disciplines", "classes", "students-discipline", "students-course"].includes(filterType)
+      showCourseSelectFor.includes(filterType as FilterType)
     ) {
-      publicApi
-        .getCourses<Course[]>(selectedUniversity)
-        .then((data) => setCourses(data))
-        .catch((error) => console.error("Erro ao carregar cursos", error));
+      publicApi.getCourses<Course[]>(selectedUniversity)
+        .then(setCourses)
+        .catch(console.error);
     } else {
       setCourses([]);
       setSelectedCourse("");
@@ -61,13 +70,11 @@ function FormsFilter({ onSearch, onReset }: { onSearch: (data: FilterData) => vo
     if (
       selectedUniversity &&
       selectedCourse &&
-      filterType &&
-      ["disciplines", "classes", "students-discipline"].includes(filterType)
+      showDisciplineSelectFor.includes(filterType as FilterType)
     ) {
-      publicApi
-        .getDisciplines<Discipline[]>(selectedUniversity, selectedCourse)
-        .then((data) => setDisciplines(data))
-        .catch((error) => console.error("Erro ao carregar disciplinas", error));
+      publicApi.getDisciplines<Discipline[]>(selectedUniversity, selectedCourse)
+        .then(setDisciplines)
+        .catch(console.error);
     } else {
       setDisciplines([]);
       setSelectedDiscipline("");
@@ -75,11 +82,14 @@ function FormsFilter({ onSearch, onReset }: { onSearch: (data: FilterData) => vo
   }, [selectedUniversity, selectedCourse, filterType]);
 
   useEffect(() => {
-    if (selectedUniversity && selectedCourse && filterType === "classes") {
-      publicApi
-        .getClasses<ClassDataItem[]>(selectedUniversity, selectedCourse)
-        .then((data) => setClasses(data))
-        .catch((error) => console.error("Erro ao carregar turmas", error));
+    if (
+      selectedUniversity &&
+      selectedCourse &&
+      showClassSelectFor.includes(filterType as FilterType)
+    ) {
+      publicApi.getClasses<ClassDataItem[]>(selectedUniversity, selectedCourse)
+        .then(setClasses)
+        .catch(console.error);
     } else {
       setClasses([]);
       setSelectedClass("");
@@ -87,14 +97,21 @@ function FormsFilter({ onSearch, onReset }: { onSearch: (data: FilterData) => vo
   }, [selectedUniversity, selectedCourse, filterType]);
 
   function handleSearchClick() {
-    const filterData: FilterData = {
+    onSearch({
       filterType,
-      universityId: selectedUniversity || undefined,
-      courseId: selectedCourse || undefined,
-      disciplineId: selectedDiscipline || undefined,
-      classId: selectedClass || undefined,
-    };
-    onSearch(filterData);
+      universityId: showUniversitySelectFor.includes(filterType as FilterType)
+        ? selectedUniversity || undefined
+        : undefined,
+      courseId: showCourseSelectFor.includes(filterType as FilterType)
+        ? selectedCourse || undefined
+        : undefined,
+      disciplineId: showDisciplineSelectFor.includes(filterType as FilterType)
+        ? selectedDiscipline || undefined
+        : undefined,
+      classId: showClassSelectFor.includes(filterType as FilterType)
+        ? selectedClass || undefined
+        : undefined,
+    });
   }
 
   function handleResetFilter() {
@@ -112,31 +129,34 @@ function FormsFilter({ onSearch, onReset }: { onSearch: (data: FilterData) => vo
   return (
     <div className="mb-4 p-4 rounded-md bg-[#181818]">
       <div className="flex flex-wrap gap-2 mb-4">
+        {/* Tipo de filtro */}
         <div className="flex-1 min-w-[200px]">
           <label className="block mb-1 text-white">Tipo de Filtro:</label>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="font-Montserrat font-medium p-2 rounded-md w-full bg-[#202020] text-slate-100"
+            className="w-full p-2 rounded-md bg-[#202020] text-slate-100"
           >
             <option value="">Selecione o tipo de filtro</option>
             <option value="universities">Universidades</option>
-            <option value="courses">Cursos da Universidade</option>
-            <option value="disciplines">Disciplinas do Curso</option>
-            <option value="classes">Turmas do Curso</option>
-            <option value="professors">Professores da Universidade</option>
-            <option value="students-discipline">Alunos da Disciplina</option>
-            <option value="students-course">Alunos do Curso</option>
+            <option value="courses">Cursos</option>
+            <option value="disciplines">Disciplinas</option>
+            <option value="classes">Turmas</option>
+            <option value="professors">Professores</option>
+            {isAdmin && <option value="students">Alunos do Sistema</option>}
+            <option value="students-course">Alunos por Curso</option>
+            <option value="students-discipline">Alunos por Disciplina</option>
           </select>
         </div>
 
-        {filterType && (
+        {/* Universidade */}
+        {showUniversitySelectFor.includes(filterType as FilterType) && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-slate-100">Universidade:</label>
             <select
               value={selectedUniversity}
               onChange={(e) => setSelectedUniversity(e.target.value)}
-              className="p-2 rounded-md w-full bg-[#202020] text-slate-100 font-Montserrat font-medium"
+              className="w-full p-2 rounded-md bg-[#202020] text-slate-100"
             >
               <option value="">Selecione a universidade</option>
               {universities.map((uni) => (
@@ -148,49 +168,52 @@ function FormsFilter({ onSearch, onReset }: { onSearch: (data: FilterData) => vo
           </div>
         )}
 
-        {filterType && ["courses", "disciplines", "classes", "students-discipline", "students-course"].includes(filterType) && (
+        {/* Curso */}
+        {showCourseSelectFor.includes(filterType as FilterType) && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Curso:</label>
             <select
               value={selectedCourse}
               onChange={(e) => setSelectedCourse(e.target.value)}
-              className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+              className="w-full p-2 rounded-md bg-[#141414] text-white"
             >
               <option value="">Selecione o curso</option>
-              {courses.map((course) => (
-                <option key={course._id} value={course._id}>
-                  {course.name}
+              {courses.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
                 </option>
               ))}
             </select>
           </div>
         )}
 
-        {filterType && ["disciplines", "classes", "students-discipline"].includes(filterType) && (
+        {/* Disciplina */}
+        {showDisciplineSelectFor.includes(filterType as FilterType) && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Disciplina:</label>
             <select
               value={selectedDiscipline}
               onChange={(e) => setSelectedDiscipline(e.target.value)}
-              className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+              className="w-full p-2 rounded-md bg-[#141414] text-white"
             >
               <option value="">Selecione a disciplina</option>
-              {disciplines.map((disc) => (
-                <option key={disc._id} value={disc._id}>
-                  {disc.name}
+              {disciplines.map((d) => (
+                <option key={d._id} value={d._id}>
+                  {d.name}
                 </option>
               ))}
             </select>
           </div>
         )}
 
-        {filterType === "classes" && (
+        {/* Turma */}
+        {showClassSelectFor.includes(filterType as FilterType) && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Turma:</label>
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+              className="w-full p-2 rounded-md bg-[#141414] text-white"
             >
               <option value="">Selecione a turma</option>
               {classes.map((cls) => (
@@ -202,6 +225,7 @@ function FormsFilter({ onSearch, onReset }: { onSearch: (data: FilterData) => vo
           </div>
         )}
       </div>
+
       <div className="flex gap-2">
         <ButtonCRUD action="search" onClick={handleSearchClick} />
         <button

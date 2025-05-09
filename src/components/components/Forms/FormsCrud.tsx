@@ -12,6 +12,14 @@ import type {
   DisciplineData,
 } from "@/@types/FormsDataTypes";
 
+// Estendemos cada Data com um id opcional para evitar erro de propriedade ausente
+// Agora id pode ser string ou number, alinhando com CourseData.id
+type Univ = UniversityData & { id?: string | number };
+type Course = CourseData & { id?: string | number };
+type Prof = ProfessorData & { id?: string | number };
+type Cls = ClassData & { id?: string | number };
+type Disc = DisciplineData & { id?: string | number };
+
 export type EntityType =
   | "university"
   | "course"
@@ -20,36 +28,50 @@ export type EntityType =
   | "discipline";
 
 interface FormsCrudProps {
+  /**
+   * callback que recebe a entidade e os dados do formulário
+   */
   onSubmit: (
-    entity: EntityType,
-    item:
-      | UniversityData
-      | CourseData
-      | ProfessorData
-      | ClassData
-      | DisciplineData
+    entidade: EntityType,
+    item: Univ | Course | Prof | Cls | Disc
   ) => void;
+
+  /**
+   * initialData deve vir como { type: EntityType, data: DadosCorrespondentes }
+   */
   initialData?:
-  | UniversityData
-  | CourseData
-  | ProfessorData
-  | ClassData
-  | DisciplineData;
+  | { type: "university"; data: Univ }
+  | { type: "course"; data: Course }
+  | { type: "class"; data: Cls }
+  | { type: "professor"; data: Prof }
+  | { type: "discipline"; data: Disc };
 }
 
-const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
-  const [selectedEntity, setSelectedEntity] = React.useState<EntityType | "">(
-    ""
-  );
+export const FormsCrud: React.FC<FormsCrudProps> = ({
+  onSubmit,
+  initialData,
+}) => {
+  // seleciona a entidade a cadastrar
+  const [selectedEntity, setSelectedEntity] = React.useState<
+    EntityType | ""
+  >(initialData?.type ?? "");
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as EntityType;
-    setSelectedEntity(value);
+  const handleSelectChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setSelectedEntity(e.target.value as EntityType);
   };
+
+  // extrai somente o `data` quando o tipo bater com a entidade selecionada
+  const initial =
+    initialData?.type === selectedEntity
+      ? initialData.data
+      : undefined;
 
   return (
     <div className="mb-4 p-4 bg-[#181818] text-white rounded-md">
       <h2 className="text-lg font-bold">Cadastro</h2>
+
       <label className="block mb-2">Selecione a Entidade:</label>
       <select
         value={selectedEntity}
@@ -63,38 +85,41 @@ const FormsCrud: React.FC<FormsCrudProps> = ({ onSubmit, initialData }) => {
         <option value="professor">Professor</option>
         <option value="discipline">Disciplina</option>
       </select>
+
       {selectedEntity === "university" && (
         <UniversityForm
-          onSubmit={(data) => onSubmit("university", data)}
-          initialData={initialData as UniversityData | undefined}
+          onSubmit={(dados) => onSubmit("university", dados)}
+          initialData={initial as Univ | undefined}
         />
       )}
+
       {selectedEntity === "course" && (
         <CourseForm
-          onSubmit={(data) => onSubmit("course", data)}
-          initialData={initialData as CourseData | undefined}
+          onSubmit={(dados) => onSubmit("course", dados)}
+          initialData={initial as Course | undefined}
         />
       )}
+
       {selectedEntity === "class" && (
         <ClassForm
-          onSubmit={(data) => onSubmit("class", data)}
-          initialData={initialData as ClassData | undefined}
+          onSubmit={(dados) => onSubmit("class", dados)}
+          initialData={initial as Cls | undefined}
         />
       )}
+
       {selectedEntity === "professor" && (
         <ProfessorForm
-          onSubmit={(data) => onSubmit("professor", data)}
-          initialData={initialData as ProfessorData | undefined}
+          onSubmit={(dados) => onSubmit("professor", dados)}
+          initialData={initial as Prof | undefined}
         />
       )}
+
       {selectedEntity === "discipline" && (
         <DisciplineForm
-          onSubmit={(data) => onSubmit("discipline", data)}
-          initialData={initialData as DisciplineData | undefined}
+          onSubmit={(dados) => onSubmit("discipline", dados)}
+          initialData={initial as Disc | undefined}
         />
       )}
     </div>
   );
 };
-
-export { FormsCrud };

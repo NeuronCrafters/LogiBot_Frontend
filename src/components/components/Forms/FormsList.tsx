@@ -1,218 +1,110 @@
-import { useState, useEffect } from "react";
-import { publicApi } from "@/services/apiClient";
-import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
-import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
+// src/components/components/Forms/FormsList.tsx
+import { Button } from "@/components/ui/button";
 
-interface Institution {
-  _id: string;
+export interface ListItem {
+  id: string;
   name: string;
+  code?: string;      // usado para 'discipline' ou email de professor/aluno ou ID nos genéricos
+  roles?: string[];   // apenas para professor e student
 }
-interface Course { _id: string; name: string; }
-interface Discipline { _id: string; name: string; }
-interface ClassDataItem { _id: string; name: string; }
 
-export function FormsFilter({
-  onSearch,
-  onReset,
-}: {
-  onSearch: (data: FilterData) => void;
-  onReset: () => void;
-}) {
-  const [filterType, setFilterType] = useState<FilterType | "">("");
-  const [universities, setUniversities] = useState<Institution[]>([]);
-  const [selectedUniversity, setSelectedUniversity] = useState<string>("");
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<string>("");
-  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
-  const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
-  const [classes, setClasses] = useState<ClassDataItem[]>([]);
-  const [selectedClass, setSelectedClass] = useState<string>("");
+export type EntityType =
+  | "university"
+  | "course"
+  | "discipline"
+  | "class"
+  | "professor"
+  | "student";
 
-  useEffect(() => {
-    publicApi
-      .getInstitutions<Institution[]>()
-      .then(setUniversities)
-      .catch((e) => console.error("Erro ao carregar universidades", e));
-  }, []);
+interface FormsListProps {
+  entity: EntityType;
+  items: ListItem[];
+  onEdit: (item: ListItem) => void;
+  onDelete: (id: string) => void;
+}
 
-  useEffect(() => {
-    if (
-      selectedUniversity &&
-      filterType &&
-      ["courses", "disciplines", "classes", "students-discipline", "students-course", "professors"].includes(filterType)
-    ) {
-      publicApi
-        .getCourses<Course[]>(selectedUniversity)
-        .then(setCourses)
-        .catch((e) => console.error("Erro ao carregar cursos", e));
-    } else {
-      setCourses([]);
-      setSelectedCourse("");
-    }
-  }, [selectedUniversity, filterType]);
+export function FormsList({
+  entity,
+  items,
+  onEdit,
+  onDelete,
+}: FormsListProps) {
+  // Label dinâmico para a terceira coluna
+  const thirdHeader =
+    entity === "discipline"
+      ? "Código"
+      : entity === "professor" || entity === "student"
+        ? "Email"
+        : "ID";
 
-  useEffect(() => {
-    if (
-      selectedUniversity &&
-      selectedCourse &&
-      filterType &&
-      ["disciplines", "classes", "students-discipline"].includes(filterType)
-    ) {
-      publicApi
-        .getDisciplines<Discipline[]>(selectedUniversity, selectedCourse)
-        .then(setDisciplines)
-        .catch((e) => console.error("Erro ao carregar disciplinas", e));
-    } else {
-      setDisciplines([]);
-      setSelectedDiscipline("");
-    }
-  }, [selectedUniversity, selectedCourse, filterType]);
+  // Decide se mostra a coluna de Papéis
+  const showRoles = entity === "professor" || entity === "student";
 
-  useEffect(() => {
-    if (selectedUniversity && selectedCourse && filterType === "classes") {
-      publicApi
-        .getClasses<ClassDataItem[]>(selectedUniversity, selectedCourse)
-        .then(setClasses)
-        .catch((e) => console.error("Erro ao carregar turmas", e));
-    } else {
-      setClasses([]);
-      setSelectedClass("");
-    }
-  }, [selectedUniversity, selectedCourse, filterType]);
-
-  function handleSearchClick() {
-    onSearch({
-      filterType,
-      universityId: selectedUniversity || undefined,
-      courseId: selectedCourse || undefined,
-      disciplineId: selectedDiscipline || undefined,
-      classId: selectedClass || undefined,
-    });
-  }
-
-  function handleResetFilter() {
-    setFilterType("");
-    setSelectedUniversity("");
-    setCourses([]);
-    setSelectedCourse("");
-    setDisciplines([]);
-    setSelectedDiscipline("");
-    setClasses([]);
-    setSelectedClass("");
-    onReset();
-  }
+  // Quantidade de colunas totais (para colSpan em vazio)
+  const totalCols = 3 + (showRoles ? 1 : 0) + 1; // Nª, Nome, 3ª, [Papel], Ações
 
   return (
-    <div className="mb-4 p-4 rounded-md bg-[#181818]">
-      <div className="flex flex-wrap gap-2 mb-4">
-        {/* Filter type */}
-        <div className="flex-1 min-w-[200px]">
-          <label className="block mb-1 text-white">Tipo de Filtro:</label>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="font-Montserrat font-medium p-2 rounded-md w-full bg-[#202020] text-slate-100"
-          >
-            <option value="">Selecione o tipo de filtro</option>
-            <option value="universities">Universidades</option>
-            <option value="courses">Cursos da Universidade</option>
-            <option value="disciplines">Disciplinas do Curso</option>
-            <option value="classes">Turmas do Curso</option>
-            <option value="professors">Professores da Universidade</option>
-            <option value="students">Todos os Alunos</option>            {/* ← new */}
-            <option value="students-discipline">Alunos da Disciplina</option>
-            <option value="students-course">Alunos do Curso</option>
-          </select>
-        </div>
-
-        {/* University selector */}
-        {filterType && (
-          <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-slate-100">Universidade:</label>
-            <select
-              value={selectedUniversity}
-              onChange={(e) => setSelectedUniversity(e.target.value)}
-              className="p-2 rounded-md w-full bg-[#202020] text-slate-100 font-Montserrat font-medium"
-            >
-              <option value="">Selecione a universidade</option>
-              {universities.map((uni) => (
-                <option key={uni._id} value={uni._id}>
-                  {uni.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Course selector */}
-        {filterType &&
-          ["courses", "disciplines", "classes", "students-discipline", "students-course"].includes(filterType) && (
-            <div className="flex-1 min-w-[200px]">
-              <label className="block mb-1 text-white">Curso:</label>
-              <select
-                value={selectedCourse}
-                onChange={(e) => setSelectedCourse(e.target.value)}
-                className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+    <div className="bg-[#181818] rounded-md overflow-auto">
+      <table className="min-w-full text-white border-collapse">
+        <thead>
+          <tr>
+            <th className="px-4 py-2 border border-neutral-700 text-left">Nª</th>
+            <th className="px-4 py-2 border border-neutral-700 text-left">Nome</th>
+            <th className="px-4 py-2 border border-neutral-700 text-left">{thirdHeader}</th>
+            {showRoles && (
+              <th className="px-4 py-2 border border-neutral-700 text-left">Papel</th>
+            )}
+            <th className="px-4 py-2 border border-neutral-700 text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.length > 0 ? (
+            items.map((item, idx) => (
+              <tr key={item.id}>
+                <td className="px-4 py-2 border border-neutral-700">{idx + 1}</td>
+                <td className="px-4 py-2 border border-neutral-700">{item.name}</td>
+                <td className="px-4 py-2 border border-neutral-700">
+                  {item.code ?? item.id}
+                </td>
+                {showRoles && (
+                  <td className="px-4 py-2 border border-neutral-700">
+                    {item.roles?.join(", ") ?? "—"}
+                  </td>
+                )}
+                <td className="px-4 py-2 border border-neutral-700 text-center">
+                  <div className="inline-flex items-center justify-center gap-2">
+                    {entity === "professor" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEdit(item)}
+                      >
+                        Editar
+                      </Button>
+                    )}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => onDelete(item.id)}
+                    >
+                      Deletar
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={totalCols}
+                className="px-4 py-2 border border-neutral-700 text-center text-gray-500"
               >
-                <option value="">Selecione o curso</option>
-                {courses.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                Nenhum {entity} encontrado.
+              </td>
+            </tr>
           )}
-
-        {/* Discipline selector */}
-        {filterType &&
-          ["disciplines", "classes", "students-discipline"].includes(filterType) && (
-            <div className="flex-1 min-w-[200px]">
-              <label className="block mb-1 text-white">Disciplina:</label>
-              <select
-                value={selectedDiscipline}
-                onChange={(e) => setSelectedDiscipline(e.target.value)}
-                className="border border-white p-2 rounded w-full bg-[#141414] text-white"
-              >
-                <option value="">Selecione a disciplina</option>
-                {disciplines.map((d) => (
-                  <option key={d._id} value={d._id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-        {/* Class selector */}
-        {filterType === "classes" && (
-          <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white">Turma:</label>
-            <select
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
-              className="border border-white p-2 rounded w-full bg-[#141414] text-white"
-            >
-              <option value="">Selecione a turma</option>
-              {classes.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-      </div>
-
-      <div className="flex gap-2">
-        <ButtonCRUD action="search" onClick={handleSearchClick} />
-        <button
-          onClick={handleResetFilter}
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-        >
-          Recarregar
-        </button>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 }
