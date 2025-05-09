@@ -1,5 +1,11 @@
 import { api } from "@/services/api/api";
-import { ACADEMIC_ROUTES, PUBLIC_ROUTES, RASA_ROUTES, AcademicEntityType } from "./api/api_routes";
+import {
+  ACADEMIC_ROUTES,
+  PUBLIC_ROUTES,
+  RASA_ROUTES,
+  ADMIN_ROUTES,
+  AcademicEntityType,
+} from "./api/api_routes";
 
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
@@ -16,82 +22,95 @@ const deleteRequest = async <T>(url: string): Promise<T> => {
   return response.data;
 };
 
+const patchRequest = async <T>(url: string, data: object): Promise<T> => {
+  const response = await api.patch<T>(url, data, { withCredentials: true });
+  return response.data;
+};
+
 export const academicApi = {
   async post<T>(entity: AcademicEntityType, data: object): Promise<T> {
     const url = ACADEMIC_ROUTES[entity].post;
     return postRequest<T>(url, data);
   },
   async get<T>(entity: AcademicEntityType, id?: string): Promise<T> {
-    const baseUrl = ACADEMIC_ROUTES[entity].get;
-    const url = id ? `${baseUrl}/${id}` : baseUrl;
+    const base = ACADEMIC_ROUTES[entity].get;
+    const url = id ? `${base}/${id}` : base;
     return getRequest<T>(url);
   },
   async delete<T>(entity: AcademicEntityType, id: string): Promise<T> {
-    const baseUrl = ACADEMIC_ROUTES[entity].delete;
-    const url = `${baseUrl}/${id}`;
+    const base = ACADEMIC_ROUTES[entity].delete;
+    const url = `${base}/${id}`;
     return deleteRequest<T>(url);
   },
 };
 
 export const publicApi = {
-  async getInstitutions<T>(): Promise<T> {
-    return getRequest<T>(PUBLIC_ROUTES.institutions);
-  },
-  async getCourses<T>(universityId: string): Promise<T> {
-    return getRequest<T>(`${PUBLIC_ROUTES.courses}/${universityId}`);
-  },
-  async getDisciplines<T>(universityId: string, courseId: string): Promise<T> {
-    return getRequest<T>(`${PUBLIC_ROUTES.disciplines}/${universityId}/${courseId}`);
-  },
-  async getClasses<T>(universityId: string, courseId: string): Promise<T> {
-    return getRequest<T>(`${PUBLIC_ROUTES.classes}/${universityId}/${courseId}`);
-  },
-  async getProfessors<T>(universityId: string, courseId?: string): Promise<T> {
-    const url = courseId
-      ? `${PUBLIC_ROUTES.professors}/${universityId}/${courseId}`
-      : `${PUBLIC_ROUTES.professors}/${universityId}`;
+  getInstitutions: <T>() => getRequest<T>(PUBLIC_ROUTES.institutions),
+  getCourses: <T>(universityId: string) =>
+    getRequest<T>(`${PUBLIC_ROUTES.courses}/${universityId}`),
+  getDisciplines: <T>(u: string, c: string) =>
+    getRequest<T>(`${PUBLIC_ROUTES.disciplines}/${u}/${c}`),
+  getClasses: <T>(u: string, c: string) =>
+    getRequest<T>(`${PUBLIC_ROUTES.classes}/${u}/${c}`),
+  getProfessors: <T>(u: string, c?: string) => {
+    const url = c
+      ? `${PUBLIC_ROUTES.professors}/${u}/${c}`
+      : `${PUBLIC_ROUTES.professors}/${u}`;
     return getRequest<T>(url);
   },
-  async getStudentsByClass<T>(universityId: string, courseId: string, classId: string): Promise<T> {
-    return getRequest<T>(`${PUBLIC_ROUTES.studentsByClass}/${universityId}/${courseId}/${classId}`);
-  },
-  async getStudentsByDiscipline<T>(universityId: string, courseId: string, disciplineId: string): Promise<T> {
-    return getRequest<T>(`${PUBLIC_ROUTES.studentsByDiscipline}/${universityId}/${courseId}/${disciplineId}`);
-  },
-  async getStudentsByCourse<T>(universityId: string, courseId: string): Promise<T> {
-    return getRequest<T>(`${PUBLIC_ROUTES.studentsByCourse}/${universityId}/${courseId}`);
-  },
+  getStudentsByClass: <T>(u: string, c: string, t: string) =>
+    getRequest<T>(`${PUBLIC_ROUTES.studentsByClass}/${u}/${c}/${t}`),
+  getStudentsByDiscipline: <T>(u: string, c: string, d: string) =>
+    getRequest<T>(`${PUBLIC_ROUTES.studentsByDiscipline}/${u}/${c}/${d}`),
+  getStudentsByCourse: <T>(u: string, c: string) =>
+    getRequest<T>(`${PUBLIC_ROUTES.studentsByCourse}/${u}/${c}`),
+};
+
+export const adminApi = {
+  createProfessor: <T>(data: object) =>
+    postRequest<T>(ADMIN_ROUTES.createProfessor, data),
+
+  deleteProfessor: <T>(professorId: string) =>
+    deleteRequest<T>(
+      ADMIN_ROUTES.deleteProfessor.replace(":professorId", professorId)
+    ),
+
+  listAllProfessors: <T>() => getRequest<T>(ADMIN_ROUTES.listAllProfessors),
+
+  listProfessorsByUniversity: <T>(schoolId: string) =>
+    getRequest<T>(
+      ADMIN_ROUTES.listProfessorsByUniversity.replace(":schoolId", schoolId)
+    ),
+
+  listProfessorsByCourse: <T>(courseId: string) =>
+    getRequest<T>(
+      ADMIN_ROUTES.listProfessorsByCourse.replace(":courseId", courseId)
+    ),
+
+  updateProfessorRole: <T>(id: string, action: "add" | "remove") =>
+    patchRequest<T>(
+      ADMIN_ROUTES.updateProfessorRole.replace(":id", id),
+      { action }
+    ),
+  listStudents: <T>() => getRequest<T>(ADMIN_ROUTES.listStudents),
 };
 
 export const rasaApi = {
-  async sendMessage<T>(message: string): Promise<T> {
-    return postRequest<T>(RASA_ROUTES.talk, { message });
-  },
-  async listarNiveis<T>(): Promise<T> {
-    return getRequest<T>(RASA_ROUTES.listarNiveis);
-  },
-  async definirNivel<T>(nivel: string): Promise<T> {
-    return postRequest<T>(RASA_ROUTES.definirNivel, { nivel });
-  },
-  async listarOpcoes<T>(): Promise<T> {
-    return getRequest<T>(RASA_ROUTES.listarOpcoes);
-  },
-  async listarSubopcoes<T>(categoria: string): Promise<T> {
-    return postRequest<T>(RASA_ROUTES.listarSubopcoes, { categoria });
-  },
-  async gerarPerguntas<T>(pergunta: string): Promise<T> {
-    return postRequest<T>(RASA_ROUTES.gerarPerguntas, { pergunta });
-  },
-  async getGabarito<T>(): Promise<T> {
-    return getRequest<T>(RASA_ROUTES.getGabarito);
-  },
-  async verificarRespostas<T>(respostas: string[]): Promise<T> {
-    return postRequest<T>(RASA_ROUTES.verificarRespostas, { respostas });
-  },
-  async actionConversar<T>(): Promise<T> {
-    return postRequest<T>(RASA_ROUTES.actionConversar, { text: "conversar" });
-  },
-  async actionPerguntar<T>(message: string): Promise<T> {
-    return postRequest<T>(RASA_ROUTES.actionPerguntar, { message });
-  },
+  sendMessage: <T>(message: string) =>
+    postRequest<T>(RASA_ROUTES.talk, { message }),
+  listarNiveis: <T>() => getRequest<T>(RASA_ROUTES.listarNiveis),
+  definirNivel: <T>(nivel: string) =>
+    postRequest<T>(RASA_ROUTES.definirNivel, { nivel }),
+  listarOpcoes: <T>() => getRequest<T>(RASA_ROUTES.listarOpcoes),
+  listarSubopcoes: <T>(categoria: string) =>
+    postRequest<T>(RASA_ROUTES.listarSubopcoes, { categoria }),
+  gerarPerguntas: <T>(pergunta: string) =>
+    postRequest<T>(RASA_ROUTES.gerarPerguntas, { pergunta }),
+  getGabarito: <T>() => getRequest<T>(RASA_ROUTES.getGabarito),
+  verificarRespostas: <T>(respostas: string[]) =>
+    postRequest<T>(RASA_ROUTES.verificarRespostas, { respostas }),
+  actionConversar: <T>() =>
+    postRequest<T>(RASA_ROUTES.actionConversar, { text: "conversar" }),
+  actionPerguntar: <T>(message: string) =>
+    postRequest<T>(RASA_ROUTES.actionPerguntar, { message }),
 };

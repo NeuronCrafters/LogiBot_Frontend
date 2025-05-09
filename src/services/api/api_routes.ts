@@ -2,7 +2,6 @@ export type AcademicEntityType =
   | "university"
   | "course"
   | "class"
-  | "professor"
   | "discipline";
 
 export const ACADEMIC_ROUTES: Record<
@@ -28,12 +27,7 @@ export const ACADEMIC_ROUTES: Record<
     post: "/academic-institution/discipline",
     get: "/academic-institution/discipline",
     delete: "/academic-institution/discipline",
-  },
-  professor: {
-    post: "/admin/professor",
-    get: "/academic-institution/professor",
-    delete: "/academic-institution/professor",
-  },
+  }
 };
 
 export const PUBLIC_ROUTES = {
@@ -59,3 +53,13 @@ export const RASA_ROUTES = {
   actionConversar: "/sael/action/conversar",
   actionPerguntar: "/sael/action/perguntar",
 };
+
+export const ADMIN_ROUTES = {
+  createProfessor: "/admin/professor",
+  deleteProfessor: "/admin/professor/:professorId",
+  listAllProfessors: "/admin/professors",
+  listProfessorsByUniversity: "/admin/university/:schoolId/professors",
+  listProfessorsByCourse: "/admin/course/:courseId/professors",
+  updateProfessorRole: "/admin/professor/:id/role",
+  listStudents: "/admin/students",
+} as const;
