@@ -1,3 +1,4 @@
+// src/pages/CRUD.tsx
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-Auth";
 import {
@@ -13,7 +14,7 @@ import { FormsList } from "../../components/components/Forms/FormsList";
 import type { Item as OriginalItem } from "../../components/components/Forms/FormsList";
 import { FormsCrud } from "../../components/components/Forms/FormsCrud";
 import type { FilterData } from "../../@types/FormsFilterTypes";
-import { publicApi, academicApi } from "@/services/apiClient";
+import { publicApi, academicApi, adminApi } from "@/services/apiClient";
 import {
   UniversityData,
   CourseData,
@@ -53,8 +54,11 @@ function CRUD() {
 
   useEffect(() => {
     const roles = Array.isArray(user?.role) ? user.role : [user?.role];
-
-    if (roles.includes("admin") || roles.includes("coordinator") || roles.includes("course-coordinator")) {
+    if (
+      roles.includes("admin") ||
+      roles.includes("course-coordinator") ||
+      roles.includes("professor")
+    ) {
       setIsAllowed(true);
     } else {
       setIsAllowed(false);
@@ -69,7 +73,7 @@ function CRUD() {
     );
   }
 
-  async function handleSearch(filterData: FilterData): Promise<void> {
+  async function handleSearch(filterData: FilterData) {
     try {
       let data: RawItem[] = [];
       switch (filterData.filterType) {
@@ -94,51 +98,43 @@ function CRUD() {
           break;
         case "classes":
           if (filterData.universityId && filterData.courseId) {
-            data = await publicApi.getClasses<RawItem[]>(filterData.universityId, filterData.courseId);
+            data = await publicApi.getClasses<RawItem[]>(
+              filterData.universityId,
+              filterData.courseId
+            );
             setCurrentEntity("class");
           }
           break;
         case "professors":
-          if (filterData.universityId) {
-            if (filterData.courseId) {
-              data = await publicApi.getProfessors<RawItem[]>(filterData.universityId, filterData.courseId);
-            } else {
-              data = await publicApi.getProfessors<RawItem[]>(filterData.universityId);
-            }
-            setCurrentEntity("professor");
-          }
-          break;
-        case "students-discipline":
-          if (
-            filterData.universityId &&
-            filterData.courseId &&
-            filterData.disciplineId
-          ) {
-            data = await publicApi.getStudentsByDiscipline<RawItem[]>(
-              filterData.universityId,
-              filterData.courseId,
-              filterData.disciplineId
-            );
-            setCurrentEntity("student");
-          }
-          break;
-        case "students-course":
           if (filterData.universityId && filterData.courseId) {
-            data = await publicApi.getStudentsByCourse<RawItem[]>(filterData.universityId, filterData.courseId);
-            setCurrentEntity("student");
+            // lista professores do curso
+            data = await adminApi.listProfessorsByCourse<RawItem[]>(filterData.courseId);
+          } else if (filterData.universityId) {
+            // lista professores da universidade
+            data = await adminApi.listProfessorsByUniversity<RawItem[]>(
+              filterData.universityId
+            );
           }
+          setCurrentEntity("professor");
+          break;
+        case "students":
+          // lista alunos conforme papel do usuário
+          data = await adminApi.listStudents<RawItem[]>();
+          setCurrentEntity("student");
           break;
         default:
           console.error("Filtro inválido");
       }
-      const mappedData: Item[] = data.map((item, index) => ({
-        id: item.id ?? item._id ?? index,
-        name: item.name,
-        code: item.code ?? undefined,
+
+      const mapped: Item[] = data.map((it, idx) => ({
+        id: it.id ?? it._id ?? idx,
+        name: it.name,
+        code: it.code,
       }));
-      setItems(mappedData);
-    } catch (error) {
-      console.error("Erro ao buscar itens:", error);
+      setItems(mapped);
+    } catch (err) {
+      console.error("Erro ao buscar itens:", err);
+      toast.error("Falha ao buscar dados.");
     }
   }
 
@@ -150,102 +146,99 @@ function CRUD() {
       | ProfessorData
       | ClassData
       | DisciplineData
-  ): Promise<void> {
+  ) {
     try {
-      let response:
+      let resp:
         | UniversityData
         | CourseData
         | ProfessorData
         | ClassData
         | DisciplineData;
-
       switch (entity) {
         case "university":
-          response = await academicApi.post<UniversityData>("university", item);
+          resp = await academicApi.post<UniversityData>("university", item);
           break;
         case "course":
-          response = await academicApi.post<CourseData>("course", item);
+          resp = await academicApi.post<CourseData>("course", item);
           break;
         case "class":
-          response = await academicApi.post<ClassData>("class", item);
+          resp = await academicApi.post<ClassData>("class", item);
           break;
         case "discipline":
-          response = await academicApi.post<DisciplineData>("discipline", item);
+          resp = await academicApi.post<DisciplineData>("discipline", item);
           break;
         case "professor":
-          response = await academicApi.post<ProfessorData>("professor", item);
+          resp = await adminApi.createProfessor<ProfessorData>(item);
           break;
         default:
-          console.error("Entidade não suportada para criação:", entity);
+          console.error("Entidade não suportada:", entity);
           return;
       }
 
-      setCreatedData(response);
+      setCreatedData(resp);
       setModalOpen(true);
-      toast.success("Registro criado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao criar item:", error);
-      toast.error("Erro ao criar item.");
+      toast.success("Cadastro realizado com sucesso!");
+    } catch (err) {
+      console.error("Erro ao criar item:", err);
+      toast.error("Falha ao criar registro.");
     }
   }
 
-  function handleEdit(item: Item): void {
-    setEditingItem(item);
+  function handleEdit(it: Item) {
+    setEditingItem(it);
   }
 
-  function handleDelete(id: string | number): void {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  function handleDelete(id: string | number) {
+    setItems((prev) => prev.filter((it) => it.id !== id));
   }
 
-  function handleResetList(): void {
+  function handleResetList() {
     setItems([]);
   }
 
   return (
     <div className="min-h-screen bg-[#141414] overflow-x-hidden">
       <FormsHeader />
-      <div className="bg-[#141414]">
-        <div className="px-4 py-8 max-w-screen-xl mx-auto">
-          <h1 className="text-2xl font-bold mb-4 text-white font-Montserrat">
-            Sistema de Gerenciamento do SAEL
-          </h1>
-          <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
-          {currentEntity !== "student" && currentEntity !== "professor" ? (
-            <FormsCrud
-              onSubmit={(entity, data) => handleCreateOrUpdate(entity, data)}
-              initialData={editingItem || undefined}
-            />
-          ) : (
-            currentEntity === "professor" && (
-              <FormsCrud
-                onSubmit={(entity, data) => handleCreateOrUpdate(entity, data)}
-                initialData={editingItem || undefined}
-              />
-            )
-          )}
-          <FormsList
-            entity={currentEntity}
-            items={items}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+      <div className="px-4 py-8 max-w-screen-xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4 text-white font-Montserrat">
+          Sistema de Gerenciamento do SAEL
+        </h1>
+        <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
+        {currentEntity !== "student" && (
+          <FormsCrud
+            onSubmit={(e, d) => handleCreateOrUpdate(e, d)}
+            initialData={editingItem ?? undefined}
           />
-        </div>
+        )}
+        <FormsList
+          entity={currentEntity}
+          items={items}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="bg-[#1f1f1f] text-white max-w-md">
           <DialogHeader>
-            <DialogTitle>Cadastro Realizado</DialogTitle>
+            <DialogTitle>Cadastro Concluído</DialogTitle>
             <DialogDescription className="text-slate-400">
-              Veja abaixo os dados do item criado com sucesso.
+              Detalhes do item criado:
             </DialogDescription>
           </DialogHeader>
           {createdData && (
-            <div className="space-y-2 mt-2">
-              <p><strong>ID:</strong> {createdData._id || createdData.id}</p>
-              <p><strong>Nome:</strong> {createdData.name}</p>
-              {createdData.code && <p><strong>Código:</strong> {createdData.code}</p>}
-              {createdData.courseId && <p><strong>ID do Curso:</strong> {createdData.courseId}</p>}
+            <div className="mt-2 space-y-2">
+              <p>
+                <strong>ID:</strong> {createdData._id ?? createdData.id}
+              </p>
+              <p>
+                <strong>Nome:</strong> {createdData.name}
+              </p>
+              {"code" in createdData && createdData.code && (
+                <p>
+                  <strong>Código:</strong> {createdData.code}
+                </p>
+              )}
             </div>
           )}
         </DialogContent>

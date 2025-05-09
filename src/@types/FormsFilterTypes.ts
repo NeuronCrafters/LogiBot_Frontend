@@ -4,6 +4,7 @@ export type FilterType =
   | 'disciplines'
   | 'classes'
   | 'professors'
+  | 'students'
   | 'students-discipline'
   | 'students-course';
 

@@ -1,142 +1,218 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useState, useEffect } from "react";
+import { publicApi } from "@/services/apiClient";
+import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
-import { academicApi } from "@/services/apiClient";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { AcademicEntityType } from "@/services/api/api_routes";
 
-export interface Item {
-  id: string | number;
+interface Institution {
+  _id: string;
   name: string;
-  code?: string;
 }
+interface Course { _id: string; name: string; }
+interface Discipline { _id: string; name: string; }
+interface ClassDataItem { _id: string; name: string; }
 
-export type EntityType = AcademicEntityType | "student";
-
-export interface FormsListProps {
-  items: Item[];
-  entity: EntityType;
-  onEdit: (item: Item) => void;
-  onDelete: (id: string | number) => void;
-  createdItem?: Item | null;
-}
-
-function FormsList({
-  items,
-  entity,
-  onEdit,
-  onDelete,
-  createdItem,
-}: FormsListProps) {
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<boolean>(false);
+export function FormsFilter({
+  onSearch,
+  onReset,
+}: {
+  onSearch: (data: FilterData) => void;
+  onReset: () => void;
+}) {
+  const [filterType, setFilterType] = useState<FilterType | "">("");
+  const [universities, setUniversities] = useState<Institution[]>([]);
+  const [selectedUniversity, setSelectedUniversity] = useState<string>("");
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<string>("");
+  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
+  const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
+  const [classes, setClasses] = useState<ClassDataItem[]>([]);
+  const [selectedClass, setSelectedClass] = useState<string>("");
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    publicApi
+      .getInstitutions<Institution[]>()
+      .then(setUniversities)
+      .catch((e) => console.error("Erro ao carregar universidades", e));
   }, []);
 
   useEffect(() => {
-    if (createdItem && entity === "class") {
-      setShowModal(true);
-    }
-  }, [createdItem, entity]);
-
-  const handleDeleteAction = async (id: string | number) => {
-    const confirmed = window.confirm("Tem certeza que deseja deletar?");
-    if (!confirmed) return;
-
-    const deletableEntities: AcademicEntityType[] = [
-      "university",
-      "course",
-      "discipline",
-      "class",
-      "professor",
-    ];
-
-    if (deletableEntities.includes(entity as AcademicEntityType)) {
-      try {
-        await academicApi.delete(entity as AcademicEntityType, id.toString());
-        toast.success("Item deletado com sucesso!");
-        onDelete(id);
-      } catch (error) {
-        toast.error("Erro ao deletar item.");
-        console.error("Erro ao deletar item:", error);
-      }
+    if (
+      selectedUniversity &&
+      filterType &&
+      ["courses", "disciplines", "classes", "students-discipline", "students-course", "professors"].includes(filterType)
+    ) {
+      publicApi
+        .getCourses<Course[]>(selectedUniversity)
+        .then(setCourses)
+        .catch((e) => console.error("Erro ao carregar cursos", e));
     } else {
-      onDelete(id);
+      setCourses([]);
+      setSelectedCourse("");
     }
-  };
+  }, [selectedUniversity, filterType]);
 
-  const formatTitle = (e: EntityType) => {
-    switch (e) {
-      case "student":
-        return "Alunos";
-      case "professor":
-        return "Professores";
-      default:
-        return `${e.charAt(0).toUpperCase()}${e.slice(1)}s`;
+  useEffect(() => {
+    if (
+      selectedUniversity &&
+      selectedCourse &&
+      filterType &&
+      ["disciplines", "classes", "students-discipline"].includes(filterType)
+    ) {
+      publicApi
+        .getDisciplines<Discipline[]>(selectedUniversity, selectedCourse)
+        .then(setDisciplines)
+        .catch((e) => console.error("Erro ao carregar disciplinas", e));
+    } else {
+      setDisciplines([]);
+      setSelectedDiscipline("");
     }
-  };
+  }, [selectedUniversity, selectedCourse, filterType]);
+
+  useEffect(() => {
+    if (selectedUniversity && selectedCourse && filterType === "classes") {
+      publicApi
+        .getClasses<ClassDataItem[]>(selectedUniversity, selectedCourse)
+        .then(setClasses)
+        .catch((e) => console.error("Erro ao carregar turmas", e));
+    } else {
+      setClasses([]);
+      setSelectedClass("");
+    }
+  }, [selectedUniversity, selectedCourse, filterType]);
+
+  function handleSearchClick() {
+    onSearch({
+      filterType,
+      universityId: selectedUniversity || undefined,
+      courseId: selectedCourse || undefined,
+      disciplineId: selectedDiscipline || undefined,
+      classId: selectedClass || undefined,
+    });
+  }
+
+  function handleResetFilter() {
+    setFilterType("");
+    setSelectedUniversity("");
+    setCourses([]);
+    setSelectedCourse("");
+    setDisciplines([]);
+    setSelectedDiscipline("");
+    setClasses([]);
+    setSelectedClass("");
+    onReset();
+  }
 
   return (
-    <>
-      <div className="bg-[#181818] text-white p-4 rounded-md">
-        <h2 className="text-xl font-semibold mb-4">
-          {formatTitle(entity)} encontrados:
-        </h2>
-        <ul>
-          {items.map((item) => (
-            <li
-              key={item.id}
-              className="bg-[#202020] flex flex-col sm:flex-row justify-between items-start sm:items-center rounded-md p-2 mb-2"
-            >
-              <div className="text-sm">
-                <p><strong>Nome:</strong> {item.name}</p>
-                {item.code && (
-                  <p className="text-xs text-gray-400">Código: {item.code}</p>
-                )}
-                <p className="text-xs text-gray-500">ID: {item.id}</p>
-              </div>
+    <div className="mb-4 p-4 rounded-md bg-[#181818]">
+      <div className="flex flex-wrap gap-2 mb-4">
+        {/* Filter type */}
+        <div className="flex-1 min-w-[200px]">
+          <label className="block mb-1 text-white">Tipo de Filtro:</label>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value as FilterType)}
+            className="font-Montserrat font-medium p-2 rounded-md w-full bg-[#202020] text-slate-100"
+          >
+            <option value="">Selecione o tipo de filtro</option>
+            <option value="universities">Universidades</option>
+            <option value="courses">Cursos da Universidade</option>
+            <option value="disciplines">Disciplinas do Curso</option>
+            <option value="classes">Turmas do Curso</option>
+            <option value="professors">Professores da Universidade</option>
+            <option value="students">Todos os Alunos</option>            {/* ← new */}
+            <option value="students-discipline">Alunos da Disciplina</option>
+            <option value="students-course">Alunos do Curso</option>
+          </select>
+        </div>
 
-              {["university", "course", "discipline", "class", "professor"].includes(entity) && (
-                <div className="flex gap-2 mt-2 sm:mt-0">
-                  <ButtonCRUD
-                    action="update"
-                    onClick={() => onEdit(item)}
-                    compact={isMobile}
-                  />
-                  <ButtonCRUD
-                    action="delete"
-                    onClick={() => handleDeleteAction(item.id)}
-                    compact={isMobile}
-                  />
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        {/* University selector */}
+        {filterType && (
+          <div className="flex-1 min-w-[200px]">
+            <label className="block mb-1 text-slate-100">Universidade:</label>
+            <select
+              value={selectedUniversity}
+              onChange={(e) => setSelectedUniversity(e.target.value)}
+              className="p-2 rounded-md w-full bg-[#202020] text-slate-100 font-Montserrat font-medium"
+            >
+              <option value="">Selecione a universidade</option>
+              {universities.map((uni) => (
+                <option key={uni._id} value={uni._id}>
+                  {uni.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Course selector */}
+        {filterType &&
+          ["courses", "disciplines", "classes", "students-discipline", "students-course"].includes(filterType) && (
+            <div className="flex-1 min-w-[200px]">
+              <label className="block mb-1 text-white">Curso:</label>
+              <select
+                value={selectedCourse}
+                onChange={(e) => setSelectedCourse(e.target.value)}
+                className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+              >
+                <option value="">Selecione o curso</option>
+                {courses.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+        {/* Discipline selector */}
+        {filterType &&
+          ["disciplines", "classes", "students-discipline"].includes(filterType) && (
+            <div className="flex-1 min-w-[200px]">
+              <label className="block mb-1 text-white">Disciplina:</label>
+              <select
+                value={selectedDiscipline}
+                onChange={(e) => setSelectedDiscipline(e.target.value)}
+                className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+              >
+                <option value="">Selecione a disciplina</option>
+                {disciplines.map((d) => (
+                  <option key={d._id} value={d._id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+        {/* Class selector */}
+        {filterType === "classes" && (
+          <div className="flex-1 min-w-[200px]">
+            <label className="block mb-1 text-white">Turma:</label>
+            <select
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              className="border border-white p-2 rounded w-full bg-[#141414] text-white"
+            >
+              <option value="">Selecione a turma</option>
+              {classes.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
-      {/* Modal para quando uma turma for criada */}
-      {createdItem && (
-        <Dialog open={showModal} onOpenChange={setShowModal}>
-          <DialogContent className="bg-[#202020] text-white">
-            <DialogHeader>
-              <DialogTitle>Turma criada com sucesso!</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-2 mt-2">
-              <p><strong>Nome:</strong> {createdItem.name}</p>
-              {createdItem.code && <p><strong>Código:</strong> {createdItem.code}</p>}
-              <p><strong>ID:</strong> {createdItem.id}</p>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-    </>
+      <div className="flex gap-2">
+        <ButtonCRUD action="search" onClick={handleSearchClick} />
+        <button
+          onClick={handleResetFilter}
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+        >
+          Recarregar
+        </button>
+      </div>
+    </div>
   );
 }
-
-export { FormsList };
