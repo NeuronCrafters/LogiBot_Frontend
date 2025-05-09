@@ -1,11 +1,11 @@
-// src/components/components/Forms/FormsList.tsx
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-Auth";
 
 export interface ListItem {
   id: string;
   name: string;
-  code?: string;      // usado para 'discipline' ou email de professor/aluno ou ID nos genéricos
-  roles?: string[];   // apenas para professor e student
+  code?: string;
+  roles?: string[];
 }
 
 export type EntityType =
@@ -23,57 +23,59 @@ interface FormsListProps {
   onDelete: (id: string) => void;
 }
 
-export function FormsList({
-  entity,
-  items,
-  onEdit,
-  onDelete,
-}: FormsListProps) {
-  // Label dinâmico para a terceira coluna
-  const thirdHeader =
+export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
+  const { user } = useAuth();
+  if (!user) return null;
+
+  const userRoles = Array.isArray(user.role) ? user.role : [user.role];
+  const isAdmin = userRoles.includes("admin");
+
+  const headerLabel =
     entity === "discipline"
       ? "Código"
       : entity === "professor" || entity === "student"
         ? "Email"
         : "ID";
 
-  // Decide se mostra a coluna de Papéis
-  const showRoles = entity === "professor" || entity === "student";
-
-  // Quantidade de colunas totais (para colSpan em vazio)
-  const totalCols = 3 + (showRoles ? 1 : 0) + 1; // Nª, Nome, 3ª, [Papel], Ações
-
   return (
-    <div className="bg-[#181818] rounded-md overflow-auto">
-      <table className="min-w-full text-white border-collapse">
+    <div className="bg-[#181818] rounded-md mt-4 overflow-auto">
+      <table className="table-auto w-full text-white border-collapse">
         <thead>
           <tr>
-            <th className="px-4 py-2 border border-neutral-700 text-left">Nª</th>
-            <th className="px-4 py-2 border border-neutral-700 text-left">Nome</th>
-            <th className="px-4 py-2 border border-neutral-700 text-left">{thirdHeader}</th>
-            {showRoles && (
-              <th className="px-4 py-2 border border-neutral-700 text-left">Papel</th>
+            <th className="border border-neutral-700 px-4 py-2">Nª</th>
+            <th className="border border-neutral-700 px-4 py-2">Nome</th>
+            <th className="border border-neutral-700 px-4 py-2">
+              {headerLabel}
+            </th>
+            {(entity === "professor" || entity === "student") && (
+              <th className="border border-neutral-700 px-4 py-2">Papéis</th>
             )}
-            <th className="px-4 py-2 border border-neutral-700 text-center">Ações</th>
+            <th className="border border-neutral-700 px-4 py-2 text-center">
+              Ações
+            </th>
           </tr>
         </thead>
         <tbody>
           {items.length > 0 ? (
             items.map((item, idx) => (
               <tr key={item.id}>
-                <td className="px-4 py-2 border border-neutral-700">{idx + 1}</td>
-                <td className="px-4 py-2 border border-neutral-700">{item.name}</td>
-                <td className="px-4 py-2 border border-neutral-700">
+                <td className="border border-neutral-700 px-4 py-2">
+                  {idx + 1}
+                </td>
+                <td className="border border-neutral-700 px-4 py-2">
+                  {item.name}
+                </td>
+                <td className="border border-neutral-700 px-4 py-2">
                   {item.code ?? item.id}
                 </td>
-                {showRoles && (
-                  <td className="px-4 py-2 border border-neutral-700">
+                {(entity === "professor" || entity === "student") && (
+                  <td className="border border-neutral-700 px-4 py-2">
                     {item.roles?.join(", ") ?? "—"}
                   </td>
                 )}
-                <td className="px-4 py-2 border border-neutral-700 text-center">
-                  <div className="inline-flex items-center justify-center gap-2">
-                    {entity === "professor" && (
+                <td className="border border-neutral-700 px-4 py-2 text-center">
+                  <div className="inline-flex gap-2 justify-center">
+                    {isAdmin && entity === "professor" && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -82,13 +84,15 @@ export function FormsList({
                         Editar
                       </Button>
                     )}
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => onDelete(item.id)}
-                    >
-                      Deletar
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => onDelete(item.id)}
+                      >
+                        Deletar
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -96,8 +100,8 @@ export function FormsList({
           ) : (
             <tr>
               <td
-                colSpan={totalCols}
-                className="px-4 py-2 border border-neutral-700 text-center text-gray-500"
+                colSpan={(entity === "professor" || entity === "student") ? 5 : 4}
+                className="border border-neutral-700 px-4 py-2 text-center text-gray-500"
               >
                 Nenhum {entity} encontrado.
               </td>

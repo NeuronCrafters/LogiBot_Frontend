@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { FormsHeader } from "@/components/components/Forms/FormsHeader";
 import { FormsFilter } from "@/components/components/Forms/FormsFilter";
 import { FormsCrud } from "@/components/components/Forms/FormsCrud";
-import { FormsList } from "@/components/components/Forms/FormsList";
+import { FormsList, ListItem } from "@/components/components/Forms/FormsList";
 import type { FilterData } from "@/@types/FormsFilterTypes";
 import { publicApi, adminApi, academicApi } from "@/services/apiClient";
 import {
@@ -23,8 +23,6 @@ import {
 } from "@/@types/FormsDataTypes";
 import toast from "react-hot-toast";
 
-// --- Tipagens auxiliares ---
-
 interface StudentRaw {
   _id: string;
   name: string;
@@ -32,18 +30,13 @@ interface StudentRaw {
   course: string;
   disciplines: Array<{ _id: string; name: string; code: string }>;
 }
-
 interface GenericRaw {
   _id: string;
   name: string;
   code?: string;
 }
 
-// Extendemos Item para poder guardar roles (professor e student)
-interface Item {
-  id: string;
-  name: string;
-  code?: string;
+interface Item extends ListItem {
   roles?: string[];
 }
 
@@ -55,7 +48,6 @@ type Entity =
   | "professor"
   | "student";
 
-// Formato local de professor para o modal
 interface LocalProfessor {
   _id: string;
   name: string;
@@ -63,7 +55,6 @@ interface LocalProfessor {
   roles: string[];
 }
 
-// Função de mapeamento interno→display
 const humanRole = (r: string) => {
   switch (r) {
     case "admin":
@@ -85,7 +76,6 @@ export function CRUD() {
 
   const userRoles = Array.isArray(user.role) ? user.role : [user.role];
 
-  // Estados principais
   const [items, setItems] = useState<Item[]>([]);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [currentEntity, setCurrentEntity] = useState<Entity>("university");
@@ -93,10 +83,12 @@ export function CRUD() {
   const [createdData, setCreatedData] = useState<any>(null);
   const [isAllowed, setIsAllowed] = useState(false);
 
-  // Modal de edição de papel
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [profData, setProfData] = useState<LocalProfessor | null>(null);
   const [roleAction, setRoleAction] = useState<"add" | "remove">("add");
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [toDeleteId, setToDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     setIsAllowed(
@@ -114,60 +106,64 @@ export function CRUD() {
     );
   }
 
-  // --- Busca & filtro ---
   async function handleSearch(filterData: FilterData) {
     try {
       let studentData: StudentRaw[] = [];
       let profDataArr: ProfessorData[] = [];
       let genericData: GenericRaw[] = [];
+      let localEntity: Entity = "university";
 
       switch (filterData.filterType) {
         case "students":
         case "students-course":
         case "students-discipline": {
-          // 1) busca sempre todos
           studentData = await adminApi.listStudents<StudentRaw[]>();
-          // 2) aplica filtros
-          if (filterData.filterType === "students-course" && filterData.courseId) {
-            studentData = studentData.filter(s => s.course === filterData.courseId);
-          }
-          if (filterData.filterType === "students-discipline" && filterData.disciplineId) {
-            studentData = studentData.filter(s =>
-              s.disciplines.some(d => d._id === filterData.disciplineId)
+          if (
+            filterData.filterType === "students-course" &&
+            filterData.courseId
+          ) {
+            studentData = studentData.filter(
+              (s) => s.course === filterData.courseId
             );
           }
-          setCurrentEntity("student");
+          if (
+            filterData.filterType === "students-discipline" &&
+            filterData.disciplineId
+          ) {
+            studentData = studentData.filter((s) =>
+              s.disciplines.some((d) => d._id === filterData.disciplineId)
+            );
+          }
+          localEntity = "student";
           break;
         }
-
         case "professors": {
-          // 1) busca conforme filtros
           if (filterData.universityId && filterData.courseId) {
-            profDataArr = await adminApi.listProfessorsByCourse<ProfessorData[]>(
-              filterData.courseId
-            );
+            profDataArr =
+              await adminApi.listProfessorsByCourse<ProfessorData[]>(
+                filterData.courseId
+              );
           } else if (filterData.universityId) {
-            profDataArr = await adminApi.listProfessorsByUniversity<ProfessorData[]>(
-              filterData.universityId
-            );
+            profDataArr =
+              await adminApi.listProfessorsByUniversity<ProfessorData[]>(
+                filterData.universityId
+              );
           } else {
             profDataArr = await adminApi.listAllProfessors<ProfessorData[]>();
           }
-          setCurrentEntity("professor");
+          localEntity = "professor";
           break;
         }
-
-        // restantes genéricos
         case "universities":
           genericData = await publicApi.getInstitutions<GenericRaw[]>();
-          setCurrentEntity("university");
+          localEntity = "university";
           break;
         case "courses":
           if (filterData.universityId) {
             genericData = await publicApi.getCourses<GenericRaw[]>(
               filterData.universityId
             );
-            setCurrentEntity("course");
+            localEntity = "course";
           }
           break;
         case "disciplines":
@@ -176,7 +172,7 @@ export function CRUD() {
               filterData.universityId,
               filterData.courseId
             );
-            setCurrentEntity("discipline");
+            localEntity = "discipline";
           }
           break;
         case "classes":
@@ -185,27 +181,23 @@ export function CRUD() {
               filterData.universityId,
               filterData.courseId
             );
-            setCurrentEntity("class");
+            localEntity = "class";
           }
           break;
-        default:
-          console.error("Filtro inválido:", filterData.filterType);
       }
 
-      // --- Mapeamento final para items ---
-      if (currentEntity === "student") {
+      if (localEntity === "student") {
         setItems(
-          studentData.map(s => ({
+          studentData.map((s) => ({
             id: s._id,
             name: s.name,
             code: s.email,
             roles: ["Estudante"],
           }))
         );
-      } else if (currentEntity === "professor") {
+      } else if (localEntity === "professor") {
         setItems(
-          profDataArr.map(p => {
-            // garantir array de roles
+          profDataArr.map((p) => {
             const raw = (p as any).role as string | string[];
             const arr = Array.isArray(raw) ? raw : [raw];
             return {
@@ -218,7 +210,7 @@ export function CRUD() {
         );
       } else {
         setItems(
-          genericData.map(g => ({
+          genericData.map((g) => ({
             id: g._id,
             name: g.name,
             code: g.code,
@@ -226,13 +218,13 @@ export function CRUD() {
         );
       }
 
+      setCurrentEntity(localEntity);
     } catch (err) {
       console.error("Erro ao buscar itens:", err);
       toast.error("Falha ao buscar dados.");
     }
   }
 
-  // --- Criação / atualização genérica ---
   async function handleCreateOrUpdate(
     entity: Entity,
     item:
@@ -272,12 +264,10 @@ export function CRUD() {
     }
   }
 
-  // --- Editar: professor abre modal de role; demais reutilizam FormsCrud ---
   async function handleEdit(item: Item) {
     if (currentEntity === "professor" && userRoles.includes("admin")) {
-      // busca todos para achar o selecionado
       const all = await adminApi.listAllProfessors<ProfessorData[]>();
-      const p = all.find(x => String(x._id) === item.id);
+      const p = all.find((x) => String(x._id) === item.id);
       if (!p) {
         toast.error("Professor não encontrado.");
         return;
@@ -290,7 +280,6 @@ export function CRUD() {
         email: p.email,
         roles: arr.map(humanRole),
       });
-      // define ação inicial
       setRoleAction(arr.includes("course-coordinator") ? "remove" : "add");
       setRoleModalOpen(true);
     } else {
@@ -298,24 +287,38 @@ export function CRUD() {
     }
   }
 
-  // --- Deletar ---
   async function handleDelete(id: string) {
     try {
       if (currentEntity === "professor") {
         await adminApi.deleteProfessor(id);
         toast.success("Professor removido com sucesso!");
       }
-      setItems(prev => prev.filter(it => it.id !== id));
+      setItems((prev) => prev.filter((it) => it.id !== id));
     } catch {
       toast.error("Falha ao deletar.");
     }
+  }
+
+  function confirmDelete(id: string) {
+    setToDeleteId(id);
+    setDeleteModalOpen(true);
+  }
+
+  function cancelDelete() {
+    setToDeleteId(null);
+    setDeleteModalOpen(false);
+  }
+
+  async function doDelete() {
+    if (!toDeleteId) return;
+    await handleDelete(toDeleteId);
+    cancelDelete();
   }
 
   function handleResetList() {
     setItems([]);
   }
 
-  // --- Aplica mudança de papel ---
   async function applyRoleChange() {
     if (!profData) return;
     const isCoord = profData.roles.includes("Coordenador de Curso");
@@ -323,17 +326,13 @@ export function CRUD() {
       return;
     }
     try {
-      await adminApi.updateProfessorRole(
-        profData._id,
-        roleAction
-      );
+      await adminApi.updateProfessorRole(profData._id, roleAction);
       toast.success(
         roleAction === "add"
           ? "Coordenador de Curso adicionado!"
           : "Coordenador de Curso removido!"
       );
       setRoleModalOpen(false);
-      // refrescar listagem
       handleSearch({ filterType: "professors" });
     } catch (e: any) {
       toast.error(e.message || "Falha ao atualizar papel.");
@@ -341,15 +340,13 @@ export function CRUD() {
   }
 
   return (
-    <div className="min-h-screen bg-[#141414] overflow-x-hidden">
+    <div className="min-h-screen bg-[#141414] overflow-x-auto">
       <FormsHeader />
 
       <div className="px-4 py-8 max-w-screen-xl mx-auto">
         <h1 className="text-2xl font-bold mb-4 text-white font-Montserrat">
           Sistema de Gerenciamento do SAEL
         </h1>
-
-        <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
 
         {currentEntity !== "student" && (
           <FormsCrud
@@ -362,15 +359,16 @@ export function CRUD() {
           />
         )}
 
+        <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
+
         <FormsList
           entity={currentEntity}
           items={items}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={confirmDelete}
         />
       </div>
 
-      {/* Modal de criação */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
         <DialogContent className="bg-[#1f1f1f] text-white max-w-md">
           <DialogHeader>
@@ -389,7 +387,6 @@ export function CRUD() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal de alteração de papel */}
       <Dialog open={roleModalOpen} onOpenChange={setRoleModalOpen}>
         <DialogContent className="bg-[#1f1f1f] text-white max-w-md">
           <DialogHeader>
@@ -443,6 +440,25 @@ export function CRUD() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteModalOpen} onOpenChange={cancelDelete}>
+        <DialogContent className="bg-[#1f1f1f] text-white max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Confirmar deleção</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Tem certeza que deseja deletar este registro?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={cancelDelete}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={doDelete}>
+              Deletar
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

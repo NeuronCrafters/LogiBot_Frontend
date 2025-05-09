@@ -5,6 +5,7 @@ interface ButtonCRUDProps {
   action: "create" | "delete" | "list" | "search" | "update" | "details";
   onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   compact?: boolean;
+  disabled?: boolean;
 }
 
 const actionConfig = {
@@ -16,13 +17,24 @@ const actionConfig = {
   details: { label: "Detalhes", icon: <Eye className="w-5 h-5" />, color: "bg-purple-500" },
 };
 
-export function ButtonCRUD({ action, onClick, compact = false }: ButtonCRUDProps) {
+export function ButtonCRUD({
+  action,
+  onClick,
+  compact = false,
+  disabled = false,
+}: ButtonCRUDProps) {
   const { label, icon, color } = actionConfig[action];
 
   return (
     <Button
       onClick={onClick}
-      className={`${color} text-white px-4 py-2 flex items-center gap-2 rounded ${compact ? "w-10 h-10 justify-center" : "w-[112px]"}`}
+      disabled={disabled}
+      className={`
+        ${color} text-white 
+        ${disabled ? "opacity-50 cursor-not-allowed" : "hover:brightness-90"} 
+        px-4 py-2 flex items-center gap-2 rounded 
+        ${compact ? "w-10 h-10 justify-center" : "w-[112px]"}
+      `}
     >
       {icon}
       {!compact && label}
