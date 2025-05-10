@@ -26,38 +26,33 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
         ? "teacher"
         : "student";
 
-
   return (
     <>
-      {/* Overlay */}
       <div
         className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
           }`}
         onClick={closeMenu}
       />
 
-      {/* Drawer */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-[350px] bg-[#181818] transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed inset-y-0 right-0 z-50 w-[350px] bg-[#181818] transform transition-transform duration-300 flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
-        <div className="flex justify-end p-4">
+        <div className="flex justify-end p-4 bg-[#181818] sticky top-0 z-10">
           <button onClick={closeMenu} className="text-white hover:text-gray-400">
             <X size={28} />
           </button>
         </div>
 
-        <div className="h-full p-6 flex flex-col">
+        <div className="p-6 flex flex-col overflow-y-auto flex-1">
           <div className="flex flex-col items-center space-y-2 mb-4">
             <div
               className="
-    rounded-full p-[2px]
-    bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-    inline-flex items-center justify-center
-    w-32 h-32
-    sm:w-36 sm:h-36 
-    md:w-40 md:h-40 
-  "
+                rounded-full p-[2px]
+                bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+                inline-flex items-center justify-center
+                w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40
+              "
             >
               <Avatar
                 seed={user._id}
@@ -92,7 +87,6 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
 
           <Separator className="bg-[#2a2a2a] mb-2" />
 
-          {/* Opções de menu */}
           <MenuOptions
             role={menuRole as "student" | "teacher" | "course-coordinator" | "admin"}
             logout={() => { logout(); closeMenu(); }}
