@@ -40,9 +40,9 @@ function Signin() {
     }
   };
 
-  const handleDeclineConsent = () => {
-    setShowConsent(false);
-  };
+  // const handleDeclineConsent = () => {
+  //   setShowConsent(false);
+  // };
 
   const handleOpenConsent = (e: React.MouseEvent) => {
     e.preventDefault();
