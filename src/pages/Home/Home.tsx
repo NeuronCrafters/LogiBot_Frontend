@@ -1,21 +1,32 @@
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
-import { useAuth } from "@/hooks/use-Auth";
-import { useNavigate } from "react-router-dom";
+import { Infos } from "@/components/components/Infos/Infos";
 
 export function Home() {
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showInfo, setShowInfo] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.skipInfoModal) {
+      setShowInfo(false);
+    }
+  }, [location.state]);
 
   const handlePlayClick = () => {
-    if (user) {
-      navigate("/chat");
-    } else {
-      navigate("/signin");
-    }
+    setShowInfo(true); // mostra modal de info
+  };
+
+  const handleAccept = () => {
+    setShowInfo(false);
+    navigate("/signin");
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#141414] text-white">
+    <div className="relative flex flex-col h-screen bg-[#141414] text-white">
+      {showInfo && <Infos type="signup" onAccept={handleAccept} />}
+
       <header className="w-full p-6 flex justify-between items-center bg-[#1F1F1F] shadow-lg">
         <h1 className="text-2xl font-bold">Sistema de Apoio ao Ensino de Lógica</h1>
         <button
@@ -33,7 +44,6 @@ export function Home() {
             SAEL é um sistema de apoio acadêmico. Com nosso suporte, você irá aprender assuntos de lógica de programação, além de reforçar sua base com atividades.
           </p>
         </div>
-
         <div className="w-full md:w-1/2 flex items-center justify-center">
           <AnimatedLogo />
         </div>

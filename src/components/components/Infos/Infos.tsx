@@ -1,109 +1,83 @@
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
-import { Typograph } from "@/components/components/Typograph/Typograph";
-import { ButtonInfo } from "@/components/components/Button/ButtonInfo";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
-export function Infos() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
+interface InfosProps {
+  type: "consent" | "signup";
+  onAccept?: () => void;
+}
 
-  useEffect(() => {
-    const hasReadInfo = localStorage.getItem("infosRead");
-    const isGoodbyePage = window.location.pathname === "/goodbye";
+const configMap = {
+  consent: {
+    title: "Consentimento para Coleta de Dados",
+    message:
+      "O SAEL coleta dados de uso com finalidade educacional e para melhorar a sua experiência. Tudo em conformidade com a LGPD.",
+    acceptLabel: "Aceito os termos",
+    declineLabel: "Não aceito",
+  },
+  signup: {
+    title: "Bem-vindo ao SAEL",
+    message:
+      "O SAEL é um sistema de apoio acadêmico gratuito. Para usar todas as funcionalidades, é necessário criar uma conta gratuita.",
+    acceptLabel: "Fechar",
+    declineLabel: "",
+  },
+};
 
-    if (!hasReadInfo && !isGoodbyePage) {
-      setIsOpen(true);
-    }
-  }, []);
-
-  const handleAccept = () => {
-    localStorage.setItem("infosRead", "true");
-    setIsOpen(false);
-  };
+function Infos({ type, onAccept }: InfosProps) {
+  const navigate = useNavigate();
+  const config = configMap[type];
 
   const handleDecline = () => {
-    setIsOpen(false);
-    setIsDeclineModalOpen(true);
+    // No modal de consentimento, voltar à Home
+    navigate("/", { state: { skipInfoModal: true } });
   };
 
-  const handleRetry = () => {
-    setIsDeclineModalOpen(false);
-    setIsOpen(true);
-  };
-
-  const handleFinalDecline = () => {
-    setIsDeclineModalOpen(false);
-    setTimeout(() => {
-      window.location.href = "/goodbye";
-    }, 300);
+  const handleAccept = () => {
+    if (onAccept) return onAccept();
+    if (type === "consent") navigate("/signup");
   };
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent
-          className="max-w-[90%] sm:max-w-md md:max-w-lg lg:max-w-xl bg-[#141414] p-6 rounded-lg shadow-lg overflow-auto max-h-[90vh]"
-        >
-          <DialogHeader>
-            <Typograph
-              text="Aviso Importante"
-              colorText="text-white"
-              variant="title1"
-              weight="bold"
-              fontFamily="poppins"
-            />
-          </DialogHeader>
-          <div className="space-y-4">
-            <Typograph
-              text="Bem-vindo(a) à plataforma! Gostaríamos de informar que coletamos dados de uso da plataforma Chat SAEL, para aprimorar a experiência do usuário."
-              colorText="text-white"
-              variant="text3"
-              weight="regular"
-              fontFamily="poppins"
-            />
-            <Typograph
-              text="Esses dados são tratados com total segurança e em conformidade com a legislação vigente. Ao continuar, você concorda com a coleta e o uso dessas informações."
-              colorText="text-white"
-              variant="text3"
-              weight="regular"
-              fontFamily="poppins"
-            />
-          </div>
-          <div className="flex justify-between space-x-4 mt-4">
-            <ButtonInfo type="agree" onClick={handleAccept} />
-            <ButtonInfo type="disagree" onClick={handleDecline} />
-          </div>
-        </DialogContent>
-      </Dialog>
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="w-full max-w-lg"
+      >
+        <Card className="rounded-2xl shadow-2xl bg-[#1F1F1F] border border-neutral-700 text-white">
+          <CardContent className="p-6 sm:p-8 space-y-6 text-center">
+            <h2 className="text-2xl font-bold tracking-tight">{config.title}</h2>
+            <p className="text-sm sm:text-base leading-relaxed text-white/90">
+              {config.message}
+            </p>
 
-      <Dialog open={isDeclineModalOpen} onOpenChange={setIsDeclineModalOpen}>
-        <DialogContent
-          className="max-w-[90%] sm:max-w-md md:max-w-lg lg:max-w-xl bg-[#141414] p-6 rounded-lg shadow-lg overflow-auto max-h-[90vh]"
-        >
-          <DialogHeader>
-            <Typograph
-              text="Lamentamos a sua decisão"
-              colorText="text-white"
-              variant="title1"
-              weight="bold"
-              fontFamily="poppins"
-            />
-          </DialogHeader>
-          <div className="space-y-4">
-            <Typograph
-              text="Infelizmente, não será possível continuar usando a plataforma sem concordar com os termos. Caso mude de ideia, você poderá aceitar as condições e aproveitar todos os recursos oferecidos."
-              colorText="text-white"
-              variant="text3"
-              weight="regular"
-              fontFamily="poppins"
-            />
-          </div>
-          <div className="flex justify-between space-x-4 mt-4">
-            <ButtonInfo type="agree" onClick={handleRetry} label="Voltar e Concordar" />
-            <ButtonInfo type="disagree" onClick={handleFinalDecline} label="Sair" />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+              <Button
+                onClick={handleAccept}
+                className="w-full sm:w-auto border border-white"
+                variant="default"
+              >
+                {config.acceptLabel}
+              </Button>
+
+              {type === "consent" && (
+                <Button
+                  onClick={handleDecline}
+                  className="w-full sm:w-auto border border-white text-white"
+                  variant="outline"
+                >
+                  {config.declineLabel}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
   );
 }
+
+export { Infos };

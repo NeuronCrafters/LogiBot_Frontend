@@ -6,6 +6,7 @@ import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 
+
 interface University {
   _id: string;
   name: string;
