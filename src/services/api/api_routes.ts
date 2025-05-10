@@ -74,4 +74,5 @@ export const COORDINATOR_ROUTES = {
   listStudentsByDiscipline:
     "/admin/coordinator/students/discipline/:disciplineId",
   listDisciplines: "/admin/coordinator/disciplines",
+  listClasses: "/admin/coordinator/classes",
 } as const;

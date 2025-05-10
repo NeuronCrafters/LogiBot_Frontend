@@ -137,6 +137,8 @@ export const coordinatorApi = {
     ),
   listDisciplines: <T>() =>
     getRequest<T>(COORDINATOR_ROUTES.listDisciplines),
+  listClasses: <T>() =>
+    getRequest<T>(COORDINATOR_ROUTES.listClasses),
 };
 
 
