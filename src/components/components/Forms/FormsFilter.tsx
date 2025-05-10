@@ -1,4 +1,3 @@
-// src/components/components/Forms/FormsFilter.tsx
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-Auth";
 import { publicApi } from "@/services/apiClient";
@@ -26,10 +25,9 @@ export function FormsFilter({
 
   // valores fixos para coord / prof
   const fixedUniversity = String(user.school);
-  const fixedCourse =
-    Array.isArray(user.courses) && user.courses.length > 0
-      ? user.courses[0]
-      : "";
+  const fixedCourse = Array.isArray(user.courses) && user.courses.length > 0
+    ? user.courses[0]
+    : "";
 
   // filtros permitidos por papel
   const allowedFilters: FilterType[] = isAdmin
@@ -46,7 +44,8 @@ export function FormsFilter({
     : isCoordinator
       ? [
         "professors",
-        "disciplines",          // agora aparece sem select
+        "disciplines",          // coord agora sem select extra
+        "classes",              // coord lista turmas
         "students-course",
         "students-discipline",
       ]
@@ -66,7 +65,7 @@ export function FormsFilter({
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
 
-  // determina quais selects aparecem
+  // quais selects aparecem
   const showUniversitySelect =
     isAdmin &&
     [
@@ -88,55 +87,67 @@ export function FormsFilter({
     ].includes(filterType as FilterType);
 
   const showStudentDisciplineSelect =
-    filterType === "students-discipline" && (isAdmin || isCoordinator || isProfessor);
+    filterType === "students-discipline" &&
+    (isAdmin || isCoordinator || isProfessor);
 
-  // PARA O COORDENADOR:
-  // não exibimos select algum nem para "professors" nem para "disciplines"
+  // para o coordenador: não exibimos select algum para estes filtros
   const coordinatorNoSelect =
-    isCoordinator && ["professors", "disciplines"].includes(filterType as FilterType);
+    isCoordinator &&
+    ["professors", "disciplines", "classes"].includes(filterType as FilterType);
 
-  // habilita o botão "Pesquisar"
+  // habilita botão Pesquisar
   let canSearch =
     !!filterType &&
     (!showUniversitySelect || !!selectedUniversity) &&
     (!showCourseSelect || !!selectedCourse) &&
     (!showStudentDisciplineSelect || !!selectedDiscipline);
 
-  // mas se for coordenador e filtro for "professors" ou "disciplines", liberamos direto:
+  // mas se for coord e filtro sem select, liberamos direto
   if (coordinatorNoSelect) {
     canSearch = true;
   }
 
-  // carrega universidades (apenas admin)
+  // carrega universidades (só admin)
   useEffect(() => {
     if (isAdmin) {
-      publicApi.getInstitutions<Institution[]>().then(setUniversities).catch(console.error);
+      publicApi.getInstitutions<Institution[]>()
+        .then(setUniversities)
+        .catch(console.error);
     }
   }, [isAdmin]);
 
-  // carrega cursos (apenas admin)
+  // carrega cursos (só admin)
   useEffect(() => {
     if (showCourseSelect && selectedUniversity) {
-      publicApi.getCourses<Course[]>(selectedUniversity).then(setCourses).catch(console.error);
+      publicApi.getCourses<Course[]>(selectedUniversity)
+        .then(setCourses)
+        .catch(console.error);
     } else {
       setCourses([]);
       if (isAdmin) setSelectedCourse("");
     }
   }, [showCourseSelect, selectedUniversity, isAdmin]);
 
-  // carrega disciplinas (para student-discipline e admin)
+  // carrega disciplinas quando for “students-discipline”
+  // e também para coord se filtrar “disciplines”
   useEffect(() => {
-    if (showStudentDisciplineSelect) {
+    if (
+      showStudentDisciplineSelect ||
+      (isCoordinator && filterType === "disciplines")
+    ) {
       const uni = isAdmin ? selectedUniversity : fixedUniversity;
       const course = isAdmin ? selectedCourse : fixedCourse;
       if (uni && course) {
-        publicApi.getDisciplines<Discipline[]>(uni, course).then(setDisciplines).catch(console.error);
+        publicApi.getDisciplines<Discipline[]>(uni, course)
+          .then(setDisciplines)
+          .catch(console.error);
       }
     } else {
       setDisciplines([]);
       setSelectedDiscipline("");
     }
   }, [
+    filterType,
     showStudentDisciplineSelect,
     selectedUniversity,
     selectedCourse,
@@ -161,7 +172,9 @@ export function FormsFilter({
           : showCourseSelect
             ? selectedCourse
             : undefined,
-      disciplineId: showStudentDisciplineSelect ? selectedDiscipline : undefined,
+      disciplineId: showStudentDisciplineSelect
+        ? selectedDiscipline
+        : undefined,
       classId: undefined,
     });
   }
@@ -245,7 +258,7 @@ export function FormsFilter({
           </div>
         )}
 
-        {/* Disciplina para “Alunos por Disciplina” */}
+        {/* Disciplina (students-discipline) */}
         {showStudentDisciplineSelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Disciplina:</label>
@@ -266,7 +279,11 @@ export function FormsFilter({
       </div>
 
       <div className="flex gap-2">
-        <ButtonCRUD action="search" onClick={handleSearchClick} disabled={!canSearch} />
+        <ButtonCRUD
+          action="search"
+          onClick={handleSearchClick}
+          disabled={!canSearch}
+        />
         <button
           onClick={handleResetFilter}
           className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"

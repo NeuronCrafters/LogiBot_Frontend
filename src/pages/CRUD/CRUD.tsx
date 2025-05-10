@@ -122,11 +122,7 @@ export function CRUD() {
           case "professors": {
             const profs = await coordinatorApi.listMyProfessors<ProfessorData[]>();
             fetched = profs.map((p) => {
-              const rawRoles: string[] = Array.isArray(p.role)
-                ? p.role
-                : p.role
-                  ? [p.role]
-                  : [];
+              const rawRoles: string[] = Array.isArray(p.role) ? p.role : p.role ? [p.role] : [];
               return {
                 id: String(p._id),
                 name: p.name,
@@ -137,7 +133,31 @@ export function CRUD() {
             entity = "professor";
             break;
           }
-          case "students":
+
+          case "disciplines": {
+            // lista disciplinas do curso do coordenador
+            const discs = await coordinatorApi.listDisciplines<DisciplineData[]>();
+            fetched = discs.map((d) => ({
+              id: String(d._id),
+              name: d.name,
+              code: (d as any).code ?? d._id,
+            }));
+            entity = "discipline";
+            break;
+          }
+
+          case "classes": {
+            // lista turmas do curso do coordenador
+            const cls = await coordinatorApi.listClasses<ClassData[]>();
+            fetched = cls.map((c) => ({
+              id: String(c._id),
+              name: c.name,
+              code: (c as any).code ?? c._id,
+            }));
+            entity = "class";
+            break;
+          }
+
           case "students-course": {
             const studs = await coordinatorApi.listMyStudents<StudentRaw[]>();
             fetched = studs.map((s) => ({
@@ -149,14 +169,16 @@ export function CRUD() {
             entity = "student";
             break;
           }
+
           case "students-discipline": {
             if (!filterData.disciplineId) {
               toast.error("Selecione uma disciplina.");
               return;
             }
-            const studs = await coordinatorApi.listStudentsByDiscipline<StudentRaw[]>(
-              filterData.disciplineId
-            );
+            const studs =
+              await coordinatorApi.listStudentsByDiscipline<StudentRaw[]>(
+                filterData.disciplineId
+              );
             fetched = studs.map((s) => ({
               id: s._id,
               name: s.name,
@@ -166,17 +188,7 @@ export function CRUD() {
             entity = "student";
             break;
           }
-          case "disciplines": {
-            // novo case para listar as disciplinas do curso do coordenador
-            const discs = await coordinatorApi.listDisciplines<GenericRaw[]>();
-            fetched = discs.map((d) => ({
-              id: d._id,
-              name: d.name,
-              code: d.code ?? d._id,
-            }));
-            entity = "discipline";
-            break;
-          }
+
           default:
             fetched = [];
         }
@@ -312,8 +324,6 @@ export function CRUD() {
       toast.error("Falha ao buscar dados.");
     }
   }
-
-
 
   async function handleCreateOrUpdate(
     entity: Entity,
