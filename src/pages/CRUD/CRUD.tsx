@@ -154,10 +154,9 @@ export function CRUD() {
               toast.error("Selecione uma disciplina.");
               return;
             }
-            const studs =
-              await coordinatorApi.listStudentsByDiscipline<StudentRaw[]>(
-                filterData.disciplineId
-              );
+            const studs = await coordinatorApi.listStudentsByDiscipline<StudentRaw[]>(
+              filterData.disciplineId
+            );
             fetched = studs.map((s) => ({
               id: s._id,
               name: s.name,
@@ -167,7 +166,17 @@ export function CRUD() {
             entity = "student";
             break;
           }
-
+          case "disciplines": {
+            // novo case para listar as disciplinas do curso do coordenador
+            const discs = await coordinatorApi.listDisciplines<GenericRaw[]>();
+            fetched = discs.map((d) => ({
+              id: d._id,
+              name: d.name,
+              code: d.code ?? d._id,
+            }));
+            entity = "discipline";
+            break;
+          }
           default:
             fetched = [];
         }
@@ -303,6 +312,7 @@ export function CRUD() {
       toast.error("Falha ao buscar dados.");
     }
   }
+
 
 
   async function handleCreateOrUpdate(
