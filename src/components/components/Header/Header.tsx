@@ -48,16 +48,15 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
         </div>
 
         <div className="h-full p-6 flex flex-col">
-          {/* Avatar e nome */}
           <div className="flex flex-col items-center space-y-2 mb-4">
             <div
               className="
-    rounded-full p-[1px]
+    rounded-full p-[2px]
     bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
     inline-flex items-center justify-center
-    w-32 h-32       /* 128×128px por padrão */
-    sm:w-36 sm:h-36 /* 144×144px em >=sm */
-    md:w-40 md:h-40 /* 160×160px em >=md */
+    w-32 h-32
+    sm:w-36 sm:h-36 
+    md:w-40 md:h-40 
   "
             >
               <Avatar
