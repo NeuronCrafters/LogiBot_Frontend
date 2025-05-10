@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useAuth } from "@/hooks/use-Auth";
 import { UniversityForm } from "./Forms/UniversityForm";
 import { CourseForm } from "./Forms/CourseForm";
 import { ProfessorForm } from "./Forms/ProfessorForm";
@@ -12,33 +13,24 @@ import type {
   DisciplineData,
 } from "@/@types/FormsDataTypes";
 
-// Estendemos cada Data com um id opcional para evitar erro de propriedade ausente
-// Agora id pode ser string ou number, alinhando com CourseData.id
-type Univ = UniversityData & { id?: string | number };
-type Course = CourseData & { id?: string | number };
-type Prof = ProfessorData & { id?: string | number };
-type Cls = ClassData & { id?: string | number };
-type Disc = DisciplineData & { id?: string | number };
-
-export type EntityType =
+type EntityType =
   | "university"
   | "course"
   | "class"
   | "professor"
   | "discipline";
 
+type Univ = UniversityData & { id?: string | number };
+type Course = CourseData & { id?: string | number };
+type Prof = ProfessorData & { id?: string | number };
+type Cls = ClassData & { id?: string | number };
+type Disc = DisciplineData & { id?: string | number };
+
 interface FormsCrudProps {
-  /**
-   * callback que recebe a entidade e os dados do formulário
-   */
   onSubmit: (
     entidade: EntityType,
     item: Univ | Course | Prof | Cls | Disc
   ) => void;
-
-  /**
-   * initialData deve vir como { type: EntityType, data: DadosCorrespondentes }
-   */
   initialData?:
   | { type: "university"; data: Univ }
   | { type: "course"; data: Course }
@@ -51,10 +43,28 @@ export const FormsCrud: React.FC<FormsCrudProps> = ({
   onSubmit,
   initialData,
 }) => {
-  // seleciona a entidade a cadastrar
-  const [selectedEntity, setSelectedEntity] = React.useState<
-    EntityType | ""
-  >(initialData?.type ?? "");
+  const { user } = useAuth();
+  if (!user) return null;
+
+  const roles = Array.isArray(user.role) ? user.role : [user.role];
+  const isAdmin = roles.includes("admin");
+  const isCoordinator = roles.includes("course-coordinator");
+
+  // se não for admin nem coordenador, nem renderiza
+  if (!isAdmin && !isCoordinator) {
+    return null;
+  }
+
+  // define quais entidades aparecem
+  const allowedEntities: EntityType[] = isAdmin
+    ? ["university", "course", "class", "professor", "discipline"]
+    : ["class"]; // coordenador só cria turma
+
+  const [selectedEntity, setSelectedEntity] = useState<EntityType | "">(
+    initialData?.type && allowedEntities.includes(initialData.type)
+      ? initialData.type
+      : ""
+  );
 
   const handleSelectChange = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -62,7 +72,6 @@ export const FormsCrud: React.FC<FormsCrudProps> = ({
     setSelectedEntity(e.target.value as EntityType);
   };
 
-  // extrai somente o `data` quando o tipo bater com a entidade selecionada
   const initial =
     initialData?.type === selectedEntity
       ? initialData.data
@@ -70,51 +79,53 @@ export const FormsCrud: React.FC<FormsCrudProps> = ({
 
   return (
     <div className="mb-4 p-4 bg-[#181818] text-white rounded-md">
-      <h2 className="text-lg font-bold">Cadastro</h2>
+      <h2 className="text-lg font-bold mb-2">Cadastro</h2>
 
       <label className="block mb-2">Selecione a Entidade:</label>
       <select
         value={selectedEntity}
         onChange={handleSelectChange}
-        className="p-2 rounded w-full bg-[#202020] text-white"
+        className="p-2 rounded w-full bg-[#202020] text-white mb-4"
       >
-        <option value="">Selecione</option>
-        <option value="university">Universidade</option>
-        <option value="course">Curso</option>
-        <option value="class">Turma</option>
-        <option value="professor">Professor</option>
-        <option value="discipline">Disciplina</option>
+        <option value="">-- Escolha --</option>
+        {allowedEntities.map((ent) => (
+          <option key={ent} value={ent}>
+            {{
+              university: "Universidade",
+              course: "Curso",
+              class: "Turma",
+              professor: "Professor",
+              discipline: "Disciplina",
+            }[ent]}
+          </option>
+        ))}
       </select>
 
-      {selectedEntity === "university" && (
+      {selectedEntity === "university" && isAdmin && (
         <UniversityForm
           onSubmit={(dados) => onSubmit("university", dados)}
           initialData={initial as Univ | undefined}
         />
       )}
-
-      {selectedEntity === "course" && (
+      {selectedEntity === "course" && isAdmin && (
         <CourseForm
           onSubmit={(dados) => onSubmit("course", dados)}
           initialData={initial as Course | undefined}
         />
       )}
-
       {selectedEntity === "class" && (
         <ClassForm
           onSubmit={(dados) => onSubmit("class", dados)}
           initialData={initial as Cls | undefined}
         />
       )}
-
-      {selectedEntity === "professor" && (
+      {selectedEntity === "professor" && isAdmin && (
         <ProfessorForm
           onSubmit={(dados) => onSubmit("professor", dados)}
           initialData={initial as Prof | undefined}
         />
       )}
-
-      {selectedEntity === "discipline" && (
+      {selectedEntity === "discipline" && isAdmin && (
         <DisciplineForm
           onSubmit={(dados) => onSubmit("discipline", dados)}
           initialData={initial as Disc | undefined}
