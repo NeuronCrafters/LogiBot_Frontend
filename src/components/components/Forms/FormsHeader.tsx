@@ -25,22 +25,24 @@ function FormsHeader() {
             <Button onClick={() => setMenuOpen(true)} aria-label="Abrir menu">
               <div
                 className="
-        rounded-full p-[1px]
-        bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-        inline-flex items-center justify-center
-        w-8 h-8
-        sm:w-10 sm:h-10
-        md:w-12 md:h-12
-        lg:w-14 lg:h-14
-      "
+      rounded-full p-[1px]
+      bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+      inline-flex items-center justify-center
+      w-8 h-8
+      sm:w-10 sm:h-10
+      md:w-12 md:h-12
+      lg:w-14 lg:h-14
+    "
               >
                 <Avatar
                   seed={user._id}
-                  backgroundColor="#2a2a2a"
+                  backgroundColor="#141414"
                   className="w-full h-full"
                 />
               </div>
             </Button>
+
+
           )}
         </div>
       </div>

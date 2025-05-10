@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
@@ -48,7 +48,7 @@ export function About() {
     ? user.role.includes("admin")
     : user.role === "admin";
 
-  // extrai schoolName (que já vem na API como string)
+  // extrai nomes
   const schoolName =
     typeof user.schoolName === "string"
       ? user.schoolName
@@ -56,13 +56,11 @@ export function About() {
         ? user.schoolName.join(", ")
         : "";
 
-  // extrai nome do curso do primeiro elemento de user.courses
   const courseName =
     Array.isArray(user.courses) && user.courses.length > 0
       ? (user.courses[0] as any).name
       : "-";
 
-  // extrai turma (só para estudante)
   const className =
     Array.isArray(user.className)
       ? user.className.join(", ")
@@ -78,14 +76,12 @@ export function About() {
           <Button onClick={() => setMenuOpen(true)} aria-label="Abrir menu">
             <div
               className="
-        rounded-full p-[1px]
-        bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-        inline-flex items-center justify-center
-        w-8 h-8
-        sm:w-10 sm:h-10
-        md:w-12 md:h-12
-        lg:w-14 lg:h-14
-      "
+      rounded-full
+      p-[2px]
+      bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+      inline-flex items-center justify-center
+      w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14
+    "
             >
               <Avatar
                 seed={user._id}
@@ -94,23 +90,23 @@ export function About() {
               />
             </div>
           </Button>
-        )}
 
+
+
+        )}
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-1 shadow-2xl">
+        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl rounded-3xl p-[2px] bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl">
           <div className="bg-[#2a2a2a] rounded-3xl p-6 sm:p-10 space-y-6">
-
             <div className="flex justify-center -mt-16">
               <div
                 className={`
-      rounded-full p-[6px]
+      rounded-full
+      p-[1px]
       bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
       inline-flex items-center justify-center
-      ${isAdmin
-                    ? "w-32 h-32 sm:w-36 sm:h-36"
-                    : "w-40 h-40 sm:w-44 sm:h-44"}  
+      ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}
     `}
               >
                 <Avatar
@@ -120,8 +116,6 @@ export function About() {
                 />
               </div>
             </div>
-
-
             <div className="space-y-4">
               <Detail label="Nome" value={user.name} />
               <Detail label="Email" value={user.email} />
