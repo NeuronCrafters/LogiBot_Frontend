@@ -8,7 +8,13 @@ export interface User {
     school: string;
     course?: string;
     courses?: string[];
-    class?: string;
+    class?: string[] | string;
+    schoolId: string[] | string;
+    schoolName: string[] | string;
+    courseId?: string[] | string;
+    courseName?: string[] | string;
+    classId?: string[] | string;
+    className?: string[] | string;
 }
 
 export interface AuthContextData {
