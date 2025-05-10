@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
@@ -90,9 +90,6 @@ export function About() {
               />
             </div>
           </Button>
-
-
-
         )}
       </header>
 
@@ -103,7 +100,7 @@ export function About() {
               <div
                 className={`
       rounded-full
-      p-[1px]
+      p-[3px]
       bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
       inline-flex items-center justify-center
       ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}
