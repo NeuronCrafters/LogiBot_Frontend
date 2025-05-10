@@ -135,7 +135,10 @@ export const coordinatorApi = {
         disciplineId
       )
     ),
+  listDisciplines: <T>() =>
+    getRequest<T>(COORDINATOR_ROUTES.listDisciplines),
 };
+
 
 // --------------
 // Rasa chatbot

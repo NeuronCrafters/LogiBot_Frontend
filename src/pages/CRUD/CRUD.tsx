@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-Auth";
 import {
@@ -13,7 +14,13 @@ import { FormsFilter } from "@/components/components/Forms/FormsFilter";
 import { FormsCrud } from "@/components/components/Forms/FormsCrud";
 import { FormsList, ListItem } from "@/components/components/Forms/FormsList";
 import type { FilterData } from "@/@types/FormsFilterTypes";
-import { publicApi, adminApi, academicApi } from "@/services/apiClient";
+import {
+  adminApi,
+  professorApi,
+  coordinatorApi,
+  academicApi,
+  publicApi,
+} from "@/services/apiClient";
 import {
   UniversityData,
   CourseData,
@@ -75,6 +82,9 @@ export function CRUD() {
   if (!user) return null;
 
   const userRoles = Array.isArray(user.role) ? user.role : [user.role];
+  const isAdmin = userRoles.includes("admin");
+  const isCoordinator = userRoles.includes("course-coordinator");
+  const isProfessor = userRoles.includes("professor");
 
   const [items, setItems] = useState<Item[]>([]);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
@@ -91,12 +101,8 @@ export function CRUD() {
   const [toDeleteId, setToDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsAllowed(
-      userRoles.includes("admin") ||
-      userRoles.includes("course-coordinator") ||
-      userRoles.includes("professor")
-    );
-  }, [userRoles]);
+    setIsAllowed(isAdmin || isCoordinator || isProfessor);
+  }, [isAdmin, isCoordinator, isProfessor]);
 
   if (!isAllowed) {
     return (
@@ -108,122 +114,196 @@ export function CRUD() {
 
   async function handleSearch(filterData: FilterData) {
     try {
-      let studentData: StudentRaw[] = [];
-      let profDataArr: ProfessorData[] = [];
-      let genericData: GenericRaw[] = [];
-      let localEntity: Entity = "university";
+      let fetched: any[] = [];
+      let entity: Entity = "student";
 
-      switch (filterData.filterType) {
-        case "students":
-        case "students-course":
-        case "students-discipline": {
-          studentData = await adminApi.listStudents<StudentRaw[]>();
-          if (
-            filterData.filterType === "students-course" &&
-            filterData.courseId
-          ) {
-            studentData = studentData.filter(
-              (s) => s.course === filterData.courseId
-            );
+      if (isCoordinator) {
+        switch (filterData.filterType) {
+          case "professors": {
+            const profs = await coordinatorApi.listMyProfessors<ProfessorData[]>();
+            fetched = profs.map((p) => {
+              const rawRoles: string[] = Array.isArray(p.role)
+                ? p.role
+                : p.role
+                  ? [p.role]
+                  : [];
+              return {
+                id: String(p._id),
+                name: p.name,
+                code: p.email,
+                roles: rawRoles.map(humanRole),
+              };
+            });
+            entity = "professor";
+            break;
           }
-          if (
-            filterData.filterType === "students-discipline" &&
-            filterData.disciplineId
-          ) {
-            studentData = studentData.filter((s) =>
-              s.disciplines.some((d) => d._id === filterData.disciplineId)
-            );
+          case "students":
+          case "students-course": {
+            const studs = await coordinatorApi.listMyStudents<StudentRaw[]>();
+            fetched = studs.map((s) => ({
+              id: s._id,
+              name: s.name,
+              code: s.email,
+              roles: ["Estudante"],
+            }));
+            entity = "student";
+            break;
           }
-          localEntity = "student";
-          break;
+          case "students-discipline": {
+            if (!filterData.disciplineId) {
+              toast.error("Selecione uma disciplina.");
+              return;
+            }
+            const studs =
+              await coordinatorApi.listStudentsByDiscipline<StudentRaw[]>(
+                filterData.disciplineId
+              );
+            fetched = studs.map((s) => ({
+              id: s._id,
+              name: s.name,
+              code: s.email,
+              roles: ["Estudante"],
+            }));
+            entity = "student";
+            break;
+          }
+
+          default:
+            fetched = [];
         }
-        case "professors": {
-          if (filterData.universityId && filterData.courseId) {
-            profDataArr =
-              await adminApi.listProfessorsByCourse<ProfessorData[]>(
+
+      } else if (isProfessor) {
+        const studs = await professorApi.listMyStudents<StudentRaw[]>();
+        fetched = studs.map((s) => ({
+          id: s._id,
+          name: s.name,
+          code: s.email,
+          roles: ["Estudante"],
+        }));
+        entity = "student";
+
+      } else if (isAdmin) {
+        switch (filterData.filterType) {
+          case "students":
+          case "students-course":
+          case "students-discipline": {
+            let studs = await adminApi.listStudents<StudentRaw[]>();
+            if (
+              filterData.filterType === "students-course" &&
+              filterData.courseId
+            ) {
+              studs = studs.filter((s) => s.course === filterData.courseId);
+            }
+            if (
+              filterData.filterType === "students-discipline" &&
+              filterData.disciplineId
+            ) {
+              studs = studs.filter((s) =>
+                s.disciplines.some((d) => d._id === filterData.disciplineId)
+              );
+            }
+            fetched = studs.map((s) => ({
+              id: s._id,
+              name: s.name,
+              code: s.email,
+              roles: ["Estudante"],
+            }));
+            entity = "student";
+            break;
+          }
+          case "professors": {
+            let profs: ProfessorData[];
+            if (filterData.courseId) {
+              profs = await adminApi.listProfessorsByCourse<ProfessorData[]>(
                 filterData.courseId
               );
-          } else if (filterData.universityId) {
-            profDataArr =
-              await adminApi.listProfessorsByUniversity<ProfessorData[]>(
+            } else if (filterData.universityId) {
+              profs = await adminApi.listProfessorsByUniversity<ProfessorData[]>(
                 filterData.universityId
               );
-          } else {
-            profDataArr = await adminApi.listAllProfessors<ProfessorData[]>();
+            } else {
+              profs = await adminApi.listAllProfessors<ProfessorData[]>();
+            }
+            fetched = profs.map((p) => {
+              const rawRoles: string[] = Array.isArray(p.role)
+                ? p.role
+                : p.role
+                  ? [p.role]
+                  : [];
+              return {
+                id: String(p._id),
+                name: p.name,
+                code: p.email,
+                roles: rawRoles.map(humanRole),
+              };
+            });
+            entity = "professor";
+            break;
           }
-          localEntity = "professor";
-          break;
-        }
-        case "universities":
-          genericData = await publicApi.getInstitutions<GenericRaw[]>();
-          localEntity = "university";
-          break;
-        case "courses":
-          if (filterData.universityId) {
-            genericData = await publicApi.getCourses<GenericRaw[]>(
+          case "universities": {
+            const unis = await publicApi.getInstitutions<GenericRaw[]>();
+            fetched = unis.map((u) => ({
+              id: u._id,
+              name: u.name,
+              code: u.code ?? u._id,
+            }));
+            entity = "university";
+            break;
+          }
+          case "courses": {
+            if (!filterData.universityId) return;
+            const courses = await publicApi.getCourses<GenericRaw[]>(
               filterData.universityId
             );
-            localEntity = "course";
+            fetched = courses.map((c) => ({
+              id: c._id,
+              name: c.name,
+              code: c.code ?? c._id,
+            }));
+            entity = "course";
+            break;
           }
-          break;
-        case "disciplines":
-          if (filterData.universityId && filterData.courseId) {
-            genericData = await publicApi.getDisciplines<GenericRaw[]>(
+          case "disciplines": {
+            if (!filterData.universityId || !filterData.courseId) return;
+            const discs = await publicApi.getDisciplines<GenericRaw[]>(
               filterData.universityId,
               filterData.courseId
             );
-            localEntity = "discipline";
+            fetched = discs.map((d) => ({
+              id: d._id,
+              name: d.name,
+              code: d.code,
+            }));
+            entity = "discipline";
+            break;
           }
-          break;
-        case "classes":
-          if (filterData.universityId && filterData.courseId) {
-            genericData = await publicApi.getClasses<GenericRaw[]>(
+          case "classes": {
+            if (!filterData.universityId || !filterData.courseId) return;
+            const cls = await publicApi.getClasses<GenericRaw[]>(
               filterData.universityId,
               filterData.courseId
             );
-            localEntity = "class";
+            fetched = cls.map((c) => ({
+              id: c._id,
+              name: c.name,
+              code: c.code ?? c._id,
+            }));
+            entity = "class";
+            break;
           }
-          break;
+          default:
+            fetched = [];
+        }
       }
 
-      if (localEntity === "student") {
-        setItems(
-          studentData.map((s) => ({
-            id: s._id,
-            name: s.name,
-            code: s.email,
-            roles: ["Estudante"],
-          }))
-        );
-      } else if (localEntity === "professor") {
-        setItems(
-          profDataArr.map((p) => {
-            const raw = (p as any).role as string | string[];
-            const arr = Array.isArray(raw) ? raw : [raw];
-            return {
-              id: String(p._id),
-              name: p.name,
-              code: p.email,
-              roles: arr.map(humanRole),
-            };
-          })
-        );
-      } else {
-        setItems(
-          genericData.map((g) => ({
-            id: g._id,
-            name: g.name,
-            code: g.code,
-          }))
-        );
-      }
-
-      setCurrentEntity(localEntity);
+      setItems(fetched);
+      setCurrentEntity(entity);
     } catch (err) {
       console.error("Erro ao buscar itens:", err);
       toast.error("Falha ao buscar dados.");
     }
   }
+
 
   async function handleCreateOrUpdate(
     entity: Entity,
@@ -247,7 +327,10 @@ export function CRUD() {
           resp = await academicApi.post<ClassData>("class", item);
           break;
         case "discipline":
-          resp = await academicApi.post<DisciplineData>("discipline", item);
+          resp = await academicApi.post<DisciplineData>(
+            "discipline",
+            item
+          );
           break;
         case "professor":
           resp = await adminApi.createProfessor<ProfessorData>(item);
@@ -265,22 +348,26 @@ export function CRUD() {
   }
 
   async function handleEdit(item: Item) {
-    if (currentEntity === "professor" && userRoles.includes("admin")) {
+    if (currentEntity === "professor" && isAdmin) {
       const all = await adminApi.listAllProfessors<ProfessorData[]>();
       const p = all.find((x) => String(x._id) === item.id);
       if (!p) {
         toast.error("Professor não encontrado.");
         return;
       }
-      const raw = (p as any).role as string | string[];
-      const arr = Array.isArray(raw) ? raw : [raw];
+      const rawRoles: string[] = Array.isArray(p.role)
+        ? p.role
+        : p.role
+          ? [p.role]
+          : [];
+      const labels = rawRoles.map((r) => humanRole(r));
       setProfData({
         _id: String(p._id),
         name: p.name,
         email: p.email,
-        roles: arr.map(humanRole),
+        roles: labels,
       });
-      setRoleAction(arr.includes("course-coordinator") ? "remove" : "add");
+      setRoleAction(labels.includes("Coordenador de Curso") ? "remove" : "add");
       setRoleModalOpen(true);
     } else {
       setEditingItem(item);
@@ -321,8 +408,8 @@ export function CRUD() {
 
   async function applyRoleChange() {
     if (!profData) return;
-    const isCoord = profData.roles.includes("Coordenador de Curso");
-    if ((roleAction === "add" && isCoord) || (roleAction === "remove" && !isCoord)) {
+    const hasCoord = profData.roles.includes("Coordenador de Curso");
+    if ((roleAction === "add" && hasCoord) || (roleAction === "remove" && !hasCoord)) {
       return;
     }
     try {
@@ -333,7 +420,7 @@ export function CRUD() {
           : "Coordenador de Curso removido!"
       );
       setRoleModalOpen(false);
-      handleSearch({ filterType: "professors" });
+      handleSearch({ filterType: "professors" } as FilterData);
     } catch (e: any) {
       toast.error(e.message || "Falha ao atualizar papel.");
     }
@@ -348,7 +435,7 @@ export function CRUD() {
           Sistema de Gerenciamento do SAEL
         </h1>
 
-        {currentEntity !== "student" && (
+        {currentEntity !== "student" && isAdmin && (
           <FormsCrud
             onSubmit={handleCreateOrUpdate}
             initialData={
@@ -369,6 +456,7 @@ export function CRUD() {
         />
       </div>
 
+      {/* Modal de criação */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
         <DialogContent className="bg-[#1f1f1f] text-white max-w-md">
           <DialogHeader>
@@ -379,14 +467,23 @@ export function CRUD() {
           </DialogHeader>
           {createdData && (
             <div className="mt-2 space-y-2">
-              <p><strong>ID:</strong> {createdData._id ?? createdData.id}</p>
-              <p><strong>Nome:</strong> {createdData.name}</p>
-              {createdData.code && <p><strong>Código:</strong> {createdData.code}</p>}
+              <p>
+                <strong>ID:</strong> {createdData._id ?? createdData.id}
+              </p>
+              <p>
+                <strong>Nome:</strong> {createdData.name}
+              </p>
+              {createdData.code && (
+                <p>
+                  <strong>Código:</strong> {createdData.code}
+                </p>
+              )}
             </div>
           )}
         </DialogContent>
       </Dialog>
 
+      {/* Modal de mudança de papel */}
       <Dialog open={roleModalOpen} onOpenChange={setRoleModalOpen}>
         <DialogContent className="bg-[#1f1f1f] text-white max-w-md">
           <DialogHeader>
@@ -397,10 +494,15 @@ export function CRUD() {
           </DialogHeader>
           {profData && (
             <div className="mt-4 space-y-4">
-              <p><strong>Professor:</strong> {profData.name}</p>
-              <p><strong>Email:</strong> {profData.email}</p>
-              <p><strong>Papeis atuais:</strong> {profData.roles.join(", ")}</p>
-
+              <p>
+                <strong>Professor:</strong> {profData.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {profData.email}
+              </p>
+              <p>
+                <strong>Papeis atuais:</strong> {profData.roles.join(", ")}
+              </p>
               <fieldset className="flex flex-col gap-2 mt-4">
                 <label className="flex items-center gap-2">
                   <input
@@ -409,7 +511,7 @@ export function CRUD() {
                     value="add"
                     checked={roleAction === "add"}
                     onChange={() => setRoleAction("add")}
-                  />
+                  />{" "}
                   Adicionar Coordenador de Curso
                 </label>
                 <label className="flex items-center gap-2">
@@ -419,19 +521,20 @@ export function CRUD() {
                     value="remove"
                     checked={roleAction === "remove"}
                     onChange={() => setRoleAction("remove")}
-                  />
+                  />{" "}
                   Remover Coordenador de Curso
                 </label>
               </fieldset>
-
               <div className="mt-6 flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setRoleModalOpen(false)}>
                   Cancelar
                 </Button>
                 <Button
                   disabled={
-                    (roleAction === "add" && profData.roles.includes("Coordenador de Curso")) ||
-                    (roleAction === "remove" && !profData.roles.includes("Coordenador de Curso"))
+                    (roleAction === "add" &&
+                      profData.roles.includes("Coordenador de Curso")) ||
+                    (roleAction === "remove" &&
+                      !profData.roles.includes("Coordenador de Curso"))
                   }
                   onClick={applyRoleChange}
                 >
@@ -443,6 +546,7 @@ export function CRUD() {
         </DialogContent>
       </Dialog>
 
+      {/* Modal de delete */}
       <Dialog open={deleteModalOpen} onOpenChange={cancelDelete}>
         <DialogContent className="bg-[#1f1f1f] text-white max-w-sm">
           <DialogHeader>

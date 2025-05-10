@@ -16,7 +16,6 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
   const { user, logout } = useAuth();
   if (!user) return null;
 
-  // Normaliza papel do usuário conforme backend ("Professor" com P maiúsculo)
   const rawRoles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = rawRoles.includes("admin");
   const isCoordinator = rawRoles.includes("course-coordinator");

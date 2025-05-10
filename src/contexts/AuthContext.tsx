@@ -5,8 +5,9 @@ export interface User {
     name: string;
     email: string;
     role: string[] | string;
-    school?: string;
+    school: string;
     course?: string;
+    courses?: string[];
     class?: string;
 }
 

@@ -48,7 +48,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
               {headerLabel}
             </th>
             {(entity === "professor" || entity === "student") && (
-              <th className="border border-neutral-700 px-4 py-2">Papéis</th>
+              <th className="border border-neutral-700 px-4 py-2">Ocupação</th>
             )}
             <th className="border border-neutral-700 px-4 py-2 text-center">
               Ações
