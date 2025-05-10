@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Loader2, Menu as MenuIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Header } from "@/components/components/Header/Header";
@@ -74,14 +75,27 @@ export function About() {
       <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-800">
         <h2 className="text-2xl font-semibold font-Montserrat">Sobre Mim</h2>
         {isAuthenticated && (
-          <button
-            onClick={() => setMenuOpen(true)}
-            aria-label="Abrir menu"
-            className="text-white"
-          >
-            <MenuIcon size={28} />
-          </button>
+          <Button onClick={() => setMenuOpen(true)} aria-label="Abrir menu">
+            <div
+              className="
+        rounded-full p-[1px]
+        bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+        inline-flex items-center justify-center
+        w-8 h-8
+        sm:w-10 sm:h-10
+        md:w-12 md:h-12
+        lg:w-14 lg:h-14
+      "
+            >
+              <Avatar
+                seed={user._id}
+                backgroundColor="#2a2a2a"
+                className="w-full h-full"
+              />
+            </div>
+          </Button>
         )}
+
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 py-8">
@@ -89,13 +103,24 @@ export function About() {
           <div className="bg-[#2a2a2a] rounded-3xl p-6 sm:p-10 space-y-6">
 
             <div className="flex justify-center -mt-16">
-              <div className="rounded-full p-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+              <div
+                className={`
+      rounded-full p-[6px]
+      bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+      inline-flex items-center justify-center
+      ${isAdmin
+                    ? "w-32 h-32 sm:w-36 sm:h-36"
+                    : "w-40 h-40 sm:w-44 sm:h-44"}  
+    `}
+              >
                 <Avatar
                   seed={user._id}
-                  size={isAdmin ? 120 : 160}
+                  backgroundColor="#2a2a2a"
+                  className="w-full h-full"
                 />
               </div>
             </div>
+
 
             <div className="space-y-4">
               <Detail label="Nome" value={user.name} />

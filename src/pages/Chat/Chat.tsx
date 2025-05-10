@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlignJustify, ChevronLeft, RefreshCcw } from "lucide-react";
+import { ChevronLeft, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,7 @@ import { BotGreetingMessage } from "@/components/components/Bot/BotGreetingMessa
 import { ResultDisplay } from "@/components/components/Bot/ResultDisplay";
 import { InitialChoiceStep } from "@/components/components/Bot/InitialChoiceStep";
 import { TypingBubble } from "@/components/components/Bot/TypingBubble";
+import { Avatar } from "@/components/components/Avatar/Avatar";
 
 interface ChatMsg {
   role: "user" | "assistant";
@@ -166,7 +167,30 @@ export function Chat() {
       <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4 z-10">
         <Button onClick={() => navigate("/")}> <ChevronLeft stroke="white" /> </Button>
         <p className="text-white text-xl font-semibold">CHAT SAEL</p>
-        {user && <Button onClick={() => setMenuOpen(true)}> <AlignJustify stroke="white" /> </Button>}
+        {user &&
+          <Button onClick={() => setMenuOpen(true)}>
+            <div
+              className="
+      rounded-full
+      p-[1px] bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+      inline-flex items-center justify-center
+      w-8 h-8
+      sm:w-10 sm:h-10
+      md:w-12 md:h-12
+      lg:w-14 lg:h-14
+    "
+            >
+              <Avatar
+                seed={user._id}
+                backgroundColor="#141414"
+                className="w-full h-full"
+              />
+            </div>
+          </Button>
+
+
+
+        }
       </div>
 
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />

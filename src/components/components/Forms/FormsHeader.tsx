@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Header } from "@/components/components/Header/Header";
 import { useAuth } from "@/hooks/use-Auth";
+import { Avatar } from "@/components/components/Avatar/Avatar";
+import { Button } from "@/components/ui/button";
 
 function FormsHeader() {
   const { user } = useAuth();
@@ -21,11 +22,25 @@ function FormsHeader() {
         </div>
         <div className="flex items-center gap-4">
           {user && (
-            <button onClick={() => setMenuOpen(true)} className="focus:outline-none">
-              <Avatar className="h-10 w-10 bg-gray-700 text-white flex items-center justify-center">
-                <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
-              </Avatar>
-            </button>
+            <Button onClick={() => setMenuOpen(true)} aria-label="Abrir menu">
+              <div
+                className="
+        rounded-full p-[1px]
+        bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+        inline-flex items-center justify-center
+        w-8 h-8
+        sm:w-10 sm:h-10
+        md:w-12 md:h-12
+        lg:w-14 lg:h-14
+      "
+              >
+                <Avatar
+                  seed={user._id}
+                  backgroundColor="#2a2a2a"
+                  className="w-full h-full"
+                />
+              </div>
+            </Button>
           )}
         </div>
       </div>
@@ -33,4 +48,4 @@ function FormsHeader() {
   );
 }
 
-export { FormsHeader }
+export { FormsHeader };
