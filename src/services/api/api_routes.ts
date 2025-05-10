@@ -63,3 +63,14 @@ export const ADMIN_ROUTES = {
   updateProfessorRole: "/admin/professor/:id/role",
   listStudents: "/admin/students",
 } as const;
+
+export const PROFESSOR_ROUTES = {
+  listMyStudents: "/admin/professor/students",
+} as const;
+
+export const COORDINATOR_ROUTES = {
+  listMyProfessors: "/admin/coordinator/professors",
+  listMyStudents: "/admin/coordinator/students",
+  listStudentsByDiscipline:
+    "/admin/coordinator/students/discipline/:disciplineId",
+} as const;

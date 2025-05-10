@@ -1,9 +1,12 @@
+// src/services/apiClient.ts
 import { api } from "@/services/api/api";
 import {
   ACADEMIC_ROUTES,
   PUBLIC_ROUTES,
   RASA_ROUTES,
   ADMIN_ROUTES,
+  PROFESSOR_ROUTES,
+  COORDINATOR_ROUTES,
   AcademicEntityType,
 } from "./api/api_routes";
 
@@ -27,6 +30,9 @@ const patchRequest = async <T>(url: string, data: object): Promise<T> => {
   return response.data;
 };
 
+// -------------------------------------
+// Academic (publicly managed entities)
+// -------------------------------------
 export const academicApi = {
   async post<T>(entity: AcademicEntityType, data: object): Promise<T> {
     const url = ACADEMIC_ROUTES[entity].post;
@@ -44,6 +50,9 @@ export const academicApi = {
   },
 };
 
+// --------------------
+// Public lookup routes
+// --------------------
 export const publicApi = {
   getInstitutions: <T>() => getRequest<T>(PUBLIC_ROUTES.institutions),
   getCourses: <T>(universityId: string) =>
@@ -52,12 +61,12 @@ export const publicApi = {
     getRequest<T>(`${PUBLIC_ROUTES.disciplines}/${u}/${c}`),
   getClasses: <T>(u: string, c: string) =>
     getRequest<T>(`${PUBLIC_ROUTES.classes}/${u}/${c}`),
-  getProfessors: <T>(u: string, c?: string) => {
-    const url = c
-      ? `${PUBLIC_ROUTES.professors}/${u}/${c}`
-      : `${PUBLIC_ROUTES.professors}/${u}`;
-    return getRequest<T>(url);
-  },
+  getProfessors: <T>(u: string, c?: string) =>
+    getRequest<T>(
+      c
+        ? `${PUBLIC_ROUTES.professors}/${u}/${c}`
+        : `${PUBLIC_ROUTES.professors}/${u}`
+    ),
   getStudentsByClass: <T>(u: string, c: string, t: string) =>
     getRequest<T>(`${PUBLIC_ROUTES.studentsByClass}/${u}/${c}/${t}`),
   getStudentsByDiscipline: <T>(u: string, c: string, d: string) =>
@@ -66,6 +75,9 @@ export const publicApi = {
     getRequest<T>(`${PUBLIC_ROUTES.studentsByCourse}/${u}/${c}`),
 };
 
+// --------------
+// Admin routes
+// --------------
 export const adminApi = {
   createProfessor: <T>(data: object) =>
     postRequest<T>(ADMIN_ROUTES.createProfessor, data),
@@ -79,7 +91,10 @@ export const adminApi = {
 
   listProfessorsByUniversity: <T>(schoolId: string) =>
     getRequest<T>(
-      ADMIN_ROUTES.listProfessorsByUniversity.replace(":schoolId", schoolId)
+      ADMIN_ROUTES.listProfessorsByUniversity.replace(
+        ":schoolId",
+        schoolId
+      )
     ),
 
   listProfessorsByCourse: <T>(courseId: string) =>
@@ -92,9 +107,39 @@ export const adminApi = {
       ADMIN_ROUTES.updateProfessorRole.replace(":id", id),
       { action }
     ),
+
   listStudents: <T>() => getRequest<T>(ADMIN_ROUTES.listStudents),
 };
 
+// --------------------
+// Professor‐specific
+// --------------------
+export const professorApi = {
+  listMyStudents: <T>() => getRequest<T>(PROFESSOR_ROUTES.listMyStudents),
+};
+
+// ---------------------------
+// Course-Coordinator routes
+// ---------------------------
+export const coordinatorApi = {
+  listMyProfessors: <T>() =>
+    getRequest<T>(COORDINATOR_ROUTES.listMyProfessors),
+
+  listMyStudents: <T>() =>
+    getRequest<T>(COORDINATOR_ROUTES.listMyStudents),
+
+  listStudentsByDiscipline: <T>(disciplineId: string) =>
+    getRequest<T>(
+      COORDINATOR_ROUTES.listStudentsByDiscipline.replace(
+        ":disciplineId",
+        disciplineId
+      )
+    ),
+};
+
+// --------------
+// Rasa chatbot
+// --------------
 export const rasaApi = {
   sendMessage: <T>(message: string) =>
     postRequest<T>(RASA_ROUTES.talk, { message }),
