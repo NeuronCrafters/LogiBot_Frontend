@@ -128,10 +128,6 @@ export function Chat() {
 
         {mode === "quiz" && step === "results" && resultData && (
           <div className="mt-6 space-y-6">
-            <QuestionsDisplay
-              questions={questions}
-              onSubmitAnswers={() => { }}
-            />
             <ResultDisplay
               detalhes={resultData.detalhes}
               totalCorrectAnswers={resultData.totalCorrectAnswers}
@@ -139,16 +135,14 @@ export function Chat() {
             />
             <div className="flex justify-center">
               <ButtonBotAnswer
-                text="✅ Continuar praticando"
-                onClick={() => {
-                  setStep("levels");
-                  setShowLevels(true);
-                }}
+                text="Continuar praticando"
                 isSubmit
+                onClick={handleRestart}
               />
             </div>
           </div>
         )}
+
       </div>
 
       {/* Chat Input */}

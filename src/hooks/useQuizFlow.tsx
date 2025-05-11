@@ -68,24 +68,16 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   };
 
   const handleLevelNext = (btns: any[], nivel: string) => {
-    console.log("🟦 handleLevelNext - nível:", nivel);
-    console.log("🟦 handleLevelNext - botões recebidos:", btns);
-
     setMessages((prev) => [
       ...prev,
       { role: "user", content: formatTitle(nivel) },
       { role: "assistant", content: "Agora escolha um assunto para praticar:" }
     ]);
-
     setCategoryButtons(btns);
     setStep("categories");
   };
 
-
-
   const handleCategoryNext = (btns: ButtonData[], payload: string) => {
-    console.log("📦 Payload recebido no clique do botão:", payload);
-
     let categoria = "";
     try {
       const jsonStart = payload.indexOf("{");
@@ -95,13 +87,10 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
         categoria = parsed.categoria || "";
       }
     } catch (e) {
-      console.error("❌ Erro ao extrair categoria do payload:", payload, e);
+      console.error("Erro ao extrair categoria:", payload, e);
     }
 
-    if (!categoria) {
-      console.warn("⚠️ Nenhuma categoria encontrada no payload. Ignorando clique.");
-      return;
-    }
+    if (!categoria) return;
 
     setMessages((prev) => [
       ...prev,
@@ -112,8 +101,6 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setSubsubjectButtons(btns);
     setStep("subsubjects");
   };
-
-
 
   const handleSubsubjectNext = (qs: Question[], subtopico: string) => {
     setMessages((prev) => [
@@ -129,7 +116,6 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
       setStep("questions");
     }, 1500);
   };
-
 
   const handleSubmitAnswers = async (answers: string[]) => {
     const convertToOptionKey = (answer: string) => {
@@ -147,10 +133,12 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     const lettersOnly = answers.map(convertToOptionKey);
     const formattedAnswers = answers.map((answer) => `options ${convertToOptionKey(answer)}`);
 
-    setMessages((m) => [
-      ...m,
-      { role: "user", content: `Respostas escolhidas: ${lettersOnly.join(", ")}` }
-    ]);
+    setMessages((m) => {
+      const updated = [...m];
+      updated.push({ role: "user", content: `Respostas escolhidas: ${lettersOnly.join(", ")}` });
+      return updated;
+    });
+
 
     try {
       const res = await rasaService.verificarRespostas(formattedAnswers);
@@ -163,18 +151,16 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     }
   };
 
-
   const handleRestart = () => {
     setStep("levels");
     setCategoryButtons([]);
     setSubsubjectButtons([]);
     setQuestions([]);
     setResultData(null);
-    setMessages([]);
-    setShowLevels(false);
-    setMode("none");
-    setGreetingDone(false);
+    setShowLevels(true);
+    setMode("quiz");
   };
+
 
   useEffect(() => {
     if (pendingLevelIntro) {
