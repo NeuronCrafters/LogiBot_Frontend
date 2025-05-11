@@ -5,7 +5,7 @@ import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedLogo";
 import { Typograph } from "@/components/components/Typograph/Typograph";
-import { AppModal } from "@/components/components/Modal/AppModal"; // ✅ Novo modal
+import { AppModal } from "@/components/components/Modal/AppModal";
 
 function Signin() {
   const [email, setEmail] = useState("");
