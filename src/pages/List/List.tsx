@@ -11,6 +11,8 @@ import toast from "react-hot-toast";
 import { coordinatorApi, professorApi, publicApi } from "@/services/apiClient";
 import type { FilterData } from "@/@types/FormsFilterTypes";
 import type { ListItem } from "@/components/components/Forms/FormsList";
+import { searchEntitiesByFilter } from "@/@types/searchEntitiesByFilter";
+
 
 type Institution = { _id: string; name: string };
 type Discipline = { _id: string; name: string };
@@ -30,31 +32,12 @@ export function List() {
   const isProfessor = userRoles.includes("professor");
 
   const handleSearch = async (filterData: FilterData) => {
-    try {
-      let fetched: ListItem[] = [];
+    const role: "admin" | "course-coordinator" | "professor" =
+      isAdmin ? "admin" : isCoordinator ? "course-coordinator" : "professor";
 
-      if (isAdmin && filterData.filterType === "universities") {
-        const res = (await publicApi.getInstitutions()) as Institution[];
-        fetched = res.map((i) => ({ id: i._id, name: i.name }));
-        setEntity("university");
-      }
-
-      if (isCoordinator && filterData.filterType === "disciplines") {
-        const res = (await coordinatorApi.listDisciplines()) as Discipline[];
-        fetched = res.map((d) => ({ id: d._id, name: d.name }));
-        setEntity("discipline");
-      }
-
-      if (isProfessor && filterData.filterType === "students-discipline") {
-        const res = (await professorApi.listMyStudents()) as Student[];
-        fetched = res.map((s) => ({ id: s._id, name: s.name, code: s.email }));
-        setEntity("student");
-      }
-
-      setItems(fetched);
-    } catch (err) {
-      toast.error("Erro ao buscar dados");
-    }
+    const { items, entity } = await searchEntitiesByFilter(role, filterData);
+    setItems(items);
+    setEntity(entity);
   };
 
   return (

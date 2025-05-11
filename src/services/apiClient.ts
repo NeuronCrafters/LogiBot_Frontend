@@ -1,4 +1,3 @@
-// src/services/apiClient.ts
 import { api } from "@/services/api/api";
 import {
   ACADEMIC_ROUTES,
