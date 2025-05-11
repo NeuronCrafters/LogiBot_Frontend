@@ -1,20 +1,13 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
-import { Infos } from "@/components/components/Infos/Infos";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Footer } from "@/components/components/Footer/Footer";
+import { AppModal } from "@/components/components/Modal/AppModal";
 
 export function Home() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [showInfo, setShowInfo] = useState(false);
-
-  useEffect(() => {
-    if (location.state?.skipInfoModal) {
-      setShowInfo(false);
-    }
-  }, [location.state]);
+  const navigate = useNavigate();
 
   const handlePlayClick = () => {
     setShowInfo(true);
@@ -27,7 +20,16 @@ export function Home() {
 
   return (
     <div className="relative flex flex-col min-h-screen bg-[#141414] text-white">
-      {showInfo && <Infos type="signup" onAccept={handleAccept} />}
+      {showInfo && (
+        <AppModal
+          isOpen={true}
+          type="info"
+          title="Bem-vindo ao SAEL"
+          description="O SAEL é um sistema de apoio acadêmico gratuito. Para usar todas as funcionalidades, é necessário criar uma conta gratuita."
+          onConfirm={handleAccept}
+          onClose={() => setShowInfo(false)}
+        />
+      )}
 
       <header className="w-full p-6 flex justify-between items-center bg-[#1F1F1F] shadow-lg">
         <Typograph

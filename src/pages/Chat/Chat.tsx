@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, RefreshCcw } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
-import { useNavigate } from "react-router-dom";
 import { ChatMessages } from "@/components/components/Bot/ChatMessages";
 import { LevelStep } from "@/components/components/Bot/LevelStep";
 import { CategoryStep } from "@/components/components/Bot/CategoryStep";
@@ -41,7 +40,6 @@ export function Chat() {
   const [fakeTypingDelay, setFakeTypingDelay] = useState(false);
 
   const { user } = useAuth();
-  const navigate = useNavigate();
   const userName = user?.name || "Usuário";
 
   const sendMessage = async (message: string) => {
@@ -165,39 +163,28 @@ export function Chat() {
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
-      <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4 z-10">
-        <Button onClick={() => navigate("/")}> <ChevronLeft stroke="white" /> </Button>
+      <div className="absolute bg-[#141414] w-full flex items-center gap-4 border-b border-neutral-800 px-8 py-4 z-10">
         <Typograph
-          text="CHAT SAEL"
+          text="Chat SAEL"
           colorText="text-white"
           variant="text2"
           weight="bold"
           fontFamily="poppins"
         />
-        {user &&
-          <Button onClick={() => setMenuOpen(true)}>
-            <div
-              className="
-      rounded-full
-      p-[1px] bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-      inline-flex items-center justify-center
-      w-8 h-8
-      sm:w-10 sm:h-10
-      md:w-12 md:h-12
-      lg:w-14 lg:h-14
-    "
-            >
-              <Avatar
-                seed={user._id}
-                backgroundColor="#141414"
-                className="w-full h-full"
-              />
-            </div>
-          </Button>
 
-
-
-        }
+        {user && (
+          <div className="ml-auto">
+            <Button onClick={() => setMenuOpen(true)}>
+              <div className="rounded-full p-[1px] bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14">
+                <Avatar
+                  seed={user._id}
+                  backgroundColor="#141414"
+                  className="w-full h-full"
+                />
+              </div>
+            </Button>
+          </div>
+        )}
       </div>
 
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />

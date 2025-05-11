@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
-// import { ButtonSocialLogin } from "@/components/components/Button/ButtonSocialLogin";
 import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedLogo";
-import { Infos } from "@/components/components/Infos/Infos";
 import { Typograph } from "@/components/components/Typograph/Typograph";
+import { AppModal } from "@/components/components/Modal/AppModal"; // ✅ Novo modal
 
 function Signin() {
   const [email, setEmail] = useState("");
@@ -49,7 +48,14 @@ function Signin() {
 
   return (
     <div className="relative flex min-h-screen">
-      {showConsent && <Infos type="consent" onAccept={handleAcceptConsent} />}
+      <AppModal
+        isOpen={showConsent}
+        type="consent"
+        title="Consentimento para Coleta de Dados"
+        description="O SAEL coleta dados de uso com finalidade educacional e para melhorar a sua experiência. Tudo em conformidade com a LGPD."
+        onConfirm={handleAcceptConsent}
+        onClose={() => setShowConsent(false)}
+      />
 
       <div
         className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900"
@@ -114,8 +120,6 @@ function Signin() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-
-            {/* <ButtonSocialLogin className="rounded-lg px-6 py-3 w-full" /> */}
 
             <ButtonLogin
               type="submit"
