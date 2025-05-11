@@ -135,17 +135,22 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     const convertToOptionKey = (answer: string) => {
       const prefix = answer.trim().toLowerCase().charAt(0);
       switch (prefix) {
-        case "a": return "options A";
-        case "b": return "options B";
-        case "c": return "options C";
-        case "d": return "options D";
-        case "e": return "options E";
-        default: return "options A";
+        case "a": return "A";
+        case "b": return "B";
+        case "c": return "C";
+        case "d": return "D";
+        case "e": return "E";
+        default: return "?";
       }
     };
 
-    const formattedAnswers = answers.map(convertToOptionKey);
-    setMessages((m) => [...m, { role: "user", content: `Respostas: ${answers.join(", ")}` }]);
+    const lettersOnly = answers.map(convertToOptionKey);
+    const formattedAnswers = answers.map((answer) => `options ${convertToOptionKey(answer)}`);
+
+    setMessages((m) => [
+      ...m,
+      { role: "user", content: `Respostas escolhidas: ${lettersOnly.join(", ")}` }
+    ]);
 
     try {
       const res = await rasaService.verificarRespostas(formattedAnswers);
@@ -157,6 +162,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
       setMessages((m) => [...m, { role: "assistant", content: "Erro ao verificar respostas." }]);
     }
   };
+
 
   const handleRestart = () => {
     setStep("levels");
@@ -191,10 +197,12 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setInputText,
     setGreetingDone,
     step,
+    setStep,
     mode,
     questions,
     resultData,
     showLevels,
+    setShowLevels,
     categoryButtons,
     subsubjectButtons,
     handleInitialChoice,

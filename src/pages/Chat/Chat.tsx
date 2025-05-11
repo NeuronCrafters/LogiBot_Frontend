@@ -1,11 +1,8 @@
 import { useAuth } from "@/hooks/use-Auth";
 import { useQuizFlow } from "@/hooks/UseQuizFlow";
-import { useEffect } from "react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Header } from "@/components/components/Header/Header";
-import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/components/Avatar/Avatar";
-import { RefreshCcw } from "lucide-react";
 import { BotGreetingMessage } from "@/components/components/Bot/Chat/BotGreetingMessage";
 import { InitialChoiceStep } from "@/components/components/Bot/InitialChoiceStep";
 import { ChatMessages } from "@/components/components/Bot/ChatMessages";
@@ -16,6 +13,7 @@ import { SubsubjectStep } from "@/components/components/Bot/Quiz/SubsubjectStep"
 import { QuestionsDisplay } from "@/components/components/Bot/Quiz/QuestionDisplay";
 import { ResultDisplay } from "@/components/components/Bot/Quiz/ResultDisplay";
 import { ChatInput } from "@/components/components/Input/ChatInput";
+import { ButtonBotAnswer } from "@/components/components/Button/ButtonBotAnswer";
 
 export function Chat() {
   const { user } = useAuth();
@@ -46,6 +44,8 @@ export function Chat() {
     handleSubmitAnswers,
     handleRestart,
     sendMessage,
+    setStep,
+    setShowLevels
   } = useQuizFlow({ userId });
 
   return (
@@ -61,7 +61,7 @@ export function Chat() {
         />
         {user && (
           <div className="ml-auto">
-            <Button
+            <button
               onClick={() => setMenuOpen(true)}
               className="p-0 flex items-center justify-center"
             >
@@ -72,7 +72,7 @@ export function Chat() {
                   className="w-full h-full rounded-full"
                 />
               </div>
-            </Button>
+            </button>
           </div>
         )}
       </div>
@@ -91,13 +91,11 @@ export function Chat() {
 
         {mode !== "none" && (
           <div className="flex justify-center mt-2 mb-4">
-            <Button
+            <ButtonBotAnswer
+              text="🔁 Trocar modo (quiz/conversa)"
               onClick={handleRestart}
-              className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-xl flex items-center gap-2"
-            >
-              <RefreshCcw className="w-4 h-4" />
-              Trocar modo (quiz/conversa)
-            </Button>
+              isSubmit
+            />
           </div>
         )}
 
@@ -112,15 +110,15 @@ export function Chat() {
         {mode === "quiz" && showLevels && step === "levels" && (
           <LevelStep onNext={handleLevelNext} />
         )}
+
         {mode === "quiz" && step === "categories" && (
           <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />
         )}
+
         {mode === "quiz" && step === "subsubjects" && (
-          <SubsubjectStep
-            buttons={subsubjectButtons}
-            onNext={handleSubsubjectNext}
-          />
+          <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />
         )}
+
         {mode === "quiz" && step === "questions" && (
           <QuestionsDisplay
             questions={questions}
@@ -129,19 +127,25 @@ export function Chat() {
         )}
 
         {mode === "quiz" && step === "results" && resultData && (
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-6">
+            <QuestionsDisplay
+              questions={questions}
+              onSubmitAnswers={() => { }}
+            />
             <ResultDisplay
               detalhes={resultData.detalhes}
               totalCorrectAnswers={resultData.totalCorrectAnswers}
               totalWrongAnswers={resultData.totalWrongAnswers}
             />
             <div className="flex justify-center">
-              <Button
-                onClick={handleRestart}
-                className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2.5 rounded-2xl mt-2 shadow"
-              >
-                Continuar praticando
-              </Button>
+              <ButtonBotAnswer
+                text="✅ Continuar praticando"
+                onClick={() => {
+                  setStep("levels");
+                  setShowLevels(true);
+                }}
+                isSubmit
+              />
             </div>
           </div>
         )}

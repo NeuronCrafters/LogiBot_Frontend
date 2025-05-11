@@ -12,7 +12,7 @@ export function ButtonChoiceBot({
   layout = "grid",
 }: ChoiceButtonsProps) {
   const baseStyle =
-    "rounded-2xl px-5 py-2.5 shadow transition-all text-white min-w-[140px]";
+    "rounded-2xl px-5 py-2.5 shadow transition-all text-white min-w-[140px] text-center";
 
   const containerClass =
     layout === "row"
@@ -26,8 +26,8 @@ export function ButtonChoiceBot({
           key={i}
           onClick={() => onSelect(opt.value)}
           className={`${baseStyle} ${opt.variant === "green"
-            ? "bg-green-600 hover:bg-green-700"
-            : "bg-blue-700 hover:bg-blue-800"
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-blue-700 hover:bg-blue-800"
             }`}
         >
           {opt.label}
