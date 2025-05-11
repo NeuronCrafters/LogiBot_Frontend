@@ -99,22 +99,15 @@ export function About() {
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl rounded-3xl p-[2px] bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl">
-          <div className="bg-[#2a2a2a] rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="rainbow-card w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl">
+          <div className="card-content space-y-6">
             <div className="flex justify-center -mt-16">
               <div
-                className={`
-                  rounded-full
-                  p-[3px]
-                  bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-                  inline-flex items-center justify-center
-                  ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}
-                `}
-              >
+                className={`rainbow-avatar ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}`}>
                 <Avatar
                   seed={user._id}
                   backgroundColor="#2a2a2a"
-                  className="w-full h-full"
+                  className="w-full h-full rounded-full"
                 />
               </div>
             </div>
