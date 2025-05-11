@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Button } from "@/components/ui/button";
 import {
   User,
@@ -8,8 +7,10 @@ import {
   Settings,
   HelpCircle,
   MessageSquare,
-  TableProperties
+  TableProperties,
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface MenuOptionsProps {
   role: "student" | "teacher" | "course-coordinator" | "admin";
@@ -22,114 +23,72 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
   const isAboutPage = location.pathname === "/about";
   const isFaqPage = location.pathname === "/faq";
 
+  const menuItems = [
+    {
+      show: !isAboutPage,
+      path: "/about",
+      icon: <User className="w-5 h-5" />,
+      label: "Detalhes",
+    },
+    {
+      show: ["teacher", "course-coordinator", "admin"].includes(role),
+      path: "/chart",
+      icon: <PieChart className="w-5 h-5" />,
+      label: "Resultados",
+    },
+    {
+      show: ["admin", "course-coordinator"].includes(role),
+      path: "/list",
+      icon: <TableProperties className="w-5 h-5" />,
+      label: "Listar",
+    },
+    {
+      show: true,
+      path: "/chat",
+      icon: <MessageSquare className="w-5 h-5" />,
+      label: "Chat",
+    },
+    {
+      show: ["admin", "course-coordinator"].includes(role),
+      path: "/crud",
+      icon: <Settings className="w-5 h-5" />,
+      label: "Criar",
+    },
+    {
+      show: !isFaqPage,
+      path: "/faq",
+      icon: <HelpCircle className="w-5 h-5" />,
+      label: "Dúvidas",
+    },
+  ];
+
   return (
-    <nav className="flex flex-col space-y-4 bg-[#141414] p-4 rounded-lg shadow-md">
-      {!isAboutPage && (
-        <Link to="/about">
-          <Button
-            variant="ghost"
-            className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100"
-          >
-            <User className="w-5 h-5" />
-            <Typograph
-              text="Detalhes"
-              colorText="text-[#E4E4E4]"
-              variant="text4"
-              weight="regular"
-              fontFamily="poppins"
-            />
-          </Button>
-        </Link>
-      )}
-
-      {["teacher", "course-coordinator", "admin"].includes(role) && (
-        <Link to="/chart">
-          <Button
-            variant="ghost"
-            className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100"
-          >
-            <PieChart className="w-5 h-5" />
-            <Typograph
-              text="Resultados"
-              colorText="text-[#E4E4E4]"
-              variant="text4"
-              weight="regular"
-              fontFamily="poppins"
-            />
-          </Button>
-        </Link>
-      )}
-
-      {["admin", "course-coordinator"].includes(role) && (
-        <Link to="/list">
-          <Button
-            variant="ghost"
-            className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100"
-          >
-            <TableProperties className="w-5 h-5" />
-            <Typograph
-              text="Listar"
-              colorText="text-[#E4E4E4]"
-              variant="text4"
-              weight="regular"
-              fontFamily="poppins"
-            />
-          </Button>
-        </Link>
-      )}
-
-
-      <Link to="/chat">
-        <Button
-          variant="ghost"
-          className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100"
-        >
-          <MessageSquare className="w-5 h-5" />
-          <Typograph
-            text="Chat"
-            colorText="text-[#E4E4E4]"
-            variant="text4"
-            weight="regular"
-            fontFamily="poppins"
-          />
-        </Button>
-      </Link>
-
-      {["admin", "course-coordinator"].includes(role) && (
-        <Link to="/crud">
-          <Button
-            variant="ghost"
-            className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100"
-          >
-            <Settings className="w-5 h-5" />
-            <Typograph
-              text="Criar"
-              colorText="text-[#E4E4E4]"
-              variant="text4"
-              weight="regular"
-              fontFamily="poppins"
-            />
-          </Button>
-        </Link>
-      )}
-
-      {!isFaqPage && (
-        <Link to="/faq">
-          <Button
-            variant="ghost"
-            className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100"
-          >
-            <HelpCircle className="w-5 h-5" />
-            <Typograph
-              text="Dúvidas"
-              colorText="text-[#E4E4E4]"
-              variant="text4"
-              weight="regular"
-              fontFamily="poppins"
-            />
-          </Button>
-        </Link>
-      )}
+    <motion.nav
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      transition={{ duration: 0.3 }}
+      className="flex flex-col space-y-3 bg-[#141414] p-4 rounded-xl shadow-xl"
+    >
+      {menuItems
+        .filter((item) => item.show)
+        .map(({ path, icon, label }) => (
+          <Link key={path} to={path}>
+            <Button
+              variant="ghost"
+              className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-white"
+            >
+              {icon}
+              <Typograph
+                text={label}
+                colorText="text-[#E4E4E4]"
+                variant="text4"
+                weight="regular"
+                fontFamily="poppins"
+              />
+            </Button>
+          </Link>
+        ))}
 
       <Button
         variant="ghost"
@@ -145,6 +104,6 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
           fontFamily="poppins"
         />
       </Button>
-    </nav>
+    </motion.nav>
   );
 }
