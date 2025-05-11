@@ -9,6 +9,26 @@ interface ChatMsg {
   content: string;
 }
 
+interface AnswerDetail {
+  level: string;
+  subject: string;
+  selectedOption: {
+    question: string;
+    isCorrect: string;
+    isSelected: string;
+  };
+  correctOption?: string;
+  totalCorrectAnswers: number;
+  totalWrongAnswers: number;
+  timestamp: string;
+}
+
+interface QuizResult {
+  detalhes?: { questions?: AnswerDetail[] };
+  totalCorrectAnswers: number;
+  totalWrongAnswers: number;
+}
+
 interface useQuizFlowProps {
   userId: string;
 }
@@ -19,7 +39,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [categoryButtons, setCategoryButtons] = useState<any[]>([]);
   const [subsubjectButtons, setSubsubjectButtons] = useState<any[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [resultData, setResultData] = useState<any>(null);
+  const [resultData, setResultData] = useState<QuizResult | null>(null);
   const [typing, setTyping] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
   const [pendingLevelIntro, setPendingLevelIntro] = useState(false);
@@ -28,6 +48,9 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [inputText, setInputText] = useState("");
   const [mode, setMode] = useState<"none" | "quiz" | "chat">("none");
   const [fakeTypingDelay, setFakeTypingDelay] = useState(false);
+
+  const [previousQuestions, setPreviousQuestions] = useState<Question[][]>([]);
+  const [previousResults, setPreviousResults] = useState<QuizResult[]>([]);
 
   const sendMessage = async (message: string) => {
     if (!message.trim()) return;
@@ -51,6 +74,8 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
 
   const handleInitialChoice = async (choice: "quiz" | "chat") => {
     setMessages([]);
+    setPreviousQuestions([]);
+    setPreviousResults([]);
     if (choice === "quiz") {
       setPendingLevelIntro(true);
       setStep("levels");
@@ -71,7 +96,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setMessages((prev) => [
       ...prev,
       { role: "user", content: formatTitle(nivel) },
-      { role: "assistant", content: "Agora escolha um assunto para praticar:" }
+      { role: "assistant", content: "Agora escolha um assunto para praticar:" },
     ]);
     setCategoryButtons(btns);
     setStep("categories");
@@ -87,7 +112,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
         categoria = parsed.categoria || "";
       }
     } catch (e) {
-      console.error("Erro ao extrair categoria:", payload, e);
+      console.error("Erro ao extrair categoria:", e);
     }
 
     if (!categoria) return;
@@ -95,7 +120,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setMessages((prev) => [
       ...prev,
       { role: "user", content: formatTitle(categoria) },
-      { role: "assistant", content: `Escolha um tópico dentro de ${formatTitle(categoria)}:` }
+      { role: "assistant", content: `Escolha um tópico dentro de ${formatTitle(categoria)}:` },
     ]);
 
     setSubsubjectButtons(btns);
@@ -106,7 +131,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setMessages((prev) => [
       ...prev,
       { role: "user", content: formatTitle(subtopico) },
-      { role: "assistant", content: "Gerando suas perguntas..." }
+      { role: "assistant", content: "Gerando suas perguntas..." },
     ]);
     setTyping(true);
     setTimeout(() => {
@@ -133,16 +158,15 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     const lettersOnly = answers.map(convertToOptionKey);
     const formattedAnswers = answers.map((answer) => `options ${convertToOptionKey(answer)}`);
 
-    setMessages((m) => {
-      const updated = [...m];
-      updated.push({ role: "user", content: `Respostas escolhidas: ${lettersOnly.join(", ")}` });
-      return updated;
-    });
-
+    setMessages((m) => [...m, { role: "user", content: `Respostas escolhidas: ${lettersOnly.join(", ")}` }]);
 
     try {
       const res = await rasaService.verificarRespostas(formattedAnswers);
       setMessages((m) => [...m, { role: "assistant", content: res.message }]);
+
+      setPreviousQuestions((prev) => [...prev, questions]);
+      setPreviousResults((prev) => [...prev, res]);
+
       setResultData(res);
       setStep("results");
     } catch (err) {
@@ -157,10 +181,9 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setSubsubjectButtons([]);
     setQuestions([]);
     setResultData(null);
-    setShowLevels(true);
-    setMode("quiz");
+    setShowLevels(false);
+    setPendingLevelIntro(true);
   };
-
 
   useEffect(() => {
     if (pendingLevelIntro) {
@@ -187,6 +210,8 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     mode,
     questions,
     resultData,
+    previousQuestions,
+    previousResults,
     showLevels,
     setShowLevels,
     categoryButtons,
@@ -198,5 +223,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     handleSubmitAnswers,
     handleRestart,
     sendMessage,
+    setPreviousQuestions,
+    setPreviousResults,
   };
 }

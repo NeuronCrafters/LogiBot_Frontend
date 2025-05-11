@@ -34,9 +34,10 @@ export function Chat() {
     mode,
     questions,
     resultData,
-    showLevels,
-    categoryButtons,
-    subsubjectButtons,
+    previousQuestions,
+    previousResults,
+    setPreviousQuestions,
+    setPreviousResults,
     handleInitialChoice,
     handleLevelNext,
     handleCategoryNext,
@@ -45,7 +46,10 @@ export function Chat() {
     handleRestart,
     sendMessage,
     setStep,
-    setShowLevels
+    setShowLevels,
+    showLevels,
+    categoryButtons,
+    subsubjectButtons,
   } = useQuizFlow({ userId });
 
   return (
@@ -107,6 +111,28 @@ export function Chat() {
           <TypingBubble onDone={() => { }} text="Só um momento..." />
         )}
 
+        {/* Exibir último resultado se ainda não estiver fazendo novo quiz */}
+        {mode === "quiz" &&
+          step === "levels" &&
+          previousQuestions.length > 0 &&
+          previousResults.length > 0 && (
+            <div className="mt-6 space-y-6">
+              <QuestionsDisplay
+                questions={previousQuestions[previousQuestions.length - 1]}
+                onSubmitAnswers={() => { }}
+              />
+              <ResultDisplay
+                detalhes={previousResults[previousResults.length - 1].detalhes}
+                totalCorrectAnswers={
+                  previousResults[previousResults.length - 1].totalCorrectAnswers
+                }
+                totalWrongAnswers={
+                  previousResults[previousResults.length - 1].totalWrongAnswers
+                }
+              />
+            </div>
+          )}
+
         {mode === "quiz" && showLevels && step === "levels" && (
           <LevelStep onNext={handleLevelNext} />
         )}
@@ -137,12 +163,16 @@ export function Chat() {
               <ButtonBotAnswer
                 text="Continuar praticando"
                 isSubmit
-                onClick={handleRestart}
+                onClick={() => {
+                  setPreviousQuestions((prev) => [...prev, questions]);
+                  setPreviousResults((prev) => [...prev, resultData]);
+                  setStep("levels");
+                  setShowLevels(true);
+                }}
               />
             </div>
           </div>
         )}
-
       </div>
 
       {/* Chat Input */}
