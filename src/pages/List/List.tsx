@@ -7,7 +7,7 @@ import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Header } from "@/components/components/Header/Header";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Button } from "@/components/ui/button";
-import { searchEntitiesByFilter } from "@/@types/searchEntitiesByFilter";
+import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
 import type { FilterData } from "@/@types/FormsFilterTypes";
 import type { ListItem } from "@/components/components/Forms/FormsList";
 import { motion, AnimatePresence } from "framer-motion";

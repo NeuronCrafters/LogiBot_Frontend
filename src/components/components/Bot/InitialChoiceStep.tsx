@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { TypingBubble } from "@/components/components/Bot/TypingBubble";
+import { TypingBubble } from "@/components/components/Bot/Chat/TypingBubble";
+import { motion } from "framer-motion";
+import { Typograph } from "@/components/components/Typograph/Typograph";
+import { ButtonChoiceBot } from "../Button/ButtonChoiceBot";
 
 interface InitialChoiceStepProps {
   onChoose: (choice: "quiz" | "chat") => void;
@@ -15,8 +17,13 @@ export function InitialChoiceStep({ onChoose }: InitialChoiceStepProps) {
   }, []);
 
   return (
-    <div className="w-full px-2">
-      <div className="rounded-xl p-6 max-w-2xl mx-auto animate-fade-in">
+    <motion.div
+      className="w-full px-2"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="rounded-xl p-6 max-w-2xl mx-auto bg-transparent">
         {showTyping && !showPrompt && (
           <TypingBubble
             text="Vamos conversar, sobre o que quer falar?"
@@ -26,26 +33,28 @@ export function InitialChoiceStep({ onChoose }: InitialChoiceStepProps) {
 
         {showPrompt && (
           <>
-            <p className="text-white text-lg font-semibold text-center mb-6">
-              O que deseja hoje?
-            </p>
+            <Typograph
+              text="O que deseja hoje?"
+              variant="text2"
+              weight="semibold"
+              fontFamily="poppins"
+              colorText="text-white"
+              className="text-center mb-6"
+            />
+
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button
-                onClick={() => onChoose("quiz")}
-                className="bg-blue-700 hover:bg-blue-800 text-white rounded-2xl px-5 py-2.5 shadow transition-all"
-              >
-                Fazer quiz (5 perguntas)
-              </Button>
-              <Button
-                onClick={() => onChoose("chat")}
-                className="bg-green-600 hover:bg-green-700 text-white rounded-2xl px-5 py-2.5 shadow transition-all"
-              >
-                Conversar sobre lógica de programação
-              </Button>
+              <ButtonChoiceBot
+                options={[
+                  { label: "Fazer quiz (5 perguntas)", value: "quiz" },
+                  { label: "Conversar sobre lógica de programação", value: "chat", variant: "green" },
+                ]}
+                onSelect={(value) => onChoose(value as "quiz" | "chat")}
+              />
+
             </div>
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

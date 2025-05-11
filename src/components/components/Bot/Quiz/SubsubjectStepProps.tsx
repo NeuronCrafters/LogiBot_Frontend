@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { rasaService } from "@/services/api/api_rasa";
 import { ButtonData } from "./CategoryStep";
-import { Question } from "./Question";
+import { Question } from "../../../../@types/QuestionType";
 
 interface SubsubjectStepProps {
   buttons: ButtonData[];
