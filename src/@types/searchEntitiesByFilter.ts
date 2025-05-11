@@ -150,6 +150,7 @@ export async function searchEntitiesByFilter(
             id: s._id,
             name: s.name,
             code: s.email,
+            roles: ["Estudante"],
           }));
           selectedEntity = "student";
           break;
@@ -163,6 +164,7 @@ export async function searchEntitiesByFilter(
         id: s._id,
         name: s.name,
         code: s.email,
+        roles: ["Estudante"],
       }));
       selectedEntity = "student";
     }

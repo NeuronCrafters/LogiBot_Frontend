@@ -1,5 +1,14 @@
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface ListItem {
   id: string;
@@ -38,77 +47,80 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         : "ID";
 
   return (
-    <div className="bg-[#181818] rounded-md mt-4 overflow-auto">
-      <table className="table-auto w-full text-white border-collapse">
-        <thead>
-          <tr>
-            <th className="border border-neutral-700 px-4 py-2">Nª</th>
-            <th className="border border-neutral-700 px-4 py-2">Nome</th>
-            <th className="border border-neutral-700 px-4 py-2">
-              {headerLabel}
-            </th>
+    <motion.div
+      className="bg-[#181818] border border-neutral-700 rounded-md p-4 shadow-md"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-white">Nª</TableHead>
+            <TableHead className="text-white">Nome</TableHead>
+            <TableHead className="text-white">{headerLabel}</TableHead>
             {(entity === "professor" || entity === "student") && (
-              <th className="border border-neutral-700 px-4 py-2">Ocupação</th>
+              <TableHead className="text-white">Ocupação</TableHead>
             )}
-            <th className="border border-neutral-700 px-4 py-2 text-center">
-              Ações
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.length > 0 ? (
-            items.map((item, idx) => (
-              <tr key={item.id}>
-                <td className="border border-neutral-700 px-4 py-2">
-                  {idx + 1}
-                </td>
-                <td className="border border-neutral-700 px-4 py-2">
-                  {item.name}
-                </td>
-                <td className="border border-neutral-700 px-4 py-2">
-                  {item.code ?? item.id}
-                </td>
-                {(entity === "professor" || entity === "student") && (
-                  <td className="border border-neutral-700 px-4 py-2">
-                    {item.roles?.join(", ") ?? "—"}
-                  </td>
-                )}
-                <td className="border border-neutral-700 px-4 py-2 text-center">
-                  <div className="inline-flex gap-2 justify-center">
-                    {isAdmin && entity === "professor" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(item)}
-                      >
-                        Editar
-                      </Button>
-                    )}
-                    {isAdmin && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => onDelete(item.id)}
-                      >
-                        Deletar
-                      </Button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan={(entity === "professor" || entity === "student") ? 5 : 4}
-                className="border border-neutral-700 px-4 py-2 text-center text-gray-500"
-              >
-                Nenhum {entity} encontrado.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+            <TableHead className="text-center text-white">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <AnimatePresence>
+            {items.length > 0 ? (
+              items.map((item, idx) => (
+                <motion.tr
+                  key={item.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="transition-colors duration-200 hover:bg-[#2a2a2a]"
+                >
+                  <TableCell>{idx + 1}</TableCell>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.code ?? item.id}</TableCell>
+                  {(entity === "professor" || entity === "student") && (
+                    <TableCell>{item.roles?.join(", ") ?? "—"}</TableCell>
+                  )}
+                  <TableCell className="text-center">
+                    <div className="inline-flex gap-2 justify-center">
+                      {isAdmin && entity === "professor" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onEdit(item)}
+                        >
+                          Editar
+                        </Button>
+                      )}
+                      {isAdmin && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => onDelete(item.id)}
+                        >
+                          Deletar
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </motion.tr>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={(entity === "professor" || entity === "student") ? 5 : 4}
+                  className="text-center text-gray-500"
+                >
+                  Nenhum {entity} encontrado.
+                </TableCell>
+              </TableRow>
+            )}
+          </AnimatePresence>
+        </TableBody>
+      </Table>
+    </motion.div>
   );
 }

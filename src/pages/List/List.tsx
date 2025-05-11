@@ -7,24 +7,18 @@ import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Header } from "@/components/components/Header/Header";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
-import { coordinatorApi, professorApi, publicApi } from "@/services/apiClient";
+import { searchEntitiesByFilter } from "@/@types/searchEntitiesByFilter";
 import type { FilterData } from "@/@types/FormsFilterTypes";
 import type { ListItem } from "@/components/components/Forms/FormsList";
-import { searchEntitiesByFilter } from "@/@types/searchEntitiesByFilter";
+import { motion, AnimatePresence } from "framer-motion";
 
-
-type Institution = { _id: string; name: string };
-type Discipline = { _id: string; name: string };
-type Student = { _id: string; name: string; email: string };
+type EntityType = "university" | "course" | "discipline" | "class" | "professor" | "student";
 
 export function List() {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [items, setItems] = useState<ListItem[]>([]);
-  const [entity, setEntity] = useState<
-    "university" | "course" | "discipline" | "class" | "professor" | "student"
-  >("university");
+  const [entity, setEntity] = useState<EntityType>("university");
 
   const userRoles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isAdmin = userRoles.includes("admin");
@@ -40,8 +34,13 @@ export function List() {
     setEntity(entity);
   };
 
+  const handleResetList = () => {
+    setItems([]); // Trigga animação de saída
+  };
+
   return (
     <main className="min-h-screen bg-[#141414] text-white">
+      {/* Topbar */}
       <div className="absolute bg-[#141414] w-full flex items-center gap-4 border-b border-neutral-800 px-8 py-4 z-10">
         <Typograph
           text="Listagem"
@@ -66,10 +65,10 @@ export function List() {
         )}
       </div>
 
-      {/* Menu lateral */}
+      {/* Menu Lateral */}
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
-      {/* Conteúdo centralizado */}
+      {/* Conteúdo Central */}
       <div className="w-full flex justify-center pt-24 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-screen-md">
           <div className="flex items-center gap-3 mb-6">
@@ -83,16 +82,27 @@ export function List() {
             />
           </div>
 
-          <FormsFilter onSearch={handleSearch} onReset={() => setItems([])} />
+          <FormsFilter onSearch={handleSearch} onReset={handleResetList} />
 
-          <div className="mt-6">
-            <FormsList
-              items={items}
-              entity={entity}
-              onEdit={() => { }}
-              onDelete={() => { }}
-            />
-          </div>
+          <AnimatePresence>
+            {items.length > 0 && (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="mt-6"
+              >
+                <FormsList
+                  items={items}
+                  entity={entity}
+                  onEdit={() => { }}
+                  onDelete={() => { }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </main>

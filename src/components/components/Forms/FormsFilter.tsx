@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/use-Auth";
 import { publicApi } from "@/services/apiClient";
 import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
+import { motion } from "framer-motion";
 
 interface Institution { _id: string; name: string; }
 interface Course { _id: string; name: string; }
@@ -23,31 +24,20 @@ export function FormsFilter({
   const isCoordinator = roles.includes("course-coordinator");
   const isProfessor = roles.includes("professor");
 
-  // valores fixos para coord / prof
   const fixedUniversity = String(user.school);
   const fixedCourse = Array.isArray(user.courses) && user.courses.length > 0
     ? user.courses[0]
     : "";
 
-  // filtros permitidos por papel
   const allowedFilters: FilterType[] = isAdmin
     ? [
-      "universities",
-      "courses",
-      "disciplines",
-      "classes",
-      "professors",
-      "students",
-      "students-course",
-      "students-discipline",
+      "universities", "courses", "disciplines", "classes",
+      "professors", "students", "students-course", "students-discipline",
     ]
     : isCoordinator
       ? [
-        "professors",
-        "disciplines",          // coord agora sem select extra
-        "classes",              // coord lista turmas
-        "students-course",
-        "students-discipline",
+        "professors", "disciplines", "classes",
+        "students-course", "students-discipline",
       ]
       : isProfessor
         ? ["students-discipline"]
@@ -65,49 +55,36 @@ export function FormsFilter({
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
 
-  // quais selects aparecem
   const showUniversitySelect =
     isAdmin &&
     [
-      "courses",
-      "disciplines",
-      "classes",
-      "professors",
-      "students-course",
-      "students-discipline",
+      "courses", "disciplines", "classes",
+      "professors", "students-course", "students-discipline",
     ].includes(filterType as FilterType);
 
   const showCourseSelect =
     isAdmin &&
     [
-      "disciplines",
-      "classes",
-      "students-course",
-      "students-discipline",
+      "disciplines", "classes",
+      "students-course", "students-discipline",
     ].includes(filterType as FilterType);
 
   const showStudentDisciplineSelect =
     filterType === "students-discipline" &&
     (isAdmin || isCoordinator || isProfessor);
 
-  // para o coordenador: não exibimos select algum para estes filtros
   const coordinatorNoSelect =
     isCoordinator &&
     ["professors", "disciplines", "classes"].includes(filterType as FilterType);
 
-  // habilita botão Pesquisar
   let canSearch =
     !!filterType &&
     (!showUniversitySelect || !!selectedUniversity) &&
     (!showCourseSelect || !!selectedCourse) &&
     (!showStudentDisciplineSelect || !!selectedDiscipline);
 
-  // mas se for coord e filtro sem select, liberamos direto
-  if (coordinatorNoSelect) {
-    canSearch = true;
-  }
+  if (coordinatorNoSelect) canSearch = true;
 
-  // carrega universidades (só admin)
   useEffect(() => {
     if (isAdmin) {
       publicApi.getInstitutions<Institution[]>()
@@ -116,7 +93,6 @@ export function FormsFilter({
     }
   }, [isAdmin]);
 
-  // carrega cursos (só admin)
   useEffect(() => {
     if (showCourseSelect && selectedUniversity) {
       publicApi.getCourses<Course[]>(selectedUniversity)
@@ -128,8 +104,6 @@ export function FormsFilter({
     }
   }, [showCourseSelect, selectedUniversity, isAdmin]);
 
-  // carrega disciplinas quando for “students-discipline”
-  // e também para coord se filtrar “disciplines”
   useEffect(() => {
     if (
       showStudentDisciplineSelect ||
@@ -160,21 +134,9 @@ export function FormsFilter({
     if (!canSearch) return;
     onSearch({
       filterType,
-      universityId:
-        isCoordinator || isProfessor
-          ? fixedUniversity
-          : showUniversitySelect
-            ? selectedUniversity
-            : undefined,
-      courseId:
-        isCoordinator || isProfessor
-          ? fixedCourse
-          : showCourseSelect
-            ? selectedCourse
-            : undefined,
-      disciplineId: showStudentDisciplineSelect
-        ? selectedDiscipline
-        : undefined,
+      universityId: isCoordinator || isProfessor ? fixedUniversity : showUniversitySelect ? selectedUniversity : undefined,
+      courseId: isCoordinator || isProfessor ? fixedCourse : showCourseSelect ? selectedCourse : undefined,
+      disciplineId: showStudentDisciplineSelect ? selectedDiscipline : undefined,
       classId: undefined,
     });
   }
@@ -192,9 +154,15 @@ export function FormsFilter({
   }
 
   return (
-    <div className="mb-4 p-4 rounded-md bg-[#181818]">
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.4 }}
+      className="mb-4 p-4 rounded-xl bg-[#181818] border border-neutral-800 shadow-sm"
+    >
       <div className="flex flex-wrap gap-2 mb-4">
-        {/* Tipo de Filtro */}
         <div className="flex-1 min-w-[200px]">
           <label className="block mb-1 text-white">Tipo de Filtro:</label>
           <select
@@ -220,7 +188,6 @@ export function FormsFilter({
           </select>
         </div>
 
-        {/* Universidade (admin) */}
         {showUniversitySelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-slate-400">Universidade:</label>
@@ -231,15 +198,12 @@ export function FormsFilter({
             >
               <option value="">Selecione a universidade</option>
               {universities.map((u) => (
-                <option key={u._id} value={u._id}>
-                  {u.name}
-                </option>
+                <option key={u._id} value={u._id}>{u.name}</option>
               ))}
             </select>
           </div>
         )}
 
-        {/* Curso (admin) */}
         {showCourseSelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Curso:</label>
@@ -250,15 +214,12 @@ export function FormsFilter({
             >
               <option value="">Selecione o curso</option>
               {courses.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
+                <option key={c._id} value={c._id}>{c.name}</option>
               ))}
             </select>
           </div>
         )}
 
-        {/* Disciplina (students-discipline) */}
         {showStudentDisciplineSelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white">Disciplina:</label>
@@ -269,9 +230,7 @@ export function FormsFilter({
             >
               <option value="">Selecione a disciplina</option>
               {disciplines.map((d) => (
-                <option key={d._id} value={d._id}>
-                  {d.name}
-                </option>
+                <option key={d._id} value={d._id}>{d.name}</option>
               ))}
             </select>
           </div>
@@ -284,13 +243,11 @@ export function FormsFilter({
           onClick={handleSearchClick}
           disabled={!canSearch}
         />
-        <button
+        <ButtonCRUD
+          action="reload"
           onClick={handleResetFilter}
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-        >
-          Recarregar
-        </button>
+        />
       </div>
-    </div>
+    </motion.div>
   );
 }
