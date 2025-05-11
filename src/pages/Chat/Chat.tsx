@@ -110,7 +110,42 @@ export function Chat() {
     }
   };
 
+  // const handleSubmitAnswers = async (answers: string[]) => {
+  //   const convertToOptionKey = (answer: string) => {
+  //     const prefix = answer.trim().toLowerCase().charAt(0);
+  //     switch (prefix) {
+  //       case "a": return "options A";
+  //       case "b": return "options B";
+  //       case "c": return "options C";
+  //       case "d": return "options D";
+  //       case "e": return "options E";
+  //       default: return "options A";
+  //     }
+  //   };
+
+  //   const formattedAnswers = answers.map(convertToOptionKey);
+
+  //   answers.forEach((answer, index) => {
+  //     setMessages((m) => [...m, { role: "user", content: `Pergunta ${index + 1}: ${answer}` }]);
+  //   });
+
+  //   try {
+  //     const res = await rasaService.verificarRespostas(formattedAnswers);
+  //     setMessages((m) => [...m, { role: "assistant", content: res.message }]);
+  //     setResultData(res);
+  //     setStep("results");
+  //   } catch (err) {
+  //     console.error(err);
+  //     setMessages((m) => [...m, { role: "assistant", content: "Erro ao verificar respostas." }]);
+  //   }
+  // };
+
+
   const handleSubmitAnswers = async (answers: string[]) => {
+    // Loga as respostas selecionadas pelo usuário (ex: ["A", "B", "C"])
+    console.log("Respostas selecionadas pelo usuário:", answers);
+
+    // Converte as letras para os identificadores esperados pela API
     const convertToOptionKey = (answer: string) => {
       const prefix = answer.trim().toLowerCase().charAt(0);
       switch (prefix) {
@@ -119,26 +154,34 @@ export function Chat() {
         case "c": return "options C";
         case "d": return "options D";
         case "e": return "options E";
-        default: return "options A";
+        default: return "options A"; // fallback seguro
       }
     };
 
     const formattedAnswers = answers.map(convertToOptionKey);
 
+    // Loga as respostas convertidas para o formato que será enviado
+    console.log("Respostas formatadas para envio:", formattedAnswers);
+
+    // Exibe no chat as respostas marcadas (útil para interface do usuário)
     answers.forEach((answer, index) => {
       setMessages((m) => [...m, { role: "user", content: `Pergunta ${index + 1}: ${answer}` }]);
     });
 
     try {
+      // Tenta enviar as respostas para o backend (que repassa para o Rasa)
       const res = await rasaService.verificarRespostas(formattedAnswers);
+
+      // Mostra o retorno no chat
       setMessages((m) => [...m, { role: "assistant", content: res.message }]);
       setResultData(res);
       setStep("results");
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao enviar respostas para verificação:", err);
       setMessages((m) => [...m, { role: "assistant", content: "Erro ao verificar respostas." }]);
     }
   };
+
 
   const handleRestart = () => {
     setStep("levels");
