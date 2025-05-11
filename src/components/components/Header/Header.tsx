@@ -46,18 +46,11 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
 
         <div className="p-6 flex flex-col overflow-y-auto flex-1">
           <div className="flex flex-col items-center space-y-2 mb-4">
-            <div
-              className="
-                rounded-full p-[2px]
-                bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-                inline-flex items-center justify-center
-                w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40
-              "
-            >
+            <div className="rainbow-avatar w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-full">
               <Avatar
                 seed={user._id}
                 backgroundColor="#2a2a2a"
-                className="w-full h-full"
+                className="w-full h-full rounded-full"
               />
             </div>
 

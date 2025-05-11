@@ -8,19 +8,16 @@ import { Header } from "@/components/components/Header/Header";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import { coordinatorApi, professorApi, publicApi } from "@/services/apiClient";
 import type { FilterData } from "@/@types/FormsFilterTypes";
 import type { ListItem } from "@/components/components/Forms/FormsList";
 
-// Tipos
 type Institution = { _id: string; name: string };
 type Discipline = { _id: string; name: string };
 type Student = { _id: string; name: string; email: string };
 
 export function List() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [items, setItems] = useState<ListItem[]>([]);
   const [entity, setEntity] = useState<
@@ -62,7 +59,6 @@ export function List() {
 
   return (
     <main className="min-h-screen bg-[#141414] text-white">
-      {/* Cabeçalho fixo com Typograph à esquerda */}
       <div className="absolute bg-[#141414] w-full flex items-center gap-4 border-b border-neutral-800 px-8 py-4 z-10">
         <Typograph
           text="Listagem"
@@ -74,12 +70,12 @@ export function List() {
 
         {user && (
           <div className="ml-auto">
-            <Button onClick={() => setMenuOpen(true)}>
-              <div className="rounded-full p-[1px] bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14">
+            <Button onClick={() => setMenuOpen(true)} className="p-0 flex items-center justify-center">
+              <div className="rainbow-avatar w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
                 <Avatar
                   seed={user._id}
                   backgroundColor="#141414"
-                  className="w-full h-full"
+                  className="w-full h-full rounded-full"
                 />
               </div>
             </Button>

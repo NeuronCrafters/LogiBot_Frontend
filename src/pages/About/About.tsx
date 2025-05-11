@@ -86,20 +86,12 @@ export function About() {
           fontFamily="poppins"
         />
         {isAuthenticated && (
-          <Button onClick={() => setMenuOpen(true)} aria-label="Abrir menu">
-            <div
-              className="
-                rounded-full
-                p-[2px]
-                bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-                inline-flex items-center justify-center
-                w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14
-              "
-            >
+          <Button onClick={() => setMenuOpen(true)} className="p-0 flex items-center justify-center">
+            <div className="rainbow-avatar w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
               <Avatar
                 seed={user._id}
-                backgroundColor="#2a2a2a"
-                className="w-full h-full"
+                backgroundColor="#141414"
+                className="w-full h-full rounded-full"
               />
             </div>
           </Button>
