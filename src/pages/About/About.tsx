@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Header } from "@/components/components/Header/Header";
+import { Typograph } from "@/components/components/Typograph/Typograph";
 
 const translateRole = (role: string) => {
   switch (role) {
@@ -32,10 +33,17 @@ export function About() {
       </div>
     );
   }
+
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#141414]">
-        <p className="text-red-500">Erro ao carregar os dados.</p>
+        <Typograph
+          text="Erro ao carregar os dados."
+          colorText="text-red-500"
+          variant="text5"
+          weight="medium"
+          fontFamily="poppins"
+        />
       </div>
     );
   }
@@ -48,7 +56,6 @@ export function About() {
     ? user.role.includes("admin")
     : user.role === "admin";
 
-  // extrai nomes
   const schoolName =
     typeof user.schoolName === "string"
       ? user.schoolName
@@ -71,17 +78,23 @@ export function About() {
   return (
     <div className="flex flex-col min-h-screen bg-[#141414] text-white">
       <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-800">
-        <h2 className="text-2xl font-semibold font-Montserrat">Sobre Mim</h2>
+        <Typograph
+          text="Sobre Mim"
+          colorText="text-white"
+          variant="text2"
+          weight="bold"
+          fontFamily="poppins"
+        />
         {isAuthenticated && (
           <Button onClick={() => setMenuOpen(true)} aria-label="Abrir menu">
             <div
               className="
-      rounded-full
-      p-[2px]
-      bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-      inline-flex items-center justify-center
-      w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14
-    "
+                rounded-full
+                p-[2px]
+                bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+                inline-flex items-center justify-center
+                w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14
+              "
             >
               <Avatar
                 seed={user._id}
@@ -99,12 +112,12 @@ export function About() {
             <div className="flex justify-center -mt-16">
               <div
                 className={`
-      rounded-full
-      p-[3px]
-      bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
-      inline-flex items-center justify-center
-      ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}
-    `}
+                  rounded-full
+                  p-[3px]
+                  bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+                  inline-flex items-center justify-center
+                  ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}
+                `}
               >
                 <Avatar
                   seed={user._id}
@@ -117,7 +130,6 @@ export function About() {
               <Detail label="Nome" value={user.name} />
               <Detail label="Email" value={user.email} />
               <Detail label="Ocupação" value={occupation} />
-
               {!isAdmin && (
                 <>
                   <Detail label="Universidade" value={schoolName} />
@@ -141,11 +153,24 @@ interface DetailProps {
   label: string;
   value: string;
 }
+
 function Detail({ label, value }: DetailProps) {
   return (
-    <div>
-      <span className="font-medium text-gray-300">{label}:</span>{" "}
-      <span className="font-semibold">{value}</span>
+    <div className="flex gap-2 flex-wrap">
+      <Typograph
+        text={`${label}:`}
+        colorText="text-gray-300"
+        variant="text6"
+        weight="medium"
+        fontFamily="poppins"
+      />
+      <Typograph
+        text={value}
+        colorText="text-white"
+        variant="text6"
+        weight="semibold"
+        fontFamily="poppins"
+      />
     </div>
   );
 }

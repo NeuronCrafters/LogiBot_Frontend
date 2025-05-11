@@ -17,6 +17,7 @@ import { ResultDisplay } from "@/components/components/Bot/ResultDisplay";
 import { InitialChoiceStep } from "@/components/components/Bot/InitialChoiceStep";
 import { TypingBubble } from "@/components/components/Bot/TypingBubble";
 import { Avatar } from "@/components/components/Avatar/Avatar";
+import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface ChatMsg {
   role: "user" | "assistant";
@@ -166,7 +167,13 @@ export function Chat() {
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
       <div className="absolute bg-[#141414] w-full flex justify-between border-b border-neutral-800 px-8 py-4 z-10">
         <Button onClick={() => navigate("/")}> <ChevronLeft stroke="white" /> </Button>
-        <p className="text-white text-xl font-semibold">CHAT SAEL</p>
+        <Typograph
+          text="CHAT SAEL"
+          colorText="text-white"
+          variant="text2"
+          weight="bold"
+          fontFamily="poppins"
+        />
         {user &&
           <Button onClick={() => setMenuOpen(true)}>
             <div

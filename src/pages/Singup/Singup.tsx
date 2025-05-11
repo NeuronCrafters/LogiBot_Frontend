@@ -5,7 +5,7 @@ import { api } from "@/services/api/api";
 import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
-
+import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface University {
   _id: string;
@@ -66,15 +66,45 @@ function Signup() {
         style={{ flex: 2 }}
       >
         <AnimatedLogo />
-        <h1 className="text-slate-100 text-5xl lg:text-6xl font-bold mt-12 ml-8">SAEL</h1>
+        <Typograph
+          text="SAEL"
+          colorText="text-slate-100"
+          variant="title10"
+          weight="bold"
+          fontFamily="poppins"
+          className="mt-12 ml-8"
+        />
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
-          <h2 className="text-white text-4xl font-bold text-start">Cadastro</h2>
-          <p className="text-neutral-300 text-start mb-2">Realize seu cadastro no site</p>
+          <Typograph
+            text="Cadastro"
+            colorText="text-white"
+            variant="text2"
+            weight="bold"
+            fontFamily="poppins"
+            className="text-start"
+          />
+          <Typograph
+            text="Realize seu cadastro no site"
+            colorText="text-neutral-300"
+            variant="text7"
+            weight="regular"
+            fontFamily="poppins"
+            className="mb-2 text-start"
+          />
 
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          {error && (
+            <Typograph
+              text={error}
+              colorText="text-red-500"
+              variant="text9"
+              weight="medium"
+              fontFamily="poppins"
+              className="mb-4"
+            />
+          )}
 
           <form onSubmit={handleRegister}>
             <Input
@@ -134,12 +164,21 @@ function Signup() {
             </ButtonLogin>
           </form>
 
-          <p className="text-gray-400 text-sm text-center mt-4">
-            Já possui conta?{" "}
-            <Link to="/signin" className="text-blue-500 no-underline">
-              Faça Login
-            </Link>
-          </p>
+          <Typograph
+            text={
+              <>
+                Já possui conta?{" "}
+                <Link to="/signin" className="text-blue-500 no-underline">
+                  Faça Login
+                </Link>
+              </>
+            }
+            colorText="text-gray-400"
+            variant="text9"
+            weight="regular"
+            fontFamily="poppins"
+            className="text-center mt-4"
+          />
         </div>
       </div>
     </div>

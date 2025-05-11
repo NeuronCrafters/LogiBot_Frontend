@@ -8,6 +8,7 @@ import {
   Settings,
   HelpCircle,
   MessageSquare,
+  TableProperties
 } from "lucide-react";
 
 interface MenuOptionsProps {
@@ -58,6 +59,25 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
           </Button>
         </Link>
       )}
+
+      {["admin", "course-coordinator"].includes(role) && (
+        <Link to="/list">
+          <Button
+            variant="ghost"
+            className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-gray-100"
+          >
+            <TableProperties className="w-5 h-5" />
+            <Typograph
+              text="Listar"
+              colorText="text-[#E4E4E4]"
+              variant="text4"
+              weight="regular"
+              fontFamily="poppins"
+            />
+          </Button>
+        </Link>
+      )}
+
 
       <Link to="/chat">
         <Button

@@ -1,9 +1,15 @@
 import { ReactNode } from "react";
 
 const WeightType = {
-  bold: "font-bold",
-  medium: "font-medium",
+  thin: "font-thin",
+  extralight: "font-extralight",
+  light: "font-light",
   regular: "font-normal",
+  medium: "font-medium",
+  semibold: "font-semibold",
+  bold: "font-bold",
+  extrabold: "font-extrabold",
+  black: "font-black",
 };
 
 const FontFamily = {
@@ -56,9 +62,7 @@ export function Typograph({
 }: TypographProps) {
   const baseClass = `${WeightType[weight]} ${FontFamily[fontFamily]} ${VariantStyles[variant]} ${colorText} ${className}`;
 
-  const Tag = ["title1", "title2", "title3", "title4", "title5", "title6", "title7", "title8", "title9", "title10", "title11"].includes(variant)
-    ? "h1"
-    : "p";
+  const Tag = variant.startsWith("title") ? "h1" : "p";
 
   return <Tag className={baseClass}>{text}</Tag>;
 }

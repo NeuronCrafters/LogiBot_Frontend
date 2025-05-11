@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 import { Infos } from "@/components/components/Infos/Infos";
+import { Typograph } from "@/components/components/Typograph/Typograph";
+import { Footer } from "@/components/components/Footer/Footer";
 
 export function Home() {
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ export function Home() {
   }, [location.state]);
 
   const handlePlayClick = () => {
-    setShowInfo(true); // mostra modal de info
+    setShowInfo(true);
   };
 
   const handleAccept = () => {
@@ -24,11 +26,17 @@ export function Home() {
   };
 
   return (
-    <div className="relative flex flex-col h-screen bg-[#141414] text-white">
+    <div className="relative flex flex-col min-h-screen bg-[#141414] text-white">
       {showInfo && <Infos type="signup" onAccept={handleAccept} />}
 
       <header className="w-full p-6 flex justify-between items-center bg-[#1F1F1F] shadow-lg">
-        <h1 className="text-2xl font-bold">Sistema de Apoio ao Ensino de Lógica</h1>
+        <Typograph
+          text="Sistema de Apoio ao Ensino de Lógica"
+          colorText="text-white"
+          variant="text4"
+          weight="bold"
+          fontFamily="poppins"
+        />
         <button
           onClick={handlePlayClick}
           className="px-4 py-2 bg-blue-500 rounded hover:bg-blue-600 transition"
@@ -39,19 +47,29 @@ export function Home() {
 
       <main className="flex-1 flex flex-col md:flex-row items-center justify-center text-center p-6 gap-10">
         <div className="w-full md:w-1/2 flex flex-col items-center">
-          <h2 className="text-4xl font-bold mb-4">Bem-vindo ao SAEL</h2>
-          <p className="text-lg max-w-md">
-            SAEL é um sistema de apoio acadêmico. Com nosso suporte, você irá aprender assuntos de lógica de programação, além de reforçar sua base com atividades.
-          </p>
+          <Typograph
+            text="Bem-vindo ao SAEL"
+            colorText="text-white"
+            variant="title10"
+            weight="bold"
+            fontFamily="poppins"
+            className="mb-4"
+          />
+          <Typograph
+            text="SAEL é um sistema de apoio acadêmico. Com nosso suporte, você irá aprender assuntos de lógica de programação, além de reforçar sua base com atividades."
+            colorText="text-white"
+            variant="text5"
+            weight="regular"
+            fontFamily="poppins"
+            className="max-w-md"
+          />
         </div>
         <div className="w-full md:w-1/2 flex items-center justify-center">
           <AnimatedLogo />
         </div>
       </main>
 
-      <footer className="w-full p-4 bg-[#1F1F1F] text-center text-gray-400">
-        © {new Date().getFullYear()} Sistema de Apoio ao Ensino de Lógica. Todos os direitos reservados.
-      </footer>
+      <Footer />
     </div>
   );
 }
