@@ -14,13 +14,13 @@ export function TypingBubble({ onDone, text }: TypingBubbleProps) {
   useEffect(() => {
     const typingInterval = setInterval(() => {
       setDotCount((prev) => (prev < 3 ? prev + 1 : 1));
-    }, 500);
+    }, 400);
 
     const revealTimeout = setTimeout(() => {
       setShowText(true);
       clearInterval(typingInterval);
       onDone();
-    }, 2000);
+    }, 1800);
 
     return () => {
       clearInterval(typingInterval);
@@ -30,15 +30,15 @@ export function TypingBubble({ onDone, text }: TypingBubbleProps) {
 
   return (
     <motion.div
-      className="flex items-end w-full mb-3 justify-start"
+      className="flex items-end w-full mb-3 justify-start animate-fade-in"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="bg-gray-800 text-gray-200 px-4 py-2 rounded-lg rounded-bl-none shadow max-w-[75%]">
+      <div className="bg-gray-800 text-gray-200 px-4 py-2 rounded-xl rounded-bl-none shadow max-w-[75%]">
         <Typograph
           text={showText ? text : `Só um momento${".".repeat(dotCount)}`}
-          variant="text4"
+          variant="text8"
           weight="regular"
           fontFamily="poppins"
           colorText="text-gray-200"

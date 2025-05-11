@@ -9,7 +9,7 @@ import { formatTitle } from "@/utils/formatText";
 type ButtonData = { title: string; payload: string };
 
 interface LevelStepProps {
-  onNext: (buttons: ButtonData[], botText: string) => void;
+  onNext: (buttons: ButtonData[], nivel: string) => void;
 }
 
 export function LevelStep({ onNext }: LevelStepProps) {
@@ -27,25 +27,21 @@ export function LevelStep({ onNext }: LevelStepProps) {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSelect = async (value: string) => {
-    onNext([], value); // adiciona a escolha do usuário
+  const handleSelect = async (nivelSelecionado: string) => {
+    console.log("🟨 Nível clicado pelo usuário:", nivelSelecionado);
     try {
-      const res = await rasaService.definirNivel(value);
-      const nextButtons = res.responses?.[1]?.buttons || [];
-      const botText = res.responses?.[1]?.text || "";
-      onNext(nextButtons, botText);
-    } catch {
-      onNext([], "Erro ao definir nível.");
+      const res = await rasaService.definirNivel(nivelSelecionado);
+      const botoesAssuntos = res.responses?.[1]?.buttons || [];
+      onNext(botoesAssuntos, nivelSelecionado); // 🔥 aqui usamos onNext corretamente
+    } catch (err) {
+      console.error("Erro ao definir nível:", err);
+      onNext([], nivelSelecionado);
     }
   };
 
   if (loading) {
     return (
-      <motion.div
-        className="flex justify-center items-center w-full py-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
+      <motion.div className="flex justify-center items-center w-full py-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <div className="flex items-center gap-2 text-gray-600 bg-gray-100 px-4 py-2 rounded-2xl shadow">
           <Loader2 className="animate-spin w-4 h-4" />
           <span>Carregando níveis...</span>
@@ -56,11 +52,7 @@ export function LevelStep({ onNext }: LevelStepProps) {
 
   if (levels.length === 0) {
     return (
-      <motion.div
-        className="flex justify-center items-center w-full py-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
+      <motion.div className="flex justify-center items-center w-full py-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-2xl shadow-md">
           Nenhum nível disponível, use a caixa de texto abaixo para conversar.
         </div>
@@ -78,17 +70,16 @@ export function LevelStep({ onNext }: LevelStepProps) {
       <div className="rounded-xl p-6 max-w-2xl mx-auto">
         <Typograph
           text="Escolha seu nível de dificuldade"
-          variant="text2"
+          variant="text4"
           weight="medium"
           fontFamily="poppins"
           colorText="text-white"
           className="text-center mb-6"
         />
-
         <ButtonChoiceBot
           options={levels.map((l) => ({
             label: formatTitle(l.title),
-            value: l.title,
+            value: l.title
           }))}
           onSelect={handleSelect}
         />
