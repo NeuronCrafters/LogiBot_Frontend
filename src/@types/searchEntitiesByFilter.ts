@@ -108,6 +108,7 @@ export async function searchEntitiesByFilter(
               id: p._id,
               name: p.name,
               code: p.email,
+              courseId: p.course ?? p.courseId ?? "",
               roles: rawRoles.map((r) => {
                 switch (r) {
                   case "admin":

@@ -15,6 +15,7 @@ interface AppModalProps {
   onCancel?: () => void;
   onClose?: () => void;
   children?: React.ReactNode;
+  disabled?: boolean;
 }
 
 const defaultConfig = {
@@ -51,12 +52,14 @@ export function AppModal({
   onCancel,
   onClose,
   children,
+  disabled = false,
 }: AppModalProps) {
   if (!isOpen) return null;
 
   const config = defaultConfig[type];
 
   const handleConfirm = () => {
+    if (disabled) return;
     if (onConfirm) onConfirm();
     else if (onClose) onClose();
   };
@@ -110,15 +113,14 @@ export function AppModal({
                 >
                   {cancelLabel ?? config.cancelLabel}
                 </ButtonRainbow>
-
               )}
               <ButtonRainbow
                 variant={type === "delete" ? "destructive" : "default"}
                 onClick={handleConfirm}
+                disabled={disabled}
               >
                 {acceptLabel ?? config.acceptLabel}
               </ButtonRainbow>
-
             </div>
           </CardContent>
         </Card>
