@@ -54,12 +54,13 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
       icon: <Settings className="w-5 h-5" />,
       label: "Criar",
     },
-    {
-      show: !isFaqPage,
-      path: "/faq",
-      icon: <HelpCircle className="w-5 h-5" />,
-      label: "Dúvidas",
-    },
+    //!em desenvolvimento
+    // {
+    //   show: !isFaqPage,
+    //   path: "/faq",
+    //   icon: <HelpCircle className="w-5 h-5" />,
+    //   label: "Dúvidas",
+    // },
   ];
 
   return (
