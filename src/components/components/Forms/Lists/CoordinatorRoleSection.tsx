@@ -34,8 +34,8 @@ export function CoordinatorRoleSection({
   );
 
   return (
-    <div className="text-left space-y-4">
-      <label className="flex items-center gap-2">
+    <div className="text-left space-y-4 bg-[#1f1f1f] p-4 rounded-xl border border-white/10">
+      <label className="flex items-center gap-2 text-white">
         <input
           type="checkbox"
           checked={addCoord}
@@ -48,7 +48,7 @@ export function CoordinatorRoleSection({
         Adicionar o cargo de: Coordenador de Curso
       </label>
 
-      <label className="flex items-center gap-2">
+      <label className="flex items-center gap-2 text-white">
         <input
           type="checkbox"
           checked={removeCoord}
@@ -76,7 +76,7 @@ export function CoordinatorRoleSection({
             <select
               value={newCoordinator}
               onChange={(e) => onCoordinatorChange(e.target.value)}
-              className="w-full p-2 rounded-md bg-[#202020] text-white"
+              className="w-full p-2 rounded-md bg-[#141414] text-white"
             >
               <option value="">Selecione um professor</option>
               {filteredCandidates.map((c) => (
