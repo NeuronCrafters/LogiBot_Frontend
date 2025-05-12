@@ -160,15 +160,15 @@ export function FormsFilter({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.4 }}
-      className="mb-4 p-4 rounded-xl bg-[#181818] border border-neutral-800 shadow-sm"
+      className="mb-4 p-4 rounded-xl bg-[#1f1f1f] border border-white/10 shadow-lg"
     >
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-4 mb-4">
         <div className="flex-1 min-w-[200px]">
           <label className="block mb-1 text-white">Tipo de Filtro:</label>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="w-full p-2 rounded-md bg-[#202020] text-slate-100"
+            className="w-full p-2 rounded-md bg-[#141414] text-white"
           >
             <option value="">Selecione</option>
             {allowedFilters.map((ft) => (
@@ -190,11 +190,11 @@ export function FormsFilter({
 
         {showUniversitySelect && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-slate-400">Universidade:</label>
+            <label className="block mb-1 text-white">Universidade:</label>
             <select
               value={selectedUniversity}
               onChange={(e) => setSelectedUniversity(e.target.value)}
-              className="w-full p-2 rounded-md bg-[#202020] text-slate-100"
+              className="w-full p-2 rounded-md bg-[#141414] text-white"
             >
               <option value="">Selecione a universidade</option>
               {universities.map((u) => (

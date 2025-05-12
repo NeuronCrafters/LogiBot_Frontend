@@ -14,12 +14,7 @@ import type {
   DisciplineData,
 } from "@/@types/FormsDataTypes";
 
-type EntityType =
-  | "university"
-  | "course"
-  | "class"
-  | "professor"
-  | "discipline";
+type EntityType = "university" | "course" | "class" | "professor" | "discipline";
 
 type Univ = UniversityData & { id?: string | number };
 type Course = CourseData & { id?: string | number };
@@ -83,14 +78,14 @@ export const FormsCrud: React.FC<FormsCrudProps> = ({
     initialData?.type === selectedEntity ? initialData.data : undefined;
 
   return (
-    <div className="mb-4 p-4 bg-[#181818] text-white rounded-md">
-      <h2 className="text-lg font-bold mb-2">Cadastro</h2>
+    <div className="form-container">
+      <h2 className="text-xl font-bold mb-4 text-white">Cadastro</h2>
 
-      <label className="block mb-2">Selecione a Entidade:</label>
+      <label className="block mb-2 text-sm text-white">Selecione a Entidade:</label>
       <select
         value={selectedEntity}
         onChange={handleSelectChange}
-        className="p-2 rounded w-full bg-[#202020] text-white mb-4"
+        className="select-entity"
       >
         <option value="">-- Escolha --</option>
         {allowedEntities.map((ent) => (

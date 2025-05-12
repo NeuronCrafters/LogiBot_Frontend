@@ -40,7 +40,7 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
           />
 
           <motion.div
-            className="fixed inset-y-0 right-0 w-[350px] bg-[#181818] z-50 shadow-xl flex flex-col"
+            className="fixed inset-y-0 right-0 w-[350px] bg-[#1f1f1f] z-50 shadow-xl flex flex-col"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}

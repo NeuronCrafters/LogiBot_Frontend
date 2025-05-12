@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { publicApi } from "@/services/apiClient";
+import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
 export interface CourseData {
   id?: string | number;
@@ -42,35 +43,39 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4">
-      <label className="block text-white mb-2">Nome do Curso:</label>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        className="p-2 rounded w-full bg-[#202020] text-white"
-      />
-      <label className="block text-white mt-4 mb-2">Universidade:</label>
-      <select
-        value={universityId}
-        onChange={(e) => setUniversityId(e.target.value)}
-        required
-        className="p-2 rounded w-full bg-[#202020] text-white"
-      >
-        <option value="">Selecione a universidade</option>
-        {universities.map((uni) => (
-          <option key={uni._id} value={uni._id}>
-            {uni.name}
-          </option>
-        ))}
-      </select>
-      <button
-        type="submit"
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        {initialData ? "Atualizar" : "Cadastrar"}
-      </button>
+    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+      <div>
+        <label className="block text-white mb-2">Nome do Curso:</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="p-2 rounded w-full bg-[#141414] text-white"
+        />
+      </div>
+      <div>
+        <label className="block text-white mb-2">Universidade:</label>
+        <select
+          value={universityId}
+          onChange={(e) => setUniversityId(e.target.value)}
+          required
+          className="p-2 rounded w-full bg-[#141414] text-white"
+        >
+          <option value="">Selecione a universidade</option>
+          {universities.map((uni) => (
+            <option key={uni._id} value={uni._id}>
+              {uni.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="pt-2">
+        <ButtonCRUD
+          action={initialData ? "update" : "create"}
+          onClick={handleSubmit}
+        />
+      </div>
     </form>
   );
 }

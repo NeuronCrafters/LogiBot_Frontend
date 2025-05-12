@@ -14,6 +14,7 @@ import { AppModal } from "@/components/components/Modal/AppModal";
 import { toast } from "react-hot-toast";
 import { adminApi } from "@/services/apiClient";
 import { CoordinatorRoleSection } from "@/components/components/Forms/Lists/CoordinatorRoleSection";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface ListItem {
   id: string;
@@ -46,6 +47,13 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
   const [removeCoord, setRemoveCoord] = useState(false);
   const [newCoordinator, setNewCoordinator] = useState<string>("");
   const [candidates, setCandidates] = useState<ListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    const delay = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(delay);
+  }, [items]);
 
   useEffect(() => {
     const fetchCandidates = async () => {
@@ -107,7 +115,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
 
   return (
     <motion.div
-      className="bg-[#181818] border border-neutral-700 rounded-2xl p-4 shadow-xl"
+      className="bg-[#1f1f1f] border border-white/10 rounded-xl p-4 shadow-lg"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
@@ -127,7 +135,13 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         </TableHeader>
         <TableBody>
           <AnimatePresence>
-            {items.length > 0 ? (
+            {loading ? (
+              [...Array(3)].map((_, idx) => (
+                <TableRow key={idx}>
+                  <TableCell colSpan={5}><Skeleton className="h-10 w-full bg-white/10 rounded-md" /></TableCell>
+                </TableRow>
+              ))
+            ) : items.length > 0 ? (
               items.map((item, idx) => (
                 <motion.tr
                   key={item.id}
@@ -135,7 +149,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="transition-colors duration-200 hover:bg-[#2a2a2a]"
+                  className="transition-colors duration-200 hover:bg-[#141414]"
                 >
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell>{item.name}</TableCell>

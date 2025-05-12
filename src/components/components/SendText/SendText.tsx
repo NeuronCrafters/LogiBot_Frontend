@@ -27,7 +27,7 @@ export function SendText() {
   };
 
   return (
-    <div ref={containerRef} className="flex items-center justify-center w-full h-full bg-[#181818] p-4 shadow-md">
+    <div ref={containerRef} className="flex items-center justify-center w-full h-full bg-[#1f1f1f] p-4 shadow-md">
       <div className="w-[800px] max-w-full h-[120px] flex items-center gap-0 rounded-lg">
         <Textarea
           rows={1}

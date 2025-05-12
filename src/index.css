@@ -111,3 +111,59 @@
     background-position: 0% 50%;
   }
 }
+
+
+/* ---------- Identidade Visual Escura ---------- */
+:root {
+  --bg-dark: #141414;
+  --bg-darker: #1f1f1f;
+  --text-light: #ffffff;
+  --text-muted: #a1a1a1;
+  --border-light: rgba(255, 255, 255, 0.1);
+}
+
+.form-container {
+  background-color: #1f1f1f;
+  color: #ffffff;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+  margin-bottom: 1rem;
+}
+
+.select-entity {
+  width: 100%;
+  background-color: #141414;
+  color: #ffffff;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-section {
+  background-color: #1f1f1f;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.input-field {
+  background-color: #141414;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+
+/* ---------- Tema Claro (futuramente) ---------- */
+:root.light {
+  --bg-dark: #ffffff;
+  --bg-darker: #f0f0f0;
+  --text-light: #000000;
+  --text-muted: #444444;
+  --border-light: rgba(0, 0, 0, 0.1);
+}

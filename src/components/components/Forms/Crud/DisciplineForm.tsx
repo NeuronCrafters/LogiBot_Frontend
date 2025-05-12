@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { publicApi } from "@/services/apiClient";
+import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 
 export interface DisciplineData {
   name: string;
@@ -105,72 +106,87 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4">
-      <label className="block text-white mb-2">Nome da Disciplina:</label>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        className="p-2 rounded w-full bg-[#202020] text-white"
-      />
-      <label className="block text-white mt-4 mb-2">Universidade:</label>
-      <select
-        value={selectedUniversity}
-        onChange={(e) => setSelectedUniversity(e.target.value)}
-        required
-        className="p-2 rounded w-full bg-[#202020] text-white"
-      >
-        <option value="">Selecione a universidade</option>
-        {universities.map(uni => (
-          <option key={uni._id} value={uni._id}>{uni.name}</option>
-        ))}
-      </select>
+    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+      <div>
+        <label className="block text-white mb-2">Nome da Disciplina:</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="p-2 rounded w-full bg-[#141414] text-white"
+        />
+      </div>
+
+      <div>
+        <label className="block text-white mb-2">Universidade:</label>
+        <select
+          value={selectedUniversity}
+          onChange={(e) => setSelectedUniversity(e.target.value)}
+          required
+          className="p-2 rounded w-full bg-[#141414] text-white"
+        >
+          <option value="">Selecione a universidade</option>
+          {universities.map(uni => (
+            <option key={uni._id} value={uni._id}>{uni.name}</option>
+          ))}
+        </select>
+      </div>
+
       {selectedUniversity && (
-        <>
-          <label className="block text-white mt-4 mb-2">Curso:</label>
+        <div>
+          <label className="block text-white mb-2">Curso:</label>
           <select
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
             required
-            className="p-2 rounded w-full bg-[#202020] text-white"
+            className="p-2 rounded w-full bg-[#141414] text-white"
           >
             <option value="">Selecione o curso</option>
             {courses.map(course => (
               <option key={course._id} value={course._id}>{course.name}</option>
             ))}
           </select>
-        </>
+        </div>
       )}
+
       {selectedCourse && (
         <>
-          <label className="block text-white mt-4 mb-2">Turmas (Selecione uma ou mais):</label>
-          <select
-            multiple
-            value={selectedClassIds}
-            onChange={handleClassesChange}
-            className="p-2 rounded w-full bg-[#202020] text-white"
-          >
-            {classes.map(cls => (
-              <option key={cls._id} value={cls._id}>{cls.name}</option>
-            ))}
-          </select>
-          <label className="block text-white mt-4 mb-2">Professores (Selecione um ou mais):</label>
-          <select
-            multiple
-            value={selectedProfessorIds}
-            onChange={handleProfessorsChange}
-            className="p-2 rounded w-full bg-[#202020] text-white"
-          >
-            {professors.map(prof => (
-              <option key={prof._id} value={prof._id}>{prof.name}</option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-white mb-2">Turmas (Selecione uma ou mais):</label>
+            <select
+              multiple
+              value={selectedClassIds}
+              onChange={handleClassesChange}
+              className="p-2 rounded w-full bg-[#141414] text-white"
+            >
+              {classes.map(cls => (
+                <option key={cls._id} value={cls._id}>{cls.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-white mt-4 mb-2">Professores (Selecione um ou mais):</label>
+            <select
+              multiple
+              value={selectedProfessorIds}
+              onChange={handleProfessorsChange}
+              className="p-2 rounded w-full bg-[#141414] text-white"
+            >
+              {professors.map(prof => (
+                <option key={prof._id} value={prof._id}>{prof.name}</option>
+              ))}
+            </select>
+          </div>
         </>
       )}
-      <button type="submit" className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-        {initialData ? "Atualizar" : "Cadastrar"}
-      </button>
+
+      <div className="pt-2">
+        <ButtonCRUD
+          action={initialData ? "update" : "create"}
+          onClick={handleSubmit}
+        />
+      </div>
     </form>
   );
 }
