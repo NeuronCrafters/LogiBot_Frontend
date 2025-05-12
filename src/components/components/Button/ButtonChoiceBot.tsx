@@ -26,8 +26,8 @@ export function ButtonChoiceBot({
           key={i}
           onClick={() => onSelect(opt.value)}
           className={`${baseStyle} ${opt.variant === "green"
-              ? "bg-green-600 hover:bg-green-700"
-              : "bg-blue-700 hover:bg-blue-800"
+            ? "bg-green-600 hover:bg-green-700"
+            : "bg-blue-700 hover:bg-blue-800"
             }`}
         >
           {opt.label}

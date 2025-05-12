@@ -35,7 +35,7 @@ export function TypingBubble({ onDone, text }: TypingBubbleProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="bg-gray-800 text-gray-200 px-4 py-2 rounded-xl rounded-bl-none shadow max-w-[75%]">
+      <div className="bg-[#2c2c2c] text-gray-200 px-4 py-2 rounded-xl rounded-bl-none shadow max-w-[75%]">
         <Typograph
           text={showText ? text : `Só um momento${".".repeat(dotCount)}`}
           variant="text8"

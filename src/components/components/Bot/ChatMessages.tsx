@@ -80,12 +80,13 @@ function ChatMessages({ messages, userName, userId }: ChatMessagesProps) {
 
             <div
               className={`p-3 rounded-xl max-w-[75%] ${isUser
-                  ? "bg-blue-600 text-white ml-auto rounded-br-none"
-                  : "bg-gray-800 text-gray-100 mr-auto rounded-bl-none"
+                ? "bg-blue-600 text-white ml-auto rounded-br-none"
+                : "bg-[#2a2a2a] text-white mr-auto rounded-bl-none"
                 }`}
             >
               {content}
             </div>
+
 
             {isUser && (
               <div className="ml-2 rainbow-avatar w-10 h-10 rounded-full flex items-center justify-center">

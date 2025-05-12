@@ -19,11 +19,11 @@ export function ButtonBotAnswer({
     "rounded-2xl px-5 py-2.5 text-white transition-all shadow";
 
   const selectedClass = selected
-    ? "bg-blue-700 hover:bg-blue-800"
+    ? "bg-[#2563eb] hover:bg-blue-800"
     : "bg-transparent border border-white/20 hover:bg-white/10";
 
   const submitClass =
-    "bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:ring-blue-400 font-semibold";
+    "bg-[#2563eb] hover:bg-blue-800 focus:ring-2 focus:ring-blue-400 font-semibold";
 
   return (
     <Button
