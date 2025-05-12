@@ -15,8 +15,19 @@ export function QuestionsDisplay({
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
 
   const handleSelect = (questionIndex: number, option: string) => {
-    setSelectedAnswers((prev) => ({ ...prev, [questionIndex]: option }));
+    setSelectedAnswers((prev) => {
+      const current = prev[questionIndex];
+      if (current === option) {
+        const updated = { ...prev };
+        delete updated[questionIndex];
+        return updated;
+      } else {
+        return { ...prev, [questionIndex]: option };
+      }
+    });
   };
+
+
 
   const handleSubmit = () => {
     const answers = questions.map((q, index) => {
@@ -36,21 +47,30 @@ export function QuestionsDisplay({
           <div className="border border-white/20 rounded-2xl p-4 bg-[#1f2937] shadow-md w-full max-w-[520px] mx-auto">
             <Typograph
               text={`${i + 1}. ${q.question}`}
-              variant="text6"
+              variant="text7"
               fontFamily="poppins"
-              weight="semibold"
+              weight="medium"
               colorText="text-white"
             />
           </div>
           <div className="flex flex-col items-center gap-2">
-            {q.options.map((opt, j) => (
-              <ButtonBotAnswer
-                key={j}
-                text={opt}
-                selected={selectedAnswers[i] === opt}
-                onClick={() => handleSelect(i, opt)}
-              />
-            ))}
+            {q.options.map((opt, j) => {
+              const letter = ["A", "B", "C", "D", "E"][j] || "?";
+              return (
+                <ButtonBotAnswer
+                  key={j}
+                  selected={selectedAnswers[i] === opt}
+                  onClick={() => handleSelect(i, opt)}
+                  text={
+                    <span className="flex items-start gap-2">
+                      <span className="font-bold text-blue-400">{letter})</span>
+                      <span className="text-white">{opt}</span>
+                    </span>
+                  }
+                />
+              );
+            })}
+
           </div>
         </div>
       ))}

@@ -124,8 +124,11 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     ]);
 
     setSubsubjectButtons(btns);
-    setStep("subsubjects");
+    setTimeout(() => {
+      setStep("subsubjects");
+    }, 100);
   };
+
 
   const handleSubsubjectNext = (qs: Question[], subtopico: string) => {
     setMessages((prev) => [
