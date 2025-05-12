@@ -5,7 +5,7 @@ import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 
-import { ChartFilter } from "@/components/components/Chart/Independent/ChartFilter";
+import { ChartFilter } from "@/components/components/Chart/ChartFilter";
 import { UsageChart } from "@/components/components/Chart/Independent/UsageChart";
 import { CorrectWrongChart } from "@/components/components/Chart/Independent/CorrectWrongChart";
 import { CategoryChart } from "@/components/components/Chart/Independent/CategoryChart";
@@ -62,12 +62,26 @@ export function Chart() {
 
         <ChartFilter onChange={(type, ids, mode) => setFilter({ type, ids, mode })} />
 
-        <UsageChart filter={filter} />
-        <CorrectWrongChart filter={filter} />
-        <CategoryChart filter={filter} />
-        <ComparisonAccuracyChart filter={filter} />
-        <CategoryParticipationChart filter={filter} />
-        <UsageComparisonChart filter={filter} />
+        {filter.mode === "single" && (
+          <>
+            <UsageChart filter={filter} />
+            <CorrectWrongChart filter={filter} />
+            <CategoryChart filter={filter} />
+          </>
+        )}
+
+        {filter.mode === "compare" && (
+          <>
+            {filter.type === "student" && (
+              <>
+                <UsageComparisonChart filter={filter} />
+                <ComparisonAccuracyChart filter={filter} />
+              </>
+            )}
+
+            <CategoryParticipationChart filter={filter} />
+          </>
+        )}
       </div>
     </div>
   );

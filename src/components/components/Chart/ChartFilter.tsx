@@ -8,6 +8,7 @@ import {
   SelectItem
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { motion } from "framer-motion";
 import type { ChartFilterState, ChartMode } from "@/@types/ChartsType";
 
 interface Props {
@@ -24,15 +25,22 @@ export function ChartFilter({ onChange }: Props) {
   }, [entityType, selectedIds, mode]);
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.4 }}
+      className="p-4 rounded-xl bg-[#1f1f1f] border border-white/10 shadow-lg space-y-4"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label>Tipo de Entidade</Label>
+        <div className="space-y-1">
+          <Label className="text-white">Tipo de Entidade</Label>
           <Select value={entityType} onValueChange={(v) => setEntityType(v as ChartFilterState["type"])}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-[#141414] text-white border border-white/10 rounded-md">
               <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#1f1f1f] text-white border border-white/10">
               <SelectItem value="student">Aluno</SelectItem>
               <SelectItem value="class">Turma</SelectItem>
               <SelectItem value="course">Curso</SelectItem>
@@ -41,13 +49,13 @@ export function ChartFilter({ onChange }: Props) {
           </Select>
         </div>
 
-        <div>
-          <Label>Modo de Visualização</Label>
+        <div className="space-y-1">
+          <Label className="text-white">Modo de Visualização</Label>
           <Select value={mode} onValueChange={(v) => setMode(v as ChartMode)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-[#141414] text-white border border-white/10 rounded-md">
               <SelectValue placeholder="Selecione o modo" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#1f1f1f] text-white border border-white/10">
               <SelectItem value="single">Visualizar um</SelectItem>
               <SelectItem value="compare">Comparar vários</SelectItem>
             </SelectContent>
@@ -60,6 +68,6 @@ export function ChartFilter({ onChange }: Props) {
         multiple={mode === "compare"}
         onSelect={setSelectedIds}
       />
-    </div>
+    </motion.div>
   );
 }
