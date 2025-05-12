@@ -35,8 +35,6 @@ export function Chat() {
     showLevels,
     categoryButtons,
     subsubjectButtons,
-    previousQuestions,
-    previousResults,
     setPreviousQuestions,
     setPreviousResults,
     handleInitialChoice,
