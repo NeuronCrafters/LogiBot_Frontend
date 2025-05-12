@@ -4,56 +4,108 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
-import { Card } from "@/components/ui/card";
-import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { api } from "@/services/api/api";
-import type { ChartFilterState } from "@/@types/ChartsType";
+import { useAuth } from "@/hooks/use-Auth";
+import { Typograph } from "@/components/components/Typograph/Typograph";
+import { publicApi } from "@/services/apiClient";
+import { ChartFilterState } from "@/@types/ChartsType";
 
-export function ComparisonAccuracyChart({ filter }: { filter: ChartFilterState }) {
-  const [data, setData] = useState([]);
+interface ChartProps {
+  filter: ChartFilterState;
+}
+
+interface ChartData {
+  name: string;
+  correct: number;
+  incorrect: number;
+}
+
+export function ComparisonAccuracyChart({ filter }: ChartProps) {
+  const { user } = useAuth();
+  const [data, setData] = useState<ChartData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const shouldRender =
+    filter.type === "student" &&
+    filter.mode === "compare" &&
+    filter.ids.length > 0;
 
   useEffect(() => {
-    api.post("/dashboard/comparison-accuracy", filter).then((res) => setData(res.data));
+    if (!shouldRender) return;
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        const promises = filter.ids.map(async (id) => {
+          // 1. Buscar nome real do estudante
+          const studentRes = await publicApi.getStudentById<{ name: string }>(id);
+
+          // 2. Simular dados de análise (até você ter a rota real)
+          const analysisRes = {
+            correctAnswers: Math.floor(Math.random() * 10),
+            wrongAnswers: Math.floor(Math.random() * 10),
+          };
+
+          return {
+            name: studentRes.name,
+            correct: analysisRes.correctAnswers,
+            incorrect: analysisRes.wrongAnswers,
+          };
+        });
+
+        const results = await Promise.all(promises);
+        setData(results);
+      } catch (error) {
+        console.error("Erro ao buscar dados de comparação:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [filter]);
 
+  if (!shouldRender) return null;
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-      <Card className="p-4 bg-[#1f1f1f] border border-white/10 rounded-xl shadow-lg">
-        <Typograph
-          text="Acertos x Erros"
-          variant="text6"
-          weight="semibold"
-          fontFamily="montserrat"
-          colorText="text-white"
-        />
-        <div className="overflow-x-auto mt-4">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff1a" />
-              <XAxis dataKey="user" stroke="#ffffffcc" />
-              <YAxis stroke="#ffffffcc" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f1f1f",
-                  border: "1px solid #ffffff22",
-                  borderRadius: "8px",
-                }}
-                labelStyle={{ color: "#ffffff" }}
-                itemStyle={{ color: "#ffffff" }}
-              />
-              <Legend wrapperStyle={{ color: "#ffffff" }} />
-              <Bar dataKey="acertos" fill="#10b981" />
-              <Bar dataKey="erros" fill="#ef4444" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-[#141414] p-4 rounded-2xl shadow-lg mt-4 w-full"
+    >
+      <Typograph
+        text="Acertos e Erros por Estudante"
+        variant="text9"
+        weight="semibold"
+        fontFamily="montserrat"
+        colorText="text-white"
+      />
+
+      {loading ? (
+        <p className="text-white">Carregando dados...</p>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <XAxis dataKey="name" stroke="#ffffff" />
+            <YAxis stroke="#ffffff" />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#1f2937",
+                borderRadius: "8px",
+                color: "#fff",
+              }}
+              labelStyle={{ color: "#fff" }}
+            />
+            <Bar dataKey="correct" fill="#22c55e" name="Acertos" />
+            <Bar dataKey="incorrect" fill="#ef4444" name="Erros" />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </motion.div>
   );
 }

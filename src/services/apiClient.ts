@@ -72,6 +72,13 @@ export const publicApi = {
     getRequest<T>(`${PUBLIC_ROUTES.studentsByDiscipline}/${u}/${c}/${d}`),
   getStudentsByCourse: <T>(u: string, c: string) =>
     getRequest<T>(`${PUBLIC_ROUTES.studentsByCourse}/${u}/${c}`),
+
+  // !ROTAS DE TESTE
+  getStudentById: <T>(id: string) => getRequest<T>(`/public/student/${id}`),
+  getClassById: <T>(id: string) => getRequest<T>(`/public/class/${id}`),
+  getCourseById: <T>(id: string) => getRequest<T>(`/public/course/${id}`),
+  getDisciplineById: <T>(id: string) => getRequest<T>(`/public/discipline/${id}`),
+  getUniversityById: <T>(id: string) => getRequest<T>(`/public/university/${id}`),
 };
 
 // --------------
