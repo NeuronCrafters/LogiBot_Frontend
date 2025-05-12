@@ -5,10 +5,10 @@ import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 
-import { ChartFilter } from "@/components/components/Chart/ChartFilter";
-import { UsageChart } from "@/components/components/Chart/UsageChart";
-import { CorrectWrongChart } from "@/components/components/Chart/CorrectWrongChart";
-import { CategoryChart } from "@/components/components/Chart/CategoryChart";
+import { ChartFilter } from "@/components/components/Chart/Independent/ChartFilter";
+import { UsageChart } from "@/components/components/Chart/Independent/UsageChart";
+import { CorrectWrongChart } from "@/components/components/Chart/Independent/CorrectWrongChart";
+import { CategoryChart } from "@/components/components/Chart/Independent/CategoryChart";
 import { ComparisonAccuracyChart } from "@/components/components/Chart/Comparison/ComparisonAccuracyChart";
 import { CategoryParticipationChart } from "@/components/components/Chart/Comparison/CategoryParticipationChart";
 import { UsageComparisonChart } from "@/components/components/Chart/Comparison/UsageComparisonChart";
