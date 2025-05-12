@@ -30,20 +30,19 @@ export function QuestionsDisplay({
   };
 
   return (
-    <div className="space-y-6 mt-6">
+    <div className="space-y-8 mt-6">
       {questions.map((q, i) => (
-        <div
-          key={i}
-          className="bg-[#1f2937] p-4 rounded-xl shadow space-y-4 border border-white/5"
-        >
-          <Typograph
-            text={`${i + 1}. ${q.question}`}
-            variant="text5"
-            fontFamily="poppins"
-            weight="semibold"
-            colorText="text-white"
-          />
-          <div className="flex flex-col gap-2">
+        <div key={i} className="space-y-4">
+          <div className="border border-white/20 rounded-2xl p-4 bg-[#1f2937] shadow-md w-full max-w-[520px] mx-auto">
+            <Typograph
+              text={`${i + 1}. ${q.question}`}
+              variant="text6"
+              fontFamily="poppins"
+              weight="semibold"
+              colorText="text-white"
+            />
+          </div>
+          <div className="flex flex-col items-center gap-2">
             {q.options.map((opt, j) => (
               <ButtonBotAnswer
                 key={j}

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 
 interface BotAnswerButtonProps {
-  text: string;
+  text: React.ReactNode;
   selected?: boolean;
   onClick: () => void;
   isSubmit?: boolean;
@@ -29,10 +29,16 @@ export function ButtonBotAnswer({
     <Button
       onClick={onClick}
       disabled={disabled}
-      className={`${baseClass} ${isSubmit ? submitClass : selectedClass
-        } ${isSubmit ? "px-6 py-2.5" : "text-left text-base leading-snug w-full max-w-[520px] min-w-[300px]"}`}
+      className={`
+    ${baseClass}
+    ${isSubmit ? submitClass : selectedClass}
+    ${isSubmit
+          ? "px-6 py-2.5 text-center"
+          : "justify-start text-left text-base leading-snug w-full max-w-[520px] min-w-[300px] px-4 py-3"}
+  `}
     >
       {text}
     </Button>
+
   );
 }
