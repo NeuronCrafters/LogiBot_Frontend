@@ -1,6 +1,6 @@
 import { coordinatorApi, professorApi, publicApi, adminApi } from "@/services/apiClient";
 import type { FilterData } from "@/@types/FormsFilterTypes";
-import type { ListItem } from "@/components/components/Forms/FormsList";
+import type { ListItem } from "@/components/components/Forms/Lists/FormsList";
 import toast from "react-hot-toast";
 
 type Role = "admin" | "course-coordinator" | "professor";

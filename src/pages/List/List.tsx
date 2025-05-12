@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TableProperties } from "lucide-react";
-import { FormsFilter } from "@/components/components/Forms/FormsFilter";
-import { FormsList } from "@/components/components/Forms/FormsList";
+import { FormsFilter } from "@/components/components/Forms/Lists/FormsFilter";
+import { FormsList } from "@/components/components/Forms/Lists/FormsList";
 import { useAuth } from "@/hooks/use-Auth";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Header } from "@/components/components/Header/Header";
@@ -9,7 +9,7 @@ import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Button } from "@/components/ui/button";
 import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
 import type { FilterData } from "@/@types/FormsFilterTypes";
-import type { ListItem } from "@/components/components/Forms/FormsList";
+import type { ListItem } from "@/components/components/Forms/Lists/FormsList";
 import { motion, AnimatePresence } from "framer-motion";
 
 type EntityType = "university" | "course" | "discipline" | "class" | "professor" | "student";

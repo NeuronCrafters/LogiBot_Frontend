@@ -13,7 +13,7 @@ import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 import { AppModal } from "@/components/components/Modal/AppModal";
 import { toast } from "react-hot-toast";
 import { adminApi } from "@/services/apiClient";
-import { CoordinatorRoleSection } from "@/components/components/Forms/CoordinatorRoleSection";
+import { CoordinatorRoleSection } from "@/components/components/Forms/Lists/CoordinatorRoleSection";
 
 export interface ListItem {
   id: string;
