@@ -26,10 +26,22 @@ export function CorrectWrongChart({ filter }: { filter: ChartFilterState }) {
     if (!filter.ids[0]) return;
 
     logApi
-      .get<ChartData[]>(filter.type, "accuracy", "individual", filter.ids[0])
-      .then(setData)
+      .get<ChartData[] | any>(filter.type, "accuracy", "individual", filter.ids[0])
+      .then((res) => {
+        if (Array.isArray(res)) {
+          setData(res);
+        } else if (res && typeof res === "object") {
+          setData([
+            { name: "Acertos", value: res.totalCorrect ?? 0 },
+            { name: "Erros", value: res.totalWrong ?? 0 },
+          ]);
+        } else {
+          setData([]);
+        }
+      })
       .catch(console.error);
   }, [filter]);
+
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>

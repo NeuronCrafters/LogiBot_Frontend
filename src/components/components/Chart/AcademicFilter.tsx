@@ -17,9 +17,8 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useDataCache } from "@/hooks/use-DataCache";
 import { useAuth } from "@/hooks/use-Auth";
-import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
+import { searchEntitiesByFilter, type Role } from "@/utils/searchEntitiesByFilter";
 import type { FilterData } from "@/@types/FormsFilterTypes";
-import type { Role } from "@/utils/searchEntitiesByFilter";
 
 interface AcademicFilterProps {
   entityType: "student" | "class" | "course" | "university";
@@ -37,12 +36,9 @@ export function AcademicFilter({
   const { get, set } = useDataCache<Option[]>();
   const { user } = useAuth();
   const rawRoles = Array.isArray(user?.role) ? user.role : [user?.role];
-  const role = (rawRoles.find((r): r is string =>
-    typeof r === "string" &&
-    ["admin", "course-coordinator", "professor"].includes(r)
+  const role = (rawRoles.find((r): r is Role =>
+    typeof r === "string" && ["admin", "course-coordinator", "professor"].includes(r)
   ) ?? "admin") as Role;
-
-
 
   const [universities, setUniversities] = useState<Option[]>([]);
   const [courses, setCourses] = useState<Option[]>([]);
@@ -57,14 +53,14 @@ export function AcademicFilter({
 
   useEffect(() => {
     const cacheKey = "universities";
-    const cached = get(cacheKey);
+    const cached = get(cacheKey, true);
     if (cached) {
       setUniversities(cached);
     } else {
       searchEntitiesByFilter(role, { filterType: "universities" })
         .then(({ items }) => {
           const formatted = items.map((i) => ({ _id: i.id, name: i.name }));
-          set(cacheKey, formatted);
+          set(cacheKey, formatted, true);
           setUniversities(formatted);
         })
         .catch(console.error);
@@ -74,7 +70,7 @@ export function AcademicFilter({
   useEffect(() => {
     if (selectedUniversity) {
       const cacheKey = `courses_${selectedUniversity}`;
-      const cached = get(cacheKey);
+      const cached = get(cacheKey, true);
       if (cached) {
         setCourses(cached);
       } else {
@@ -84,7 +80,7 @@ export function AcademicFilter({
         })
           .then(({ items }) => {
             const formatted = items.map((i) => ({ _id: i.id, name: i.name }));
-            set(cacheKey, formatted);
+            set(cacheKey, formatted, true);
             setCourses(formatted);
           })
           .catch(console.error);
@@ -98,7 +94,7 @@ export function AcademicFilter({
   useEffect(() => {
     if (selectedUniversity && selectedCourse) {
       const cacheKey = `classes_${selectedUniversity}_${selectedCourse}`;
-      const cached = get(cacheKey);
+      const cached = get(cacheKey, true);
       if (cached) {
         setClasses(cached);
       } else {
@@ -109,7 +105,7 @@ export function AcademicFilter({
         })
           .then(({ items }) => {
             const formatted = items.map((i) => ({ _id: i.id, name: i.name }));
-            set(cacheKey, formatted);
+            set(cacheKey, formatted, true);
             setClasses(formatted);
           })
           .catch(console.error);
