@@ -35,7 +35,7 @@ export function List() {
   };
 
   const handleResetList = () => {
-    setItems([]); // Trigga animação de saída
+    setItems([]);
   };
 
   return (

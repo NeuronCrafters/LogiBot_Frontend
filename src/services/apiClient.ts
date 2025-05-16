@@ -6,7 +6,11 @@ import {
   ADMIN_ROUTES,
   PROFESSOR_ROUTES,
   COORDINATOR_ROUTES,
+  LOG_ROUTES,
   AcademicEntityType,
+  LogEntityType,
+  LogMetricType,
+  LogModeType
 } from "./api/api_routes";
 
 const getRequest = async <T>(url: string): Promise<T> => {
@@ -147,7 +151,6 @@ export const coordinatorApi = {
     getRequest<T>(COORDINATOR_ROUTES.listClasses),
 };
 
-
 // --------------
 // Rasa chatbot
 // --------------
@@ -169,4 +172,19 @@ export const rasaApi = {
     postRequest<T>(RASA_ROUTES.actionConversar, { text: "conversar" }),
   actionPerguntar: <T>(message: string) =>
     postRequest<T>(RASA_ROUTES.actionPerguntar, { message }),
+};
+
+// --------------
+// Logs
+// --------------
+export const logApi = {
+  get: <T>(entity: LogEntityType, metric: LogMetricType, mode: LogModeType, idOrIds: string | string[]): Promise<T> => {
+    if (mode === "individual") {
+      const route = LOG_ROUTES[entity][metric](idOrIds as string);
+      return getRequest<T>(route);
+    } else {
+      const route = LOG_ROUTES[entity].compare[metric];
+      return postRequest<T>(route, { ids: idOrIds });
+    }
+  },
 };

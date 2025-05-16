@@ -4,6 +4,22 @@ export type AcademicEntityType =
   | "class"
   | "discipline";
 
+export type LogEntityType =
+  | "student"
+  | "class"
+  | "course"
+  | "discipline"
+  | "university";
+
+export type LogMetricType =
+  | "accuracy"
+  | "usage"
+  | "subjects";
+
+export type LogModeType =
+  | "individual"
+  | "compare";
+
 export const ACADEMIC_ROUTES: Record<
   AcademicEntityType,
   { post: string; get: string; delete: string }
@@ -75,4 +91,58 @@ export const COORDINATOR_ROUTES = {
     "/admin/coordinator/students/discipline/:disciplineId",
   listDisciplines: "/admin/coordinator/disciplines",
   listClasses: "/admin/coordinator/classes",
+} as const;
+
+
+export const LOG_ROUTES = {
+  student: {
+    accuracy: (id: string) => `/logs/student/${id}/accuracy`,
+    usage: (id: string) => `/logs/student/${id}/usage`,
+    subjects: (id: string) => `/logs/student/${id}/subjects/summary`,
+    compare: {
+      accuracy: `/logs/student/compare/accuracy`,
+      usage: `/logs/student/compare/usage`,
+      subjects: `/logs/student/compare/subjects/summary`,
+    },
+  },
+  class: {
+    accuracy: (id: string) => `/logs/class/${id}/accuracy`,
+    usage: (id: string) => `/logs/class/${id}/usage`,
+    subjects: (id: string) => `/logs/class/${id}/subjects/summary`,
+    compare: {
+      accuracy: `/logs/class/compare/accuracy`,
+      usage: `/logs/class/compare/usage`,
+      subjects: `/logs/class/compare/subjects/summary`,
+    },
+  },
+  course: {
+    accuracy: (id: string) => `/logs/course/${id}/accuracy`,
+    usage: (id: string) => `/logs/course/${id}/usage`,
+    subjects: (id: string) => `/logs/course/${id}/subjects/summary`,
+    compare: {
+      accuracy: `/logs/course/compare/accuracy`,
+      usage: `/logs/course/compare/usage`,
+      subjects: `/logs/course/compare/subjects/summary`,
+    },
+  },
+  discipline: {
+    accuracy: (id: string) => `/logs/discipline/${id}/accuracy`,
+    usage: (id: string) => `/logs/discipline/${id}/usage`,
+    subjects: (id: string) => `/logs/discipline/${id}/subjects/summary`,
+    compare: {
+      accuracy: `/logs/discipline/compare/accuracy`,
+      usage: `/logs/discipline/compare/usage`,
+      subjects: `/logs/discipline/compare/subjects/summary`,
+    },
+  },
+  university: {
+    accuracy: (id: string) => `/logs/university/${id}/accuracy`,
+    usage: (id: string) => `/logs/university/${id}/usage`,
+    subjects: (id: string) => `/logs/university/${id}/subjects/summary`,
+    compare: {
+      accuracy: `/logs/university/compare/accuracy`,
+      usage: `/logs/university/compare/usage`,
+      subjects: `/logs/university/compare/subjects/summary`,
+    },
+  },
 } as const;
