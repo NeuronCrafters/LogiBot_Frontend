@@ -29,25 +29,25 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
     if (!filter.ids[0]) return;
 
     logApi
-      .get<DataPoint[] | any>(filter.type, "subjects", "individual", filter.ids[0])
+      .get<any>(filter.type, "subjects", "individual", filter.ids[0])
       .then((res) => {
+        let parsed: DataPoint[] = [];
+
+        // caso venha no formato correto (array), usa direto
         if (Array.isArray(res)) {
-          setData(res);
+          parsed = res;
         } else if (res && typeof res === "object") {
-          const parsed = Object.entries(res.subjectFrequency || res).map(
-            ([key, value]) => ({
-              category: key,
-              value: Number(value),
-            })
-          );
-          setData(parsed);
-        } else {
-          setData([]);
+          const subjectData = res.subjectFrequency || res;
+          parsed = Object.entries(subjectData).map(([category, value]) => ({
+            category,
+            value: Number(value),
+          }));
         }
+
+        setData(parsed);
       })
       .catch(console.error);
   }, [filter]);
-
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>

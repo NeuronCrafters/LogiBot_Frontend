@@ -4,7 +4,7 @@ import {
   Pie,
   Cell,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
@@ -26,22 +26,18 @@ export function CorrectWrongChart({ filter }: { filter: ChartFilterState }) {
     if (!filter.ids[0]) return;
 
     logApi
-      .get<ChartData[] | any>(filter.type, "accuracy", "individual", filter.ids[0])
+      .get<any>(filter.type, "accuracy", "individual", filter.ids[0])
       .then((res) => {
-        if (Array.isArray(res)) {
-          setData(res);
-        } else if (res && typeof res === "object") {
-          setData([
-            { name: "Acertos", value: res.totalCorrect ?? 0 },
-            { name: "Erros", value: res.totalWrong ?? 0 },
-          ]);
-        } else {
-          setData([]);
-        }
+        const formatted: ChartData[] = [
+          { name: "Acertos", value: res?.totalCorrect ?? 0 },
+          { name: "Erros", value: res?.totalWrong ?? 0 },
+        ];
+        setData(formatted);
       })
       .catch(console.error);
   }, [filter]);
 
+  const hasData = data.some((d) => d.value > 0);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
@@ -53,25 +49,36 @@ export function CorrectWrongChart({ filter }: { filter: ChartFilterState }) {
           fontFamily="montserrat"
           colorText="text-white"
         />
-        <div className="flex justify-center mt-4">
-          <ResponsiveContainer width={280} height={240}>
-            <PieChart>
-              <Pie data={data} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
-                {data.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f1f1f",
-                  border: "1px solid #ffffff22",
-                  borderRadius: "8px",
-                }}
-                labelStyle={{ color: "#ffffff" }}
-                itemStyle={{ color: "#ffffff" }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="flex justify-center mt-4 min-h-[240px]">
+          {hasData ? (
+            <ResponsiveContainer width="100%" aspect={1.5}>
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  dataKey="value"
+                  label
+                >
+                  {data.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1f1f1f",
+                    border: "1px solid #ffffff22",
+                    borderRadius: "8px",
+                  }}
+                  labelStyle={{ color: "#ffffff" }}
+                  itemStyle={{ color: "#ffffff" }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-sm text-white/60">Nenhum dado disponível para este aluno.</p>
+          )}
         </div>
       </Card>
     </motion.div>
