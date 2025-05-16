@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/use-Auth";
-import { useQuizFlow } from "@/hooks/useQuizFlow";
+import { useQuizFlow } from "@/hooks/use-QuizFlow";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Header } from "@/components/components/Header/Header";
 import { Avatar } from "@/components/components/Avatar/Avatar";

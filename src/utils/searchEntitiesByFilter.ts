@@ -3,7 +3,7 @@ import type { FilterData } from "@/@types/FormsFilterTypes";
 import type { ListItem } from "@/components/components/Forms/Lists/FormsList";
 import toast from "react-hot-toast";
 
-type Role = "admin" | "course-coordinator" | "professor";
+export type Role = "admin" | "course-coordinator" | "professor";
 
 export type EntityType =
   | "university"

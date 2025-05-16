@@ -15,7 +15,11 @@ import {
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { publicApi } from "@/services/apiClient";
+import { useDataCache } from "@/hooks/use-DataCache";
+import { useAuth } from "@/hooks/use-Auth";
+import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
+import type { FilterData } from "@/@types/FormsFilterTypes";
+import type { Role } from "@/utils/searchEntitiesByFilter";
 
 interface AcademicFilterProps {
   entityType: "student" | "class" | "course" | "university";
@@ -30,6 +34,16 @@ export function AcademicFilter({
   multiple = false,
   onSelect,
 }: AcademicFilterProps) {
+  const { get, set } = useDataCache<Option[]>();
+  const { user } = useAuth();
+  const rawRoles = Array.isArray(user?.role) ? user.role : [user?.role];
+  const role = (rawRoles.find((r): r is string =>
+    typeof r === "string" &&
+    ["admin", "course-coordinator", "professor"].includes(r)
+  ) ?? "admin") as Role;
+
+
+
   const [universities, setUniversities] = useState<Option[]>([]);
   const [courses, setCourses] = useState<Option[]>([]);
   const [classes, setClasses] = useState<Option[]>([]);
@@ -41,61 +55,94 @@ export function AcademicFilter({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
 
-  // Universidades
   useEffect(() => {
-    publicApi.getInstitutions<Option[]>()
-      .then(setUniversities)
-      .catch(console.error);
-  }, []);
+    const cacheKey = "universities";
+    const cached = get(cacheKey);
+    if (cached) {
+      setUniversities(cached);
+    } else {
+      searchEntitiesByFilter(role, { filterType: "universities" })
+        .then(({ items }) => {
+          const formatted = items.map((i) => ({ _id: i.id, name: i.name }));
+          set(cacheKey, formatted);
+          setUniversities(formatted);
+        })
+        .catch(console.error);
+    }
+  }, [role]);
 
-  // Cursos
   useEffect(() => {
     if (selectedUniversity) {
-      publicApi.getCourses<Option[]>(selectedUniversity)
-        .then(setCourses)
-        .catch(console.error);
+      const cacheKey = `courses_${selectedUniversity}`;
+      const cached = get(cacheKey);
+      if (cached) {
+        setCourses(cached);
+      } else {
+        searchEntitiesByFilter(role, {
+          filterType: "courses",
+          universityId: selectedUniversity,
+        })
+          .then(({ items }) => {
+            const formatted = items.map((i) => ({ _id: i.id, name: i.name }));
+            set(cacheKey, formatted);
+            setCourses(formatted);
+          })
+          .catch(console.error);
+      }
     } else {
       setCourses([]);
       setSelectedCourse("");
     }
-  }, [selectedUniversity]);
+  }, [selectedUniversity, role]);
 
-  // Turmas
   useEffect(() => {
     if (selectedUniversity && selectedCourse) {
-      publicApi.getClasses<Option[]>(selectedUniversity, selectedCourse)
-        .then(setClasses)
-        .catch(console.error);
+      const cacheKey = `classes_${selectedUniversity}_${selectedCourse}`;
+      const cached = get(cacheKey);
+      if (cached) {
+        setClasses(cached);
+      } else {
+        searchEntitiesByFilter(role, {
+          filterType: "classes",
+          universityId: selectedUniversity,
+          courseId: selectedCourse,
+        })
+          .then(({ items }) => {
+            const formatted = items.map((i) => ({ _id: i.id, name: i.name }));
+            set(cacheKey, formatted);
+            setClasses(formatted);
+          })
+          .catch(console.error);
+      }
     } else {
       setClasses([]);
       setSelectedClass("");
     }
-  }, [selectedCourse]);
+  }, [selectedCourse, selectedUniversity, role]);
 
-  // Carrega a entidade principal final com base no tipo
   useEffect(() => {
     async function fetchEntities() {
       try {
-        let result: Option[] = [];
+        const filterData: FilterData = {
+          filterType:
+            entityType === "student"
+              ? "students"
+              : (entityType + "s") as FilterData["filterType"],
+          universityId: selectedUniversity || undefined,
+          courseId: selectedCourse || undefined,
+          classId: selectedClass || undefined,
+        };
 
-        if (entityType === "student" && selectedUniversity && selectedCourse && selectedClass) {
-          result = await publicApi.getStudentsByClass<Option[]>(selectedUniversity, selectedCourse, selectedClass);
-        } else if (entityType === "class" && selectedUniversity && selectedCourse) {
-          result = await publicApi.getClasses<Option[]>(selectedUniversity, selectedCourse);
-        } else if (entityType === "course" && selectedUniversity) {
-          result = await publicApi.getCourses<Option[]>(selectedUniversity);
-        } else if (entityType === "university") {
-          result = await publicApi.getInstitutions<Option[]>();
-        }
-
-        setEntities(result);
+        const { items } = await searchEntitiesByFilter(role, filterData);
+        const formatted = items.map((i) => ({ _id: i.id, name: i.name }));
+        setEntities(formatted);
       } catch (error) {
         console.error("Erro ao carregar entidade:", error);
       }
     }
 
     fetchEntities();
-  }, [entityType, selectedUniversity, selectedCourse, selectedClass]);
+  }, [entityType, selectedUniversity, selectedCourse, selectedClass, role]);
 
   const toggleItem = (id: string) => {
     const updated = multiple
@@ -117,7 +164,6 @@ export function AcademicFilter({
       transition={{ duration: 0.4 }}
       className="space-y-4"
     >
-      {/* Filtros encadeados */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <select
           value={selectedUniversity}
@@ -174,7 +220,6 @@ export function AcademicFilter({
         )}
       </div>
 
-      {/* Entidade final (popover de seleção) */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
