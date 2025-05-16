@@ -11,14 +11,24 @@ import {
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { api } from "@/services/api/api";
+import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
+interface DataPoint {
+  day: string;
+  minutes: number;
+}
+
 export function UsageChart({ filter }: { filter: ChartFilterState }) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<DataPoint[]>([]);
 
   useEffect(() => {
-    api.post("/dashboard/usage-by-day", filter).then((res) => setData(res.data));
+    if (!filter.ids[0]) return;
+
+    logApi
+      .get<DataPoint[]>(filter.type, "usage", "individual", filter.ids[0])
+      .then(setData)
+      .catch(console.error);
   }, [filter]);
 
   return (
@@ -38,11 +48,7 @@ export function UsageChart({ filter }: { filter: ChartFilterState }) {
               <XAxis dataKey="day" stroke="#ffffffcc" />
               <YAxis stroke="#ffffffcc" />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f1f1f",
-                  border: "1px solid #ffffff22",
-                  borderRadius: "8px",
-                }}
+                contentStyle={{ backgroundColor: "#1f1f1f", border: "1px solid #ffffff22", borderRadius: "8px" }}
                 labelStyle={{ color: "#ffffff" }}
                 itemStyle={{ color: "#ffffff" }}
               />

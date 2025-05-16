@@ -7,19 +7,29 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { api } from "@/services/api/api";
+import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
+interface DataPoint {
+  user: string;
+  [key: string]: string | number;
+}
+
 export function CategoryParticipationChart({ filter }: { filter: ChartFilterState }) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<DataPoint[]>([]);
 
   useEffect(() => {
-    api.post("/dashboard/category-participation", filter).then(res => setData(res.data));
+    if (filter.mode !== "compare" || !filter.ids.length) return;
+
+    logApi
+      .get<DataPoint[]>(filter.type, "subjects", "compare", filter.ids)
+      .then(setData)
+      .catch(console.error);
   }, [filter]);
 
   return (
@@ -48,11 +58,15 @@ export function CategoryParticipationChart({ filter }: { filter: ChartFilterStat
                 itemStyle={{ color: "#ffffff" }}
               />
               <Legend wrapperStyle={{ color: "#ffffff" }} />
-              <Bar dataKey="Variáveis" fill="#6366f1" />
-              <Bar dataKey="Tipos de Dados" fill="#8b5cf6" />
-              <Bar dataKey="Laços" fill="#ec4899" />
-              <Bar dataKey="Verificações" fill="#f59e0b" />
-              <Bar dataKey="Funções" fill="#10b981" />
+              {Object.keys(data[0] || {})
+                .filter((key) => key !== "user")
+                .map((key, i) => (
+                  <Bar
+                    key={key}
+                    dataKey={key}
+                    fill={["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"][i % 5]}
+                  />
+                ))}
             </BarChart>
           </ResponsiveContainer>
         </div>

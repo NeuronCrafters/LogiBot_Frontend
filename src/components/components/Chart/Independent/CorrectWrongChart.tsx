@@ -9,16 +9,26 @@ import {
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { api } from "@/services/api/api";
+import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
 const COLORS = ["#10b981", "#ef4444"];
 
+interface ChartData {
+  name: string;
+  value: number;
+}
+
 export function CorrectWrongChart({ filter }: { filter: ChartFilterState }) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<ChartData[]>([]);
 
   useEffect(() => {
-    api.post("/dashboard/correct-vs-wrong", filter).then((res) => setData(res.data));
+    if (!filter.ids[0]) return;
+
+    logApi
+      .get<ChartData[]>(filter.type, "accuracy", "individual", filter.ids[0])
+      .then(setData)
+      .catch(console.error);
   }, [filter]);
 
   return (
@@ -34,14 +44,7 @@ export function CorrectWrongChart({ filter }: { filter: ChartFilterState }) {
         <div className="flex justify-center mt-4">
           <ResponsiveContainer width={280} height={240}>
             <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                dataKey="value"
-                label
-              >
+              <Pie data={data} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
                 {data.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}

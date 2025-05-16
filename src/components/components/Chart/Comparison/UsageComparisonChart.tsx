@@ -7,19 +7,29 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { api } from "@/services/api/api";
+import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
+interface DataPoint {
+  dia: string;
+  [key: string]: string | number;
+}
+
 export function UsageComparisonChart({ filter }: { filter: ChartFilterState }) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<DataPoint[]>([]);
 
   useEffect(() => {
-    api.post("/dashboard/usage-comparison", filter).then((res) => setData(res.data));
+    if (filter.mode !== "compare" || !filter.ids.length) return;
+
+    logApi
+      .get<DataPoint[]>(filter.type, "usage", "compare", filter.ids)
+      .then(setData)
+      .catch(console.error);
   }, [filter]);
 
   return (

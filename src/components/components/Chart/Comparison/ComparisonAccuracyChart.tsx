@@ -10,7 +10,7 @@ import {
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { Typograph } from "@/components/components/Typograph/Typograph";
-import { publicApi } from "@/services/apiClient";
+import { publicApi, logApi } from "@/services/apiClient";
 import { ChartFilterState } from "@/@types/ChartsType";
 
 interface ChartProps {
@@ -39,28 +39,21 @@ export function ComparisonAccuracyChart({ filter }: ChartProps) {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const accuracy = await logApi.get<any[]>("student", "accuracy", "compare", filter.ids);
 
-        const promises = filter.ids.map(async (id) => {
-          // 1. Buscar nome real do estudante
-          const studentRes = await publicApi.getStudentById<{ name: string }>(id);
+        const students = await Promise.all(
+          filter.ids.map((id) => publicApi.getStudentById<{ name: string }>(id))
+        );
 
-          // 2. Simular dados de análise (até você ter a rota real)
-          const analysisRes = {
-            correctAnswers: Math.floor(Math.random() * 10),
-            wrongAnswers: Math.floor(Math.random() * 10),
-          };
+        const chartData = accuracy.map((entry, index) => ({
+          name: students[index].name,
+          correct: entry.correctAnswers,
+          incorrect: entry.wrongAnswers,
+        }));
 
-          return {
-            name: studentRes.name,
-            correct: analysisRes.correctAnswers,
-            incorrect: analysisRes.wrongAnswers,
-          };
-        });
-
-        const results = await Promise.all(promises);
-        setData(results);
+        setData(chartData);
       } catch (error) {
-        console.error("Erro ao buscar dados de comparação:", error);
+        console.error("Erro ao buscar dados:", error);
       } finally {
         setLoading(false);
       }

@@ -78,7 +78,6 @@ export function Chart() {
                 <ComparisonAccuracyChart filter={filter} />
               </>
             )}
-
             <CategoryParticipationChart filter={filter} />
           </>
         )}

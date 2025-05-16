@@ -12,16 +12,26 @@ import {
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { api } from "@/services/api/api";
+import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
 const barColors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
+interface DataPoint {
+  category: string;
+  value: number;
+}
+
 export function CategoryChart({ filter }: { filter: ChartFilterState }) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<DataPoint[]>([]);
 
   useEffect(() => {
-    api.post("/dashboard/category-performance", filter).then((res) => setData(res.data));
+    if (!filter.ids[0]) return;
+
+    logApi
+      .get<DataPoint[]>(filter.type, "subjects", "individual", filter.ids[0])
+      .then(setData)
+      .catch(console.error);
   }, [filter]);
 
   return (
