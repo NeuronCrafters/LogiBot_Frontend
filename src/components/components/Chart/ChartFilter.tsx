@@ -12,17 +12,23 @@ import { motion } from "framer-motion";
 import type { ChartFilterState, ChartMode } from "@/@types/ChartsType";
 
 interface Props {
-  onChange: (type: ChartFilterState["type"], ids: string[], mode: ChartMode) => void;
+  onChange: (
+    type: ChartFilterState["type"],
+    ids: string[],
+    mode: ChartMode
+  ) => void;
 }
 
 export function ChartFilter({ onChange }: Props) {
-  const [entityType, setEntityType] = useState<ChartFilterState["type"]>("student");
+  const [entityType, setEntityType] =
+    useState<ChartFilterState["type"]>("student");
   const [mode, setMode] = useState<ChartMode>("single");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  // Dispara a alteração de filtro para o pai
   useEffect(() => {
     onChange(entityType, selectedIds, mode);
-  }, [entityType, selectedIds, mode]);
+  }, [entityType, selectedIds, mode, onChange]);
 
   return (
     <motion.div
@@ -33,10 +39,16 @@ export function ChartFilter({ onChange }: Props) {
       transition={{ duration: 0.4 }}
       className="p-4 rounded-xl bg-[#1f1f1f] border border-white/10 shadow-lg space-y-6"
     >
+      {/* Seletor de tipo e modo */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label className="text-white text-sm">Tipo de Entidade</Label>
-          <Select value={entityType} onValueChange={(v) => setEntityType(v as ChartFilterState["type"])}>
+          <Select
+            value={entityType}
+            onValueChange={(v) =>
+              setEntityType(v as ChartFilterState["type"])
+            }
+          >
             <SelectTrigger className="w-full bg-[#141414] text-white border border-white/10 rounded-md h-11">
               <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>
@@ -63,6 +75,7 @@ export function ChartFilter({ onChange }: Props) {
         </div>
       </div>
 
+      {/* Filtros contextuais e encadeados */}
       <AcademicFilter
         entityType={entityType}
         multiple={mode === "compare"}
