@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { api } from "@/services/api/api";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { publicApi } from "@/services/apiClient";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -13,15 +19,41 @@ interface AcademicFilterProps {
   onSelect: (ids: string[]) => void;
 }
 
-export function AcademicFilter({ entityType, multiple = false, onSelect }: AcademicFilterProps) {
+export function AcademicFilter({
+  entityType,
+  multiple = false,
+  onSelect,
+}: AcademicFilterProps) {
   const [items, setItems] = useState<{ id: string; name: string }[]>([]);
   const [open, setOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
-    api.get(`/public/${entityType}s`).then((res) => {
-      setItems(res.data);
-    });
+    let fetchData = async () => {
+      try {
+        let response: { id: string; name: string }[] = [];
+
+        if (entityType === "student") {
+          const students = await publicApi.getStudentsByCourse("1", "1") as { id: string; name: string }[];
+          response = students;
+        } else if (entityType === "class") {
+          const classes = await publicApi.getClasses("1", "1") as { id: string; name: string }[];
+          response = classes;
+        } else if (entityType === "course") {
+          const courses = await publicApi.getCourses("1") as { id: string; name: string }[];
+          response = courses;
+        } else if (entityType === "university") {
+          const universities = await publicApi.getInstitutions() as { id: string; name: string }[];
+          response = universities;
+        }
+
+        setItems(response);
+      } catch (err) {
+        console.error("Erro ao buscar entidades públicas:", err);
+      }
+    };
+
+    fetchData();
   }, [entityType]);
 
   const toggleItem = (id: string) => {
@@ -48,7 +80,7 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between bg-[#141414] text-white border border-white/10"
+            className="w-full h-11 justify-between bg-[#141414] text-white border border-white/10 rounded-md"
           >
             {selectedIds.length > 0
               ? `${selectedIds.length} selecionado(s)`
@@ -57,10 +89,15 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-full p-0 bg-[#1f1f1f] border border-white/10">
+        <PopoverContent className="w-full p-0 bg-[#1f1f1f] border border-white/10 rounded-md">
           <Command>
-            <CommandInput placeholder="Buscar..." className="text-white" />
-            <CommandEmpty className="text-sm text-white/60 px-2 py-4">Nenhum encontrado.</CommandEmpty>
+            <CommandInput
+              placeholder="Buscar..."
+              className="text-white placeholder:text-white/40"
+            />
+            <CommandEmpty className="text-sm text-white/60 px-2 py-4">
+              Nenhum encontrado.
+            </CommandEmpty>
             <CommandGroup className="max-h-[300px] overflow-y-auto">
               {items.map((item) => (
                 <CommandItem
