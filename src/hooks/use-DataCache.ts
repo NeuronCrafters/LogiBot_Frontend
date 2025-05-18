@@ -1,9 +1,14 @@
 import { useRef } from "react";
 
 type CacheStore<T> = Record<string, T>;
+type CacheTimestamps = Record<string, number>;
 
+/**
+ * Hook de cache com memória, localStorage e TTL (usado com useCachedFetch e useChartData)
+ */
 export function useDataCache<T>() {
   const memoryCache = useRef<CacheStore<T>>({});
+  const memoryTimestamps = useRef<CacheTimestamps>({});
 
   function getFromMemory(key: string): T | null {
     return memoryCache.current[key] ?? null;
@@ -11,6 +16,7 @@ export function useDataCache<T>() {
 
   function setToMemory(key: string, value: T) {
     memoryCache.current[key] = value;
+    memoryTimestamps.current[key] = Date.now();
   }
 
   function getFromLocalStorage(key: string): T | null {
@@ -26,22 +32,31 @@ export function useDataCache<T>() {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
+      // Silencioso
     }
   }
 
-  function get(key: string, useLocal = false): T | null {
+  function get(key: string, useLocal: boolean = false): T | null {
     if (useLocal) {
       return getFromLocalStorage(key) ?? getFromMemory(key);
     }
     return getFromMemory(key);
   }
 
-  function set(key: string, value: T, persistLocal = false) {
+  function set(key: string, value: T, persistLocal: boolean = false) {
     setToMemory(key, value);
     if (persistLocal) {
       setToLocalStorage(key, value);
     }
   }
 
-  return { get, set };
+  function getTimestamp(key: string): number | undefined {
+    return memoryTimestamps.current[key];
+  }
+
+  return {
+    get,
+    set,
+    getTimestamp,
+  };
 }

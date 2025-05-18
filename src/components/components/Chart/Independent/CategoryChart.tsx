@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -12,77 +11,112 @@ import {
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { logApi } from "@/services/apiClient";
-import type { ChartFilterState } from "@/@types/ChartsType";
+import { useChartData } from "@/hooks/use-ChartData";
+import type { ChartFilterState, CategoryData } from "@/@types/ChartsType";
 
 const barColors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
-interface DataPoint {
-  category: string;
-  value: number;
-}
-
 export function CategoryChart({ filter }: { filter: ChartFilterState }) {
-  const [data, setData] = useState<DataPoint[]>([]);
+  const isValidFilter = !!filter.ids[0] && filter.ids[0].trim() !== "";
 
-  useEffect(() => {
-    if (!filter.ids[0]) return;
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+  } = useChartData<any>(
+    filter.type,
+    "subjects",
+    "individual",
+    filter.ids[0] || "",
+    !isValidFilter
+  );
 
-    logApi
-      .get<any>(filter.type, "subjects", "individual", filter.ids[0])
-      .then((res) => {
-        let parsed: DataPoint[] = [];
-
-        // caso venha no formato correto (array), usa direto
-        if (Array.isArray(res)) {
-          parsed = res;
-        } else if (res && typeof res === "object") {
-          const subjectData = res.subjectFrequency || res;
-          parsed = Object.entries(subjectData).map(([category, value]) => ({
-            category,
-            value: Number(value),
-          }));
-        }
-
-        setData(parsed);
-      })
-      .catch(console.error);
-  }, [filter]);
+  const processedData: CategoryData[] = !data
+    ? []
+    : Array.isArray(data)
+      ? data
+      : Object.entries(data.subjectFrequency || data).map(([category, value]) => ({
+        category,
+        value: Number(value),
+      }));
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-      <Card className="p-4 bg-[#1f1f1f] border border-white/10 rounded-xl shadow-lg">
-        <Typograph
-          text="Participação por Categoria"
-          variant="text6"
-          weight="semibold"
-          fontFamily="montserrat"
-          colorText="text-white"
-        />
-        <div className="overflow-x-auto mt-4">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff1a" />
-              <XAxis dataKey="category" stroke="#ffffffcc" />
-              <YAxis stroke="#ffffffcc" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f1f1f",
-                  border: "1px solid #ffffff22",
-                  borderRadius: "8px",
-                }}
-                labelStyle={{ color: "#ffffff" }}
-                itemStyle={{ color: "#ffffff" }}
-              />
-              <Bar dataKey="value">
-                {data.map((_, i) => (
-                  <Cell key={i} fill={barColors[i % barColors.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+    <Card className="p-4 bg-[#141414] border-white/10 w-full mb-6">
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Typograph
+            text="Distribuição por Assunto"
+            variant="text6"
+            weight="semibold"
+            fontFamily="montserrat"
+            colorText="text-white"
+          />
+          {import.meta.env.DEV && (
+            <span className="text-xs text-white/40">
+              Cache TTL de 5 min
+            </span>
+          )}
         </div>
-      </Card>
-    </motion.div>
+
+        {!isValidFilter ? (
+          <div className="flex items-center justify-center h-64 text-white/70">
+            Selecione uma entidade para visualizar dados
+          </div>
+        ) : isLoading ? (
+          <div className="flex items-center justify-center h-64 text-white/70">
+            Carregando dados...
+          </div>
+        ) : isError ? (
+          <div className="flex items-center justify-center h-64 text-red-400">
+            {error}
+          </div>
+        ) : processedData.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="h-64 w-full"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={processedData}
+                margin={{ top: 5, right: 20, left: 0, bottom: 25 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                <XAxis
+                  dataKey="category"
+                  stroke="#999"
+                  angle={-45}
+                  textAnchor="end"
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis stroke="#999" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1f1f1f",
+                    borderColor: "#333",
+                  }}
+                  labelStyle={{ color: "#fff" }}
+                  itemStyle={{ color: "#fff" }}
+                />
+                <Bar dataKey="value" name="Quantidade">
+                  {processedData.map((_, i) => (
+                    <Cell
+                      key={`cell-${i}`}
+                      fill={barColors[i % barColors.length]}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </motion.div>
+        ) : (
+          <div className="flex items-center justify-center h-64 text-white/70">
+            Nenhum dado disponível para este assunto.
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }

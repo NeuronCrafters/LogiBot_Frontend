@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -12,28 +11,42 @@ import {
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { logApi } from "@/services/apiClient";
-import type { ChartFilterState } from "@/@types/ChartsType";
-
-interface DataPoint {
-  user: string;
-  [key: string]: string | number;
-}
+import { useChartData } from "@/hooks/use-ChartData";
+import type { ChartFilterState, CategoryComparisonData } from "@/@types/ChartsType";
 
 export function CategoryParticipationChart({ filter }: { filter: ChartFilterState }) {
-  const [data, setData] = useState<DataPoint[]>([]);
+  const hasEnoughIds = filter.ids.length > 1;
 
-  useEffect(() => {
-    if (filter.mode !== "compare" || !filter.ids.length) return;
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    hasValidIds,
+  } = useChartData<CategoryComparisonData[]>(
+    filter.type,
+    "subjects",
+    "compare",
+    filter.ids,
+    !hasEnoughIds
+  );
 
-    logApi
-      .get<DataPoint[]>(filter.type, "subjects", "compare", filter.ids)
-      .then(setData)
-      .catch(console.error);
-  }, [filter]);
+  const processedData = Array.isArray(data) ? data : [];
+
+  const categories =
+    processedData.length > 0
+      ? Object.keys(processedData[0]).filter((key) => key !== "user")
+      : [];
+
+  const categoryColors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.6 }}
+      className="w-full"
+    >
       <Card className="p-4 bg-[#1f1f1f] border border-white/10 rounded-xl shadow-lg">
         <Typograph
           text="Participação por Categoria"
@@ -42,34 +55,52 @@ export function CategoryParticipationChart({ filter }: { filter: ChartFilterStat
           fontFamily="montserrat"
           colorText="text-white"
         />
-        <div className="overflow-x-auto mt-4">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff1a" />
-              <XAxis dataKey="user" stroke="#ffffffcc" />
-              <YAxis stroke="#ffffffcc" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f1f1f",
-                  border: "1px solid #ffffff22",
-                  borderRadius: "8px",
-                }}
-                labelStyle={{ color: "#ffffff" }}
-                itemStyle={{ color: "#ffffff" }}
-              />
-              <Legend wrapperStyle={{ color: "#ffffff" }} />
-              {Object.keys(data[0] || {})
-                .filter((key) => key !== "user")
-                .map((key, i) => (
+
+        {!hasValidIds ? (
+          <div className="flex items-center justify-center h-64 text-white/70">
+            Selecione mais entidades para visualizar a comparação.
+          </div>
+        ) : isLoading ? (
+          <div className="flex items-center justify-center h-64 text-white/70">
+            Carregando dados de comparação...
+          </div>
+        ) : isError ? (
+          <div className="flex items-center justify-center h-64 text-red-400">
+            {error}
+          </div>
+        ) : processedData.length === 0 ? (
+          <div className="flex items-center justify-center h-64 text-white/70">
+            Nenhum dado de participação encontrado.
+          </div>
+        ) : (
+          <div className="overflow-x-auto mt-4">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={processedData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff1a" />
+                <XAxis dataKey="user" stroke="#ffffffcc" />
+                <YAxis stroke="#ffffffcc" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1f1f1f",
+                    border: "1px solid #ffffff22",
+                    borderRadius: "8px",
+                  }}
+                  labelStyle={{ color: "#fff" }}
+                  itemStyle={{ color: "#fff" }}
+                />
+                <Legend wrapperStyle={{ color: "#ffffff" }} />
+                {categories.map((category, i) => (
                   <Bar
-                    key={key}
-                    dataKey={key}
-                    fill={["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"][i % 5]}
+                    key={category}
+                    dataKey={category}
+                    name={category}
+                    fill={categoryColors[i % categoryColors.length]}
                   />
                 ))}
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </Card>
     </motion.div>
   );

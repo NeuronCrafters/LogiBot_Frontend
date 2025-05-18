@@ -1,7 +1,106 @@
-export type ChartMode = "single" | "compare";
+import { LogEntityType, LogMetricType, LogModeType } from "@/services/api/api_routes";
 
+// Estado do filtro de gráficos
 export interface ChartFilterState {
-  type: "student" | "class" | "course" | "university";
+  type: LogEntityType;
   ids: string[];
-  mode: ChartMode;
+  mode?: LogModeType;
+}
+
+// Dados para gráfico de categoria
+export interface CategoryData {
+  category: string;
+  value: number;
+}
+
+// Dados para gráfico de acertos/erros
+export interface AccuracyData {
+  name: string;
+  value: number;
+}
+
+// Dados para gráfico de uso
+export interface UsageData {
+  day: string;
+  minutes: number;
+}
+
+// Dados para comparação de categorias
+export interface CategoryComparisonData {
+  user: string;
+  [category: string]: string | number;
+}
+
+// Dados de comparação de acurácia
+export interface AccuracyComparisonData {
+  name: string;
+  correct: number;
+  incorrect: number;
+}
+
+// Dados de comparação de uso
+export interface UsageComparisonData {
+  dia: string;
+  [user: string]: string | number;
+}
+
+// Tipo para resultado da busca de entidades
+export interface EntitySearchResult {
+  items: Array<{
+    id: string;
+    name: string;
+    [key: string]: any;
+  }>;
+  total: number;
+}
+
+// Tipos para filtros do formulário
+export interface FilterData {
+  filterType: "students" | "classes" | "courses" | "universities";
+  universityId?: string;
+  courseId?: string;
+  classId?: string;
+  searchTerm?: string;
+}
+
+// Nova interface para a resposta da API de uso
+export interface UsageApiResponse {
+  totalUsageTime: number;
+  sessionCount: number;
+  sessionDetails: Array<{
+    sessionStart: string;
+    sessionEnd: string;
+    sessionDuration: number;
+  }>;
+}
+
+// Interface para a resposta da API de acurácia
+export interface AccuracyApiResponse {
+  totalCorrect: number;
+  totalWrong: number;
+  accuracy: number; // Porcentagem de acerto (0-100)
+}
+
+// Interface para a resposta da API de categorias/assuntos
+export interface SubjectsApiResponse {
+  subjectFrequency: Record<string, number>;
+}
+
+// Interfaces para os formatos de resposta comparativa
+export interface CompareAccuracyApiResponse {
+  entityId: string;
+  name: string;
+  totalCorrect: number;
+  totalWrong: number;
+  accuracy: number;
+}
+
+export interface CompareUsageApiResponse {
+  dia: string;
+  [entityId: string]: string | number;
+}
+
+export interface CompareSubjectsApiResponse {
+  user: string;
+  [category: string]: string | number;
 }
