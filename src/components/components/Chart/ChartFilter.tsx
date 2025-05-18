@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { AcademicFilter } from "./AcademicFilter";
 import {
   Select,
@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import type { ChartFilterState } from "@/@types/ChartsType";
 import { LogEntityType, LogModeType } from "@/services/api/api_routes";
-import { debounce } from "@/utils/debounce";
 
 interface ChartFilterProps {
   onChange: (
@@ -22,90 +21,49 @@ interface ChartFilterProps {
 }
 
 export function ChartFilter({ onChange }: ChartFilterProps) {
-  const [entityType, setEntityType] =
-    useState<LogEntityType>("student");
+  const [entityType, setEntityType] = useState<LogEntityType>("student");
   const [mode, setMode] = useState<LogModeType>("individual");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Flag para evitar chamadas durante a montagem inicial
-  const initialMountRef = useRef(true);
-  const isFilterChangingRef = useRef(false);
+  // Movemos a função notifyParent para um useCallback
+  // para garantir que ela usa os valores mais recentes
+  // de entityType e mode a cada chamada
+  const notifyParent = useCallback((
+    type: LogEntityType,
+    ids: string[],
+    viewMode: LogModeType
+  ) => {
+    // Garantimos que os IDs são válidos antes de chamar o callback
+    const validIds = ids.filter((id) => id && id.trim() !== "");
+    console.log("ChartFilter - notifyParent chamado:", { type, validIds, viewMode });
+    onChange(type, validIds, viewMode);
+  }, [onChange]); // Dependência apenas do onChange, que não deve mudar
 
-  // Versão com debounce da função de callback
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedOnChange = useCallback(
-    debounce((type: LogEntityType, ids: string[], mode: LogModeType) => {
-      if (isFilterChangingRef.current) return;
-
-      onChange(type, ids, mode);
-      isFilterChangingRef.current = false;
-    }, 250),
-    [onChange]
-  );
-
-  // Disparar alterações do filtro para o pai
-  useEffect(() => {
-    // Pular a execução na montagem inicial
-    if (initialMountRef.current) {
-      initialMountRef.current = false;
-      return;
-    }
-
-    // Verificar se temos IDs válidos antes de disparar a alteração
-    const hasValidIds = selectedIds.length > 0 && selectedIds.every(id => id && id.trim() !== '');
-
-    // Se tivermos IDs válidos, disparar a alteração com debounce
-    if (hasValidIds) {
-      debouncedOnChange(entityType, selectedIds, mode);
-    } else {
-      // Se não tivermos IDs válidos, disparar a alteração imediatamente
-      // com um array vazio para limpar quaisquer gráficos existentes
-      onChange(entityType, [], mode);
-    }
-  }, [entityType, selectedIds, mode, onChange, debouncedOnChange]);
-
-  // Verificar se o componente está desmontado antes de atualizar estados
-  const isMounted = useRef(true);
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  // Handler para mudança de tipo de entidade
   const handleEntityTypeChange = useCallback((value: string) => {
-    if (!isMounted.current) return;
-
-    isFilterChangingRef.current = true;
     const newType = value as LogEntityType;
     setEntityType(newType);
-
-    // Limpar a seleção quando mudamos o tipo
     setSelectedIds([]);
-  }, []);
+    // Usamos os valores atuais dos estados diretamente aqui
+    notifyParent(newType, [], mode);
+  }, [mode, notifyParent]);
 
-  // Handler para mudança de modo de visualização
   const handleModeChange = useCallback((value: string) => {
-    if (!isMounted.current) return;
-
-    isFilterChangingRef.current = true;
     const newMode = value as LogModeType;
     setMode(newMode);
-
-    // Limpar a seleção quando mudamos o modo
-    // para evitar problemas de compatibilidade
     setSelectedIds([]);
-  }, []);
+    // Usamos os valores atuais dos estados diretamente aqui
+    notifyParent(entityType, [], newMode);
+  }, [entityType, notifyParent]);
 
-  // Handler para seleção de entidades do AcademicFilter
   const handleEntitySelection = useCallback((ids: string[]) => {
-    if (!isMounted.current) return;
+    // Validamos os IDs recebidos
+    const validIds = ids.filter((id) => id && id.trim() !== "");
+    console.log("ChartFilter - handleEntitySelection:", validIds);
 
-    // Verificar se a seleção realmente mudou
-    if (JSON.stringify(ids) !== JSON.stringify(selectedIds)) {
-      setSelectedIds(ids);
-    }
-  }, [selectedIds]);
+    setSelectedIds(validIds);
+    // Chamamos notifyParent com os valores atuais
+    notifyParent(entityType, validIds, mode);
+  }, [entityType, mode, notifyParent]);
 
   return (
     <motion.div
@@ -116,16 +74,12 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       transition={{ duration: 0.4 }}
       className="space-y-6 mb-8"
     >
-      {/* Seletor de tipo e modo */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="entity-type" className="text-white">
             Tipo de Entidade
           </Label>
-          <Select
-            value={entityType}
-            onValueChange={handleEntityTypeChange}
-          >
+          <Select value={entityType} onValueChange={handleEntityTypeChange}>
             <SelectTrigger className="bg-[#141414] text-white border-white/10">
               <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>
@@ -154,21 +108,17 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
         </div>
       </div>
 
-      {/* Filtros contextuais e encadeados */}
       <AcademicFilter
         entityType={entityType}
         multiple={mode === "compare"}
         onSelect={handleEntitySelection}
       />
 
-      {/* Indicador de modo selecionado */}
       {mode === "compare" && (
         <div className="text-sm text-yellow-400 mt-1">
-          {selectedIds.length < 2 ? (
-            "Selecione pelo menos duas entidades para comparação"
-          ) : (
-            `${selectedIds.length} entidades selecionadas para comparação`
-          )}
+          {selectedIds.length < 2
+            ? "Selecione pelo menos duas entidades para comparação"
+            : `${selectedIds.length} entidades selecionadas para comparação`}
         </div>
       )}
     </motion.div>

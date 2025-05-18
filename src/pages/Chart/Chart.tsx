@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, Suspense, lazy } from "react";
+import { useState, useCallback, useRef, Suspense, lazy, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { Avatar } from "@/components/components/Avatar/Avatar";
@@ -7,43 +7,66 @@ import { Typograph } from "@/components/components/Typograph/Typograph";
 import { ChartFilter } from "@/components/components/Chart/ChartFilter";
 import type { ChartFilterState } from "@/@types/ChartsType";
 import { LogEntityType, LogModeType } from "@/services/api/api_routes";
+import React from "react";
 
+// Componentes carregados de forma lazy
 const UsageChart = lazy(() =>
-  import("@/components/components/Chart/Independent/UsageChart").then((mod) => ({
-    default: mod.UsageChart,
-  }))
+  import("@/components/components/Chart/Independent/UsageChart").then(mod => ({ default: mod.UsageChart }))
 );
-
 const CorrectWrongChart = lazy(() =>
-  import("@/components/components/Chart/Independent/CorrectWrongChart").then((mod) => ({
-    default: mod.CorrectWrongChart,
-  }))
+  import("@/components/components/Chart/Independent/CorrectWrongChart").then(mod => ({ default: mod.CorrectWrongChart }))
 );
-
 const CategoryChart = lazy(() =>
-  import("@/components/components/Chart/Independent/CategoryChart").then((mod) => ({
-    default: mod.CategoryChart,
-  }))
+  import("@/components/components/Chart/Independent/CategoryChart").then(mod => ({ default: mod.CategoryChart }))
 );
-
 const ComparisonAccuracyChart = lazy(() =>
-  import("@/components/components/Chart/Comparison/ComparisonAccuracyChart").then((mod) => ({
-    default: mod.ComparisonAccuracyChart,
-  }))
+  import("@/components/components/Chart/Comparison/ComparisonAccuracyChart").then(mod => ({ default: mod.ComparisonAccuracyChart }))
 );
-
 const CategoryParticipationChart = lazy(() =>
-  import("@/components/components/Chart/Comparison/CategoryParticipationChart").then((mod) => ({
-    default: mod.CategoryParticipationChart,
-  }))
+  import("@/components/components/Chart/Comparison/CategoryParticipationChart").then(mod => ({ default: mod.CategoryParticipationChart }))
 );
-
 const UsageComparisonChart = lazy(() =>
-  import("@/components/components/Chart/Comparison/UsageComparisonChart").then((mod) => ({
-    default: mod.UsageComparisonChart,
-  }))
+  import("@/components/components/Chart/Comparison/UsageComparisonChart").then(mod => ({ default: mod.UsageComparisonChart }))
 );
 
+// Tipos para o ErrorBoundary
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+// Componente de tratamento de erros para isolar problemas em componentes individuais
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    console.error("Erro em componente do gráfico:", error, errorInfo);
+  }
+
+  render(): React.ReactNode {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-white/80">
+          <p className="font-medium">Erro ao renderizar o componente</p>
+          <p className="text-sm mt-2">{this.state.error?.message || "Erro desconhecido"}</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 export function Chart() {
   const { user } = useAuth();
@@ -53,47 +76,50 @@ export function Chart() {
     ids: [],
     mode: "individual",
   });
-  const [loading, setLoading] = useState(false);
-  const filterUpdateInProgressRef = useRef(false);
+
   const isMounted = useRef(true);
 
+  // Efeito para limpar a referência de montagem
   useEffect(() => {
     return () => {
       isMounted.current = false;
     };
   }, []);
 
-  const handleFilterChange = useCallback((
-    type: LogEntityType,
-    ids: string[],
-    mode: LogModeType
-  ) => {
-    if (filterUpdateInProgressRef.current || !isMounted.current) return;
+  const handleFilterChange = useCallback(
+    (type: LogEntityType, ids: string[], mode: LogModeType) => {
+      if (!isMounted.current) return;
 
-    filterUpdateInProgressRef.current = true;
-    setLoading(true);
+      // Validação robusta para garantir que ids seja sempre um array, mesmo que vazio
+      const validIds = Array.isArray(ids) ? ids.filter(id => typeof id === 'string' && id.trim() !== '') : [];
 
-    setTimeout(() => {
-      if (isMounted.current) {
-        setFilter({ type, ids, mode });
+      setFilter({
+        type: type || 'student',
+        ids: validIds,
+        mode: mode || 'individual'
+      });
+    },
+    []
+  );
 
-        setTimeout(() => {
-          if (isMounted.current) {
-            setLoading(false);
-            filterUpdateInProgressRef.current = false;
-          }
-        }, 300);
-      } else {
-        filterUpdateInProgressRef.current = false;
-      }
-    }, 50);
-  }, []);
+  // Cálculo preciso e explícito de isCompareMode e hasSelection
+  // para evitar qualquer falha na detecção de seleções válidas
+  const validIds = Array.isArray(filter.ids) ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') : [];
+  const isCompareMode = filter.mode === "compare" && validIds.length > 1;
+  const hasSelection = validIds.length > 0;
 
-  const isCompareMode = filter.mode === "compare" && filter.ids.length > 1;
-  const hasSelection = filter.ids.length > 0;
+  // Componente de fallback personalizado
+  const ChartLoadingFallback = () => (
+    <div className="flex flex-col items-center justify-center h-64 bg-[#1f1f1f] rounded-xl border border-white/10 p-4">
+      <div className="animate-pulse w-12 h-12 rounded-full bg-indigo-600/30 mb-4"></div>
+      <p className="text-white/70 text-center">Carregando gráficos...</p>
+      <p className="text-white/50 text-center text-sm mt-2">Por favor, aguarde enquanto processamos os dados</p>
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
+      {/* Header fixo */}
       <div className="absolute bg-[#141414] w-full flex items-center gap-4 border-b border-neutral-800 px-8 py-4 z-10">
         <Typograph
           text="Dashboard"
@@ -145,23 +171,35 @@ export function Chart() {
             </p>
           </div>
         ) : (
-          <div className={`transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
-            <Suspense fallback={<div className="text-white/70 text-center mt-4">Carregando gráficos...</div>}>
+          <div className="transition-opacity duration-300 opacity-100">
+            <Suspense fallback={<ChartLoadingFallback />}>
               {filter.mode === "individual" && (
                 <div className="space-y-6 mt-6">
-                  <UsageChart filter={filter} />
-                  <CorrectWrongChart filter={filter} />
-                  <CategoryChart filter={filter} />
+                  <ErrorBoundary>
+                    <UsageChart filter={{ ...filter, ids: validIds }} />
+                  </ErrorBoundary>
+                  <ErrorBoundary>
+                    <CorrectWrongChart filter={{ ...filter, ids: validIds }} />
+                  </ErrorBoundary>
+                  <ErrorBoundary>
+                    <CategoryChart filter={{ ...filter, ids: validIds }} />
+                  </ErrorBoundary>
                 </div>
               )}
 
               {filter.mode === "compare" && (
                 <div className="space-y-6 mt-6">
-                  {filter.ids.length > 1 ? (
+                  {validIds.length > 1 ? (
                     <>
-                      <ComparisonAccuracyChart filter={filter} />
-                      <CategoryParticipationChart filter={filter} />
-                      <UsageComparisonChart filter={filter} />
+                      <ErrorBoundary>
+                        <ComparisonAccuracyChart filter={{ ...filter, ids: validIds }} />
+                      </ErrorBoundary>
+                      <ErrorBoundary>
+                        <CategoryParticipationChart filter={{ ...filter, ids: validIds }} />
+                      </ErrorBoundary>
+                      <ErrorBoundary>
+                        <UsageComparisonChart filter={{ ...filter, ids: validIds }} />
+                      </ErrorBoundary>
                     </>
                   ) : (
                     <div className="flex items-center justify-center h-64 bg-[#1f1f1f] rounded-xl border border-white/10">

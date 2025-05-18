@@ -4,21 +4,31 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
-// Configurações de cache
-const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutos em milissegundos
+// Tempo padrão de expiração do cache (5 minutos)
+const CACHE_EXPIRATION = 5 * 60 * 1000;
 
-// Armazenamento de cache
+// Armazenamento interno do cache
 const dataCache: Record<string, CacheEntry<any>> = {};
 
 /**
- * Gera uma chave de cache com base nos parâmetros passados
+ * Gera a chave do cache com base nos parâmetros
  */
 function generateCacheKey(type: string, metric: string, mode: string, id: string): string {
   return `${type}:${metric}:${mode}:${id}`;
 }
 
 /**
- * Armazena dados no cache
+ * Verifica se um dado é vazio (usado para não cachear respostas vazias)
+ */
+function isEmptyData(data: any): boolean {
+  if (data == null) return true;
+  if (Array.isArray(data)) return data.length === 0;
+  if (typeof data === "object") return Object.keys(data).length === 0;
+  return false;
+}
+
+/**
+ * Armazena os dados no cache
  */
 export function cacheData<T>(
   type: string,
@@ -30,41 +40,50 @@ export function cacheData<T>(
 ): void {
   const key = generateCacheKey(type, metric, mode, id);
   const now = Date.now();
-  const expiration = customExpiration || CACHE_EXPIRATION;
+  const expiration = customExpiration ?? CACHE_EXPIRATION;
+
+  // Não cacheia se os dados estiverem vazios
+  if (isEmptyData(data)) {
+    if (import.meta.env.DEV) {
+      console.log(`[Cache] Dados vazios detectados para ${key}. Ignorando cache.`);
+    }
+    return;
+  }
 
   dataCache[key] = {
     data,
     timestamp: now,
-    expiresAt: now + expiration
+    expiresAt: now + expiration,
   };
 
-  // Log de desenvolvimento
   if (import.meta.env.DEV) {
     console.log(`[Cache] Dados armazenados para ${key}`);
   }
 }
 
 /**
- * Obtém dados do cache se disponíveis e válidos
+ * Retorna os dados do cache se ainda forem válidos
  */
-export function getCachedData<T>(type: string, metric: string, mode: string, id: string): T | null {
+export function getCachedData<T>(
+  type: string,
+  metric: string,
+  mode: string,
+  id: string
+): T | null {
   const key = generateCacheKey(type, metric, mode, id);
   const entry = dataCache[key];
 
-  // Se não existe entrada ou expirou, retorna null
-  if (!entry || Date.now() > entry.expiresAt) {
-    if (entry) {
-      // Log de cache expirado
-      if (import.meta.env.DEV) {
-        console.log(`[Cache] Dados expirados para ${key}`);
-      }
-      // Remove entrada expirada
-      delete dataCache[key];
+  if (!entry) return null;
+
+  const now = Date.now();
+  if (now > entry.expiresAt || isEmptyData(entry.data)) {
+    if (import.meta.env.DEV) {
+      console.log(`[Cache] Expirado ou inválido: ${key}`);
     }
+    delete dataCache[key];
     return null;
   }
 
-  // Log de hit no cache
   if (import.meta.env.DEV) {
     console.log(`[Cache] Hit! Usando dados em cache para ${key}`);
   }
@@ -73,64 +92,65 @@ export function getCachedData<T>(type: string, metric: string, mode: string, id:
 }
 
 /**
- * Invalida todas as entradas de cache ou apenas para um tipo específico
+ * Invalida entradas de cache por tipo ou todas
  */
 export function invalidateCache(type?: string): void {
-  if (type) {
-    // Remove apenas entradas do tipo especificado
-    Object.keys(dataCache).forEach(key => {
-      if (key.startsWith(`${type}:`)) {
-        delete dataCache[key];
-      }
-    });
+  const keys = Object.keys(dataCache);
+  const now = Date.now();
 
-    if (import.meta.env.DEV) {
-      console.log(`[Cache] Cache invalidado para o tipo ${type}`);
-    }
-  } else {
-    // Limpa todo o cache
-    Object.keys(dataCache).forEach(key => {
+  keys.forEach(key => {
+    const shouldDelete = !type || key.startsWith(`${type}:`);
+    if (shouldDelete) {
       delete dataCache[key];
-    });
-
-    if (import.meta.env.DEV) {
-      console.log(`[Cache] Cache completamente invalidado`);
     }
+  });
+
+  if (import.meta.env.DEV) {
+    console.log(
+      `[Cache] Cache ${type ? `do tipo ${type}` : "completo"} invalidado.`
+    );
   }
 }
 
 /**
- * Verifica se há dados em cache para uma determinada consulta
+ * Verifica se há dados válidos no cache
  */
-export function hasCachedData(type: string, metric: string, mode: string, id: string): boolean {
+export function hasCachedData(
+  type: string,
+  metric: string,
+  mode: string,
+  id: string
+): boolean {
   const key = generateCacheKey(type, metric, mode, id);
   const entry = dataCache[key];
-  return !!entry && Date.now() <= entry.expiresAt;
+  return !!entry && Date.now() <= entry.expiresAt && !isEmptyData(entry.data);
 }
 
 /**
- * Retorna estatísticas do cache atual
+ * Estatísticas do cache (útil para debug)
  */
-export function getCacheStats(): { totalEntries: number, sizeInBytes: number, oldestEntry: Date | null } {
+export function getCacheStats(): {
+  totalEntries: number;
+  sizeInBytes: number;
+  oldestEntry: Date | null;
+} {
   const keys = Object.keys(dataCache);
-  let oldestTimestamp = Date.now();
-  let oldestEntry = null;
+  let oldest = Date.now();
+  let oldestEntry: Date | null = null;
 
-  // Calcula o tamanho aproximado em bytes (estimativa)
-  const cacheSize = JSON.stringify(dataCache).length;
+  const sizeInBytes = JSON.stringify(dataCache).length;
 
-  // Encontra a entrada mais antiga
   keys.forEach(key => {
     const entry = dataCache[key];
-    if (entry.timestamp < oldestTimestamp) {
-      oldestTimestamp = entry.timestamp;
-      oldestEntry = new Date(oldestTimestamp);
+    if (entry.timestamp < oldest) {
+      oldest = entry.timestamp;
+      oldestEntry = new Date(oldest);
     }
   });
 
   return {
     totalEntries: keys.length,
-    sizeInBytes: cacheSize,
-    oldestEntry
+    sizeInBytes,
+    oldestEntry,
   };
 }
