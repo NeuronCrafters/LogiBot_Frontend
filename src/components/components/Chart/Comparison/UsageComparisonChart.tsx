@@ -19,25 +19,27 @@ export function UsageComparisonChart({ filter }: { filter: ChartFilterState }) {
   const [data, setData] = useState<UsageComparisonData[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const hasMultipleIds = filter.ids.length > 1;
+
   useEffect(() => {
-    if (filter.ids.length <= 1) return;
+    if (!hasMultipleIds) return;
 
     setLoading(true);
 
-    // Usando a API logApi existente com a estrutura correta
-    logApi.get<UsageComparisonData[]>(filter.type, "usage", "compare", filter.ids)
+    logApi
+      .get<UsageComparisonData[]>(filter.type, "usage", "compare", filter.ids)
       .then((response) => {
         setData(response);
-        setLoading(false);
       })
       .catch((error) => {
         console.error("Erro ao carregar dados de comparação de uso:", error);
+      })
+      .finally(() => {
         setLoading(false);
       });
-  }, [filter]);
+  }, [filter, hasMultipleIds]);
 
-  // Se não houver dados suficientes, não renderiza o gráfico
-  if (data.length === 0 && !loading) {
+  if (!hasMultipleIds) {
     return (
       <Card className="p-4 bg-[#1f1f1f] border border-white/10 rounded-xl shadow-lg">
         <Typograph
@@ -54,12 +56,10 @@ export function UsageComparisonChart({ filter }: { filter: ChartFilterState }) {
     );
   }
 
-  // Obtém os nomes de usuários/entidades disponíveis (excluindo a coluna "dia")
   const userKeys = data.length > 0
-    ? Object.keys(data[0]).filter(key => key !== "dia")
+    ? Object.keys(data[0]).filter((key) => key !== "dia")
     : [];
 
-  // Cores para cada linha no gráfico
   const colors = ["#6366f1", "#10b981", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899"];
 
   return (
@@ -82,6 +82,10 @@ export function UsageComparisonChart({ filter }: { filter: ChartFilterState }) {
           <div className="flex items-center justify-center h-64 text-white/70">
             Carregando dados de uso...
           </div>
+        ) : data.length === 0 ? (
+          <div className="flex items-center justify-center h-64 text-white/70">
+            Nenhum dado disponível para comparação.
+          </div>
         ) : (
           <div className="overflow-x-auto mt-4">
             <ResponsiveContainer width="100%" height={250}>
@@ -91,11 +95,13 @@ export function UsageComparisonChart({ filter }: { filter: ChartFilterState }) {
                   dataKey="dia"
                   stroke="#ffffffcc"
                   tickFormatter={(value) => {
-                    if (!value) return '';
                     try {
                       const date = new Date(value);
-                      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                    } catch (e) {
+                      return date.toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      });
+                    } catch {
                       return value;
                     }
                   }}
@@ -103,10 +109,10 @@ export function UsageComparisonChart({ filter }: { filter: ChartFilterState }) {
                 <YAxis
                   stroke="#ffffffcc"
                   label={{
-                    value: 'Minutos',
+                    value: "Minutos",
                     angle: -90,
-                    position: 'insideLeft',
-                    style: { fill: '#ffffffcc' }
+                    position: "insideLeft",
+                    style: { fill: "#ffffffcc" },
                   }}
                 />
                 <Tooltip
@@ -118,15 +124,14 @@ export function UsageComparisonChart({ filter }: { filter: ChartFilterState }) {
                   labelStyle={{ color: "#ffffff" }}
                   itemStyle={{ color: "#ffffff" }}
                   labelFormatter={(value) => {
-                    if (!value) return '';
                     try {
                       const date = new Date(value);
-                      return date.toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
+                      return date.toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
                       });
-                    } catch (e) {
+                    } catch {
                       return value;
                     }
                   }}
@@ -141,6 +146,7 @@ export function UsageComparisonChart({ filter }: { filter: ChartFilterState }) {
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     activeDot={{ r: 5 }}
+                    name={user}
                   />
                 ))}
               </LineChart>
