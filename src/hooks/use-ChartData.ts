@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { logApi } from "@/services/api/logApi";
+import { logApi_extends as logApi } from "@/services/api/logApi_extends";
 import { LogEntityType, LogMetricType, LogModeType } from "@/services/api/api_routes";
 
 export type LoadingState = "idle" | "loading" | "success" | "error";

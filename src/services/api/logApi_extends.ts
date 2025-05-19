@@ -1,7 +1,7 @@
 import { api } from "@/services/api/api";
 import { LOG_ROUTES } from "./api_routes";
-import { getCachedData, cacheData, invalidateCache } from "@/utils/chartDataCache";
 import { LogEntityType, LogMetricType, LogModeType } from "./api_routes";
+import { getCachedData, cacheData, invalidateCache } from "@/utils/chartDataCache";
 
 // Funções base de API
 const getRequest = async <T>(url: string): Promise<T> => {
@@ -65,7 +65,7 @@ export const baseLogApi = {
 const isDev = import.meta.env ? import.meta.env.DEV : process.env.NODE_ENV === "development";
 
 // logApi com cache e logs detalhados
-export const logApi = {
+export const logApi_extends = {
   // Preservar todas as funções existentes do baseLogApi
   ...baseLogApi,
 
@@ -326,6 +326,30 @@ export const logApi = {
       }
 
       console.log(`[API] Dados recebidos com sucesso de ${apiEndpoint}:`, data);
+
+      // Adaptação para gráficos de uso quando não há sessionDetails
+      if (metric === "usage" && entity !== "student" && typeof data === 'object' && data !== null && !('sessionDetails' in data) && 'totalUsageTime' in data) {
+        console.log(`[API] Adaptando formato de dados para compatibilidade com UsageChart`);
+
+        // Criar dados de sessão sintéticos para entidades não-student
+        const today = new Date();
+        const sessionDetails = [];
+        const totalUsageTime = Number((data as any).totalUsageTime || 0);
+
+        // Distribuir os dados em 5 pontos
+        for (let i = 0; i < 5; i++) {
+          const sessionDate = new Date(today);
+          sessionDate.setDate(sessionDate.getDate() - i * 7); // Distribuir ao longo de 5 semanas
+
+          sessionDetails.push({
+            sessionStart: sessionDate.toISOString(),
+            sessionEnd: sessionDate.toISOString(),
+            sessionDuration: totalUsageTime / 5
+          });
+        }
+
+        (data as any).sessionDetails = sessionDetails;
+      }
 
       // Armazenar dados obtidos no cache
       cacheData(entity, metric, mode, cacheId, data);

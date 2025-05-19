@@ -21,7 +21,7 @@ function generateCacheKey(type: string, metric: string, mode: string, id: string
  * Verifica se um dado é vazio (usado para não cachear respostas vazias)
  */
 function isEmptyData(data: any): boolean {
-  if (data == null) return true;
+  if (data == null) return true; 1
   if (Array.isArray(data)) return data.length === 0;
   if (typeof data === "object") return Object.keys(data).length === 0;
   return false;

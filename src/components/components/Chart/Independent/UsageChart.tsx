@@ -1,3 +1,5 @@
+// Atualização para UsageChart.tsx
+
 import { useEffect, useMemo } from "react";
 import {
   LineChart, Line, XAxis, YAxis,
@@ -47,7 +49,7 @@ export function UsageChart({ filter }: { filter: ChartFilterState }) {
     try {
       console.log("[Chart] UsageChart - Processando dados:", data);
 
-      // Caso com sessionDetails
+      // Caso com sessionDetails - agora suportado para todas as entidades
       if (typeof data === 'object' && "sessionDetails" in data && Array.isArray(data.sessionDetails)) {
         console.log("[Chart] UsageChart - Formato: objeto com sessionDetails");
 
@@ -83,7 +85,9 @@ export function UsageChart({ filter }: { filter: ChartFilterState }) {
             day: new Date().toISOString().split("T")[0],
             minutes: Number(data.totalUsageTime)
           }];
-        } const result = Array.from(usageByDay, ([day, minutes]) => ({ day, minutes }));
+        }
+
+        const result = Array.from(usageByDay, ([day, minutes]) => ({ day, minutes }));
         console.log("[Chart] UsageChart - Dados processados:", result);
         return result;
       }
@@ -104,39 +108,6 @@ export function UsageChart({ filter }: { filter: ChartFilterState }) {
           day: d.day || d.date || new Date().toISOString().split("T")[0],
           minutes: Number(d.minutes || d.duration || 0)
         }));
-      }
-
-      // Se chegou até aqui, tenta extrair qualquer coisa útil do objeto
-      if (typeof data === 'object') {
-        console.log("[Chart] UsageChart - Tentando extrair dados de formato desconhecido:", data);
-        const entries = Object.entries(data);
-
-        if (entries.length > 0) {
-          // Tenta encontrar campos que pareçam conter dados de uso
-          const today = new Date().toISOString().split("T")[0];
-
-          // Tenta encontrar propriedades que pareçam minutos/tempo
-          for (const [key, value] of entries) {
-            if (
-              typeof value === 'number' &&
-              (key.toLowerCase().includes('time') ||
-                key.toLowerCase().includes('usage') ||
-                key.toLowerCase().includes('duration') ||
-                key.toLowerCase().includes('minutes'))
-            ) {
-              console.log(`[Chart] UsageChart - Encontrado possível valor de tempo: ${key}=${value}`);
-              return [{ day: today, minutes: value }];
-            }
-          }
-
-          // Se não encontrou nada específico, use o primeiro número encontrado
-          for (const [key, value] of entries) {
-            if (typeof value === 'number') {
-              console.log(`[Chart] UsageChart - Usando primeiro valor numérico: ${key}=${value}`);
-              return [{ day: today, minutes: value }];
-            }
-          }
-        }
       }
 
       console.log("[Chart] UsageChart - Formato desconhecido, não foi possível processar os dados");

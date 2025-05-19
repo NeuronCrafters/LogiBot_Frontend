@@ -7,9 +7,10 @@ import { Typograph } from "@/components/components/Typograph/Typograph";
 import { ChartFilter } from "@/components/components/Chart/ChartFilter";
 import type { ChartFilterState } from "@/@types/ChartsType";
 import { LogEntityType, LogModeType } from "@/services/api/api_routes";
+import { logApi_extends as logApi } from "@/services/api/logApi_extends";
 import React from "react";
 
-// Componentes carregados de forma lazy
+// Lazy-loaded chart components
 const UsageChart = lazy(() =>
   import("@/components/components/Chart/Independent/UsageChart").then(mod => ({ default: mod.UsageChart }))
 );
@@ -29,32 +30,26 @@ const UsageComparisonChart = lazy(() =>
   import("@/components/components/Chart/Comparison/UsageComparisonChart").then(mod => ({ default: mod.UsageComparisonChart }))
 );
 
-// Tipos para o ErrorBoundary
+// ErrorBoundary isolates chart render errors
 interface ErrorBoundaryProps {
   children: React.ReactNode;
 }
-
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
 }
-
-// Componente de tratamento de erros para isolar problemas em componentes individuais
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error("Erro em componente do gráfico:", error, errorInfo);
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("Erro em componente do gráfico:", error, info);
   }
-
-  render(): React.ReactNode {
+  render() {
     if (this.state.hasError) {
       return (
         <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-white/80">
@@ -63,7 +58,6 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
         </div>
       );
     }
-
     return this.props.children;
   }
 }
@@ -78,37 +72,39 @@ export function Chart() {
   });
 
   const isMounted = useRef(true);
-
-  // Efeito para limpar a referência de montagem
   useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
+    return () => { isMounted.current = false; };
   }, []);
 
   const handleFilterChange = useCallback(
     (type: LogEntityType, ids: string[], mode: LogModeType) => {
       if (!isMounted.current) return;
-
-      // Validação robusta para garantir que ids seja sempre um array, mesmo que vazio
-      const validIds = Array.isArray(ids) ? ids.filter(id => typeof id === 'string' && id.trim() !== '') : [];
-
-      setFilter({
-        type: type || 'student',
-        ids: validIds,
-        mode: mode || 'individual'
-      });
+      const validIds = Array.isArray(ids)
+        ? ids.filter(id => id.trim() !== "")
+        : [];
+      setFilter({ type, ids: validIds, mode });
     },
     []
   );
 
-  // Cálculo preciso e explícito de isCompareMode e hasSelection
-  // para evitar qualquer falha na detecção de seleções válidas
-  const validIds = Array.isArray(filter.ids) ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') : [];
+  // Teste direto de API usando getCached
+  useEffect(() => {
+    if (filter.mode === 'individual' && filter.ids.length > 0) {
+      logApi.getCached(
+        filter.type,
+        "usage" as any,
+        filter.mode as any,
+        filter.ids[0]
+      )
+        .then(res => console.log("[Test API] resposta bruta:", res))
+        .catch(err => console.error("[Test API] erro:", err));
+    }
+  }, [filter]);
+
+  const validIds = filter.ids;
   const isCompareMode = filter.mode === "compare" && validIds.length > 1;
   const hasSelection = validIds.length > 0;
 
-  // Componente de fallback personalizado
   const ChartLoadingFallback = () => (
     <div className="flex flex-col items-center justify-center h-64 bg-[#1f1f1f] rounded-xl border border-white/10 p-4">
       <div className="animate-pulse w-12 h-12 rounded-full bg-indigo-600/30 mb-4"></div>
@@ -119,21 +115,12 @@ export function Chart() {
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
-      {/* Header fixo */}
       <div className="absolute bg-[#141414] w-full flex items-center gap-4 border-b border-neutral-800 px-8 py-4 z-10">
-        <Typograph
-          text="Dashboard"
-          colorText="text-white"
-          variant="text2"
-          weight="bold"
-          fontFamily="poppins"
-        />
+        <Typograph text="Dashboard" variant="text2" weight="bold" colorText="text-white" fontFamily="poppins" />
         {user && (
           <div className="ml-auto">
             <button onClick={() => setMenuOpen(true)} className="p-0 flex items-center justify-center">
-              <div className="rainbow-avatar w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
-                <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
-              </div>
+              <Avatar seed={user._id} backgroundColor="#141414" className="rainbow-avatar w-10 h-10 md:w-14 md:h-14 rounded-full" />
             </button>
           </div>
         )}
@@ -142,23 +129,10 @@ export function Chart() {
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
       <div className="flex-1 w-full max-w-6xl mx-auto pt-24 pb-20 px-4 space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-4"
-        >
-          <Typograph
-            text="Dashboard de Atividades"
-            variant="text3"
-            weight="semibold"
-            fontFamily="montserrat"
-            colorText="text-white"
-          />
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-4">
+          <Typograph text="Dashboard de Atividades" variant="text3" weight="semibold" colorText="text-white" fontFamily="montserrat" />
           <p className="text-white/60 mt-2">
-            {isCompareMode
-              ? "Compare métricas entre diferentes entidades"
-              : "Visualize métricas detalhadas por entidade"}
+            {isCompareMode ? "Compare métricas entre diferentes entidades" : "Visualize métricas detalhadas por entidade"}
           </p>
         </motion.div>
 
@@ -166,46 +140,30 @@ export function Chart() {
 
         {!hasSelection ? (
           <div className="flex items-center justify-center h-64 bg-[#1f1f1f] rounded-xl border border-white/10 mt-8">
-            <p className="text-white/70">
-              Selecione uma entidade para visualizar os dados
-            </p>
+            <p className="text-white/70">Selecione uma entidade para visualizar os dados</p>
           </div>
         ) : (
           <div className="transition-opacity duration-300 opacity-100">
             <Suspense fallback={<ChartLoadingFallback />}>
-              {filter.mode === "individual" && (
-                <div className="space-y-6 mt-6">
-                  <ErrorBoundary>
-                    <UsageChart filter={{ ...filter, ids: validIds }} />
-                  </ErrorBoundary>
-                  <ErrorBoundary>
-                    <CorrectWrongChart filter={{ ...filter, ids: validIds }} />
-                  </ErrorBoundary>
-                  <ErrorBoundary>
-                    <CategoryChart filter={{ ...filter, ids: validIds }} />
-                  </ErrorBoundary>
+              {filter.mode === "individual" && validIds[0] && (
+                <div key={`${filter.type}-${validIds[0]}`} className="space-y-6 mt-6">
+                  <ErrorBoundary><UsageChart filter={{ ...filter, ids: validIds }} /></ErrorBoundary>
+                  <ErrorBoundary><CorrectWrongChart filter={{ ...filter, ids: validIds }} /></ErrorBoundary>
+                  <ErrorBoundary><CategoryChart filter={{ ...filter, ids: validIds }} /></ErrorBoundary>
                 </div>
               )}
 
               {filter.mode === "compare" && (
-                <div className="space-y-6 mt-6">
+                <div key={`${filter.mode}-${validIds.join(",")}`} className="space-y-6 mt-6">
                   {validIds.length > 1 ? (
                     <>
-                      <ErrorBoundary>
-                        <ComparisonAccuracyChart filter={{ ...filter, ids: validIds }} />
-                      </ErrorBoundary>
-                      <ErrorBoundary>
-                        <CategoryParticipationChart filter={{ ...filter, ids: validIds }} />
-                      </ErrorBoundary>
-                      <ErrorBoundary>
-                        <UsageComparisonChart filter={{ ...filter, ids: validIds }} />
-                      </ErrorBoundary>
+                      <ErrorBoundary><ComparisonAccuracyChart filter={{ ...filter, ids: validIds }} /></ErrorBoundary>
+                      <ErrorBoundary><CategoryParticipationChart filter={{ ...filter, ids: validIds }} /></ErrorBoundary>
+                      <ErrorBoundary><UsageComparisonChart filter={{ ...filter, ids: validIds }} /></ErrorBoundary>
                     </>
                   ) : (
                     <div className="flex items-center justify-center h-64 bg-[#1f1f1f] rounded-xl border border-white/10">
-                      <p className="text-white/70">
-                        Selecione pelo menos duas entidades para visualizar a comparação
-                      </p>
+                      <p className="text-white/70">Selecione pelo menos duas entidades para comparação</p>
                     </div>
                   )}
                 </div>
