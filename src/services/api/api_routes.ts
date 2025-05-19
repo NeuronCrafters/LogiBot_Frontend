@@ -144,6 +144,12 @@ export const LOG_ROUTES = {
       subjects: `/logs/university/compare/subjects/summary`,
     },
   },
+  summary: {
+    university: (id: string) => `/logs/university/${id}/summary`,
+    course: (id: string) => `/logs/course/${id}/summary`,
+    class: (id: string) => `/logs/class/${id}/summary`,
+    filteredStudent: `/logs/student/summary/filtered`,
+  }
 } as const;
 
 export const USER_ANALYSIS_ROUTES = {

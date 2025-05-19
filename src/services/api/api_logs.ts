@@ -12,43 +12,51 @@ const postRequest = async <T>(url: string, data: object): Promise<T> => {
 };
 
 export const logApi = {
-  // Student
-  getStudentAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.student.accuracy(id)),
-  getStudentUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.student.usage(id)),
-  getStudentSubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.student.subjects(id)),
-  compareStudentAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.student.compare.accuracy, { ids }),
-  compareStudentUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.student.compare.usage, { ids }),
-  compareStudentSubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.student.compare.subjects, { ids }),
+  // // Student
+  // getStudentAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.student.accuracy(id)),
+  // getStudentUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.student.usage(id)),
+  // getStudentSubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.student.subjects(id)),
+  // compareStudentAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.student.compare.accuracy, { ids }),
+  // compareStudentUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.student.compare.usage, { ids }),
+  // compareStudentSubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.student.compare.subjects, { ids }),
 
-  // Class
-  getClassAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.class.accuracy(id)),
-  getClassUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.class.usage(id)),
-  getClassSubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.class.subjects(id)),
-  compareClassAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.class.compare.accuracy, { ids }),
-  compareClassUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.class.compare.usage, { ids }),
-  compareClassSubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.class.compare.subjects, { ids }),
+  // // Class
+  // getClassAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.class.accuracy(id)),
+  // getClassUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.class.usage(id)),
+  // getClassSubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.class.subjects(id)),
+  // compareClassAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.class.compare.accuracy, { ids }),
+  // compareClassUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.class.compare.usage, { ids }),
+  // compareClassSubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.class.compare.subjects, { ids }),
 
-  // Course
-  getCourseAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.course.accuracy(id)),
-  getCourseUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.course.usage(id)),
-  getCourseSubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.course.subjects(id)),
-  compareCourseAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.course.compare.accuracy, { ids }),
-  compareCourseUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.course.compare.usage, { ids }),
-  compareCourseSubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.course.compare.subjects, { ids }),
+  // // Course
+  // getCourseAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.course.accuracy(id)),
+  // getCourseUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.course.usage(id)),
+  // getCourseSubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.course.subjects(id)),
+  // compareCourseAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.course.compare.accuracy, { ids }),
+  // compareCourseUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.course.compare.usage, { ids }),
+  // compareCourseSubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.course.compare.subjects, { ids }),
 
-  // Discipline
-  getDisciplineAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.discipline.accuracy(id)),
-  getDisciplineUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.discipline.usage(id)),
-  getDisciplineSubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.discipline.subjects(id)),
-  compareDisciplineAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.discipline.compare.accuracy, { ids }),
-  compareDisciplineUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.discipline.compare.usage, { ids }),
-  compareDisciplineSubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.discipline.compare.subjects, { ids }),
+  // // Discipline
+  // getDisciplineAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.discipline.accuracy(id)),
+  // getDisciplineUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.discipline.usage(id)),
+  // getDisciplineSubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.discipline.subjects(id)),
+  // compareDisciplineAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.discipline.compare.accuracy, { ids }),
+  // compareDisciplineUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.discipline.compare.usage, { ids }),
+  // compareDisciplineSubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.discipline.compare.subjects, { ids }),
 
-  // University
-  getUniversityAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.university.accuracy(id)),
-  getUniversityUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.university.usage(id)),
-  getUniversitySubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.university.subjects(id)),
-  compareUniversityAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.university.compare.accuracy, { ids }),
-  compareUniversityUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.university.compare.usage, { ids }),
-  compareUniversitySubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.university.compare.subjects, { ids }),
+  // // University
+  // getUniversityAccuracy: <T>(id: string) => getRequest<T>(LOG_ROUTES.university.accuracy(id)),
+  // getUniversityUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.university.usage(id)),
+  // getUniversitySubjects: <T>(id: string) => getRequest<T>(LOG_ROUTES.university.subjects(id)),
+  // compareUniversityAccuracy: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.university.compare.accuracy, { ids }),
+  // compareUniversityUsage: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.university.compare.usage, { ids }),
+  // compareUniversitySubjects: <T>(ids: string[]) => postRequest<T>(LOG_ROUTES.university.compare.subjects, { ids }),
+
+
+  //novas rotas mais enxutas
+  getUniversitySummary: <T>(id: string) => getRequest<T>(LOG_ROUTES.summary.university(id)),
+  getCourseSummary: <T>(id: string) => getRequest<T>(LOG_ROUTES.summary.course(id)),
+  getClassSummary: <T>(id: string) => getRequest<T>(LOG_ROUTES.summary.class(id)),
+  getFilteredStudentSummary: <T>(body: { universityId: string, courseId?: string, classId?: string }) =>
+    postRequest<T>(LOG_ROUTES.summary.filteredStudent, body),
 };
