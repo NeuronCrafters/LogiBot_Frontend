@@ -43,7 +43,7 @@ export const ACADEMIC_ROUTES: Record<
     post: "/academic-institution/discipline",
     get: "/academic-institution/discipline",
     delete: "/academic-institution/discipline",
-  }
+  },
 };
 
 export const PUBLIC_ROUTES = {
@@ -92,7 +92,6 @@ export const COORDINATOR_ROUTES = {
   listDisciplines: "/admin/coordinator/disciplines",
   listClasses: "/admin/coordinator/classes",
 } as const;
-
 
 export const LOG_ROUTES = {
   student: {
@@ -145,4 +144,8 @@ export const LOG_ROUTES = {
       subjects: `/logs/university/compare/subjects/summary`,
     },
   },
+} as const;
+
+export const USER_ANALYSIS_ROUTES = {
+  addInteraction: "/useranalysis/interaction",
 } as const;
