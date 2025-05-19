@@ -57,16 +57,28 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setMessages((m) => [...m, { role: "user", content: message }]);
     setTyping(true);
     setFakeTypingDelay(true);
+
     try {
       const res = await rasaService.perguntar(message, userId);
       setTimeout(() => {
-        setMessages((m) => [...m, { role: "assistant", content: res.responses[0]?.text || "..." }]);
+        setMessages((m) => [
+          ...m,
+          { role: "assistant", content: res.responses[0]?.text || "..." },
+        ]);
         setTyping(false);
         setFakeTypingDelay(false);
       }, 1200);
-    } catch (err) {
-      console.error(err);
-      setMessages((m) => [...m, { role: "assistant", content: "Erro no chat." }]);
+    } catch (err: any) {
+      const errorMsg =
+        err.response?.data?.message ||
+        "Erro no chat.";
+      console.error("Erro no chat:", err.response?.status, errorMsg);
+
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: errorMsg },
+      ]);
+
       setTyping(false);
       setFakeTypingDelay(false);
     }
@@ -159,22 +171,38 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     };
 
     const lettersOnly = answers.map(convertToOptionKey);
-    const formattedAnswers = answers.map((answer) => `options ${convertToOptionKey(answer)}`);
+    const formattedAnswers = lettersOnly.map((l) => `options ${l}`);
 
-    setMessages((m) => [...m, { role: "user", content: `Respostas escolhidas: ${lettersOnly.join(", ")}` }]);
+    setMessages((m) => [
+      ...m,
+      { role: "user", content: `Respostas escolhidas: ${lettersOnly.join(", ")}` },
+    ]);
 
     try {
       const res = await rasaService.verificarRespostas(formattedAnswers);
-      setMessages((m) => [...m, { role: "assistant", content: res.message }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: res.message },
+      ]);
 
       setPreviousQuestions((prev) => [...prev, questions]);
       setPreviousResults((prev) => [...prev, res]);
 
       setResultData(res);
       setStep("results");
-    } catch (err) {
-      console.error("Erro ao enviar respostas:", err);
-      setMessages((m) => [...m, { role: "assistant", content: "Erro ao verificar respostas." }]);
+    } catch (err: any) {
+      const errorMsg =
+        err.response?.data?.message ??
+        "Erro ao verificar respostas.";
+      console.error(
+        "Erro ao enviar respostas:",
+        err.response?.status,
+        errorMsg
+      );
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: errorMsg },
+      ]);
     }
   };
 
