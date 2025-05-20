@@ -8,7 +8,8 @@ import { Header } from "@/components/components/Header/Header";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Button } from "@/components/ui/button";
 import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
-import type { FilterData } from "@/@types/FormsFilterTypes";
+// import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
+import type { FilterData, FilterType } from "@/@types/ChartsType";
 import type { ListItem } from "@/components/components/Forms/Lists/FormsList";
 import { motion, AnimatePresence } from "framer-motion";
 

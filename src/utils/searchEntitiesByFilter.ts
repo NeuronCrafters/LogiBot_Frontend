@@ -1,5 +1,6 @@
 import { coordinatorApi, professorApi, publicApi, adminApi } from "@/services/apiClient";
-import type { FilterData } from "@/@types/FormsFilterTypes";
+// import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
+import type { FilterData, FilterType } from "@/@types/ChartsType";
 import type { ListItem } from "@/components/components/Forms/Lists/FormsList";
 import toast from "react-hot-toast";
 

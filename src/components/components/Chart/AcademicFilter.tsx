@@ -19,7 +19,12 @@ import { FilterData, FilterType, Role } from "@/@types/ChartsType";
 interface AcademicFilterProps {
   entityType: LogEntityType;
   multiple?: boolean;
-  onSelect: (ids: string[]) => void;
+  onSelect: (ids: string[], hierarchyInfo?: {
+    universityId?: string;
+    courseId?: string;
+    classId?: string;
+    disciplineId?: string;
+  }) => void;
   additionalParams?: {
     universityId?: string;
     courseId?: string;
@@ -32,7 +37,8 @@ type Option = { _id: string; name: string };
 export function AcademicFilter({
   entityType,
   multiple = false,
-  onSelect
+  onSelect,
+  additionalParams
 }: AcademicFilterProps) {
   const { user } = useAuth();
   const rawRoles = Array.isArray(user?.role) ? user.role : [user?.role];
@@ -59,6 +65,15 @@ export function AcademicFilter({
   });
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Use os parâmetros adicionais se disponíveis
+  useEffect(() => {
+    if (additionalParams) {
+      setSelectedUniversity(additionalParams.universityId || "");
+      setSelectedCourse(additionalParams.courseId || "");
+      setSelectedClass(additionalParams.classId || "");
+    }
+  }, [additionalParams]);
 
   // Função para buscar dados
   const fetchData = async (
@@ -150,7 +165,7 @@ export function AcademicFilter({
       switch (entityType) {
         case "student":
           if (selectedClass) {
-            filterType = "students-course";
+            filterType = "students-class";
           } else if (selectedCourse) {
             filterType = "students-course";
           } else {
@@ -262,6 +277,10 @@ export function AcademicFilter({
     return entity ? entity.name : id;
   });
 
+  // Especificar limite de seleção para o modo de comparação com base no tipo da entidade
+  const selectionLimit = multiple ? 2 : 1;
+  const hasReachedLimit = selectedIds.length >= selectionLimit;
+
   return (
     <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -276,7 +295,7 @@ export function AcademicFilter({
               setSelectedClass("");
               setSelectedDiscipline("");
               setSelectedIds([]);
-              onSelect([]);
+              onSelect([], { universityId: val });
             }}
             className="p-2 rounded-md bg-[#141414] text-white border border-white/10 w-full"
             disabled={loading.universities}
@@ -302,7 +321,7 @@ export function AcademicFilter({
                 setSelectedClass("");
                 setSelectedDiscipline("");
                 setSelectedIds([]);
-                onSelect([]);
+                onSelect([], { universityId: selectedUniversity, courseId: val });
               }}
               disabled={isCoursesDisabled}
               className={cn("p-2 rounded-md bg-[#141414] text-white border border-white/10 w-full", isCoursesDisabled && "opacity-50")}
@@ -327,7 +346,11 @@ export function AcademicFilter({
                 console.log("AcademicFilter - Turma selecionada:", val);
                 setSelectedClass(val);
                 setSelectedIds([]);
-                onSelect([]);
+                onSelect([], {
+                  universityId: selectedUniversity,
+                  courseId: selectedCourse,
+                  classId: val
+                });
               }}
               disabled={isClassesDisabled}
               className={cn("p-2 rounded-md bg-[#141414] text-white border border-white/10 w-full", isClassesDisabled && "opacity-50")}
@@ -378,16 +401,25 @@ export function AcademicFilter({
               {loading.entities ? "Carregando..." : "Nenhum encontrado."}
             </CommandEmpty>
             <CommandGroup className="max-h-[300px] overflow-y-auto">
-              {filteredEntities.map(item => (
-                <CommandItem
-                  key={item._id}
-                  onSelect={() => toggleItem(item._id)}
-                  className={cn("text-white hover:bg-white/5 cursor-pointer transition-colors", selectedIds.includes(item._id) && "bg-white/10")}
-                >
-                  <Check className={cn("mr-2 h-4 w-4", selectedIds.includes(item._id) ? "opacity-100" : "opacity-0")} />
-                  {item.name}
-                </CommandItem>
-              ))}
+              {filteredEntities.map(item => {
+                const isSelected = selectedIds.includes(item._id);
+                const isDisabled = hasReachedLimit && !isSelected && multiple;
+
+                return (
+                  <CommandItem
+                    key={item._id}
+                    onSelect={() => !isDisabled && toggleItem(item._id)}
+                    className={cn(
+                      "text-white hover:bg-white/5 cursor-pointer transition-colors",
+                      isSelected && "bg-white/10",
+                      isDisabled && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <Check className={cn("mr-2 h-4 w-4", isSelected ? "opacity-100" : "opacity-0")} />
+                    {item.name}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </Command>
         </PopoverContent>
@@ -406,6 +438,14 @@ export function AcademicFilter({
               </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {multiple && (
+        <div className="text-xs text-white/60 mt-1">
+          {selectedIds.length === 0 ? "Selecione exatamente duas entidades para comparação" :
+            selectedIds.length === 1 ? "Selecione mais uma entidade para comparação" :
+              "Comparação disponível com as entidades selecionadas"}
         </div>
       )}
     </motion.div>

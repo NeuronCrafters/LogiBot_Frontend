@@ -16,7 +16,13 @@ interface ChartFilterProps {
   onChange: (
     type: LogEntityType,
     ids: string[],
-    mode: LogModeType
+    mode: LogModeType,
+    hierarchyParams?: {
+      universityId?: string,
+      courseId?: string,
+      classId?: string,
+      disciplineId?: string
+    }
   ) => void;
 }
 
@@ -35,15 +41,28 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   const notifyParent = useCallback((
     type: LogEntityType,
     ids: string[],
-    viewMode: LogModeType
+    viewMode: LogModeType,
+    params?: {
+      universityId?: string,
+      courseId?: string,
+      classId?: string,
+      disciplineId?: string
+    }
   ) => {
     // Garantimos que os IDs são válidos antes de chamar o callback
     const validIds = ids.filter((id) => id && id.trim() !== "");
-    console.log("ChartFilter - notifyParent chamado:", { type, validIds, viewMode });
+    console.log("ChartFilter - notifyParent chamado:", { type, validIds, viewMode, params });
+
+    // Verificamos se o modo é de comparação e se temos exatamente 2 IDs válidos
+    if (viewMode === "comparison" && validIds.length !== 2) {
+      console.log("ChartFilter - Comparação requer exatamente 2 IDs, temos:", validIds.length);
+      // Não notificamos ainda, esperamos ter 2 IDs
+      if (validIds.length < 2) return;
+    }
 
     // Adicionar um log antes de chamar onChange
     console.log("ChartFilter - Chamando função onChange");
-    onChange(type, validIds, viewMode);
+    onChange(type, validIds, viewMode, params);
     console.log("ChartFilter - Função onChange foi chamada");
   }, [onChange]);
 
@@ -53,8 +72,8 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     setEntityType(newType);
     setSelectedIds([]);
     // Notificar o componente pai da mudança
-    notifyParent(newType, [], mode);
-  }, [mode, notifyParent]);
+    notifyParent(newType, [], mode, hierarchyParams);
+  }, [mode, notifyParent, hierarchyParams]);
 
   const handleModeChange = useCallback((value: string) => {
     const newMode = value as LogModeType;
@@ -62,8 +81,8 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     setMode(newMode);
     setSelectedIds([]);
     // Notificar o componente pai da mudança
-    notifyParent(entityType, [], newMode);
-  }, [entityType, notifyParent]);
+    notifyParent(entityType, [], newMode, hierarchyParams);
+  }, [entityType, notifyParent, hierarchyParams]);
 
   const handleEntitySelection = useCallback((ids: string[], hierarchyInfo?: any) => {
     // Validamos os IDs recebidos
@@ -79,10 +98,25 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     // Verificar se a lista realmente mudou antes de atualizar e notificar
     if (JSON.stringify(selectedIds) !== JSON.stringify(validIds)) {
       setSelectedIds(validIds);
-      // Chamamos notifyParent com os valores atuais
-      notifyParent(entityType, validIds, mode);
+
+      // Se é modo de comparação, verificamos se temos exatamente 2 IDs
+      if (mode === "comparison" && validIds.length === 2) {
+        console.log("ChartFilter - Temos 2 IDs para comparação, notificando");
+        notifyParent(entityType, validIds, mode, hierarchyInfo || hierarchyParams);
+      } else if (mode === "individual") {
+        // Para modo individual, notificamos com qualquer número de IDs (geralmente 1)
+        notifyParent(entityType, validIds, mode, hierarchyInfo || hierarchyParams);
+      }
     }
-  }, [entityType, mode, notifyParent, selectedIds]);
+  }, [entityType, mode, notifyParent, selectedIds, hierarchyParams]);
+
+  // Ajustar o componente quando o modo muda de individual para comparison
+  useEffect(() => {
+    // Se alternar de individual para comparação, limpe os IDs selecionados
+    if (mode === "comparison" && selectedIds.length === 1) {
+      setSelectedIds([]);
+    }
+  }, [mode, selectedIds]);
 
   // Ajustar título com base no tipo de entidade
   const getEntityTypeTitle = (type: LogEntityType) => {
@@ -135,12 +169,12 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
           <Select value={mode} onValueChange={handleModeChange}>
             <SelectTrigger className="bg-[#141414] text-white border-white/10">
               <SelectValue placeholder="Selecione o modo">
-                {mode === "individual" ? "Visualizar um" : "Comparar vários"}
+                {mode === "individual" ? "Visualizar um" : "Comparar dois"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
               <SelectItem value="individual">Visualizar um</SelectItem>
-              <SelectItem value="compare">Comparar vários</SelectItem>
+              <SelectItem value="comparison">Comparar dois</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -148,15 +182,17 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
 
       <AcademicFilter
         entityType={entityType}
-        multiple={mode === "compare"}
+        multiple={mode === "comparison"}
         onSelect={handleEntitySelection}
       />
 
-      {mode === "compare" && (
+      {mode === "comparison" && (
         <div className={selectedIds.length < 2 ? "text-sm text-yellow-400 mt-1" : "text-sm text-green-400 mt-1"}>
-          {selectedIds.length < 2
-            ? "Selecione pelo menos duas entidades para comparação"
-            : `${selectedIds.length} entidades selecionadas para comparação`}
+          {selectedIds.length === 0
+            ? "Selecione duas entidades para comparação"
+            : selectedIds.length === 1
+              ? "Selecione mais uma entidade para completar a comparação"
+              : "Entidades selecionadas para comparação"}
         </div>
       )}
     </motion.div>

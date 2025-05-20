@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-Auth";
 import { publicApi } from "@/services/apiClient";
-import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
+// import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
+import type { FilterData, FilterType } from "@/@types/ChartsType";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 import { motion } from "framer-motion";
 
