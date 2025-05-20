@@ -1,6 +1,4 @@
-// Atualização para UsageChart.tsx
-
-import { useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -8,128 +6,166 @@ import {
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { useChartData } from "@/hooks/use-ChartData";
+import { logApi } from "@/services/apiClient";
 import type { ChartFilterState, UsageData, UsageApiResponse } from "@/@types/ChartsType";
 
 export function UsageChart({ filter }: { filter: ChartFilterState }) {
+  console.log("UsageChart - Renderizado com filtro:", filter);
+
+  // Estados para gerenciar dados e estado de carregamento
+  const [data, setData] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [processedData, setProcessedData] = useState<any[]>([]);
+  const [lastFetchedId, setLastFetchedId] = useState<string | null>(null);
+
   // Extração e validação robusta do ID
   const validIds = Array.isArray(filter.ids) ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') : [];
   const id = validIds[0] || "";
   const isValid = id !== "";
 
-  console.log("[Chart] UsageChart - ID:", id, "É válido:", isValid);
+  // Função para buscar dados da API
+  const fetchData = async () => {
+    if (!isValid) {
+      console.log("UsageChart - ID inválido, não buscando dados");
+      return;
+    }
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    isSuccess,
-    refresh,
-  } = useChartData<UsageApiResponse | null>(
-    filter.type,
-    "usage",
-    "individual",
-    id,
-    !isValid
-  );
+    // Verificar se já buscamos dados para este ID
+    if (lastFetchedId === id && data !== null) {
+      console.log("UsageChart - Já temos dados para este ID, pulando fetch");
+      return;
+    }
 
-  // Log detalhado dos dados brutos
-  useEffect(() => {
-    console.log("[Chart] UsageChart - Dados brutos recebidos:", data);
-  }, [data]);
+    console.log("UsageChart - Iniciando busca de dados para ID:", id);
+    setIsLoading(true);
+    setIsError(false);
+    setError(null);
 
-  // Processamento de dados robusto
-  const processedData = useMemo(() => {
-    if (!data) {
-      console.log("[Chart] UsageChart - Nenhum dado para processar");
-      return [];
+    try {
+      console.log("UsageChart - Buscando dados para:", filter.type, id);
+      const response = await logApi.get<any>(
+        filter.type,
+        "usage",
+        "individual",
+        id
+      );
+
+      console.log("UsageChart - Dados recebidos:", response);
+      setData(response);
+      processData(response);
+      setLastFetchedId(id);
+    } catch (err: any) {
+      console.error("UsageChart - Erro ao buscar dados:", err);
+      setIsError(true);
+      setError(err?.message || "Erro ao carregar dados de uso.");
+      setProcessedData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Função para processar os dados recebidos
+  const processData = (rawData: any) => {
+    if (!rawData) {
+      setProcessedData([]);
+      return;
     }
 
     try {
-      console.log("[Chart] UsageChart - Processando dados:", data);
+      console.log("UsageChart - Processando dados:", rawData);
+      let result: any[] = [];
 
       // Caso com sessionDetails - agora suportado para todas as entidades
-      if (typeof data === 'object' && "sessionDetails" in data && Array.isArray(data.sessionDetails)) {
-        console.log("[Chart] UsageChart - Formato: objeto com sessionDetails");
+      if (typeof rawData === 'object' && "sessionDetails" in rawData && Array.isArray(rawData.sessionDetails)) {
+        console.log("UsageChart - Formato: objeto com sessionDetails");
 
         // Se não houver detalhes de sessão, cria um ponto de dados com o tempo total
-        if (data.sessionDetails.length === 0 && 'totalUsageTime' in data) {
-          console.log("[Chart] UsageChart - Usando totalUsageTime por falta de sessionDetails");
-          return [{
+        if (rawData.sessionDetails.length === 0 && 'totalUsageTime' in rawData) {
+          console.log("UsageChart - Usando totalUsageTime por falta de sessionDetails");
+          result = [{
             day: new Date().toISOString().split("T")[0],
-            minutes: Number(data.totalUsageTime)
+            minutes: Number(rawData.totalUsageTime) / 60 // Convertendo para minutos se for em segundos
           }];
-        }
+        } else {
+          // Processa os detalhes da sessão
+          const usageByDay = new Map<string, number>();
+          rawData.sessionDetails.forEach((s: any) => {
+            try {
+              // Tenta extrair a data da sessão
+              const sessionDate = s.sessionStart ? new Date(s.sessionStart) : new Date();
+              const day = sessionDate.toISOString().split("T")[0];
+              // Verifica se a duração é em segundos e converte para minutos
+              const duration = typeof s.sessionDuration === 'number' ? s.sessionDuration / 60 : 0;
 
-        // Processa os detalhes da sessão
-        const usageByDay = new Map<string, number>();
-        data.sessionDetails.forEach((s: any) => {
-          try {
-            // Tenta extrair a data da sessão
-            const sessionDate = s.sessionStart ? new Date(s.sessionStart) : new Date();
-            const day = sessionDate.toISOString().split("T")[0];
-            const duration = typeof s.sessionDuration === 'number' ? s.sessionDuration : 0;
+              usageByDay.set(day, (usageByDay.get(day) || 0) + duration);
+              console.log(`UsageChart - Processado: dia=${day}, duração=${duration} minutos`);
+            } catch (e) {
+              console.error("UsageChart - Erro ao processar detalhe de sessão:", e, s);
+            }
+          });
 
-            usageByDay.set(day, (usageByDay.get(day) || 0) + duration);
-            console.log(`[Chart] UsageChart - Processado: dia=${day}, duração=${duration}`);
-          } catch (e) {
-            console.error("[Chart] UsageChart - Erro ao processar detalhe de sessão:", e, s);
+          // Se não conseguiu processar nenhum dia, cria um ponto com o tempo total
+          if (usageByDay.size === 0 && 'totalUsageTime' in rawData) {
+            console.log("UsageChart - Nenhum dia processado, usando totalUsageTime");
+            result = [{
+              day: new Date().toISOString().split("T")[0],
+              minutes: Number(rawData.totalUsageTime) / 60 // Convertendo para minutos
+            }];
+          } else {
+            result = Array.from(usageByDay, ([day, minutes]) => ({ day, minutes }));
           }
-        });
-
-        // Se não conseguiu processar nenhum dia, cria um ponto com o tempo total
-        if (usageByDay.size === 0 && 'totalUsageTime' in data) {
-          console.log("[Chart] UsageChart - Nenhum dia processado, usando totalUsageTime");
-          return [{
-            day: new Date().toISOString().split("T")[0],
-            minutes: Number(data.totalUsageTime)
-          }];
         }
-
-        const result = Array.from(usageByDay, ([day, minutes]) => ({ day, minutes }));
-        console.log("[Chart] UsageChart - Dados processados:", result);
-        return result;
       }
-
       // Modo alternativo: usar diretamente totalUsageTime
-      if (typeof data === 'object' && 'totalUsageTime' in data) {
-        console.log("[Chart] UsageChart - Formato: objeto com totalUsageTime");
-        return [{
+      else if (typeof rawData === 'object' && 'totalUsageTime' in rawData) {
+        console.log("UsageChart - Formato: objeto com totalUsageTime");
+        result = [{
           day: new Date().toISOString().split("T")[0],
-          minutes: Number(data.totalUsageTime)
+          minutes: Number(rawData.totalUsageTime) / 60 // Convertendo para minutos se for em segundos
         }];
       }
-
+      // Se houver usageTimeInSeconds, esse é o formato adaptado do nosso backend
+      else if (typeof rawData === 'object' && 'usageTimeInSeconds' in rawData) {
+        console.log("UsageChart - Formato adaptado com usageTimeInSeconds");
+        result = [{
+          day: new Date().toISOString().split("T")[0],
+          minutes: Number(rawData.usageTimeInSeconds) / 60 // Convertendo para minutos
+        }];
+      }
       // Caso com array de objetos
-      if (Array.isArray(data)) {
-        console.log("[Chart] UsageChart - Formato: array de objetos");
-        return (data as any[]).map((d: any) => ({
+      else if (Array.isArray(rawData)) {
+        console.log("UsageChart - Formato: array de objetos");
+        result = (rawData as any[]).map((d: any) => ({
           day: d.day || d.date || new Date().toISOString().split("T")[0],
           minutes: Number(d.minutes || d.duration || 0)
         }));
+      } else {
+        console.log("UsageChart - Formato desconhecido, não foi possível processar os dados");
+        result = [];
       }
 
-      console.log("[Chart] UsageChart - Formato desconhecido, não foi possível processar os dados");
-      return [];
+      console.log("UsageChart - Dados processados finais:", result);
+      setProcessedData(result);
     } catch (error) {
-      console.error("[Chart] UsageChart - Erro ao processar dados:", error);
-      return [];
+      console.error("UsageChart - Erro ao processar dados:", error);
+      setProcessedData([]);
     }
-  }, [data]);
+  };
 
-  // Log dos dados processados
+  // Efeito para buscar dados quando o filtro mudar
   useEffect(() => {
-    console.log("[Chart] UsageChart - Dados processados finais:", processedData);
-  }, [processedData]);
-
-  // Forçar nova requisição se retorno vazio após sucesso
-  useEffect(() => {
-    if (isSuccess && isValid && processedData.length === 0) {
-      console.log("[Chart] UsageChart - Dados vazios após sucesso, tentando novamente...");
-      refresh();
+    console.log("UsageChart - Filtro mudou, ID:", id, "Válido:", isValid);
+    if (isValid) {
+      fetchData();
+    } else {
+      // Limpar dados quando não há ID válido
+      setData(null);
+      setProcessedData([]);
+      setLastFetchedId(null);
     }
-  }, [isSuccess, isValid, processedData, refresh]);
+  }, [filter.type, id]);
 
   return (
     <Card className="p-4 bg-[#141414] border-white/10 w-full mb-6">
@@ -142,7 +178,7 @@ export function UsageChart({ filter }: { filter: ChartFilterState }) {
             fontFamily="montserrat"
             colorText="text-white"
           />
-          {isSuccess && processedData.length > 0 && (
+          {!isLoading && !isError && processedData.length > 0 && (
             <div className="text-xs text-white/50">
               {processedData.length} registro(s)
             </div>
@@ -170,7 +206,7 @@ export function UsageChart({ filter }: { filter: ChartFilterState }) {
           </div>
         )}
 
-        {isValid && isSuccess && processedData.length > 0 && (
+        {isValid && !isLoading && !isError && processedData.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -233,7 +269,7 @@ export function UsageChart({ filter }: { filter: ChartFilterState }) {
           </motion.div>
         )}
 
-        {isValid && isSuccess && processedData.length === 0 && (
+        {isValid && !isLoading && !isError && processedData.length === 0 && (
           <div className="flex items-center justify-center h-64 text-center text-white/70">
             <div className="flex flex-col items-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
@@ -243,7 +279,7 @@ export function UsageChart({ filter }: { filter: ChartFilterState }) {
               </svg>
               <p>Nenhum dado de uso disponível para esta entidade.</p>
               <button
-                onClick={() => refresh()}
+                onClick={fetchData}
                 className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 Tentar novamente

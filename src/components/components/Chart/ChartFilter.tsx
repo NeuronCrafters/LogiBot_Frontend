@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AcademicFilter } from "./AcademicFilter";
 import {
   Select,
@@ -25,9 +25,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   const [mode, setMode] = useState<LogModeType>("individual");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Movemos a função notifyParent para um useCallback
-  // para garantir que ela usa os valores mais recentes
-  // de entityType e mode a cada chamada
+  // Função para notificar o componente pai sobre mudanças
   const notifyParent = useCallback((
     type: LogEntityType,
     ids: string[],
@@ -36,22 +34,28 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     // Garantimos que os IDs são válidos antes de chamar o callback
     const validIds = ids.filter((id) => id && id.trim() !== "");
     console.log("ChartFilter - notifyParent chamado:", { type, validIds, viewMode });
+
+    // Adicionar um log antes de chamar onChange
+    console.log("ChartFilter - Chamando função onChange");
     onChange(type, validIds, viewMode);
-  }, [onChange]); // Dependência apenas do onChange, que não deve mudar
+    console.log("ChartFilter - Função onChange foi chamada");
+  }, [onChange]);
 
   const handleEntityTypeChange = useCallback((value: string) => {
     const newType = value as LogEntityType;
+    console.log("ChartFilter - handleEntityTypeChange:", newType);
     setEntityType(newType);
     setSelectedIds([]);
-    // Usamos os valores atuais dos estados diretamente aqui
+    // Notificar o componente pai da mudança
     notifyParent(newType, [], mode);
   }, [mode, notifyParent]);
 
   const handleModeChange = useCallback((value: string) => {
     const newMode = value as LogModeType;
+    console.log("ChartFilter - handleModeChange:", newMode);
     setMode(newMode);
     setSelectedIds([]);
-    // Usamos os valores atuais dos estados diretamente aqui
+    // Notificar o componente pai da mudança
     notifyParent(entityType, [], newMode);
   }, [entityType, notifyParent]);
 
@@ -60,10 +64,25 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     const validIds = ids.filter((id) => id && id.trim() !== "");
     console.log("ChartFilter - handleEntitySelection:", validIds);
 
-    setSelectedIds(validIds);
-    // Chamamos notifyParent com os valores atuais
-    notifyParent(entityType, validIds, mode);
-  }, [entityType, mode, notifyParent]);
+    // Verificar se a lista realmente mudou antes de atualizar e notificar
+    if (JSON.stringify(selectedIds) !== JSON.stringify(validIds)) {
+      setSelectedIds(validIds);
+      // Chamamos notifyParent com os valores atuais
+      notifyParent(entityType, validIds, mode);
+    }
+  }, [entityType, mode, notifyParent, selectedIds]);
+
+  // Ajustar título com base no tipo de entidade
+  const getEntityTypeTitle = (type: LogEntityType) => {
+    switch (type) {
+      case "student": return "Aluno";
+      case "class": return "Turma";
+      case "course": return "Curso";
+      case "university": return "Universidade";
+      case "discipline": return "Disciplina";
+      default: return "Entidade";
+    }
+  };
 
   return (
     <motion.div
@@ -72,8 +91,10 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="space-y-6 mb-8"
+      className="space-y-6 mb-8 p-4 bg-[#1f1f1f] rounded-xl border border-white/10"
     >
+      <h3 className="text-lg font-semibold text-white">Filtros</h3>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="entity-type" className="text-white">
@@ -81,7 +102,9 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
           </Label>
           <Select value={entityType} onValueChange={handleEntityTypeChange}>
             <SelectTrigger className="bg-[#141414] text-white border-white/10">
-              <SelectValue placeholder="Selecione o tipo" />
+              <SelectValue placeholder="Selecione o tipo">
+                {getEntityTypeTitle(entityType)}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
               <SelectItem value="student">Aluno</SelectItem>
@@ -98,7 +121,9 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
           </Label>
           <Select value={mode} onValueChange={handleModeChange}>
             <SelectTrigger className="bg-[#141414] text-white border-white/10">
-              <SelectValue placeholder="Selecione o modo" />
+              <SelectValue placeholder="Selecione o modo">
+                {mode === "individual" ? "Visualizar um" : "Comparar vários"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
               <SelectItem value="individual">Visualizar um</SelectItem>
@@ -115,7 +140,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       />
 
       {mode === "compare" && (
-        <div className="text-sm text-yellow-400 mt-1">
+        <div className={selectedIds.length < 2 ? "text-sm text-yellow-400 mt-1" : "text-sm text-green-400 mt-1"}>
           {selectedIds.length < 2
             ? "Selecione pelo menos duas entidades para comparação"
             : `${selectedIds.length} entidades selecionadas para comparação`}

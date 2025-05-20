@@ -11,10 +11,120 @@ const postRequest = async <T>(url: string, data: object): Promise<T> => {
   return response.data;
 };
 
+// Interfaces para adaptação de dados
+interface SummaryData {
+  totalCorrectAnswers: number;
+  totalWrongAnswers: number;
+  usageTimeInSeconds: number;
+  mostAccessedSubjects: Array<{
+    subject: string;
+    count: number;
+  }>;
+}
+
 export const logApi = {
-  getUniversitySummary: <T>(id: string) => getRequest<T>(LOG_ROUTES.summary.university(id)),
-  getCourseSummary: <T>(id: string) => getRequest<T>(LOG_ROUTES.summary.course(id)),
-  getClassSummary: <T>(id: string) => getRequest<T>(LOG_ROUTES.summary.class(id)),
+  // Métodos para resumos existentes
+  getUniversitySummary: <T>(id: string) =>
+    getRequest<T>(LOG_ROUTES.summary.university(id)),
+
+  getCourseSummary: <T>(id: string) =>
+    getRequest<T>(LOG_ROUTES.summary.course(id)),
+
+  getClassSummary: <T>(id: string) =>
+    getRequest<T>(LOG_ROUTES.summary.class(id)),
+
   getFilteredStudentSummary: <T>(body: { universityId: string, courseId?: string, classId?: string }) =>
     postRequest<T>(LOG_ROUTES.summary.filteredStudent, body),
+
+  // Métodos adaptados para gráficos específicos
+  getAccuracyData: async <T>(entityType: string, id: string): Promise<T> => {
+    let summaryData: SummaryData;
+
+    switch (entityType) {
+      case "university":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.university(id));
+        break;
+      case "course":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.course(id));
+        break;
+      case "class":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.class(id));
+        break;
+      case "student":
+        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, { universityId: id });
+        break;
+      default:
+        throw new Error(`Tipo de entidade não suportado: ${entityType}`);
+    }
+
+    // Adapta os dados para o formato esperado pelo componente CorrectWrongChart
+    return {
+      totalCorrect: summaryData.totalCorrectAnswers || 0,
+      totalWrong: summaryData.totalWrongAnswers || 0,
+      accuracy: summaryData.totalCorrectAnswers + summaryData.totalWrongAnswers > 0
+        ? (summaryData.totalCorrectAnswers / (summaryData.totalCorrectAnswers + summaryData.totalWrongAnswers)) * 100
+        : 0
+    } as unknown as T;
+  },
+
+  getUsageData: async <T>(entityType: string, id: string): Promise<T> => {
+    let summaryData: SummaryData;
+
+    switch (entityType) {
+      case "university":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.university(id));
+        break;
+      case "course":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.course(id));
+        break;
+      case "class":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.class(id));
+        break;
+      case "student":
+        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, { universityId: id });
+        break;
+      default:
+        throw new Error(`Tipo de entidade não suportado: ${entityType}`);
+    }
+
+    // Adapta os dados para o formato esperado pelo componente UsageChart
+    return {
+      totalUsageTime: summaryData.usageTimeInSeconds || 0,
+      sessionCount: 1,
+      sessionDetails: [{
+        sessionStart: new Date().toISOString(),
+        sessionEnd: new Date().toISOString(),
+        sessionDuration: summaryData.usageTimeInSeconds || 0
+      }]
+    } as unknown as T;
+  },
+
+  getSubjectsData: async <T>(entityType: string, id: string): Promise<T> => {
+    let summaryData: SummaryData;
+
+    switch (entityType) {
+      case "university":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.university(id));
+        break;
+      case "course":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.course(id));
+        break;
+      case "class":
+        summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.class(id));
+        break;
+      case "student":
+        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, { universityId: id });
+        break;
+      default:
+        throw new Error(`Tipo de entidade não suportado: ${entityType}`);
+    }
+
+    // Adapta os dados para o formato esperado pelo componente CategoryChart
+    return {
+      subjectFrequency: summaryData.mostAccessedSubjects?.reduce((acc: Record<string, number>, item: any) => {
+        acc[item.subject] = item.count;
+        return acc;
+      }, {}) || {}
+    } as unknown as T;
+  }
 };

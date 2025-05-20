@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, Cell, ResponsiveContainer
@@ -6,72 +6,108 @@ import {
 import { Card } from "@/components/ui/card";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { motion } from "framer-motion";
-import { useChartData } from "@/hooks/use-ChartData";
-import type { ChartFilterState, CategoryData } from "@/@types/ChartsType";
+import { logApi } from "@/services/apiClient";
+import type { ChartFilterState } from "@/@types/ChartsType";
 
 const barColors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
 export function CategoryChart({ filter }: { filter: ChartFilterState }) {
+  console.log("CategoryChart - Renderizado com filtro:", filter);
+
+  // Estados para gerenciar dados e estado de carregamento
+  const [data, setData] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [processedData, setProcessedData] = useState<any[]>([]);
+  const [lastFetchedId, setLastFetchedId] = useState<string | null>(null);
+
+  // Extração e validação robusta do ID
   const validIds = Array.isArray(filter.ids) ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') : [];
   const id = validIds[0] || "";
   const isValid = id !== "";
 
-  console.log("[Chart] CategoryChart - ID:", id, "É válido:", isValid);
+  // Função para buscar dados da API
+  const fetchData = async () => {
+    if (!isValid) {
+      console.log("CategoryChart - ID inválido, não buscando dados");
+      return;
+    }
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    isSuccess,
-    refresh,
-  } = useChartData<any>(
-    filter.type,
-    "subjects",
-    "individual",
-    id,
-    !isValid
-  );
+    // Verificar se já buscamos dados para este ID
+    if (lastFetchedId === id && data !== null) {
+      console.log("CategoryChart - Já temos dados para este ID, pulando fetch");
+      return;
+    }
 
-  // Log detalhado dos dados brutos
-  useEffect(() => {
-    console.log("[Chart] CategoryChart - Dados brutos recebidos:", data);
-  }, [data]);
+    console.log("CategoryChart - Iniciando busca de dados para ID:", id);
+    setIsLoading(true);
+    setIsError(false);
+    setError(null);
 
-  // Processamento de dados robusto
-  const processedData = useMemo(() => {
-    if (!data) {
-      console.log("[Chart] CategoryChart - Nenhum dado para processar");
-      return [];
+    try {
+      console.log("CategoryChart - Buscando dados para:", filter.type, id);
+      const response = await logApi.get<any>(
+        filter.type,
+        "subjects",
+        "individual",
+        id
+      );
+
+      console.log("CategoryChart - Dados recebidos:", response);
+      setData(response);
+      processData(response);
+      setLastFetchedId(id);
+    } catch (err: any) {
+      console.error("CategoryChart - Erro ao buscar dados:", err);
+      setIsError(true);
+      setError(err?.message || "Erro ao carregar dados de categorias.");
+      setProcessedData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Função para processar os dados recebidos
+  const processData = (rawData: any) => {
+    if (!rawData) {
+      setProcessedData([]);
+      return;
     }
 
     try {
-      console.log("[Chart] CategoryChart - Processando dados:", data);
+      console.log("CategoryChart - Processando dados:", rawData);
+      let result: any[] = [];
 
       // Caso com subjectFrequency
-      if (typeof data === 'object' && 'subjectFrequency' in data && typeof data.subjectFrequency === 'object') {
-        console.log("[Chart] CategoryChart - Formato: objeto com subjectFrequency");
+      if (typeof rawData === 'object' && 'subjectFrequency' in rawData && typeof rawData.subjectFrequency === 'object') {
+        console.log("CategoryChart - Formato: objeto com subjectFrequency");
 
         // Converter subjectFrequency para array de {category, value}
-        const result = Object.entries(data.subjectFrequency)
+        result = Object.entries(rawData.subjectFrequency)
           .filter(([key, value]) => key && value)
           .map(([category, value]) => ({
             category,
             value: Number(value)
           }));
-
-        console.log("[Chart] CategoryChart - Dados processados:", result);
-        return result;
       }
+      // Caso com mostAccessedSubjects
+      else if (typeof rawData === 'object' && 'mostAccessedSubjects' in rawData && Array.isArray(rawData.mostAccessedSubjects)) {
+        console.log("CategoryChart - Formato: objeto com mostAccessedSubjects");
 
+        result = rawData.mostAccessedSubjects.map((item: any) => ({
+          category: item.subject,
+          value: Number(item.count)
+        }));
+      }
       // Caso com array de objetos
-      if (Array.isArray(data)) {
-        console.log("[Chart] CategoryChart - Formato: array de objetos");
+      else if (Array.isArray(rawData)) {
+        console.log("CategoryChart - Formato: array de objetos");
 
         // Verificar se os objetos têm as propriedades necessárias
-        if (data.length > 0 && typeof data[0] === 'object') {
+        if (rawData.length > 0 && typeof rawData[0] === 'object') {
           // Verificar quais propriedades usar como categoria e valor
-          const sampleObject = data[0];
+          const sampleObject = rawData[0];
           let categoryKey = null;
           let valueKey = null;
 
@@ -98,47 +134,61 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
           }
 
           if (categoryKey && valueKey) {
-            console.log(`[Chart] CategoryChart - Usando ${categoryKey} e ${valueKey} do array`);
-            return data.map(item => ({
+            console.log(`CategoryChart - Usando ${categoryKey} e ${valueKey} do array`);
+            result = rawData.map((item: any) => ({
               category: item[categoryKey],
               value: Number(item[valueKey])
             }));
           }
         }
       }
-
+      //
       // Se chegou até aqui, tenta extrair qualquer coisa útil do objeto
-      if (typeof data === 'object') {
-        console.log("[Chart] CategoryChart - Tentando extrair dados de formato desconhecido:", data);
+      else if (typeof rawData === 'object') {
+        console.log("CategoryChart - Tentando extrair dados de formato desconhecido:", rawData);
 
         // Procurar qualquer objeto que possa conter frequências por assunto/categoria
-        for (const [key, value] of Object.entries(data)) {
+        for (const [key, value] of Object.entries(rawData)) {
           if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
             // Verificar se este objeto parece uma tabela de frequências
             const entries = Object.entries(value);
             if (entries.length > 0 && typeof entries[0][1] === 'number') {
-              console.log(`[Chart] CategoryChart - Usando objeto ${key} como fonte de dados`);
-              return entries.map(([category, count]) => ({
+              console.log(`CategoryChart - Usando objeto ${key} como fonte de dados`);
+              result = entries.map(([category, count]) => ({
                 category,
                 value: Number(count)
               }));
+              break;
             }
           }
         }
       }
 
-      console.log("[Chart] CategoryChart - Formato desconhecido, não foi possível processar os dados");
-      return [];
-    } catch (error) {
-      console.error("[Chart] CategoryChart - Erro ao processar dados:", error);
-      return [];
-    }
-  }, [data]);
+      if (result.length === 0) {
+        console.log("CategoryChart - Formato desconhecido ou sem dados, não foi possível processar");
+      } else {
+        console.log("CategoryChart - Dados processados finais:", result);
+      }
 
-  // Log dos dados processados
+      setProcessedData(result);
+    } catch (error) {
+      console.error("CategoryChart - Erro ao processar dados:", error);
+      setProcessedData([]);
+    }
+  };
+
+  // Efeito para buscar dados quando o filtro mudar
   useEffect(() => {
-    console.log("[Chart] CategoryChart - Dados processados finais:", processedData);
-  }, [processedData]);
+    console.log("CategoryChart - Filtro mudou, ID:", id, "Válido:", isValid);
+    if (isValid) {
+      fetchData();
+    } else {
+      // Limpar dados quando não há ID válido
+      setData(null);
+      setProcessedData([]);
+      setLastFetchedId(null);
+    }
+  }, [filter.type, id]);
 
   return (
     <Card className="p-4 bg-[#141414] border-white/10 w-full mb-6">
@@ -151,7 +201,7 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
             fontFamily="montserrat"
             colorText="text-white"
           />
-          {isSuccess && processedData.length > 0 && (
+          {!isLoading && !isError && processedData.length > 0 && (
             <div className="text-xs text-white/50">
               {processedData.length} categoria(s)
             </div>
@@ -159,18 +209,27 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
         </div>
 
         {!isValid && (
-          <Fallback message="Selecione uma entidade para visualizar dados" />
+          <div className="flex items-center justify-center h-64 text-center text-white/70">
+            <p>Selecione uma entidade para visualizar dados</p>
+          </div>
         )}
 
         {isValid && isLoading && (
-          <Fallback message="Carregando dados..." />
+          <div className="flex items-center justify-center h-64 text-center text-white/70">
+            <div className="flex flex-col items-center">
+              <div className="animate-pulse w-10 h-10 rounded-full bg-indigo-600/30 mb-3"></div>
+              <p>Carregando dados...</p>
+            </div>
+          </div>
         )}
 
         {isValid && isError && (
-          <Fallback message={error || "Erro ao carregar dados"} isError />
+          <div className="flex items-center justify-center h-64 text-center text-red-400">
+            <p>{error || "Erro ao carregar dados."}</p>
+          </div>
         )}
 
-        {isValid && isSuccess && processedData.length > 0 && (
+        {isValid && !isLoading && !isError && processedData.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={processedData} margin={{ top: 5, right: 20, left: 0, bottom: 25 }}>
@@ -192,7 +251,7 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
           </motion.div>
         )}
 
-        {isValid && isSuccess && processedData.length === 0 && (
+        {isValid && !isLoading && !isError && processedData.length === 0 && (
           <div className="flex items-center justify-center h-64 text-center text-white/70">
             <div className="flex flex-col items-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
@@ -202,7 +261,7 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
               </svg>
               <p>Nenhum dado de categorias disponível para esta entidade.</p>
               <button
-                onClick={() => refresh()}
+                onClick={fetchData}
                 className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 Tentar novamente
@@ -212,13 +271,5 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
         )}
       </div>
     </Card>
-  );
-}
-
-function Fallback({ message, isError = false }: { message: string; isError?: boolean }) {
-  return (
-    <div className={`flex items-center justify-center h-64 ${isError ? "text-red-400" : "text-white/70"} text-center`}>
-      <p>{message}</p>
-    </div>
   );
 }

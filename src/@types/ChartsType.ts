@@ -4,7 +4,7 @@ import { LogEntityType, LogMetricType, LogModeType } from "@/services/api/api_ro
 export interface ChartFilterState {
   type: LogEntityType;
   ids: string[];
-  mode?: LogModeType;
+  mode: LogModeType;
 }
 
 // Dados para gráfico de categoria
@@ -54,14 +54,29 @@ export interface EntitySearchResult {
   total: number;
 }
 
-// Tipos para filtros do formulário
+// Definição consolidada dos tipos de filtro
+export type FilterType =
+  | 'universities'
+  | 'courses'
+  | 'disciplines'
+  | 'classes'
+  | 'professors'
+  | 'students'
+  | 'students-discipline'
+  | 'students-course';
+
+// Interface FilterData consolidada que atende a todas as necessidades
 export interface FilterData {
-  filterType: "students" | "classes" | "courses" | "universities";
+  filterType: FilterType | '';
   universityId?: string;
   courseId?: string;
+  disciplineId?: string;
   classId?: string;
   searchTerm?: string;
 }
+
+// Definição do tipo para papéis de usuário
+export type Role = "admin" | "course-coordinator" | "professor";
 
 // Nova interface para a resposta da API de uso
 export interface UsageApiResponse {
