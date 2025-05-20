@@ -18,7 +18,7 @@ export type LogMetricType =
 
 export type LogModeType =
   | "individual"
-  | "compare";
+  | "comparison";
 
 export const ACADEMIC_ROUTES: Record<
   AcademicEntityType,
@@ -149,6 +149,12 @@ export const LOG_ROUTES = {
     course: (id: string) => `/logs/course/${id}/summary`,
     class: (id: string) => `/logs/class/${id}/summary`,
     filteredStudent: `/logs/student/summary/filtered`,
+  },
+  comparison: {
+    universities: `/logs/comparison/universities`,
+    courses: `/logs/comparison/courses`,
+    classes: `/logs/comparison/classes`,
+    students: `/logs/comparison/students`,
   }
 } as const;
 
