@@ -7,7 +7,6 @@ import { Typograph } from "@/components/components/Typograph/Typograph";
 import { ChartFilter } from "@/components/components/Chart/ChartFilter";
 import type { ChartFilterState } from "@/@types/ChartsType";
 import { LogEntityType, LogModeType } from "@/services/api/api_routes";
-import { logApi_extends as logApi } from "@/services/api/logApi_extends";
 import React from "react";
 
 // Lazy-loaded chart components
@@ -88,18 +87,18 @@ export function Chart() {
   );
 
   // Teste direto de API usando getCached
-  useEffect(() => {
-    if (filter.mode === 'individual' && filter.ids.length > 0) {
-      logApi.getCached(
-        filter.type,
-        "usage" as any,
-        filter.mode as any,
-        filter.ids[0]
-      )
-        .then(res => console.log("[Test API] resposta bruta:", res))
-        .catch(err => console.error("[Test API] erro:", err));
-    }
-  }, [filter]);
+  // useEffect(() => {
+  //   if (filter.mode === 'individual' && filter.ids.length > 0) {
+  //     logApi.getCached(
+  //       filter.type,
+  //       "usage" as any,
+  //       filter.mode as any,
+  //       filter.ids[0]
+  //     )
+  //       .then(res => console.log("[Test API] resposta bruta:", res))
+  //       .catch(err => console.error("[Test API] erro:", err));
+  //   }
+  // }, [filter]);
 
   const validIds = filter.ids;
   const isCompareMode = filter.mode === "compare" && validIds.length > 1;
