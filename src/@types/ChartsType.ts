@@ -63,6 +63,7 @@ export type FilterType =
   | 'professors'
   | 'students'
   | 'students-discipline'
+  | "students-class"
   | 'students-course';
 
 // Interface FilterData consolidada que atende a todas as necessidades
