@@ -1,4 +1,3 @@
-// CRUD.tsx
 import { useAuth } from "@/hooks/use-Auth";
 import { useState } from "react";
 import { FormsCrud } from "@/components/components/Forms/Crud/FormsCrud";
@@ -10,6 +9,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { AppModal } from "@/components/components/Modal/AppModal";
 import { LastCreatedList, RecentItem } from "@/components/components/Forms/Crud/LastCreatedList";
+import { academicApi, adminApi } from "@/services/apiClient";
+import { AcademicEntityType } from "@/services/api/api_routes";
+
+interface ApiResponse {
+  id?: string;
+  _id?: string;
+  [key: string]: any;
+}
 
 export function CRUD() {
   const { user } = useAuth();
@@ -17,7 +24,7 @@ export function CRUD() {
   const [showToast, setShowToast] = useState<"success" | "error" | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [confirmDeleteItem, setConfirmDeleteItem] = useState<RecentItem | null>(null);
 
   if (!user) return null;
@@ -34,32 +41,78 @@ export function CRUD() {
     );
   }
 
-  const handleSubmit = (entity: string, item: any) => {
-    const newItem: RecentItem = {
-      id: item.id || item._id,
-      name: item.name,
-      type: entity,
-      action: "create"
-    };
-    setRecentItems((prev) => [newItem, ...prev.slice(0, 19)]);
-    triggerToast("success", "Cadastro realizado com sucesso!");
+  const handleSubmit = async (entity: string, item: any) => {
+    setLoading(true);
+    try {
+      console.log(`Enviando ${entity}:`, item);
+
+      let response: ApiResponse;
+
+      if (entity === "professor") {
+        response = await adminApi.createProfessor<ApiResponse>(item);
+      } else if (["university", "course", "class", "discipline"].includes(entity)) {
+        response = await academicApi.post<ApiResponse>(entity as AcademicEntityType, item);
+      } else {
+        throw new Error(`Tipo de entidade desconhecido: ${entity}`);
+      }
+
+      console.log("Resposta da API:", response);
+
+      const newItem: RecentItem = {
+        id: response?.id || response?._id || `temp-${Date.now()}`,
+        name: item.name || "Item sem nome",
+        type: entity,
+        action: "create"
+      };
+
+      setRecentItems((prev) => [newItem, ...prev.slice(0, 19)]);
+      triggerToast("success", "Cadastro realizado com sucesso!");
+
+    } catch (error) {
+      console.error("Erro ao enviar dados:", error);
+      triggerToast("error", "Erro ao cadastrar. Verifique o console para mais detalhes.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEdit = (item: RecentItem) => {
-    const updated: RecentItem = { ...item, action: "update" as "update" };
-    setRecentItems((prev) => [updated, ...prev.filter((i) => i.id !== item.id).slice(0, 19)]);
-    triggerToast("success", "Item preparado para edição.");
+  const handleEdit = async (item: RecentItem) => {
+    try {
+      const updated: RecentItem = { ...item, action: "update" as "update" };
+      setRecentItems((prev) => [updated, ...prev.filter((i) => i.id !== item.id).slice(0, 19)]);
+      triggerToast("success", "Item preparado para edição.");
+    } catch (error) {
+      console.error("Erro ao preparar item para edição:", error);
+      triggerToast("error", "Erro ao preparar edição.");
+    }
   };
 
   const handleDelete = (item: RecentItem) => {
     setConfirmDeleteItem(item);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!confirmDeleteItem) return;
-    setRecentItems((prev) => prev.filter((item) => item.id !== confirmDeleteItem.id));
-    setConfirmDeleteItem(null);
-    triggerToast("success", "Registro excluído com sucesso.");
+
+    setLoading(true);
+    try {
+      if (confirmDeleteItem.type === "professor") {
+        await adminApi.deleteProfessor<ApiResponse>(confirmDeleteItem.id);
+      } else if (["university", "course", "class", "discipline"].includes(confirmDeleteItem.type)) {
+        await academicApi.delete<ApiResponse>(confirmDeleteItem.type as AcademicEntityType, confirmDeleteItem.id);
+      } else {
+        throw new Error(`Tipo de entidade desconhecido: ${confirmDeleteItem.type}`);
+      }
+
+      setRecentItems((prev) => prev.filter((item) => item.id !== confirmDeleteItem.id));
+      triggerToast("success", "Registro excluído com sucesso.");
+    } catch (error) {
+      console.error("Erro ao excluir:", error);
+      triggerToast("error", "Erro ao excluir registro.");
+    } finally {
+      setConfirmDeleteItem(null);
+      setLoading(false);
+    }
   };
 
   const triggerToast = (type: "success" | "error", message: string) => {
@@ -93,10 +146,19 @@ export function CRUD() {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.4 }}
         >
-          <FormsCrud onSubmit={handleSubmit} initialData={undefined} animateForm={true} />
+          <FormsCrud
+            onSubmit={handleSubmit}
+            initialData={undefined}
+            animateForm={true}
+          />
         </motion.div>
 
-        <LastCreatedList items={recentItems} onEdit={handleEdit} onDelete={handleDelete} loading={loading} />
+        <LastCreatedList
+          items={recentItems}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          loading={loading}
+        />
       </div>
 
       <AnimatePresence>

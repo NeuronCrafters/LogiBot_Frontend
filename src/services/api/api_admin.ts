@@ -1,34 +1,57 @@
-import { api } from "./api";
-import { ADMIN_ROUTES } from "./api_routes";
+import { api } from "@/services/api/api";
+import { ADMIN_ROUTES } from './api_routes'
+
+const postRequest = async <T>(url: string, data: object): Promise<T> => {
+  const response = await api.post<T>(url, data, { withCredentials: true });
+  return response.data;
+};
+
+const getRequest = async <T>(url: string): Promise<T> => {
+  const response = await api.get<T>(url, { withCredentials: true });
+  return response.data;
+};
+
+const deleteRequest = async <T>(url: string): Promise<T> => {
+  const response = await api.delete<T>(url, { withCredentials: true });
+  return response.data;
+};
+
+const patchRequest = async <T>(url: string, data: object): Promise<T> => {
+  const response = await api.patch<T>(url, data, { withCredentials: true });
+  return response.data;
+};
 
 export const adminApi = {
-  createProfessor: (data: object) =>
-    api.post(ADMIN_ROUTES.createProfessor, data),
+  createProfessor: <T>(data: object): Promise<T> =>
+    postRequest<T>(ADMIN_ROUTES.createProfessor, data),
 
-  deleteProfessor: (professorId: string) =>
-    api.delete(
+  deleteProfessor: <T>(professorId: string): Promise<T> =>
+    deleteRequest<T>(
       ADMIN_ROUTES.deleteProfessor.replace(":professorId", professorId)
     ),
 
-  listAllProfessors: () =>
-    api.get(ADMIN_ROUTES.listAllProfessors),
+  listAllProfessors: <T>(): Promise<T> =>
+    getRequest<T>(ADMIN_ROUTES.listAllProfessors),
 
-  listProfessorsByUniversity: (schoolId: string) =>
-    api.get(
-      ADMIN_ROUTES.listProfessorsByUniversity.replace(":schoolId", schoolId)
+  listProfessorsByUniversity: <T>(schoolId: string): Promise<T> =>
+    getRequest<T>(
+      ADMIN_ROUTES.listProfessorsByUniversity.replace(
+        ":schoolId",
+        schoolId
+      )
     ),
 
-  listProfessorsByCourse: (courseId: string) =>
-    api.get(
+  listProfessorsByCourse: <T>(courseId: string): Promise<T> =>
+    getRequest<T>(
       ADMIN_ROUTES.listProfessorsByCourse.replace(":courseId", courseId)
     ),
 
-  updateProfessorRole: (id: string, action: "add" | "remove") =>
-    api.patch(
+  updateProfessorRole: <T>(id: string, action: "add" | "remove"): Promise<T> =>
+    patchRequest<T>(
       ADMIN_ROUTES.updateProfessorRole.replace(":id", id),
       { action }
     ),
 
-  listStudents: () =>
-    api.get(ADMIN_ROUTES.listStudents),
+  listStudents: <T>(): Promise<T> =>
+    getRequest<T>(ADMIN_ROUTES.listStudents),
 };

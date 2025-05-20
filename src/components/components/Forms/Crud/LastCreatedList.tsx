@@ -37,6 +37,14 @@ export function LastCreatedList({ items, onEdit, onDelete, loading = false }: La
     closeModal();
   };
 
+  // Gera uma chave única para cada item da lista
+  const generateUniqueKey = (item: RecentItem, index: number): string => {
+    // Se o id existir, usamos ele; caso contrário, usamos o índice do array
+    const itemId = item.id || `no-id-${index}`;
+    // Adiciona timestamp para garantir que mesmo com o mesmo id e action, a chave será única
+    return `${itemId}-${item.action}-${Date.now()}-${index}`;
+  };
+
   return (
     <>
       <motion.div
@@ -57,16 +65,20 @@ export function LastCreatedList({ items, onEdit, onDelete, loading = false }: La
 
         {loading ? (
           <div className="mt-4 h-20 w-full rounded-md bg-white/10 animate-pulse" />
+        ) : items.length === 0 ? (
+          <div className="mt-4 p-3 text-center text-slate-400 bg-[#141414] rounded-xl border border-white/10">
+            <p>Nenhum registro encontrado</p>
+          </div>
         ) : (
           <ul className="mt-4 space-y-3">
-            {items.slice(0, 20).map((item) => (
+            {items.slice(0, 20).map((item, index) => (
               <li
-                key={`${item.id}-${item.action}`}
+                key={generateUniqueKey(item, index)}
                 className="flex justify-between items-center bg-[#141414] p-3 rounded-xl border border-white/10"
               >
                 <div>
                   <Typograph
-                    text={item.name}
+                    text={item.name || "Sem nome"}
                     variant="text5"
                     colorText="text-white"
                     fontFamily="poppins"
@@ -100,14 +112,14 @@ export function LastCreatedList({ items, onEdit, onDelete, loading = false }: La
         {selectedItem && (
           <div className="text-left">
             <Typograph
-              text={`ID: ${selectedItem.id}`}
+              text={`ID: ${selectedItem.id || "Não definido"}`}
               colorText="text-white"
               variant="text6"
               weight="regular"
               fontFamily="poppins"
             />
             <Typograph
-              text={`Nome: ${selectedItem.name}`}
+              text={`Nome: ${selectedItem.name || "Sem nome"}`}
               colorText="text-white"
               variant="text6"
               weight="regular"
