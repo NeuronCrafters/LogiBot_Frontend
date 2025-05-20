@@ -38,6 +38,12 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
     },
     {
       show: ["admin", "course-coordinator"].includes(role),
+      path: "/crud",
+      icon: <Settings className="w-5 h-5" />,
+      label: "Criar",
+    },
+    {
+      show: ["admin", "course-coordinator"].includes(role),
       path: "/list",
       icon: <TableProperties className="w-5 h-5" />,
       label: "Listar",
@@ -47,12 +53,6 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
       path: "/chat",
       icon: <MessageSquare className="w-5 h-5" />,
       label: "Chat",
-    },
-    {
-      show: ["admin", "course-coordinator"].includes(role),
-      path: "/crud",
-      icon: <Settings className="w-5 h-5" />,
-      label: "Criar",
     },
     //!em desenvolvimento
     // {
