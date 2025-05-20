@@ -14,17 +14,26 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
 import { LogEntityType } from "@/services/api/api_routes";
-import { FilterData, Role } from "@/@types/ChartsType";
+import { FilterData, FilterType, Role } from "@/@types/ChartsType";
 
 interface AcademicFilterProps {
   entityType: LogEntityType;
   multiple?: boolean;
   onSelect: (ids: string[]) => void;
+  additionalParams?: {
+    universityId?: string;
+    courseId?: string;
+    classId?: string;
+  };
 }
 
 type Option = { _id: string; name: string };
 
-export function AcademicFilter({ entityType, multiple = false, onSelect }: AcademicFilterProps) {
+export function AcademicFilter({
+  entityType,
+  multiple = false,
+  onSelect
+}: AcademicFilterProps) {
   const { user } = useAuth();
   const rawRoles = Array.isArray(user?.role) ? user.role : [user?.role];
   const role = (rawRoles.find((r): r is Role =>
@@ -39,12 +48,14 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
   const [selectedUniversity, setSelectedUniversity] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
+  const [selectedDiscipline, setSelectedDiscipline] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState({
     universities: false,
     courses: false,
     classes: false,
     entities: false,
+    disciplines: false
   });
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,7 +86,9 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
   useEffect(() => {
     fetchData(
       async () => {
+        console.log("AcademicFilter - Buscando universidades");
         const { items } = await searchEntitiesByFilter(role, { filterType: "universities" });
+        console.log("AcademicFilter - Universidades encontradas:", items.length);
         return items.map(i => ({ _id: i.id, name: i.name }));
       },
       setUniversities,
@@ -92,10 +105,12 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
 
     fetchData(
       async () => {
+        console.log("AcademicFilter - Buscando cursos para universidade:", selectedUniversity);
         const { items } = await searchEntitiesByFilter(role, {
           filterType: "courses",
           universityId: selectedUniversity,
         });
+        console.log("AcademicFilter - Cursos encontrados:", items.length);
         return items.map(i => ({ _id: i.id, name: i.name }));
       },
       setCourses,
@@ -112,11 +127,13 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
 
     fetchData(
       async () => {
+        console.log("AcademicFilter - Buscando turmas para universidade/curso:", selectedUniversity, selectedCourse);
         const { items } = await searchEntitiesByFilter(role, {
           filterType: "classes",
           universityId: selectedUniversity,
           courseId: selectedCourse,
         });
+        console.log("AcademicFilter - Turmas encontradas:", items.length);
         return items.map(i => ({ _id: i.id, name: i.name }));
       },
       setClasses,
@@ -127,17 +144,36 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
   // Buscar entidades
   useEffect(() => {
     const fetchEntities = async () => {
-      // Mapeamento para os tipos corretos esperados pela função searchEntitiesByFilter
-      const filterTypeMap: Record<LogEntityType, FilterData['filterType']> = {
-        "student": "students",
-        "class": "classes",
-        "course": "courses",
-        "university": "universities",
-        "discipline": "disciplines"
-      };
+      // Determinar o tipo de filtro apropriado com base no tipo de entidade
+      let filterType: FilterType = "students";
 
-      const filterType = filterTypeMap[entityType] || "students";
+      switch (entityType) {
+        case "student":
+          if (selectedClass) {
+            filterType = "students-course";
+          } else if (selectedCourse) {
+            filterType = "students-course";
+          } else {
+            filterType = "students";
+          }
+          break;
+        case "class":
+          filterType = "classes";
+          break;
+        case "course":
+          filterType = "courses";
+          break;
+        case "university":
+          filterType = "universities";
+          break;
+        case "discipline":
+          filterType = "disciplines";
+          break;
+        default:
+          filterType = "students";
+      }
 
+      console.log("AcademicFilter - Tipo de filtro selecionado:", filterType);
       setLoading(prev => ({ ...prev, entities: true }));
 
       try {
@@ -146,10 +182,14 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
           universityId: selectedUniversity || undefined,
           courseId: selectedCourse || undefined,
           classId: selectedClass || undefined,
+          disciplineId: selectedDiscipline || undefined,
           searchTerm: searchTerm || undefined,
         };
 
+        console.log("AcademicFilter - Buscando entidades com parâmetros:", filterData);
         const { items } = await searchEntitiesByFilter(role, filterData);
+        console.log("AcademicFilter - Entidades recebidas:", items.length);
+
         const formatted = items.map(i => ({ _id: i.id, name: i.name }));
         setEntities(formatted);
       } catch (error) {
@@ -160,8 +200,21 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
       }
     };
 
-    fetchEntities();
-  }, [entityType, selectedUniversity, selectedCourse, selectedClass, role]);
+    // Verificar se temos os parâmetros necessários com base no tipo de entidade
+    const shouldFetch = (
+      (entityType === "university") ||
+      (entityType === "course" && selectedUniversity) ||
+      (entityType === "class" && selectedUniversity && selectedCourse) ||
+      (entityType === "discipline" && selectedUniversity && selectedCourse) ||
+      (entityType === "student" && selectedUniversity)
+    );
+
+    if (shouldFetch) {
+      fetchEntities();
+    } else {
+      setEntities([]);
+    }
+  }, [entityType, selectedUniversity, selectedCourse, selectedClass, selectedDiscipline, role, searchTerm]);
 
   // Função para filtrar entidades por termo de busca
   const filteredEntities = entities.filter(entity =>
@@ -178,19 +231,30 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
     console.log("AcademicFilter - Item selecionado:", id, "Nova lista:", updated);
     setSelectedIds(updated);
 
-    // Notificar o componente pai imediatamente
-    onSelect(updated);
+    // Preparar informações de hierarquia para passar junto com os IDs selecionados
+    const hierarchyInfo = {
+      universityId: selectedUniversity || undefined,
+      courseId: selectedCourse || undefined,
+      classId: selectedClass || undefined,
+      disciplineId: selectedDiscipline || undefined,
+    };
+
+    // Notificar o componente pai imediatamente com os IDs e informações de hierarquia
+    onSelect(updated, hierarchyInfo);
 
     if (!multiple) setOpen(false);
   };
 
-  const isCoursesDisabled = !selectedUniversity || loading.universities || courses.length === 0;
-  const isClassesDisabled = !selectedCourse || loading.courses || classes.length === 0;
-  const isEntitiesDisabled =
+  // Lógica para determinar quando os campos devem estar desabilitados
+  const isCoursesDisabled = !selectedUniversity || loading.universities || universities.length === 0;
+  const isClassesDisabled = !selectedCourse || loading.courses || courses.length === 0;
+  const isEntitiesDisabled = (
     (entityType === "course" && !selectedUniversity) ||
     (entityType === "class" && (!selectedUniversity || !selectedCourse)) ||
-    (entityType === "student" && (!selectedUniversity || !selectedCourse)) ||
-    loading.entities;
+    (entityType === "discipline" && (!selectedUniversity || !selectedCourse)) ||
+    (entityType === "student" && !selectedUniversity) ||
+    loading.entities
+  );
 
   // Encontrar nomes para entidades selecionadas
   const selectedNames = selectedIds.map(id => {
@@ -206,9 +270,11 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
             value={selectedUniversity}
             onChange={(e) => {
               const val = e.target.value;
+              console.log("AcademicFilter - Universidade selecionada:", val);
               setSelectedUniversity(val);
               setSelectedCourse("");
               setSelectedClass("");
+              setSelectedDiscipline("");
               setSelectedIds([]);
               onSelect([]);
             }}
@@ -225,14 +291,16 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
           )}
         </div>
 
-        {["course", "class", "student"].includes(entityType) && (
+        {["course", "class", "student", "discipline"].includes(entityType) && (
           <div className="relative">
             <select
               value={selectedCourse}
               onChange={(e) => {
                 const val = e.target.value;
+                console.log("AcademicFilter - Curso selecionado:", val);
                 setSelectedCourse(val);
                 setSelectedClass("");
+                setSelectedDiscipline("");
                 setSelectedIds([]);
                 onSelect([]);
               }}
@@ -256,6 +324,7 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
               value={selectedClass}
               onChange={(e) => {
                 const val = e.target.value;
+                console.log("AcademicFilter - Turma selecionada:", val);
                 setSelectedClass(val);
                 setSelectedIds([]);
                 onSelect([]);
@@ -288,7 +357,8 @@ export function AcademicFilter({ entityType, multiple = false, onSelect }: Acade
                 : selectedNames[0] || selectedIds[0]
               : `Selecione ${entityType === "student" ? "o aluno" :
                 entityType === "class" ? "a turma" :
-                  entityType === "course" ? "o curso" : "a universidade"}`}
+                  entityType === "course" ? "o curso" :
+                    entityType === "discipline" ? "a disciplina" : "a universidade"}`}
             {loading.entities ? (
               <Loader2 className="ml-2 h-4 w-4 animate-spin" />
             ) : (

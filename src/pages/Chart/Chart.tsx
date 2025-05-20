@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { Avatar } from "@/components/components/Avatar/Avatar";
@@ -21,17 +21,16 @@ export function Chart() {
     ids: [],
     mode: "individual",
   });
-  const [key, setKey] = useState(0); // Para forçar re-renderização dos gráficos quando o filtro mudar
+  const [key, setKey] = useState(0);
 
   // Log quando o filtro muda
   useEffect(() => {
     console.log("Chart - Filtro atualizado:", filter);
-    // Incrementa a chave para forçar re-renderização dos gráficos
     setKey(prevKey => prevKey + 1);
   }, [filter]);
 
-  // Função para lidar com mudanças de filtro
-  function handleFilterChange(type: LogEntityType, ids: string[], mode: LogModeType) {
+  // Função para lidar com mudanças de filtro (memoizada para evitar re-criações)
+  const handleFilterChange = useCallback((type: LogEntityType, ids: string[], mode: LogModeType) => {
     console.log("Chart - handleFilterChange chamado:", { type, ids, mode });
 
     // Garantir que só ids válidos sejam considerados
@@ -54,13 +53,25 @@ export function Chart() {
     // Atualizar o estado do filtro
     setFilter({ type, ids: validIds, mode });
     console.log("Chart - Estado do filtro atualizado");
-  }
+  }, [filter]);
 
   // Verificar se temos IDs válidos para mostrar os gráficos
   const validIds = filter.ids.filter(id => id && id.trim() !== "");
   const hasSelection = validIds.length > 0;
 
   console.log("Chart - hasSelection:", hasSelection, "validIds:", validIds);
+
+  // Determinar o rótulo do tipo de entidade
+  const getEntityTypeLabel = (type: LogEntityType) => {
+    switch (type) {
+      case "student": return "Aluno";
+      case "class": return "Turma";
+      case "course": return "Curso";
+      case "university": return "Universidade";
+      case "discipline": return "Disciplina";
+      default: return "Entidade";
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
@@ -97,11 +108,22 @@ export function Chart() {
               <div className="space-y-6 mt-6">
                 <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30">
                   <p className="text-indigo-300 text-sm">
-                    <span className="font-medium">Entidade selecionada:</span> {filter.type === "student" ? "Aluno" :
-                      filter.type === "class" ? "Turma" :
-                        filter.type === "course" ? "Curso" : "Universidade"}
+                    <span className="font-medium">Entidade selecionada:</span> {getEntityTypeLabel(filter.type)}
                     <span className="px-2">•</span>
                     <span className="font-medium">ID:</span> {validIds[0]}
+                  </p>
+                </div>
+                <UsageChart filter={{ ...filter, ids: validIds }} />
+                <CorrectWrongChart filter={{ ...filter, ids: validIds }} />
+                <CategoryChart filter={{ ...filter, ids: validIds }} />
+              </div>
+            )}
+
+            {filter.mode === "compare" && validIds.length >= 2 && (
+              <div className="space-y-6 mt-6">
+                <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30">
+                  <p className="text-indigo-300 text-sm">
+                    <span className="font-medium">Comparando:</span> {validIds.length} {getEntityTypeLabel(filter.type)}s
                   </p>
                 </div>
                 <UsageChart filter={{ ...filter, ids: validIds }} />

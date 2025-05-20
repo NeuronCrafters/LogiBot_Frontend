@@ -20,6 +20,16 @@ interface SummaryData {
     subject: string;
     count: number;
   }>;
+  userCount?: number;
+  users?: any; // Adiciona suporte para dados de usuário específico
+}
+
+// Interface para filtro de resumo
+interface FilteredStudentSummaryParams {
+  universityId: string;
+  courseId?: string;
+  classId?: string;
+  studentId?: string; // Novo parâmetro opcional
 }
 
 export const logApi = {
@@ -33,11 +43,12 @@ export const logApi = {
   getClassSummary: <T>(id: string) =>
     getRequest<T>(LOG_ROUTES.summary.class(id)),
 
-  getFilteredStudentSummary: <T>(body: { universityId: string, courseId?: string, classId?: string }) =>
+  // Atualiza a tipagem para incluir studentId
+  getFilteredStudentSummary: <T>(body: FilteredStudentSummaryParams) =>
     postRequest<T>(LOG_ROUTES.summary.filteredStudent, body),
 
   // Métodos adaptados para gráficos específicos
-  getAccuracyData: async <T>(entityType: string, id: string): Promise<T> => {
+  getAccuracyData: async <T>(entityType: string, id: string, additionalParams?: FilteredStudentSummaryParams): Promise<T> => {
     let summaryData: SummaryData;
 
     switch (entityType) {
@@ -51,7 +62,11 @@ export const logApi = {
         summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.class(id));
         break;
       case "student":
-        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, { universityId: id });
+        // Adiciona suporte para parâmetros adicionais ao buscar dados de um aluno
+        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, {
+          universityId: id,
+          ...(additionalParams || {})
+        });
         break;
       default:
         throw new Error(`Tipo de entidade não suportado: ${entityType}`);
@@ -63,11 +78,14 @@ export const logApi = {
       totalWrong: summaryData.totalWrongAnswers || 0,
       accuracy: summaryData.totalCorrectAnswers + summaryData.totalWrongAnswers > 0
         ? (summaryData.totalCorrectAnswers / (summaryData.totalCorrectAnswers + summaryData.totalWrongAnswers)) * 100
-        : 0
+        : 0,
+      // Adiciona informações extras se disponíveis
+      userCount: summaryData.userCount,
+      users: summaryData.users
     } as unknown as T;
   },
 
-  getUsageData: async <T>(entityType: string, id: string): Promise<T> => {
+  getUsageData: async <T>(entityType: string, id: string, additionalParams?: FilteredStudentSummaryParams): Promise<T> => {
     let summaryData: SummaryData;
 
     switch (entityType) {
@@ -81,7 +99,11 @@ export const logApi = {
         summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.class(id));
         break;
       case "student":
-        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, { universityId: id });
+        // Adiciona suporte para parâmetros adicionais ao buscar dados de um aluno
+        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, {
+          universityId: id,
+          ...(additionalParams || {})
+        });
         break;
       default:
         throw new Error(`Tipo de entidade não suportado: ${entityType}`);
@@ -95,11 +117,14 @@ export const logApi = {
         sessionStart: new Date().toISOString(),
         sessionEnd: new Date().toISOString(),
         sessionDuration: summaryData.usageTimeInSeconds || 0
-      }]
+      }],
+      // Adiciona informações extras se disponíveis
+      userCount: summaryData.userCount,
+      users: summaryData.users
     } as unknown as T;
   },
 
-  getSubjectsData: async <T>(entityType: string, id: string): Promise<T> => {
+  getSubjectsData: async <T>(entityType: string, id: string, additionalParams?: FilteredStudentSummaryParams): Promise<T> => {
     let summaryData: SummaryData;
 
     switch (entityType) {
@@ -113,7 +138,11 @@ export const logApi = {
         summaryData = await getRequest<SummaryData>(LOG_ROUTES.summary.class(id));
         break;
       case "student":
-        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, { universityId: id });
+        // Adiciona suporte para parâmetros adicionais ao buscar dados de um aluno
+        summaryData = await postRequest<SummaryData>(LOG_ROUTES.summary.filteredStudent, {
+          universityId: id,
+          ...(additionalParams || {})
+        });
         break;
       default:
         throw new Error(`Tipo de entidade não suportado: ${entityType}`);
@@ -124,7 +153,10 @@ export const logApi = {
       subjectFrequency: summaryData.mostAccessedSubjects?.reduce((acc: Record<string, number>, item: any) => {
         acc[item.subject] = item.count;
         return acc;
-      }, {}) || {}
+      }, {}) || {},
+      // Adiciona informações extras se disponíveis
+      userCount: summaryData.userCount,
+      users: summaryData.users
     } as unknown as T;
   }
 };

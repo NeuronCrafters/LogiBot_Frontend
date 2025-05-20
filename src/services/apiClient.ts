@@ -178,7 +178,17 @@ export const rasaApi = {
 // Logs
 // --------------
 export const logApi = {
-  get: async <T>(entity: LogEntityType, metric: LogMetricType, mode: LogModeType, idOrIds: string | string[]): Promise<T> => {
+  get: async <T>(
+    entity: LogEntityType,
+    metric: LogMetricType,
+    mode: LogModeType,
+    idOrIds: string | string[],
+    additionalParams?: {
+      courseId?: string,
+      classId?: string,
+      studentId?: string
+    }
+  ): Promise<T> => {
     console.log(`logApi.get: ${entity}/${metric}/${mode}`, idOrIds);
 
     // Para modo individual
@@ -206,7 +216,13 @@ export const logApi = {
             case "student":
               console.log(`logApi.get: Usando rota de resumo de estudante para ${metric}`);
               // Para estudante, usamos a rota filtered que é POST
-              response = await postRequest<any>(LOG_ROUTES.summary.filteredStudent, { universityId: id });
+              // Adiciona suporte para parâmetros adicionais
+              response = await postRequest<any>(LOG_ROUTES.summary.filteredStudent, {
+                universityId: id,
+                courseId: additionalParams?.courseId,
+                classId: additionalParams?.classId,
+                studentId: additionalParams?.studentId
+              });
               break;
             default:
               console.warn(`logApi.get: Entidade não suportada ${entity}`);
@@ -222,7 +238,10 @@ export const logApi = {
               totalWrong: response.totalWrongAnswers || 0,
               accuracy: response.totalCorrectAnswers + response.totalWrongAnswers > 0
                 ? (response.totalCorrectAnswers / (response.totalCorrectAnswers + response.totalWrongAnswers)) * 100
-                : 0
+                : 0,
+              // Adiciona informações extras
+              userCount: response.userCount,
+              users: response.users
             } as unknown as T;
           }
           else if (metric === "subjects") {
@@ -231,7 +250,10 @@ export const logApi = {
               subjectFrequency: response.mostAccessedSubjects?.reduce((acc: Record<string, number>, item: any) => {
                 acc[item.subject] = item.count;
                 return acc;
-              }, {}) || {}
+              }, {}) || {},
+              // Adiciona informações extras
+              userCount: response.userCount,
+              users: response.users
             } as unknown as T;
           }
           else if (metric === "usage") {
@@ -243,7 +265,10 @@ export const logApi = {
                 sessionStart: new Date().toISOString(),
                 sessionEnd: new Date().toISOString(),
                 sessionDuration: response.usageTimeInSeconds || 0
-              }]
+              }],
+              // Adiciona informações extras
+              userCount: response.userCount,
+              users: response.users
             } as unknown as T;
           }
 
@@ -254,8 +279,6 @@ export const logApi = {
         }
       }
 
-      // Removendo a parte que causa o erro de TypeScript
-      // As rotas específicas já estão sendo tratadas acima, então não precisamos deste bloco
       console.error(`logApi.get: Rota específica para ${entity}/${metric} não implementada`);
       throw new Error(`Rota específica para ${entity}/${metric} não implementada`);
     }
@@ -280,7 +303,12 @@ export const logApi = {
                 response = await getRequest<any>(LOG_ROUTES.summary.class(id));
                 break;
               case "student":
-                response = await postRequest<any>(LOG_ROUTES.summary.filteredStudent, { universityId: id });
+                response = await postRequest<any>(LOG_ROUTES.summary.filteredStudent, {
+                  universityId: id,
+                  courseId: additionalParams?.courseId,
+                  classId: additionalParams?.classId,
+                  studentId: additionalParams?.studentId
+                });
                 break;
               default:
                 return null;

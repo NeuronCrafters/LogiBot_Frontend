@@ -24,6 +24,12 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   const [entityType, setEntityType] = useState<LogEntityType>("student");
   const [mode, setMode] = useState<LogModeType>("individual");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [hierarchyParams, setHierarchyParams] = useState<{
+    universityId?: string;
+    courseId?: string;
+    classId?: string;
+    disciplineId?: string;
+  }>({});
 
   // Função para notificar o componente pai sobre mudanças
   const notifyParent = useCallback((
@@ -59,10 +65,16 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     notifyParent(entityType, [], newMode);
   }, [entityType, notifyParent]);
 
-  const handleEntitySelection = useCallback((ids: string[]) => {
+  const handleEntitySelection = useCallback((ids: string[], hierarchyInfo?: any) => {
     // Validamos os IDs recebidos
     const validIds = ids.filter((id) => id && id.trim() !== "");
     console.log("ChartFilter - handleEntitySelection:", validIds);
+
+    // Se recebemos informações da hierarquia, atualizamos
+    if (hierarchyInfo) {
+      console.log("ChartFilter - Informações de hierarquia recebidas:", hierarchyInfo);
+      setHierarchyParams(hierarchyInfo);
+    }
 
     // Verificar se a lista realmente mudou antes de atualizar e notificar
     if (JSON.stringify(selectedIds) !== JSON.stringify(validIds)) {
@@ -111,6 +123,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
               <SelectItem value="class">Turma</SelectItem>
               <SelectItem value="course">Curso</SelectItem>
               <SelectItem value="university">Universidade</SelectItem>
+              <SelectItem value="discipline">Disciplina</SelectItem>
             </SelectContent>
           </Select>
         </div>
