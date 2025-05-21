@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { api } from "@/services/api/api";
@@ -7,33 +7,15 @@ import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 
-interface University {
-  _id: string;
-  name: string;
-}
-
 function Signup() {
-  const [universities, setUniversities] = useState<University[]>([]);
-  const [selectedUniversity, setSelectedUniversity] = useState("");
-  const [disciplineCode, setDisciplineCode] = useState("");
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const { login } = useAuth();
-
-  useEffect(() => {
-    api
-      .get("/public/institutions")
-      .then((res) => setUniversities(res.data))
-      .catch((err) => {
-        console.error("Erro ao carregar universidades:", err);
-        setError("Erro ao carregar universidades.");
-      });
-  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,16 +26,16 @@ function Signup() {
       name,
       email,
       password,
-      school: selectedUniversity,
-      disciplineCode,
+      code,
     };
 
     try {
       await api.post("/users", payload);
-      await login(email, password); // login automático após cadastro
-    } catch (error) {
+      await login(email, password);
+    } catch (error: any) {
       console.error("Erro ao cadastrar:", error);
-      setError("Erro ao realizar o cadastro.");
+      const errorMessage = error.response?.data?.message || "Erro ao realizar o cadastro.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -87,7 +69,7 @@ function Signup() {
             className="text-start"
           />
           <Typograph
-            text="Realize seu cadastro no site"
+            text="Realize seu cadastro"
             colorText="text-neutral-300"
             variant="text7"
             weight="regular"
@@ -109,8 +91,8 @@ function Signup() {
           <form onSubmit={handleRegister}>
             <Input
               type="text"
-              placeholder="Nome"
-              className="bg-neutral-800 mb-4 py-8"
+              placeholder="Nome completo"
+              className="bg-neutral-800 mb-4"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -131,27 +113,12 @@ function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-
-            <select
-              className="w-[340px] h-[50px] bg-neutral-800 text-slate-300 text-sm font-Montserrat p-2 mb-4 rounded-md"
-              value={selectedUniversity}
-              onChange={(e) => setSelectedUniversity(e.target.value)}
-              required
-            >
-              <option value="">Selecione a universidade</option>
-              {universities.map((univ) => (
-                <option key={univ._id} value={univ._id}>
-                  {univ.name}
-                </option>
-              ))}
-            </select>
-
             <Input
               type="text"
-              placeholder="Código da Disciplina"
+              placeholder="Código"
               className="bg-neutral-800 mb-4"
-              value={disciplineCode}
-              onChange={(e) => setDisciplineCode(e.target.value)}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
               required
             />
 
