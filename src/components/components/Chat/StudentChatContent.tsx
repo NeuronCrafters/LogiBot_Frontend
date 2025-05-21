@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { RefreshCcw } from 'lucide-react';
 import { User } from '@/contexts/AuthContext';
 import { BotGreetingMessage } from '@/components/components/Bot/Chat/BotGreetingMessage';
@@ -25,8 +24,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     messages,
     greetingDone,
     setGreetingDone,
-    menuOpen,
-    setMenuOpen,
     inputText,
     setInputText,
     step,

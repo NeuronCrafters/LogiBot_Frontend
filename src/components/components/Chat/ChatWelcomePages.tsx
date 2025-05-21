@@ -16,10 +16,21 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
         <div className="mx-auto bg-gradient-to-r from-violet-500 to-purple-600 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg">
           <MessageSquare size={32} className="text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-4">Bem-vindo ao Chat SAEL</h1>
-        <p className="text-gray-400 text-lg">
-          Nosso chat educacional é uma ferramenta exclusiva para estudantes.
-        </p>
+        <Typograph
+          text="Bem-vindo ao Chat SAEL"
+          colorText="text-white"
+          variant="text1"
+          weight="bold"
+          fontFamily="poppins"
+          className="mb-4"
+        />
+        <Typograph
+          text="Nosso chat educacional é uma ferramenta exclusiva para estudantes."
+          colorText="text-gray-400"
+          variant="text3"
+          weight="regular"
+          fontFamily="poppins"
+        />
       </motion.div>
 
       <motion.div
@@ -31,20 +42,43 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
         <div className="flex items-start gap-4 mb-4">
           <Lock className="text-purple-500 mt-1" size={24} />
           <div>
-            <h2 className="text-white text-xl font-bold mb-2">Acesso Restrito</h2>
-            <p className="text-gray-400">
-              Esta área é exclusiva para estudantes. A funcionalidade de chat permite tirar dúvidas,
-              fazer exercícios e praticar conteúdos através de quizzes interativos.
-            </p>
+            <Typograph
+              text="Acesso Restrito"
+              colorText="text-white"
+              variant="text2"
+              weight="bold"
+              fontFamily="poppins"
+              className="mb-2"
+            />
+            <Typograph
+              text="Esta área é exclusiva para estudantes. A funcionalidade de chat permite tirar dúvidas, fazer exercícios e praticar conteúdos através de quizzes interativos."
+              colorText="text-gray-400"
+              variant="text4"
+              weight="regular"
+              fontFamily="poppins"
+            />
           </div>
         </div>
 
         <Alert className="bg-[#2a2a2a] border-purple-600 mt-4">
           <Info className="h-5 w-5 text-purple-500" />
-          <AlertTitle className="text-white">Você não tem acesso a esta área</AlertTitle>
+          <AlertTitle className="text-white">
+            <Typograph
+              text="Você não tem acesso a esta área"
+              colorText="text-white"
+              variant="text3"
+              weight="bold"
+              fontFamily="poppins"
+            />
+          </AlertTitle>
           <AlertDescription className="text-gray-400">
-            Seu perfil atual ({userRoles.join(", ")}) não tem permissão para acessar a funcionalidade de chat.
-            Entre em contato com o administrador se precisar de acesso.
+            <Typograph
+              text={`Seu perfil atual (${userRoles.join(", ")}) não tem permissão para acessar a funcionalidade de chat. Entre em contato com o administrador se precisar de acesso.`}
+              colorText="text-gray-400"
+              variant="text4"
+              weight="regular"
+              fontFamily="poppins"
+            />
           </AlertDescription>
         </Alert>
       </motion.div>
@@ -59,7 +93,13 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
           onClick={() => window.location.href = '/'}
           className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-lg"
         >
-          Voltar para a Home
+          <Typograph
+            text="Voltar para a Home"
+            colorText="text-white"
+            variant="text4"
+            weight="regular"
+            fontFamily="poppins"
+          />
         </Button>
       </motion.div>
     </div>
@@ -79,10 +119,21 @@ export const AdminWelcome: React.FC = () => {
         <div className="mx-auto bg-gradient-to-r from-amber-500 to-orange-600 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg">
           <Lock size={32} className="text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-4">Área Administrativa</h1>
-        <p className="text-gray-400 text-lg">
-          Como administrador, você tem acesso a diferentes funcionalidades do sistema.
-        </p>
+        <Typograph
+          text="Chat Exclusivo"
+          colorText="text-white"
+          variant="text1"
+          weight="bold"
+          fontFamily="poppins"
+          className="mb-4"
+        />
+        <Typograph
+          text="Como administrador, você tem acesso a diferentes funcionalidades do sistema."
+          colorText="text-gray-400"
+          variant="text6"
+          weight="regular"
+          fontFamily="poppins"
+        />
       </motion.div>
 
       <motion.div
@@ -94,21 +145,43 @@ export const AdminWelcome: React.FC = () => {
         <div className="flex items-start gap-4 mb-4">
           <Info className="text-amber-500 mt-1" size={24} />
           <div>
-            <h2 className="text-white text-xl font-bold mb-2">Chat Exclusivo para Estudantes</h2>
-            <p className="text-gray-400">
-              A funcionalidade de chat foi projetada exclusivamente para estudantes, permitindo
-              que eles pratiquem seus conhecimentos através de quizzes e tirem dúvidas.
-            </p>
+            <Typograph
+              text="Chat Exclusivo para Estudantes"
+              colorText="text-white"
+              variant="text6"
+              weight="bold"
+              fontFamily="poppins"
+              className="mb-2"
+            />
+            <Typograph
+              text="A funcionalidade de chat foi projetada exclusivamente para estudantes, permitindo que eles pratiquem seus conhecimentos através de quizzes e tirem dúvidas."
+              colorText="text-gray-400"
+              variant="text7"
+              weight="regular"
+              fontFamily="poppins"
+            />
           </div>
         </div>
 
         <Alert className="bg-[#2a2a2a] border-amber-600 mt-4">
           <Info className="h-5 w-5 text-amber-500" />
-          <AlertTitle className="text-white">Permissão de Administrador</AlertTitle>
+          <AlertTitle className="text-white">
+            <Typograph
+              text="Permissão de Administrador"
+              colorText="text-white"
+              variant="text6"
+              weight="bold"
+              fontFamily="poppins"
+            />
+          </AlertTitle>
           <AlertDescription className="text-gray-400">
-            Como administrador, você tem acesso às funcionalidades de gerenciamento do sistema,
-            como criação de conteúdo, visualização de relatórios e configurações gerais. Para gerenciar
-            essas funções, utilize as outras seções do menu administrativo.
+            <Typograph
+              text="Como administrador, você tem acesso às funcionalidades de gerenciamento do sistema, como criação de conteúdo, visualização de relatórios e configurações gerais. Para gerenciar essas funções, utilize as outras seções do menu administrativo."
+              colorText="text-gray-400"
+              variant="text7"
+              weight="regular"
+              fontFamily="poppins"
+            />
           </AlertDescription>
         </Alert>
       </motion.div>
@@ -123,13 +196,25 @@ export const AdminWelcome: React.FC = () => {
           onClick={() => window.location.href = '/crud'}
           className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-lg mr-4"
         >
-          Ir para o CRUD
+          <Typograph
+            text="Ir para o CRUD"
+            colorText="text-white"
+            variant="text7"
+            weight="regular"
+            fontFamily="poppins"
+          />
         </Button>
         <Button
           onClick={() => window.location.href = '/'}
           className="bg-[#2a2a2a] hover:bg-[#333333] text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-lg"
         >
-          Voltar para a Home
+          <Typograph
+            text="Voltar para a Home"
+            colorText="text-white"
+            variant="text7"
+            weight="regular"
+            fontFamily="poppins"
+          />
         </Button>
       </motion.div>
     </div>
