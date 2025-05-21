@@ -206,22 +206,50 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     }
   };
 
-  const handleRestart = () => {
+  const handleRestart = async () => {
+    setGreetingDone(true);
     setStep("levels");
     setCategoryButtons([]);
     setSubsubjectButtons([]);
     setQuestions([]);
     setResultData(null);
-    setShowLevels(false);
-    setPendingLevelIntro(true);
+    setMessages([]);
+
+    const currentMode = mode;
+
+    if (currentMode === "quiz") {
+      // Saindo do modo quiz → entrando em chat
+      setShowLevels(false);
+      setMode("chat");
+
+      try {
+        await rasaService.conversar();
+        setMessages([{ role: "assistant", content: "Vamos conversar, sobre o que quer falar?" }]);
+      } catch (e) {
+        console.error("Erro ao iniciar modo conversa:", e);
+      }
+    } else if (currentMode === "chat") {
+      // Saindo do modo chat → entrando em quiz
+      setMode("quiz");
+      setMessages([{ role: "assistant", content: "Olá! Escolha seu nível abaixo 👇" }]);
+
+      // Exibe os níveis após um pequeno delay (apenas para UX suave)
+      setTimeout(() => {
+        setShowLevels(true);
+      }, 200);
+    }
   };
 
   useEffect(() => {
     if (pendingLevelIntro) {
       const timer = setTimeout(() => {
-        setMessages((prev) => [...prev, { role: "assistant", content: "Olá! Escolha seu nível abaixo 👇" }]);
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "Olá! Escolha seu nível abaixo 👇" },
+        ]);
         setTimeout(() => setShowLevels(true), 800);
       }, 800);
+
       return () => clearTimeout(timer);
     }
   }, [pendingLevelIntro]);
