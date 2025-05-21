@@ -1,5 +1,6 @@
 import { Send } from "lucide-react";
 import { userAnalysisApi } from "@/services/api/api_userAnalysis";
+import { useState } from "react";
 
 interface ChatInputProps {
     inputText: string;
@@ -8,18 +9,26 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ inputText, setInputText, sendMessage }: ChatInputProps) {
-    const handleSend = async () => {
+    const [isSending, setIsSending] = useState(false);
+
+    const handleSend = () => {
         const text = inputText.trim();
-        if (!text) return;
+        if (!text || isSending) return;
+
+        setIsSending(true);
 
         try {
-            await userAnalysisApi.addInteraction(text);
+            userAnalysisApi.addInteraction(text)
+                .catch(err => {
+                    console.error("Erro ao gravar interação:", err);
+                });
+            sendMessage(text);
+            setInputText("");
         } catch (err) {
-            console.error("Erro ao gravar interação:", err);
+            console.error("Erro ao enviar mensagem:", err);
+        } finally {
+            setIsSending(false);
         }
-
-        sendMessage(text);
-        setInputText("");
     };
 
     return (
@@ -31,12 +40,19 @@ export function ChatInput({ inputText, setInputText, sendMessage }: ChatInputPro
                     className="flex-1 bg-transparent text-gray-200 outline-none rounded-full py-3 px-6"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSend();
+                        }
+                    }}
+                    disabled={isSending}
                 />
                 <button
                     onClick={handleSend}
-                    className="text-neutral-200 bg-blue-700 rounded-full p-2 ml-2"
+                    className={`text-neutral-200 ${isSending ? 'bg-blue-500' : 'bg-blue-700'} rounded-full p-2 ml-2 transition-colors ${isSending ? 'opacity-70' : 'hover:bg-blue-600'}`}
                     aria-label="Enviar mensagem"
+                    disabled={isSending}
                 >
                     <Send strokeWidth={1.5} />
                 </button>
