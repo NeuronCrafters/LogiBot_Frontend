@@ -185,7 +185,10 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
         { role: "assistant", content: res.message },
       ]);
 
-      setPreviousQuestions((prev) => [...prev, questions]);
+      if (Array.isArray(previousQuestions)) {
+        setPreviousQuestions((prev) => [...prev, questions]);
+      }
+
       setPreviousResults((prev) => [...prev, res]);
 
       setResultData(res);
