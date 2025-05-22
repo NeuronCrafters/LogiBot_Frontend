@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart, PolarRadiusAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -76,13 +76,31 @@ const useSubjectsData = (filter: ChartFilterState) => {
         subjectCounts = rawData.subjectCounts;
       }
 
+      // Encontrar o valor máximo para normalização
+      const maxValue = Math.max(...Object.values(subjectCounts), 1);
+
       // Criar dados para o radar chart com os 5 pontos
       const chartData = [
-        { category: "Variáveis", acessos: subjectCounts.variaveis || 0 },
-        { category: "Tipos", acessos: subjectCounts.tipos || 0 },
-        { category: "Funções", acessos: subjectCounts.funcoes || 0 },
-        { category: "Loops", acessos: subjectCounts.loops || 0 },
-        { category: "Verificações", acessos: subjectCounts.verificacoes || 0 },
+        {
+          category: "Variáveis",
+          acessos: subjectCounts.variaveis || 0
+        },
+        {
+          category: "Tipos",
+          acessos: subjectCounts.tipos || 0
+        },
+        {
+          category: "Funções",
+          acessos: subjectCounts.funcoes || 0
+        },
+        {
+          category: "Loops",
+          acessos: subjectCounts.loops || 0
+        },
+        {
+          category: "Verificações",
+          acessos: subjectCounts.verificacoes || 0
+        },
       ];
 
       const totalAccesses = Object.values(subjectCounts).reduce((sum, val) => sum + val, 0);
@@ -159,9 +177,9 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
 
   if (!isValid) {
     return (
-      <Card className="bg-[#1f1f1f] border-white/10 w-full h-full">
-        <CardContent className="flex items-center justify-center h-full">
-          <p className="text-white/70">Selecione uma entidade para visualizar dados</p>
+      <Card className="bg-[#1f1f1f] border-white/10 w-full mb-0 flex flex-col">
+        <CardContent className="flex items-center justify-center h-[200px] text-center text-white/70">
+          <p>Selecione uma entidade para visualizar dados</p>
         </CardContent>
       </Card>
     );
@@ -169,11 +187,11 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
 
   if (isLoading) {
     return (
-      <Card className="bg-[#1f1f1f] border-white/10 w-full h-full">
-        <CardContent className="flex items-center justify-center h-full">
+      <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+        <CardContent className="flex items-center justify-center h-[200px] text-center text-white/70">
           <div className="flex flex-col items-center">
             <div className="animate-pulse w-10 h-10 rounded-full bg-indigo-600/30 mb-3"></div>
-            <p className="text-white/70">Carregando dados...</p>
+            <p>Carregando dados...</p>
           </div>
         </CardContent>
       </Card>
@@ -182,15 +200,15 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
 
   if (isError) {
     return (
-      <Card className="bg-[#1f1f1f] border-white/10 w-full h-full">
-        <CardContent className="flex items-center justify-center h-full">
+      <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+        <CardContent className="flex items-center justify-center h-[200px] text-center text-white/70">
           <div className="flex flex-col items-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
-            <p className="text-white/70">{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
+            <p>{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
             <button
               onClick={() => refetch()}
               className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
@@ -205,14 +223,14 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
 
   if (!hasData) {
     return (
-      <Card className="bg-[#1f1f1f] border-white/10 w-full h-full">
-        <CardContent className="flex items-center justify-center h-full">
+      <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+        <CardContent className="flex items-center justify-center h-[200px] text-center text-white/70">
           <div className="flex flex-col items-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
               <path d="M3 3v18h18" />
               <path d="m19 9-5 5-4-4-3 3" />
             </svg>
-            <p className="text-white/70">Nenhum dado de categorias disponível para esta entidade.</p>
+            <p>Nenhum dado de categorias disponível para esta entidade.</p>
             <button
               onClick={() => refetch()}
               className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
@@ -226,73 +244,99 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
   }
 
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full h-full flex flex-col">
-      <CardHeader >
+    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      <CardHeader className="flex flex-col space-y-0 border-b border-white/10 pb-4">
         <CardTitle className="text-white">Distribuição por Assunto</CardTitle>
         <CardDescription className="text-white/70">
           Acessos por categoria de conteúdo
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 flex items-center justify-center">
+
+      <CardContent className="px-2 sm:p-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full"
         >
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square max-h-[300px]"
+            className="aspect-auto h-[250px] w-full text-white"
           >
-            <RadarChart data={processedData?.chartData || []}>
+            <RadarChart
+              data={processedData?.chartData || []}
+              margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
+            >
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent hideLabel />}
+                content={(props) => {
+                  if (!props.active || !props.payload || !props.payload[0]) {
+                    return null;
+                  }
+
+                  const data = props.payload[0].payload;
+
+                  return (
+                    <div className="p-2 bg-[#1f1f1f] border border-[#333] rounded shadow text-white text-sm">
+                      <p className="font-semibold mb-1">{data.category}</p>
+                      <p>
+                        <span className="text-[#999] mr-2">Acessos:</span>
+                        <span className="font-medium">{data.acessos}</span>
+                      </p>
+                    </div>
+                  );
+                }}
               />
               <PolarGrid
-                gridType="circle"
+                gridType="polygon"
                 radialLines={true}
-                stroke="#444444"
-                strokeOpacity={0.5}
+                stroke="#333"
+                strokeOpacity={0.6}
+                strokeDasharray="2 2"
               />
               <PolarAngleAxis
                 dataKey="category"
-                tick={{ fill: '#999', fontSize: 12 }}
+                tick={{ fill: '#999', fontSize: 11 }}
+                className="text-white/70"
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 'dataMax']}
+                tick={false}
+                axisLine={false}
               />
               <Radar
                 dataKey="acessos"
-                fill="hsl(215, 100%, 50%)"
+                fill="#274a96"
                 fillOpacity={0.3}
-                stroke="hsl(215, 100%, 50%)"
+                stroke="#274a96"
                 strokeWidth={2}
+                dot={{ fill: "#274a96", strokeWidth: 0, r: 4 }}
               />
             </RadarChart>
           </ChartContainer>
         </motion.div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center">
-        <div className="text-sm">
-          {topCategory ? (
-            <div className="text-white/70">
-              Mais acessado: <span className="text-white font-medium">{topCategory.name}</span> ({topCategory.percentage}%)
+
+      {hasData && (
+        <CardFooter className="flex justify-between items-center border-t border-white/10 px-6 py-4">
+          <div className="flex flex-col">
+            <div className="flex items-center space-x-2">
+              <span className="font-medium text-white">Total: {trend?.totalAccesses || 0}</span>
+              {topCategory && (
+                <>
+                  <span className="text-white/50">|</span>
+                  <span className="font-medium text-white">Mais acessado: {topCategory.name}</span>
+                </>
+              )}
             </div>
-          ) : (
-            <div className="text-white/70">Distribuição de acessos</div>
-          )}
-        </div>
-        <div className="text-sm">
-          {trend && (
-            <div className="flex items-center gap-2 font-medium text-white">
-              Total: {trend.totalAccesses} acesso{trend.totalAccesses !== 1 ? 's' : ''}
-              {/* {trend.isPositive ? (
-                <TrendingUp className="h-4 w-4 text-green-500" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-500" />
-              )} */}
-            </div>
-          )}
-        </div>
-      </CardFooter>
+            {topCategory && (
+              <div className="mt-1">
+                <span className="text-sm text-white/70">Porcentagem: {topCategory.percentage}%</span>
+              </div>
+            )}
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 }

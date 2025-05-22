@@ -107,7 +107,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
     (accuracyData.totalCorrect > 0 || accuracyData.totalWrong > 0);
 
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full h-full mb-0 flex flex-col">
+    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-0">
       <CardHeader className="flex flex-col space-y-0 border-b border-white/10 pb-4">
         <CardTitle className="text-white">Taxa de Acertos e Erros</CardTitle>
         <CardDescription className="text-white/70">
@@ -115,7 +115,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-6 py-6 flex-1 flex flex-col justify-center items-center">
+      <CardContent className="px-6 py-6 h-[299px] flex items-center justify-center">
         {!isValid && (
           <div className="flex items-center justify-center h-full w-full text-center text-white/70">
             <p>Selecione uma entidade para visualizar dados</p>
@@ -157,7 +157,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
             transition={{ duration: 0.5 }}
             className="h-full w-full flex items-center justify-center"
           >
-            <PieChart width={300} height={220}>
+            <PieChart width={300} height={250}>
               <Pie
                 data={accuracyData.chartData}
                 cx="50%"
@@ -205,25 +205,20 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
         )}
       </CardContent>
 
-      {
-        hasData && (
-          <CardFooter className="flex justify-between items-center border-t border-white/10 px-6 py-4">
-            <div className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <span className="font-medium text-white">Acertos: {accuracyData.totalCorrect}</span>
-                <span className="text-white/50">|</span>
-                <span className="font-medium text-white">Erros: {accuracyData.totalWrong}</span>
-              </div>
-              <div className="mt-1">
-                <span className="text-sm text-white/70">Precisão: {accuracyData.accuracy.toFixed(1)}%</span>
-              </div>
+      {hasData && (
+        <CardFooter className="flex justify-between items-center border-t border-white/10 px-6 py-4">
+          <div className="flex flex-col">
+            <div className="flex items-center space-x-2">
+              <span className="font-medium text-white">Acertos: {accuracyData.totalCorrect}</span>
+              <span className="text-white/50">|</span>
+              <span className="font-medium text-white">Erros: {accuracyData.totalWrong}</span>
             </div>
-            <div className="flex items-center">
-              {/* Comentado para manter consistência com o design atual */}
+            <div className="mt-1">
+              <span className="text-sm text-white/70">Precisão: {accuracyData.accuracy.toFixed(1)}%</span>
             </div>
-          </CardFooter>
-        )
-      }
-    </Card >
+          </div>
+        </CardFooter>
+      )}
+    </Card>
   );
 }
