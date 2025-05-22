@@ -122,7 +122,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       case "class": return "Turma";
       case "course": return "Curso";
       case "university": return "Universidade";
-      case "discipline": return "Disciplina";
+      // case "discipline": return "Disciplina";
       default: return "Entidade";
     }
   };
@@ -161,7 +161,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
                 <SelectItem value="class">Turma</SelectItem>
                 <SelectItem value="course">Curso</SelectItem>
                 <SelectItem value="university">Universidade</SelectItem>
-                <SelectItem value="discipline">Disciplina</SelectItem>
+                {/* <SelectItem value="discipline">Disciplina</SelectItem> */}
               </SelectContent>
             </Select>
           </div>

@@ -1,53 +1,55 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
-  BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, Cell, ResponsiveContainer
-} from "recharts";
-import { Card } from "@/components/ui/card";
-import { Typograph } from "@/components/components/Typograph/Typograph";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
-const barColors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
+// Função para traduzir nomes de categorias
+const translateCategory = (category: string): string => {
+  const translations: Record<string, string> = {
+    "variaveis": "Variáveis",
+    "tipos": "Tipos",
+    "funcoes": "Funções",
+    "loops": "Loops",
+    "verificacoes": "Verificações",
+    // Adicione mais traduções conforme necessário
+  };
 
-export function CategoryChart({ filter }: { filter: ChartFilterState }) {
-  console.log("CategoryChart - Renderizado com filtro:", filter);
+  return translations[category] || category;
+};
 
-  // Estados para gerenciar dados e estado de carregamento
-  const [data, setData] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [processedData, setProcessedData] = useState<any[]>([]);
-  const [lastFetchedId, setLastFetchedId] = useState<string | null>(null);
-
+// Hook personalizado para buscar dados de categorias
+const useSubjectsData = (filter: ChartFilterState) => {
   // Extração e validação robusta do ID
-  const validIds = Array.isArray(filter.ids) ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') : [];
+  const validIds = Array.isArray(filter.ids)
+    ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
+    : [];
+
   const id = validIds[0] || "";
-  const isValid = id !== "";
 
-  // Função para buscar dados da API
-  const fetchData = async () => {
-    if (!isValid) {
-      console.log("CategoryChart - ID inválido, não buscando dados");
-      return;
-    }
+  return useQuery({
+    queryKey: ['subjects', filter.type, id],
+    queryFn: async () => {
+      if (!id) {
+        throw new Error("ID inválido");
+      }
 
-    // Verificar se já buscamos dados para este ID
-    if (lastFetchedId === id && data !== null) {
-      console.log("CategoryChart - Já temos dados para este ID, pulando fetch");
-      return;
-    }
-
-    console.log("CategoryChart - Iniciando busca de dados para ID:", id);
-    setIsLoading(true);
-    setIsError(false);
-    setError(null);
-
-    try {
       console.log("CategoryChart - Buscando dados para:", filter.type, id);
-      const response = await logApi.get<any>(
+      const response = await logApi.get(
         filter.type,
         "subjects",
         "individual",
@@ -55,27 +57,12 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
       );
 
       console.log("CategoryChart - Dados recebidos:", response);
-      setData(response);
-      processData(response);
-      setLastFetchedId(id);
-    } catch (err: any) {
-      console.error("CategoryChart - Erro ao buscar dados:", err);
-      setIsError(true);
-      setError(err?.message || "Erro ao carregar dados de categorias.");
-      setProcessedData([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Função para processar os dados recebidos
-  const processData = (rawData: any) => {
-    if (!rawData) {
-      setProcessedData([]);
-      return;
-    }
-
-    try {
+      return response;
+    },
+    enabled: !!id,
+    staleTime: 15 * 60 * 1000, // 15 minutos
+    gcTime: 30 * 60 * 1000, // 30 minutos
+    select: (rawData: any) => {
       console.log("CategoryChart - Processando dados:", rawData);
       let result: any[] = [];
 
@@ -142,7 +129,6 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
           }
         }
       }
-      //
       // Se chegou até aqui, tenta extrair qualquer coisa útil do objeto
       else if (typeof rawData === 'object') {
         console.log("CategoryChart - Tentando extrair dados de formato desconhecido:", rawData);
@@ -164,58 +150,109 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
         }
       }
 
-      if (result.length === 0) {
-        console.log("CategoryChart - Formato desconhecido ou sem dados, não foi possível processar");
-      } else {
-        console.log("CategoryChart - Dados processados finais:", result);
+      // Ordenar por valor (decrescente)
+      result.sort((a, b) => b.value - a.value);
+
+      // Limitar a 5 categorias para melhor visualização
+      if (result.length > 5) {
+        result = result.slice(0, 5);
       }
 
-      setProcessedData(result);
-    } catch (error) {
-      console.error("CategoryChart - Erro ao processar dados:", error);
-      setProcessedData([]);
+      return result;
     }
-  };
+  });
+};
 
-  // Efeito para buscar dados quando o filtro mudar
-  useEffect(() => {
-    console.log("CategoryChart - Filtro mudou, ID:", id, "Válido:", isValid);
-    if (isValid) {
-      fetchData();
-    } else {
-      // Limpar dados quando não há ID válido
-      setData(null);
-      setProcessedData([]);
-      setLastFetchedId(null);
-    }
-  }, [filter.type, id]);
+export function CategoryChart({ filter }: { filter: ChartFilterState }) {
+  console.log("CategoryChart - Renderizado com filtro:", filter);
+
+  // Usar o hook personalizado para buscar dados
+  const {
+    data: processedData = [],
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useSubjectsData(filter);
+
+  // Extração e validação robusta do ID
+  const validIds = Array.isArray(filter.ids)
+    ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
+    : [];
+
+  const id = validIds[0] || "";
+  const isValid = id !== "";
+
+  // Verificar se temos dados
+  const hasData = processedData.length > 0;
+
+  // Configuração do gráfico
+  const chartConfig = useMemo(() => {
+    // Criar configuração para cada categoria
+    const config: Record<string, any> = {
+      value: {
+        label: "Acessos",
+        color: "hsl(var(--chart-1))"
+      }
+    };
+
+    return config;
+  }, []);
+
+  // Calcular o total de acessos
+  const totalAccesses = useMemo(() => {
+    if (!processedData || processedData.length === 0) return 0;
+    return processedData.reduce((acc, curr) => acc + curr.value, 0);
+  }, [processedData]);
+
+  // Identificar a categoria mais acessada
+  const topCategory = useMemo(() => {
+    if (!processedData || processedData.length === 0) return null;
+    return processedData[0];
+  }, [processedData]);
 
   return (
-    <Card className="p-4 bg-[#141414] border-white/10 w-full mb-6">
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Typograph
-            text="Distribuição por Assunto"
-            variant="text6"
-            weight="semibold"
-            fontFamily="montserrat"
-            colorText="text-white"
-          />
-          {!isLoading && !isError && processedData.length > 0 && (
-            <div className="text-xs text-white/50">
-              {processedData.length} categoria(s)
-            </div>
-          )}
+    <Card className="bg-[#141414] border-white/10 w-full mb-6">
+      <CardHeader className="flex flex-col items-stretch space-y-0 border-b border-white/10 p-0 sm:flex-row">
+        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5">
+          <CardTitle className="text-white">Distribuição por Assunto</CardTitle>
+          <CardDescription className="text-white/70">
+            {hasData
+              ? `Tópicos mais acessados (${processedData.length})`
+              : "Estatísticas de uso por assunto"}
+          </CardDescription>
         </div>
+        {hasData && topCategory && (
+          <div className="flex">
+            <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0">
+              <span className="text-xs text-white/50">
+                Tópico mais acessado
+              </span>
+              <span className="text-lg font-bold leading-none text-white sm:text-2xl">
+                {translateCategory(topCategory.category)}
+              </span>
+            </div>
+            <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-l border-white/10 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0">
+              <span className="text-xs text-white/50">
+                Total de acessos
+              </span>
+              <span className="text-lg font-bold leading-none text-white sm:text-2xl">
+                {totalAccesses}
+              </span>
+            </div>
+          </div>
+        )}
+      </CardHeader>
 
+      <CardContent className="px-2 sm:p-6">
         {!isValid && (
-          <div className="flex items-center justify-center h-64 text-center text-white/70">
+          <div className="flex items-center justify-center h-[250px] text-center text-white/70">
             <p>Selecione uma entidade para visualizar dados</p>
           </div>
         )}
 
         {isValid && isLoading && (
-          <div className="flex items-center justify-center h-64 text-center text-white/70">
+          <div className="flex items-center justify-center h-[250px] text-center text-white/70">
             <div className="flex flex-col items-center">
               <div className="animate-pulse w-10 h-10 rounded-full bg-indigo-600/30 mb-3"></div>
               <p>Carregando dados...</p>
@@ -224,35 +261,63 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
         )}
 
         {isValid && isError && (
-          <div className="flex items-center justify-center h-64 text-center text-red-400">
-            <p>{error || "Erro ao carregar dados."}</p>
+          <div className="flex items-center justify-center h-[250px] text-center text-red-400">
+            <p>{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
           </div>
         )}
 
-        {isValid && !isLoading && !isError && processedData.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={processedData} margin={{ top: 5, right: 20, left: 0, bottom: 25 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                <XAxis dataKey="category" stroke="#999" angle={-45} textAnchor="end" tick={{ fontSize: 12 }} />
-                <YAxis stroke="#999" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#1f1f1f", borderColor: "#333" }}
-                  labelStyle={{ color: "#fff" }}
-                  itemStyle={{ color: "#fff" }}
+        {isValid && !isLoading && !isError && hasData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full text-white"
+            >
+              <BarChart
+                accessibilityLayer
+                data={processedData}
+                margin={{
+                  left: 12,
+                  right: 12,
+                }}
+                layout="vertical" // Barras horizontais para melhor visualização de categorias
+              >
+                <CartesianGrid horizontal={true} vertical={false} stroke="#333" />
+                <XAxis
+                  type="number"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  stroke="#999"
                 />
-                <Bar dataKey="value" name="Quantidade">
-                  {processedData.map((_, i) => (
-                    <Cell key={`cell-${i}`} fill={barColors[i % barColors.length]} />
-                  ))}
-                </Bar>
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      className="w-[150px] bg-[#1f1f1f] border-[#333] text-white"
+                      nameKey="value"
+                      labelFormatter={(value) => {
+                        return translateCategory(value);
+                      }}
+                    />
+                  }
+                />
+                <Bar
+                  dataKey="value"
+                  name="Acessos"
+                  fill="hsl(var(--chart-1))"
+                  radius={8}
+                />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </motion.div>
         )}
 
-        {isValid && !isLoading && !isError && processedData.length === 0 && (
-          <div className="flex items-center justify-center h-64 text-center text-white/70">
+        {isValid && !isLoading && !isError && !hasData && (
+          <div className="flex items-center justify-center h-[250px] text-center text-white/70">
             <div className="flex flex-col items-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -261,7 +326,7 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
               </svg>
               <p>Nenhum dado de categorias disponível para esta entidade.</p>
               <button
-                onClick={fetchData}
+                onClick={() => refetch()}
                 className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 Tentar novamente
@@ -269,7 +334,7 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
             </div>
           </div>
         )}
-      </div>
+      </CardContent>
     </Card>
   );
 }
