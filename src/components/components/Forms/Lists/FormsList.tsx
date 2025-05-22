@@ -57,15 +57,30 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
 
   useEffect(() => {
     const fetchCandidates = async () => {
-      if (editItem && editItem.code) {
+      if (editItem && editItem.courseId) {
         try {
-          const result = await adminApi.listProfessorsByCourse<any[]>(editItem.code);
+          // Opção 1: Usar adminApi (se ainda funcionar)
+          const result = await adminApi.listProfessorsByCourse<any[]>(editItem.courseId);
           const filtered = result.filter(
             (prof) => prof._id !== editItem.id && !prof.role?.includes("course-coordinator")
           );
           setCandidates(filtered.map((p) => ({ id: p._id, name: p.name })));
+
+          // Opção 2: Usar nova API (comentado, mas disponível)
+          // const academicData = await academicFiltersApi.getAcademicData();
+          // const professors = academicData.data.universities
+          //   .flatMap(uni => uni.courses)
+          //   .find(course => course._id === editItem.courseId)
+          //   ?.professors || [];
+          // 
+          // const filtered = professors.filter(
+          //   (prof) => prof._id !== editItem.id && !prof.role?.includes("course-coordinator")
+          // );
+          // setCandidates(filtered.map((p) => ({ id: p._id, name: p.name })));
+
         } catch (err) {
           console.error("Erro ao carregar candidatos a coordenador:", err);
+          toast.error("Erro ao carregar candidatos a coordenador");
         }
       }
     };
@@ -138,7 +153,9 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
             {loading ? (
               [...Array(3)].map((_, idx) => (
                 <TableRow key={idx}>
-                  <TableCell colSpan={5}><Skeleton className="h-10 w-full bg-white/10 rounded-md" /></TableCell>
+                  <TableCell colSpan={5}>
+                    <Skeleton className="h-10 w-full bg-white/10 rounded-md" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : items.length > 0 ? (

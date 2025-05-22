@@ -1,14 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/use-Auth";
-import { publicApi } from "@/services/apiClient";
-// import type { FilterData, FilterType } from "@/@types/FormsFilterTypes";
+import { academicFiltersApi } from "@/services/apiClient";
 import type { FilterData, FilterType } from "@/@types/ChartsType";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 import { motion } from "framer-motion";
 
-interface Institution { _id: string; name: string; }
-interface Course { _id: string; name: string; }
-interface Discipline { _id: string; name: string; }
+interface Institution {
+  _id: string;
+  name: string;
+  courses: Course[];
+}
+
+interface Course {
+  _id: string;
+  name: string;
+  disciplines: Discipline[];
+}
+
+interface Discipline {
+  _id: string;
+  name: string;
+  code: string;
+}
 
 export function FormsFilter({
   onSearch,
@@ -45,16 +58,16 @@ export function FormsFilter({
         : [];
 
   const [filterType, setFilterType] = useState<FilterType | "">("");
-  const [universities, setUniversities] = useState<Institution[]>([]);
   const [selectedUniversity, setSelectedUniversity] = useState<string>(
     isCoordinator || isProfessor ? fixedUniversity : ""
   );
-  const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>(
     isCoordinator || isProfessor ? fixedCourse : ""
   );
-  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
+  const [academicData, setAcademicData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const showUniversitySelect =
     isAdmin &&
@@ -87,49 +100,58 @@ export function FormsFilter({
   if (coordinatorNoSelect) canSearch = true;
 
   useEffect(() => {
-    if (isAdmin) {
-      publicApi.getInstitutions<Institution[]>()
-        .then(setUniversities)
-        .catch(console.error);
-    }
-  }, [isAdmin]);
+    const fetchAcademicData = async () => {
+      setLoading(true);
+      setError(null);
 
-  useEffect(() => {
-    if (showCourseSelect && selectedUniversity) {
-      publicApi.getCourses<Course[]>(selectedUniversity)
-        .then(setCourses)
-        .catch(console.error);
-    } else {
-      setCourses([]);
-      if (isAdmin) setSelectedCourse("");
-    }
-  }, [showCourseSelect, selectedUniversity, isAdmin]);
-
-  useEffect(() => {
-    if (
-      showStudentDisciplineSelect ||
-      (isCoordinator && filterType === "disciplines")
-    ) {
-      const uni = isAdmin ? selectedUniversity : fixedUniversity;
-      const course = isAdmin ? selectedCourse : fixedCourse;
-      if (uni && course) {
-        publicApi.getDisciplines<Discipline[]>(uni, course)
-          .then(setDisciplines)
-          .catch(console.error);
+      try {
+        const data = await academicFiltersApi.getAcademicData();
+        setAcademicData(data);
+      } catch (err: any) {
+        setError(err.message || 'Erro ao carregar dados acadêmicos');
+        console.error('Erro ao carregar dados acadêmicos:', err);
+      } finally {
+        setLoading(false);
       }
-    } else {
-      setDisciplines([]);
+    };
+
+    fetchAcademicData();
+  }, []); // ← UMA VEZ SÓ!
+
+  // 2️⃣ useMemo para filtros locais (SUBSTITUEM as requisições)
+  const universities: Institution[] = useMemo(() => {
+    return academicData?.data.universities || [];
+  }, [academicData]);
+
+  const courses: Course[] = useMemo(() => {
+    if (!selectedUniversity || !universities.length) return [];
+
+    const university = universities.find(u => u._id === selectedUniversity);
+    return university?.courses || [];
+  }, [universities, selectedUniversity]);
+
+  const disciplines: Discipline[] = useMemo(() => {
+    if (!selectedCourse || !courses.length) return [];
+
+    const course = courses.find(c => c._id === selectedCourse);
+    return course?.disciplines || [];
+  }, [courses, selectedCourse]);
+
+  // 3️⃣ useEffects simples para reset (OPCIONAL)
+  useEffect(() => {
+    // Reset curso quando não precisa mostrar o select
+    if (!showCourseSelect && isAdmin) {
+      setSelectedCourse("");
+    }
+  }, [showCourseSelect, isAdmin]);
+
+  useEffect(() => {
+    // Reset disciplina quando não precisa mostrar o select
+    if (!showStudentDisciplineSelect) {
       setSelectedDiscipline("");
     }
-  }, [
-    filterType,
-    showStudentDisciplineSelect,
-    selectedUniversity,
-    selectedCourse,
-    isAdmin,
-    fixedUniversity,
-    fixedCourse,
-  ]);
+  }, [showStudentDisciplineSelect]);
+
 
   function handleSearchClick() {
     if (!canSearch) return;
@@ -148,8 +170,6 @@ export function FormsFilter({
       setSelectedUniversity("");
       setSelectedCourse("");
       setSelectedDiscipline("");
-      setCourses([]);
-      setDisciplines([]);
     }
     onReset();
   }
@@ -170,6 +190,7 @@ export function FormsFilter({
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
             className="w-full p-2 rounded-md bg-[#141414] text-white"
+            disabled={loading}
           >
             <option value="">Selecione</option>
             {allowedFilters.map((ft) => (
@@ -183,7 +204,8 @@ export function FormsFilter({
                   students: "Alunos do Sistema",
                   "students-course": "Alunos por Curso",
                   "students-discipline": "Alunos por Disciplina",
-                }[ft]}
+                  "students-class": "Alunos por Turma",
+                }[ft] || ft}
               </option>
             ))}
           </select>
@@ -196,6 +218,7 @@ export function FormsFilter({
               value={selectedUniversity}
               onChange={(e) => setSelectedUniversity(e.target.value)}
               className="w-full p-2 rounded-md bg-[#141414] text-white"
+              disabled={loading}
             >
               <option value="">Selecione a universidade</option>
               {universities.map((u) => (
@@ -212,6 +235,7 @@ export function FormsFilter({
               value={selectedCourse}
               onChange={(e) => setSelectedCourse(e.target.value)}
               className="w-full p-2 rounded-md bg-[#141414] text-white"
+              disabled={loading || (!selectedUniversity && isAdmin)}
             >
               <option value="">Selecione o curso</option>
               {courses.map((c) => (
@@ -228,10 +252,13 @@ export function FormsFilter({
               value={selectedDiscipline}
               onChange={(e) => setSelectedDiscipline(e.target.value)}
               className="w-full p-2 rounded-md bg-[#141414] text-white"
+              disabled={loading || (!selectedCourse && (isAdmin || isCoordinator))}
             >
               <option value="">Selecione a disciplina</option>
               {disciplines.map((d) => (
-                <option key={d._id} value={d._id}>{d.name}</option>
+                <option key={d._id} value={d._id}>
+                  {d.name} {d.code && `(${d.code})`}
+                </option>
               ))}
             </select>
           </div>
@@ -242,11 +269,12 @@ export function FormsFilter({
         <ButtonCRUD
           action="search"
           onClick={handleSearchClick}
-          disabled={!canSearch}
+          disabled={!canSearch || loading}
         />
         <ButtonCRUD
           action="reload"
           onClick={handleResetFilter}
+          disabled={loading}
         />
       </div>
     </motion.div>
