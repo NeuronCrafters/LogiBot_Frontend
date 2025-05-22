@@ -1,18 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { publicApi } from "@/services/apiClient";
+import React, { useState, useMemo, useCallback } from "react";
+import { academicFiltersApi } from "@/services/apiClient";
 import type { ProfessorData } from "@/@types/FormsDataTypes";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 import { Eye, EyeOff } from "lucide-react";
-
-export interface University {
-  _id: string;
-  name: string;
-}
-
-export interface Course {
-  _id: string;
-  name: string;
-}
+import { University } from "@/services/api/api_academicFilters";
 
 export interface ProfessorFormProps {
   onSubmit: (data: ProfessorData) => void;
@@ -20,33 +11,38 @@ export interface ProfessorFormProps {
 }
 
 function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
+  const [academicData, setAcademicData] = useState<{
+    universities: University[];
+  } | null>(null);
+
   const [name, setName] = useState(initialData?.name ?? "");
   const [email, setEmail] = useState(initialData?.email ?? "");
   const [password, setPassword] = useState(initialData?.password ?? "");
   const [school, setSchool] = useState(initialData?.school ?? "");
   const [courses, setCourses] = useState<string[]>(initialData?.courses ?? []);
-  const [universities, setUniversities] = useState<University[]>([]);
-  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    publicApi.getInstitutions<University[]>()
-      .then((data) => setUniversities(data))
-      .catch((err) => console.error("Erro ao carregar universidades:", err));
+  // Carregar dados acadêmicos uma única vez
+  useMemo(() => {
+    const fetchAcademicData = async () => {
+      try {
+        const response = await academicFiltersApi.getAcademicData();
+        setAcademicData(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar dados acadêmicos:", error);
+      }
+    };
+    fetchAcademicData();
   }, []);
 
-  useEffect(() => {
-    if (school) {
-      publicApi.getCourses<Course[]>(school)
-        .then((data) => setAvailableCourses(data))
-        .catch((err) => console.error("Erro ao carregar cursos:", err));
-    } else {
-      setAvailableCourses([]);
-      setCourses([]);
-    }
-  }, [school]);
+  const availableCourses = useMemo(() => {
+    if (!academicData || !school) return [];
 
-  const handleSubmit = (e: React.FormEvent) => {
+    const university = academicData.universities.find(u => u._id === school);
+    return university?.courses || [];
+  }, [academicData, school]);
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim() || !school || courses.length === 0) return;
 
@@ -58,12 +54,13 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       courses,
     });
 
+    // Reset dos campos
     setName("");
     setEmail("");
     setPassword("");
     setSchool("");
     setCourses([]);
-  };
+  }, [name, email, password, school, courses, onSubmit]);
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
@@ -113,12 +110,15 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         <label className="block text-white mb-2">Universidade:</label>
         <select
           value={school}
-          onChange={(e) => setSchool(e.target.value)}
+          onChange={(e) => {
+            setSchool(e.target.value);
+            setCourses([]); // Reset courses quando universidade muda
+          }}
           required
           className="p-2 rounded w-full bg-[#141414] text-white"
         >
           <option value="">Selecione a universidade</option>
-          {universities.map((uni) => (
+          {academicData?.universities.map((uni) => (
             <option key={uni._id} value={uni._id}>
               {uni.name}
             </option>

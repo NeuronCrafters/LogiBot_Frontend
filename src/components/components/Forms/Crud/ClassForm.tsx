@@ -1,20 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { publicApi } from "@/services/apiClient";
+import React, { useState, useMemo, useCallback } from "react";
+import { academicFiltersApi } from "@/services/apiClient";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
+import { University } from "@/services/api/api_academicFilters";
 
 export interface ClassData {
   name: string;
   courseId: string;
-}
-
-export interface University {
-  _id: string;
-  name: string;
-}
-
-export interface Course {
-  _id: string;
-  name: string;
 }
 
 export interface ClassFormProps {
@@ -23,37 +14,56 @@ export interface ClassFormProps {
 }
 
 function ClassForm({ onSubmit, initialData }: ClassFormProps) {
-  const [name, setName] = useState<string>(initialData ? initialData.name : "");
-  const [selectedUniversity, setSelectedUniversity] = useState<string>("");
-  const [selectedCourse, setSelectedCourse] = useState<string>(initialData ? initialData.courseId : "");
-  const [universities, setUniversities] = useState<University[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [academicData, setAcademicData] = useState<{
+    universities: University[];
+  } | null>(null);
 
-  useEffect(() => {
-    publicApi.getInstitutions<University[]>()
-      .then((data) => setUniversities(data))
-      .catch(err => console.error("Erro ao carregar universidades:", err));
+  const [name, setName] = useState<string>(initialData ? initialData.name : "");
+  const [selectedUniversity, setSelectedUniversity] = useState<string>(
+    initialData?.courseId ?
+      academicData?.universities.find(u =>
+        u.courses.some(c => c._id === initialData.courseId)
+      )?._id || ""
+      : ""
+  );
+  const [selectedCourse, setSelectedCourse] = useState<string>(
+    initialData ? initialData.courseId : ""
+  );
+
+  // Carregar dados acadêmicos uma única vez
+  useMemo(() => {
+    const fetchAcademicData = async () => {
+      try {
+        const response = await academicFiltersApi.getAcademicData();
+        setAcademicData(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar dados acadêmicos:", error);
+      }
+    };
+    fetchAcademicData();
   }, []);
 
-  useEffect(() => {
-    if (selectedUniversity) {
-      publicApi.getCourses<Course[]>(selectedUniversity)
-        .then((data) => setCourses(data))
-        .catch(err => console.error("Erro ao carregar cursos:", err));
-    } else {
-      setCourses([]);
-      setSelectedCourse("");
-    }
-  }, [selectedUniversity]);
+  // Filtrar cursos baseado na universidade selecionada
+  const availableCourses = useMemo(() => {
+    if (!academicData || !selectedUniversity) return [];
 
-  const handleSubmit = (e: React.FormEvent) => {
+    const university = academicData.universities.find(u => u._id === selectedUniversity);
+    return university?.courses || [];
+  }, [academicData, selectedUniversity]);
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !selectedCourse) return;
-    onSubmit({ name: name.trim(), courseId: selectedCourse });
+
+    onSubmit({
+      name: name.trim(),
+      courseId: selectedCourse
+    });
+
     setName("");
     setSelectedUniversity("");
     setSelectedCourse("");
-  };
+  }, [name, selectedCourse, onSubmit]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,12 +82,15 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
         <label className="block text-sm font-medium text-white mb-1">Universidade:</label>
         <select
           value={selectedUniversity}
-          onChange={(e) => setSelectedUniversity(e.target.value)}
+          onChange={(e) => {
+            setSelectedUniversity(e.target.value);
+            setSelectedCourse(""); // Reset curso quando universidade muda
+          }}
           required
           className="w-full rounded-md bg-[#141414] text-white px-3 py-2 outline-none border border-white/10"
         >
           <option value="">Selecione a universidade</option>
-          {universities.map((uni) => (
+          {academicData?.universities.map((uni) => (
             <option key={uni._id} value={uni._id}>{uni.name}</option>
           ))}
         </select>
@@ -93,14 +106,17 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
             className="w-full rounded-md bg-[#141414] text-white px-3 py-2 outline-none border border-white/10"
           >
             <option value="">Selecione o curso</option>
-            {courses.map(course => (
+            {availableCourses.map(course => (
               <option key={course._id} value={course._id}>{course.name}</option>
             ))}
           </select>
         </div>
       )}
 
-      <ButtonCRUD action={initialData ? "update" : "create"} onClick={handleSubmit} />
+      <ButtonCRUD
+        action={initialData ? "update" : "create"}
+        onClick={handleSubmit}
+      />
     </form>
   );
 }
