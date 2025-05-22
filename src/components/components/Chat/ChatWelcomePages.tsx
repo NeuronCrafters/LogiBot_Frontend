@@ -116,7 +116,7 @@ export const AdminWelcome: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="text-center mb-8"
       >
-        <div className="mx-auto bg-gradient-to-r from-amber-500 to-orange-600 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg">
+        <div className="mx-auto bg-gradient-to-r from-fuchsia-500 to-orange-600 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg">
           <Lock size={32} className="text-white" />
         </div>
         <Typograph
@@ -143,7 +143,7 @@ export const AdminWelcome: React.FC = () => {
         className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg"
       >
         <div className="flex items-start gap-4 mb-4">
-          <Info className="text-amber-500 mt-1" size={24} />
+          <Info className="text-fuchsia-400 mt-1" size={24} />
           <div>
             <Typograph
               text="Chat Exclusivo para Estudantes"
@@ -163,27 +163,29 @@ export const AdminWelcome: React.FC = () => {
           </div>
         </div>
 
-        <Alert className="bg-[#2a2a2a] border-amber-600 mt-4">
-          <Info className="h-5 w-5 text-amber-500" />
-          <AlertTitle className="text-white">
-            <Typograph
-              text="Permissão de Administrador"
-              colorText="text-white"
-              variant="text6"
-              weight="bold"
-              fontFamily="poppins"
-            />
-          </AlertTitle>
-          <AlertDescription className="text-gray-400">
-            <Typograph
-              text="Como administrador, você tem acesso às funcionalidades de gerenciamento do sistema, como criação de conteúdo, visualização de relatórios e configurações gerais. Para gerenciar essas funções, utilize as outras seções do menu administrativo."
-              colorText="text-gray-400"
-              variant="text7"
-              weight="regular"
-              fontFamily="poppins"
-            />
-          </AlertDescription>
-        </Alert>
+        <div className="p-[2px] rounded-lg bg-gradient-to-r from-fuchsia-500 to-orange-600">
+          <Alert className="bg-[#2a2a2a] rounded-lg">
+            <Info className="h-5 w-5 text-fuchsia-400" />
+            <AlertTitle className="text-white">
+              <Typograph
+                text="Permissão de Administrador"
+                colorText="text-white"
+                variant="text6"
+                weight="bold"
+                fontFamily="poppins"
+              />
+            </AlertTitle>
+            <AlertDescription className="text-gray-400">
+              <Typograph
+                text="Como administrador, você tem acesso às funcionalidades de gerenciamento do sistema, como criação de conteúdo, visualização de relatórios e configurações gerais. Para gerenciar essas funções, utilize as outras seções do menu administrativo."
+                colorText="text-gray-400"
+                variant="text7"
+                weight="regular"
+                fontFamily="poppins"
+              />
+            </AlertDescription>
+          </Alert>
+        </div>
       </motion.div>
 
       <motion.div
@@ -192,7 +194,7 @@ export const AdminWelcome: React.FC = () => {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="text-center"
       >
-        <Button
+        {/* <Button
           onClick={() => window.location.href = '/crud'}
           className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-lg mr-4"
         >
@@ -215,7 +217,7 @@ export const AdminWelcome: React.FC = () => {
             weight="regular"
             fontFamily="poppins"
           />
-        </Button>
+        </Button> */}
       </motion.div>
     </div>
   );
