@@ -27,7 +27,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
         <Typograph
           text="Nosso chat educacional é uma ferramenta exclusiva para estudantes."
           colorText="text-gray-400"
-          variant="text3"
+          variant="text6"
           weight="regular"
           fontFamily="poppins"
         />
@@ -45,7 +45,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
             <Typograph
               text="Acesso Restrito"
               colorText="text-white"
-              variant="text2"
+              variant="text6"
               weight="bold"
               fontFamily="poppins"
               className="mb-2"
@@ -53,7 +53,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
             <Typograph
               text="Esta área é exclusiva para estudantes. A funcionalidade de chat permite tirar dúvidas, fazer exercícios e praticar conteúdos através de quizzes interativos."
               colorText="text-gray-400"
-              variant="text4"
+              variant="text7"
               weight="regular"
               fontFamily="poppins"
             />
@@ -66,7 +66,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
             <Typograph
               text="Você não tem acesso a esta área"
               colorText="text-white"
-              variant="text3"
+              variant="text6"
               weight="bold"
               fontFamily="poppins"
             />
@@ -75,7 +75,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
             <Typograph
               text={`Seu perfil atual (${userRoles.join(", ")}) não tem permissão para acessar a funcionalidade de chat. Entre em contato com o administrador se precisar de acesso.`}
               colorText="text-gray-400"
-              variant="text4"
+              variant="text7"
               weight="regular"
               fontFamily="poppins"
             />
@@ -89,7 +89,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
         transition={{ delay: 0.5, duration: 0.5 }}
         className="text-center"
       >
-        <Button
+        {/* <Button
           onClick={() => window.location.href = '/'}
           className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-lg"
         >
@@ -100,7 +100,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
             weight="regular"
             fontFamily="poppins"
           />
-        </Button>
+        </Button> */}
       </motion.div>
     </div>
   );
