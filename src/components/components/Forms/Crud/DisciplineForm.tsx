@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { academicFiltersApi } from "@/services/apiClient";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
-import { University, Course, Class, Professor } from "@/services/api/api_academicFilters";
+import { University } from "@/services/api/api_academicFilters";
 
 export interface DisciplineData {
   name: string;
