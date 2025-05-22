@@ -1,7 +1,7 @@
 import { api } from "@/services/api/api";
 import {
   ACADEMIC_ROUTES,
-  PUBLIC_ROUTES,
+  // PUBLIC_ROUTES,
   RASA_ROUTES,
   ADMIN_ROUTES,
   PROFESSOR_ROUTES,
@@ -56,34 +56,34 @@ export const academicApi = {
 // --------------------
 // Public lookup routes
 // --------------------
-export const publicApi = {
-  getInstitutions: <T>() => getRequest<T>(PUBLIC_ROUTES.institutions),
-  getCourses: <T>(universityId: string) =>
-    getRequest<T>(`${PUBLIC_ROUTES.courses}/${universityId}`),
-  getDisciplines: <T>(u: string, c: string) =>
-    getRequest<T>(`${PUBLIC_ROUTES.disciplines}/${u}/${c}`),
-  getClasses: <T>(u: string, c: string) =>
-    getRequest<T>(`${PUBLIC_ROUTES.classes}/${u}/${c}`),
-  getProfessors: <T>(u: string, c?: string) =>
-    getRequest<T>(
-      c
-        ? `${PUBLIC_ROUTES.professors}/${u}/${c}`
-        : `${PUBLIC_ROUTES.professors}/${u}`
-    ),
-  getStudentsByClass: <T>(u: string, c: string, t: string) =>
-    getRequest<T>(`${PUBLIC_ROUTES.studentsByClass}/${u}/${c}/${t}`),
-  getStudentsByDiscipline: <T>(u: string, c: string, d: string) =>
-    getRequest<T>(`${PUBLIC_ROUTES.studentsByDiscipline}/${u}/${c}/${d}`),
-  getStudentsByCourse: <T>(u: string, c: string) =>
-    getRequest<T>(`${PUBLIC_ROUTES.studentsByCourse}/${u}/${c}`),
+// export const publicApi = {
+//   getInstitutions: <T>() => getRequest<T>(PUBLIC_ROUTES.institutions),
+//   getCourses: <T>(universityId: string) =>
+//     getRequest<T>(`${PUBLIC_ROUTES.courses}/${universityId}`),
+//   getDisciplines: <T>(u: string, c: string) =>
+//     getRequest<T>(`${PUBLIC_ROUTES.disciplines}/${u}/${c}`),
+//   getClasses: <T>(u: string, c: string) =>
+//     getRequest<T>(`${PUBLIC_ROUTES.classes}/${u}/${c}`),
+//   getProfessors: <T>(u: string, c?: string) =>
+//     getRequest<T>(
+//       c
+//         ? `${PUBLIC_ROUTES.professors}/${u}/${c}`
+//         : `${PUBLIC_ROUTES.professors}/${u}`
+//     ),
+//   getStudentsByClass: <T>(u: string, c: string, t: string) =>
+//     getRequest<T>(`${PUBLIC_ROUTES.studentsByClass}/${u}/${c}/${t}`),
+//   getStudentsByDiscipline: <T>(u: string, c: string, d: string) =>
+//     getRequest<T>(`${PUBLIC_ROUTES.studentsByDiscipline}/${u}/${c}/${d}`),
+//   getStudentsByCourse: <T>(u: string, c: string) =>
+//     getRequest<T>(`${PUBLIC_ROUTES.studentsByCourse}/${u}/${c}`),
 
-  // !ROTAS DE TESTE
-  getStudentById: <T>(id: string) => getRequest<T>(`/public/student/${id}`),
-  getClassById: <T>(id: string) => getRequest<T>(`/public/class/${id}`),
-  getCourseById: <T>(id: string) => getRequest<T>(`/public/course/${id}`),
-  getDisciplineById: <T>(id: string) => getRequest<T>(`/public/discipline/${id}`),
-  getUniversityById: <T>(id: string) => getRequest<T>(`/public/university/${id}`),
-};
+//   // !ROTAS DE TESTE
+//   getStudentById: <T>(id: string) => getRequest<T>(`/public/student/${id}`),
+//   getClassById: <T>(id: string) => getRequest<T>(`/public/class/${id}`),
+//   getCourseById: <T>(id: string) => getRequest<T>(`/public/course/${id}`),
+//   getDisciplineById: <T>(id: string) => getRequest<T>(`/public/discipline/${id}`),
+//   getUniversityById: <T>(id: string) => getRequest<T>(`/public/university/${id}`),
+// };
 
 // --------------
 // Admin routes
@@ -831,7 +831,7 @@ export const logApi = {
 
 export default {
   academicApi,
-  publicApi,
+  // publicApi,
   adminApi,
   professorApi,
   coordinatorApi,

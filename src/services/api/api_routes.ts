@@ -46,16 +46,16 @@ export const ACADEMIC_ROUTES: Record<
   },
 };
 
-export const PUBLIC_ROUTES = {
-  institutions: "/public/institutions",
-  courses: "/public/courses",
-  disciplines: "/public/disciplines",
-  classes: "/public/classes",
-  professors: "/public/professors",
-  studentsByClass: "/public/students/by-class",
-  studentsByDiscipline: "/public/students/by-discipline",
-  studentsByCourse: "/public/students/by-course",
-};
+// export const PUBLIC_ROUTES = {
+//   institutions: "/public/institutions",
+//   courses: "/public/courses",
+//   disciplines: "/public/disciplines",
+//   classes: "/public/classes",
+//   professors: "/public/professors",
+//   studentsByClass: "/public/students/by-class",
+//   studentsByDiscipline: "/public/students/by-discipline",
+//   studentsByCourse: "/public/students/by-course",
+// };
 
 export const RASA_ROUTES = {
   talk: "/sael/talk",
