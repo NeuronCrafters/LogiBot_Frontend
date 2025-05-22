@@ -49,7 +49,17 @@ export function CRUD() {
       let response: ApiResponse;
 
       if (entity === "professor") {
-        response = await adminApi.createProfessor<ApiResponse>(item);
+        const professorPayload = {
+          name: item.name,
+          email: item.email,
+          password: item.password,
+          school: item.school,
+          courses: item.courses
+        };
+
+        console.log("Professor payload para criação:", professorPayload);
+
+        response = await adminApi.createProfessor<ApiResponse>(professorPayload);
       } else if (["university", "course", "class", "discipline"].includes(entity)) {
         response = await academicApi.post<ApiResponse>(entity as AcademicEntityType, item);
       } else {
@@ -75,7 +85,6 @@ export function CRUD() {
       setLoading(false);
     }
   };
-
   const handleEdit = async (item: RecentItem) => {
     try {
       const updated: RecentItem = { ...item, action: "update" as "update" };

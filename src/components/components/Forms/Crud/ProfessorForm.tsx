@@ -54,7 +54,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       courses,
     });
 
-    // Reset dos campos
     setName("");
     setEmail("");
     setPassword("");
