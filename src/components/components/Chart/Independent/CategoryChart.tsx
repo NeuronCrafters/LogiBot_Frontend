@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import {
   Card,
   CardContent,
@@ -8,15 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
+
+// Categorias fixas para o gráfico
+const FIXED_CATEGORIES = ["variaveis", "tipos", "funcoes", "loops", "verificacoes"];
 
 // Função para traduzir nomes de categorias
 const translateCategory = (category: string): string => {
@@ -64,14 +61,24 @@ const useSubjectsData = (filter: ChartFilterState) => {
     gcTime: 30 * 60 * 1000, // 30 minutos
     select: (rawData: any) => {
       console.log("CategoryChart - Processando dados:", rawData);
-      let result: any[] = [];
+
+      // Criar um mapa para armazenar valores por categoria
+      const categoryMap: Record<string, number> = {};
+
+      // Inicializar todas as categorias fixas com valor 0
+      FIXED_CATEGORIES.forEach(category => {
+        categoryMap[category] = 0;
+      });
+
+      // Processar os dados brutos
+      let extractedData: Array<{ category: string, value: number }> = [];
 
       // Caso com subjectFrequency
       if (typeof rawData === 'object' && 'subjectFrequency' in rawData && typeof rawData.subjectFrequency === 'object') {
         console.log("CategoryChart - Formato: objeto com subjectFrequency");
 
-        // Converter subjectFrequency para array de {category, value}
-        result = Object.entries(rawData.subjectFrequency)
+        // Extrair dados do subjectFrequency
+        extractedData = Object.entries(rawData.subjectFrequency)
           .filter(([key, value]) => key && value)
           .map(([category, value]) => ({
             category,
@@ -82,7 +89,7 @@ const useSubjectsData = (filter: ChartFilterState) => {
       else if (typeof rawData === 'object' && 'mostAccessedSubjects' in rawData && Array.isArray(rawData.mostAccessedSubjects)) {
         console.log("CategoryChart - Formato: objeto com mostAccessedSubjects");
 
-        result = rawData.mostAccessedSubjects.map((item: any) => ({
+        extractedData = rawData.mostAccessedSubjects.map((item: any) => ({
           category: item.subject,
           value: Number(item.count)
         }));
@@ -122,7 +129,7 @@ const useSubjectsData = (filter: ChartFilterState) => {
 
           if (categoryKey && valueKey) {
             console.log(`CategoryChart - Usando ${categoryKey} e ${valueKey} do array`);
-            result = rawData.map((item: any) => ({
+            extractedData = rawData.map((item: any) => ({
               category: item[categoryKey],
               value: Number(item[valueKey])
             }));
@@ -140,7 +147,7 @@ const useSubjectsData = (filter: ChartFilterState) => {
             const entries = Object.entries(value);
             if (entries.length > 0 && typeof entries[0][1] === 'number') {
               console.log(`CategoryChart - Usando objeto ${key} como fonte de dados`);
-              result = entries.map(([category, count]) => ({
+              extractedData = entries.map(([category, count]) => ({
                 category,
                 value: Number(count)
               }));
@@ -150,13 +157,21 @@ const useSubjectsData = (filter: ChartFilterState) => {
         }
       }
 
-      // Ordenar por valor (decrescente)
-      result.sort((a, b) => b.value - a.value);
+      // Preencher o mapa de categorias com os valores extraídos
+      extractedData.forEach(item => {
+        const categoryKey = item.category.toLowerCase();
+        // Só adicionar valores para categorias que estão em nossa lista fixa
+        if (FIXED_CATEGORIES.includes(categoryKey)) {
+          categoryMap[categoryKey] = item.value;
+        }
+      });
 
-      // Limitar a 5 categorias para melhor visualização
-      if (result.length > 5) {
-        result = result.slice(0, 5);
-      }
+      // Converter o mapa de volta para um array na ordem fixa
+      const result = FIXED_CATEGORIES.map(category => ({
+        category,
+        value: categoryMap[category],
+        label: translateCategory(category)
+      }));
 
       return result;
     }
@@ -184,20 +199,7 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
   const isValid = id !== "";
 
   // Verificar se temos dados
-  const hasData = processedData.length > 0;
-
-  // Configuração do gráfico
-  const chartConfig = useMemo(() => {
-    // Criar configuração para cada categoria
-    const config: Record<string, any> = {
-      value: {
-        label: "Acessos",
-        color: "hsl(var(--chart-1))"
-      }
-    };
-
-    return config;
-  }, []);
+  const hasData = processedData.some(item => item.value > 0);
 
   // Calcular o total de acessos
   const totalAccesses = useMemo(() => {
@@ -208,18 +210,17 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
   // Identificar a categoria mais acessada
   const topCategory = useMemo(() => {
     if (!processedData || processedData.length === 0) return null;
-    return processedData[0];
+    const sorted = [...processedData].sort((a, b) => b.value - a.value);
+    return sorted[0].value > 0 ? sorted[0] : null;
   }, [processedData]);
 
   return (
-    <Card className="bg-[#141414] border-white/10 w-full mb-6">
+    <Card className="bg-[#1f1f1f] border-white/10 w-full h-full mb-6">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b border-white/10 p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5">
           <CardTitle className="text-white">Distribuição por Assunto</CardTitle>
           <CardDescription className="text-white/70">
-            {hasData
-              ? `Tópicos mais acessados (${processedData.length})`
-              : "Estatísticas de uso por assunto"}
+            Mapeamento dos Assunstos Mais Acessados
           </CardDescription>
         </div>
         {hasData && topCategory && (
@@ -229,7 +230,7 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
                 Tópico mais acessado
               </span>
               <span className="text-lg font-bold leading-none text-white sm:text-2xl">
-                {translateCategory(topCategory.category)}
+                {topCategory.label}
               </span>
             </div>
             <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-l border-white/10 px-6 py-4 text-left data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0">
@@ -266,53 +267,44 @@ export function CategoryChart({ filter }: { filter: ChartFilterState }) {
           </div>
         )}
 
-        {isValid && !isLoading && !isError && hasData && (
+        {isValid && !isLoading && !isError && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
+            className="h-[250px] w-full"
           >
-            <ChartContainer
-              config={chartConfig}
-              className="aspect-auto h-[250px] w-full text-white"
-            >
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                accessibilityLayer
                 data={processedData}
                 margin={{
-                  left: 12,
-                  right: 12,
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
                 }}
-                layout="vertical" // Barras horizontais para melhor visualização de categorias
               >
-                <CartesianGrid horizontal={true} vertical={false} stroke="#333" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                 <XAxis
-                  type="number"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  stroke="#999"
+                  dataKey="label"
+                  tick={{ fill: "#fff" }}
+                  axisLine={{ stroke: "#555" }}
                 />
-                <ChartTooltip
+                <Tooltip
                   cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      className="w-[150px] bg-[#1f1f1f] border-[#333] text-white"
-                      nameKey="value"
-                      labelFormatter={(value) => {
-                        return translateCategory(value);
-                      }}
-                    />
-                  }
+                  contentStyle={{ backgroundColor: "#1f1f1f", borderColor: "#333" }}
+                  labelStyle={{ color: "#fff" }}
+                  itemStyle={{ color: "#fff" }}
+                  formatter={(value) => [`${value} acesso(s)`, '']}
                 />
                 <Bar
                   dataKey="value"
                   name="Acessos"
-                  fill="hsl(var(--chart-1))"
-                  radius={8}
+                  fill="#274a96"
+                  radius={[4, 4, 0, 0]}
                 />
               </BarChart>
-            </ChartContainer>
+            </ResponsiveContainer>
           </motion.div>
         )}
 

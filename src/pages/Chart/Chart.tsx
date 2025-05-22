@@ -137,9 +137,24 @@ export function Chart() {
                     colorText="text-indigo-300"
                   />
                 </div>
+
+                {/* UsageChart permanece em tela cheia */}
                 <UsageChart filter={{ ...filter, ids: validIds }} />
-                <CorrectWrongChart filter={{ ...filter, ids: validIds }} />
-                <CategoryChart filter={{ ...filter, ids: validIds }} />
+
+                {/* Container flexível para CorrectWrongChart e CategoryChart com altura fixa */}
+                <div className="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0 md:h-[450px]">
+                  {/* Cada gráfico ocupa exatamente a mesma altura e largura */}
+                  <div className="w-full md:w-1/2 h-full flex flex-col">
+                    <div className="flex-1 min-h-0">
+                      <CorrectWrongChart filter={{ ...filter, ids: validIds }} />
+                    </div>
+                  </div>
+                  <div className="w-full md:w-1/2 h-full flex flex-col">
+                    <div className="flex-1 min-h-0">
+                      <CategoryChart filter={{ ...filter, ids: validIds }} />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -158,9 +173,24 @@ export function Chart() {
                     colorText="text-indigo-300"
                   />
                 </div>
+
+                {/* UsageChart permanece em tela cheia */}
                 <UsageChart filter={{ ...filter, ids: validIds }} />
-                <CorrectWrongChart filter={{ ...filter, ids: validIds }} />
-                <CategoryChart filter={{ ...filter, ids: validIds }} />
+
+                {/* Container flexível para CorrectWrongChart e CategoryChart com altura fixa */}
+                <div className="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0 md:h-[450px]">
+                  {/* Cada gráfico ocupa exatamente a mesma altura e largura */}
+                  <div className="w-full md:w-1/2 h-full flex flex-col">
+                    <div className="flex-1 min-h-0">
+                      <CorrectWrongChart filter={{ ...filter, ids: validIds }} />
+                    </div>
+                  </div>
+                  <div className="w-full md:w-1/2 h-full flex flex-col">
+                    <div className="flex-1 min-h-0">
+                      <CategoryChart filter={{ ...filter, ids: validIds }} />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

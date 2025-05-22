@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Typograph } from "@/components/components/Typograph/Typograph";
+import { Pie, PieChart, Cell, Tooltip, Legend } from "recharts";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
@@ -11,6 +9,8 @@ import type { ChartFilterState } from "@/@types/ChartsType";
 interface CorrectWrongChartProps {
   filter: ChartFilterState;
 }
+
+const COLORS = ["#10b981", "#ef4444"];
 
 const useAccuracyData = (filter: ChartFilterState) => {
   // Extração e validação robusta do ID
@@ -61,17 +61,22 @@ const useAccuracyData = (filter: ChartFilterState) => {
       const total = totalCorrect + totalWrong;
       const accuracy = total > 0 ? (totalCorrect / total) * 100 : 0;
 
-      // Formatar os dados para o gráfico de barras
-      // Formato alterado para ter colunas separadas para acertos e erros
+      // Calcular tendência (exemplo: vamos supor que melhore 2.5% por padrão)
+      // Na implementação real, você precisaria comparar com dados históricos
+      const trend = 2.5;
+
+      // Formatar os dados para o gráfico de pizza
       const chartData = [
-        { category: "Respostas", correct: totalCorrect, wrong: totalWrong }
+        { name: "Acertos", value: totalCorrect, fill: COLORS[0] },
+        { name: "Erros", value: totalWrong, fill: COLORS[1] }
       ];
 
       return {
         chartData,
         totalCorrect,
         totalWrong,
-        accuracy
+        accuracy,
+        trend
       };
     }
   });
@@ -102,49 +107,16 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
     accuracyData.chartData.length > 0 &&
     (accuracyData.totalCorrect > 0 || accuracyData.totalWrong > 0);
 
-  // Configuração para o gráfico
-  const chartConfig = {
-    correct: {
-      label: "Acertos",
-      color: "hsl(var(--chart-2))"
-    },
-    wrong: {
-      label: "Erros",
-      color: "hsl(var(--chart-1))"
-    }
-  };
-
   return (
-    <Card className="bg-[#141414] border-white/10 w-full mb-6">
-      <CardHeader className="flex flex-col items-stretch space-y-0 border-b border-white/10">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5">
-          <CardTitle className="text-white">Taxa de Acertos e Erros</CardTitle>
-          <CardDescription className="text-white/70">
-            {hasData
-              ? `Precisão: ${accuracyData.accuracy.toFixed(1)}%`
-              : "Estatísticas de perguntas respondidas"}
-          </CardDescription>
-        </div>
-
-        {hasData && (
-          <div className="flex">
-            <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50">
-              <span className="text-xs text-white/50">Acertos</span>
-              <span className="text-lg font-bold leading-none text-green-500 sm:text-2xl">
-                {accuracyData.totalCorrect}
-              </span>
-            </div>
-            <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-l border-white/10 px-6 py-4 text-left data-[active=true]:bg-muted/50">
-              <span className="text-xs text-white/50">Erros</span>
-              <span className="text-lg font-bold leading-none text-red-500 sm:text-2xl">
-                {accuracyData.totalWrong}
-              </span>
-            </div>
-          </div>
-        )}
+    <Card className="bg-[#1f1f1f] border-white/10 w-full h-full mb-6 flex flex-col">
+      <CardHeader className="flex flex-col space-y-0 border-b border-white/10 pb-4">
+        <CardTitle className="text-white">Taxa de Acertos e Erros</CardTitle>
+        <CardDescription className="text-white/70">
+          Acertos e Erros com Base na interação do Quiz
+        </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-2 sm:p-6">
+      <CardContent className="px-6 py-6 flex-1">
         {!isValid && (
           <div className="flex items-center justify-center h-[250px] text-center text-white/70">
             <p>Selecione uma entidade para visualizar dados</p>
@@ -171,50 +143,33 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
+            className="h-[250px] w-full flex items-center justify-center"
           >
-            <ChartContainer
-              config={chartConfig}
-              className="aspect-auto h-[250px] w-full text-white"
-            >
-              <BarChart
-                accessibilityLayer
+            <PieChart width={300} height={250}>
+              <Pie
                 data={accuracyData.chartData}
-                margin={{
-                  left: 12,
-                  right: 12,
-                }}
-                barGap={8}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                dataKey="value"
+                nameKey="name"
               >
-                <CartesianGrid horizontal={true} vertical={false} stroke="#333" />
-                <XAxis
-                  dataKey="category"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  stroke="#999"
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      className="w-[120px] bg-[#1f1f1f] border-[#333] text-white"
-                    />
-                  }
-                />
-                <Bar
-                  dataKey="correct"
-                  fill="#10b981" // Verde para acertos
-                  radius={[8, 8, 0, 0]}
-                  name="Acertos"
-                />
-                <Bar
-                  dataKey="wrong"
-                  fill="#ef4444" // Vermelho para erros
-                  radius={[8, 8, 0, 0]}
-                  name="Erros"
-                />
-              </BarChart>
-            </ChartContainer>
+                {accuracyData.chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ backgroundColor: "#1f1f1f", borderColor: "#333" }}
+                labelStyle={{ color: "#fff" }}
+                itemStyle={{ color: "#fff" }}
+              />
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                formatter={(value) => <span style={{ color: "#fff" }}>{value}</span>}
+              />
+            </PieChart>
           </motion.div>
         )}
 
@@ -237,6 +192,36 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
           </div>
         )}
       </CardContent>
-    </Card>
+
+      {
+        hasData && (
+          <CardFooter className="flex justify-between items-center border-t border-white/10 px-6 py-4">
+            <div className="flex flex-col">
+              <div className="flex items-center space-x-2">
+                <span className="font-medium text-white">Acertos: {accuracyData.totalCorrect}</span>
+                <span className="text-white/50">|</span>
+                <span className="font-medium text-white">Erros: {accuracyData.totalWrong}</span>
+              </div>
+              <div className="mt-1">
+                <span className="text-sm text-white/70">Precisão: {accuracyData.accuracy.toFixed(1)}%</span>
+              </div>
+            </div>
+            <div className="flex items-center">
+              {/* {accuracyData.trend > 0 ? (
+              <div className="flex items-center text-green-500">
+                <TrendingUp className="mr-1 h-4 w-4" />
+                <span>+{accuracyData.trend.toFixed(1)}% este mês</span>
+              </div>
+            ) : (
+              <div className="flex items-center text-red-500">
+                <TrendingDown className="mr-1 h-4 w-4" />
+                <span>{accuracyData.trend.toFixed(1)}% este mês</span>
+              </div>
+            )} */}
+            </div>
+          </CardFooter>
+        )
+      }
+    </Card >
   );
 }

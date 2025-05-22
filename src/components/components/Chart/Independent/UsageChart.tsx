@@ -14,7 +14,6 @@ interface UsageChartProps {
   classId?: string;
 }
 
-// Função para formatar minutos em hh:mm
 function formatMinutes(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = Math.floor(minutes % 60);
@@ -27,18 +26,16 @@ function useUsageData(
   courseId?: string,
   classId?: string
 ) {
-  // Extrair o ID principal do array de IDs
+
   const validIds = Array.isArray(filter.ids) ?
     filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') :
     [];
 
   const mainId = validIds[0] || "";
 
-  // Se for tipo student, usamos mainId como studentId
   const isStudent = filter.type === "student";
   const studentId = isStudent ? mainId : "";
 
-  // Verifica se temos os IDs necessários
   const hasRequiredIds = isStudent
     ? Boolean(universityId && courseId && classId && studentId)
     : Boolean(mainId);
@@ -281,7 +278,7 @@ export function UsageChart({
   }, []);
 
   return (
-    <Card className="bg-[#141414] border-white/10 w-full mb-6">
+    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b border-white/10 p-0">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5">
           <CardTitle className="text-white">Tempo de Uso Diário</CardTitle>
@@ -356,7 +353,7 @@ export function UsageChart({
                   right: 12,
                 }}
               >
-                <CartesianGrid vertical={false} stroke="#333" />
+                <CartesianGrid vertical={false} stroke="#5a5a5a" />
                 <XAxis
                   dataKey="date"
                   tickLine={false}
@@ -373,9 +370,10 @@ export function UsageChart({
                   }}
                 />
                 <ChartTooltip
+                  cursor={false}
                   content={
                     <ChartTooltipContent
-                      className="w-[150px] bg-[#94249e] border-[#333] text-white"
+                      className="w-[150px] bg-[#1f1f1f] border-[#333] text-white"
                       nameKey="usage"
                       labelFormatter={(value) => {
                         const date = new Date(value);
@@ -390,7 +388,7 @@ export function UsageChart({
                 />
                 <Bar
                   dataKey="usage"
-                  fill="hsl(var(--chart-1))"
+                  fill="#274a96"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
