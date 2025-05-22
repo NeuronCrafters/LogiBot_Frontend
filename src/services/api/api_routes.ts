@@ -57,6 +57,10 @@ export const ACADEMIC_ROUTES: Record<
 //   studentsByCourse: "/public/students/by-course",
 // };
 
+export const ACADEMICFILTER_ROUTES = {
+  academicData: "/academicFilters/data"
+};
+
 export const RASA_ROUTES = {
   talk: "/sael/talk",
   listarNiveis: "/sael/action/listar_niveis",
