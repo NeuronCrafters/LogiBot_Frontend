@@ -14,19 +14,12 @@ interface UsageChartProps {
   classId?: string;
 }
 
-function formatMinutes(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = Math.floor(minutes % 60);
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-}
-
 function useUsageData(
   filter: ChartFilterState,
   universityId?: string,
   courseId?: string,
   classId?: string
 ) {
-
   const validIds = Array.isArray(filter.ids) ?
     filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') :
     [];
@@ -108,133 +101,7 @@ function useUsageData(
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: 2,
-    select: (rawData: any) => {
-      console.log("Dados brutos recebidos:", JSON.stringify(rawData, null, 2));
-
-      // Extrai os dados de tempo de uso
-      let totalMinutes = 0;
-      let sessionDetails = [];
-
-      // Tenta extrair o tempo total e sessões de várias fontes possíveis
-      if (rawData.usageTimeInSeconds) {
-        totalMinutes = rawData.usageTimeInSeconds / 60;
-      } else if (rawData.users?.totalUsageTime) {
-        totalMinutes = rawData.users.totalUsageTime / 60;
-      }
-
-      // Obtém a string formatada de tempo
-      const formattedTime = rawData.usageTime?.formatted ||
-        rawData.users?.usageTime?.formatted ||
-        formatMinutes(totalMinutes);
-
-      // Verifica se há dados de sessão em algum lugar
-      if (rawData.usageSessions) {
-        sessionDetails = rawData.usageSessions;
-      } else if (rawData.users?.sessions) {
-        sessionDetails = rawData.users.sessions;
-      } else if (rawData.sessions) {
-        sessionDetails = rawData.sessions;
-      }
-
-      // Se não temos dados de sessão, vamos criar dados baseados nos últimos 7 dias
-      // Apenas usando o tempo total dividido pelos dias para criar uma visualização
-      if (!sessionDetails || sessionDetails.length === 0) {
-        const today = new Date();
-        const dailyUsage = [];
-
-        // Se temos apenas o tempo total, vamos dividir pelos últimos 7 dias
-        // para criar uma visualização interessante
-        const daysToShow = 7;
-        const averageMinutesPerDay = totalMinutes / daysToShow;
-
-        // Cria dados para os últimos 7 dias
-        for (let i = 0; i < daysToShow; i++) {
-          const date = new Date(today);
-          date.setDate(date.getDate() - (daysToShow - 1 - i));
-
-          // Para o último dia (hoje), usamos o valor total
-          // Para os outros dias, usamos um valor proporcional
-          let dayMinutes;
-          if (i === daysToShow - 1) {
-            dayMinutes = averageMinutesPerDay * 1.5; // Um pouco mais para hoje
-          } else {
-            // Variação de 70% a 130% da média para criar um gráfico mais realista
-            const variation = 0.7 + Math.random() * 0.6; // 0.7 a 1.3
-            dayMinutes = averageMinutesPerDay * variation;
-          }
-
-          dailyUsage.push({
-            date: date.toISOString().split('T')[0],
-            usage: Math.round(dayMinutes * 10) / 10, // Arredonda para 1 casa decimal
-            formatted: formatMinutes(dayMinutes)
-          });
-        }
-
-        return {
-          totalMinutes,
-          formattedTime,
-          dailyUsage
-        };
-      }
-
-      // Se temos dados de sessão, vamos processá-los
-      // Agrupando por dia
-      const sessionsByDay: Record<string, number> = {};
-
-      sessionDetails.forEach((session: any) => {
-        let sessionDate = '';
-        let sessionMinutes = 0;
-
-        // Extrai a data e os minutos da sessão, dependendo da estrutura
-        if (session.date) {
-          sessionDate = session.date.split('T')[0];
-        } else if (session.startTime) {
-          sessionDate = new Date(session.startTime).toISOString().split('T')[0];
-        } else if (session.sessionStart) {
-          sessionDate = new Date(session.sessionStart).toISOString().split('T')[0];
-        } else {
-          // Se não temos data, pula esta sessão
-          return;
-        }
-
-        // Extrai os minutos da sessão
-        if (session.durationInMinutes) {
-          sessionMinutes = session.durationInMinutes;
-        } else if (session.durationInSeconds) {
-          sessionMinutes = session.durationInSeconds / 60;
-        } else if (session.sessionDuration) {
-          sessionMinutes = session.sessionDuration / 60;
-        }
-
-        // Adiciona ao total do dia
-        if (!sessionsByDay[sessionDate]) {
-          sessionsByDay[sessionDate] = 0;
-        }
-        sessionsByDay[sessionDate] += sessionMinutes;
-      });
-
-      // Converte o objeto em um array
-      const dailyUsage = Object.entries(sessionsByDay).map(([date, minutes]) => ({
-        date,
-        usage: minutes,
-        formatted: formatMinutes(minutes)
-      }));
-
-      // Ordena por data
-      dailyUsage.sort((a, b) => a.date.localeCompare(b.date));
-
-      // Limita aos últimos 30 dias se houver muitos dados
-      if (dailyUsage.length > 30) {
-        dailyUsage.splice(0, dailyUsage.length - 30);
-      }
-
-      return {
-        totalMinutes,
-        formattedTime,
-        dailyUsage
-      };
-    }
+    retry: 2
   });
 }
 
@@ -277,6 +144,29 @@ export function UsageChart({
     };
   }, []);
 
+  // Verifica e prepara os dados para o gráfico
+  const chartData = useMemo(() => {
+    if (!usageData) return [];
+
+    // Usa o dailyUsage se disponível
+    if (usageData.dailyUsage && Array.isArray(usageData.dailyUsage) && usageData.dailyUsage.length > 0) {
+      // Ordenar por data (mais antigas primeiro)
+      return [...usageData.dailyUsage].sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    // Fallback para dados vazios
+    return [];
+  }, [usageData]);
+
+  // Verifica se temos dados para exibir
+  const hasData = chartData.length > 0;
+
+  // Formata o tempo total
+  const formattedTime = useMemo(() => {
+    if (!usageData) return "00:00:00";
+    return usageData.usageTime?.formatted || "00:00:00";
+  }, [usageData]);
+
   return (
     <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b border-white/10 p-0">
@@ -295,7 +185,7 @@ export function UsageChart({
               Tempo Total
             </span>
             <span className="text-lg font-bold leading-none text-white sm:text-3xl">
-              {usageData?.formattedTime || "00:00"}
+              {formattedTime}
             </span>
           </button>
         </div>
@@ -322,12 +212,17 @@ export function UsageChart({
         )}
 
         {hasRequiredIds && isError && (
-          <div className="flex items-center justify-center h-[250px] text-center text-red-400">
+          <div className="flex items-center justify-center h-[250px] text-center text-white/70">
             <div className="flex flex-col items-center">
-              <p className="mb-2">{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <p>{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
               <button
                 onClick={() => refetch()}
-                className="px-3 py-1 text-sm text-indigo-400 hover:text-indigo-300 border border-indigo-400 hover:border-indigo-300 rounded transition-colors"
+                className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 Tentar novamente
               </button>
@@ -335,7 +230,7 @@ export function UsageChart({
           </div>
         )}
 
-        {hasRequiredIds && !isLoading && !isError && usageData && (
+        {hasRequiredIds && !isLoading && !isError && hasData && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -347,13 +242,22 @@ export function UsageChart({
             >
               <BarChart
                 accessibilityLayer
-                data={usageData.dailyUsage}
+                data={chartData}
                 margin={{
                   left: 12,
                   right: 12,
+                  top: 20,
+                  bottom: 5
                 }}
+                barSize={80}
+                barGap={2}
               >
-                <CartesianGrid vertical={false} stroke="#5a5a5a" />
+                <CartesianGrid
+                  vertical={false}
+                  stroke="#333"
+                  strokeDasharray="3 3"
+                  strokeOpacity={0.6}
+                />
                 <XAxis
                   dataKey="date"
                   tickLine={false}
@@ -371,32 +275,62 @@ export function UsageChart({
                 />
                 <ChartTooltip
                   cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      className="w-[150px] bg-[#1f1f1f] border-[#333] text-white"
-                      nameKey="usage"
-                      labelFormatter={(value) => {
-                        const date = new Date(value);
-                        return date.toLocaleDateString("pt-BR", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric"
-                        });
-                      }}
-                    />
-                  }
+                  content={(props) => {
+                    if (!props.active || !props.payload || !props.payload[0]) {
+                      return null;
+                    }
+
+                    const data = props.payload[0].payload;
+                    const date = new Date(data.date);
+                    const formattedDate = date.toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric"
+                    });
+
+                    // Garantir que sempre temos o formato HH:MM:SS
+                    let formattedTime = data.formatted || "00:00:00";
+
+                    // Se o tempo formatado não tiver o formato completo HH:MM:SS, ajustamos
+                    if (formattedTime && formattedTime.split(":").length < 3) {
+                      // Converter minutos para o formato correto
+                      const usage = data.usage || 0;
+                      const hours = Math.floor(usage / 60);
+                      const minutes = Math.floor(usage % 60);
+                      const seconds = Math.floor((usage * 60) % 60);
+
+                      formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+
+                    return (
+                      <div className="p-2 bg-[#1f1f1f] border border-[#333] rounded shadow text-white text-sm">
+                        <p className="font-semibold mb-1">{formattedDate}</p>
+                        <p>
+                          <span className="text-[#999] mr-2">Tempo:</span>
+                          <span className="font-medium">{formattedTime}</span>
+                        </p>
+                        {data.sessions?.length > 0 && (
+                          <p className="mt-1">
+                            <span className="text-[#999] mr-2">Sessões:</span>
+                            <span className="font-medium">{data.sessions.length}</span>
+                          </p>
+                        )}
+                      </div>
+                    );
+                  }}
                 />
                 <Bar
                   dataKey="usage"
                   fill="#274a96"
                   radius={[4, 4, 0, 0]}
+                  fillOpacity={0.9}
                 />
               </BarChart>
             </ChartContainer>
           </motion.div>
         )}
 
-        {hasRequiredIds && !isLoading && !isError && !usageData && (
+        {hasRequiredIds && !isLoading && !isError && !hasData && (
           <div className="flex items-center justify-center h-[250px] text-center text-white/70">
             <div className="flex flex-col items-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">

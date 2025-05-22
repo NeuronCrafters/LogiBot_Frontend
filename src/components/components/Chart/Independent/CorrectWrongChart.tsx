@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Pie, PieChart, Cell, Tooltip, Legend } from "recharts";
-import { TrendingUp, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { logApi } from "@/services/apiClient";
@@ -108,7 +107,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
     (accuracyData.totalCorrect > 0 || accuracyData.totalWrong > 0);
 
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full h-full mb-6 flex flex-col">
+    <Card className="bg-[#1f1f1f] border-white/10 w-full h-full mb-0 flex flex-col">
       <CardHeader className="flex flex-col space-y-0 border-b border-white/10 pb-4">
         <CardTitle className="text-white">Taxa de Acertos e Erros</CardTitle>
         <CardDescription className="text-white/70">
@@ -116,15 +115,15 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-6 py-6 flex-1">
+      <CardContent className="px-6 py-6 flex-1 flex flex-col justify-center items-center">
         {!isValid && (
-          <div className="flex items-center justify-center h-[250px] text-center text-white/70">
+          <div className="flex items-center justify-center h-full w-full text-center text-white/70">
             <p>Selecione uma entidade para visualizar dados</p>
           </div>
         )}
 
         {isValid && isLoading && (
-          <div className="flex items-center justify-center h-[250px] text-center text-white/70">
+          <div className="flex items-center justify-center h-full w-full text-center text-white/70">
             <div className="flex flex-col items-center">
               <div className="animate-pulse w-10 h-10 rounded-full bg-indigo-600/30 mb-3"></div>
               <p>Carregando dados...</p>
@@ -133,8 +132,21 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
         )}
 
         {isValid && isError && (
-          <div className="flex items-center justify-center h-[250px] text-center text-red-400">
-            <p>{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
+          <div className="flex items-center justify-center h-full w-full text-center text-white/70">
+            <div className="flex flex-col items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <p>{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
+              <button
+                onClick={() => refetch()}
+                className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                Tentar novamente
+              </button>
+            </div>
           </div>
         )}
 
@@ -143,9 +155,9 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="h-[250px] w-full flex items-center justify-center"
+            className="h-full w-full flex items-center justify-center"
           >
-            <PieChart width={300} height={250}>
+            <PieChart width={300} height={220}>
               <Pie
                 data={accuracyData.chartData}
                 cx="50%"
@@ -174,7 +186,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
         )}
 
         {isValid && !isLoading && !isError && !hasData && (
-          <div className="flex items-center justify-center h-[250px] text-center text-white/70">
+          <div className="flex items-center justify-center h-full w-full text-center text-white/70">
             <div className="flex flex-col items-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -207,17 +219,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
               </div>
             </div>
             <div className="flex items-center">
-              {/* {accuracyData.trend > 0 ? (
-              <div className="flex items-center text-green-500">
-                <TrendingUp className="mr-1 h-4 w-4" />
-                <span>+{accuracyData.trend.toFixed(1)}% este mês</span>
-              </div>
-            ) : (
-              <div className="flex items-center text-red-500">
-                <TrendingDown className="mr-1 h-4 w-4" />
-                <span>{accuracyData.trend.toFixed(1)}% este mês</span>
-              </div>
-            )} */}
+              {/* Comentado para manter consistência com o design atual */}
             </div>
           </CardFooter>
         )
