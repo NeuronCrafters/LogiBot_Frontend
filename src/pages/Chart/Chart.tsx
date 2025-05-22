@@ -88,7 +88,6 @@ export function Chart() {
               />
             </div>
           </Button>
-
         )}
       </div>
 
@@ -144,7 +143,7 @@ export function Chart() {
               </div>
             )}
 
-            {filter.mode === "compare" && validIds.length >= 2 && (
+            {filter.mode === ("compare" as LogModeType) && validIds.length >= 2 && (
               <div className="space-y-6 mt-6">
                 <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30">
                   <Typograph
