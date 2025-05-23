@@ -16,12 +16,18 @@ interface Course {
   _id: string;
   name: string;
   disciplines: Discipline[];
+  classes: Class[];
 }
 
 interface Discipline {
   _id: string;
   name: string;
   code: string;
+}
+
+interface Class {
+  _id: string;
+  name: string;
 }
 
 interface FormsFilterProps {
@@ -46,7 +52,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   };
 
   const fixedUniversity = getFirstId(user.schoolId) || String(user.school || "");
-  const fixedCourse = getFirstId(user.courseId) || (
+  const userCourseId = getFirstId(user.courseId) || (
     Array.isArray(user.courses) && user.courses.length > 0
       ? user.courses[0]
       : ""
@@ -55,12 +61,12 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   const allowedFilters: FilterType[] = isAdmin
     ? [
       "universities", "courses", "disciplines", "classes",
-      "professors", "students", "students-course", "students-discipline",
+      "professors", "students", "students-course", "students-discipline", "students-class",
     ]
     : isCoordinator
       ? [
         "professors", "disciplines", "classes",
-        "students-course", "students-discipline",
+        "students-course", "students-discipline", "students-class",
       ]
       : isProfessor
         ? ["students-discipline"]
@@ -68,13 +74,10 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
 
   // Estados do formulário
   const [filterType, setFilterType] = useState<FilterType | "">("");
-  const [selectedUniversity, setSelectedUniversity] = useState<string>(
-    isCoordinator || isProfessor ? fixedUniversity : ""
-  );
-  const [selectedCourse, setSelectedCourse] = useState<string>(
-    isCoordinator || isProfessor ? fixedCourse : ""
-  );
+  const [selectedUniversity, setSelectedUniversity] = useState<string>("");
+  const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState<string>("");
 
   // Query para buscar dados acadêmicos com cache
   const {
@@ -99,30 +102,35 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     isAdmin &&
     [
       "courses", "disciplines", "classes",
-      "professors", "students-course", "students-discipline",
+      "professors", "students-course", "students-discipline", "students-class",
     ].includes(filterType as FilterType);
 
   const showCourseSelect =
-    isAdmin &&
+    (isAdmin || isCoordinator) &&
     [
       "disciplines", "classes",
-      "students-course", "students-discipline",
+      "students-course", "students-discipline", "students-class",
     ].includes(filterType as FilterType);
 
   const showStudentDisciplineSelect =
     filterType === "students-discipline" &&
     (isAdmin || isCoordinator || isProfessor);
 
+  const showStudentClassSelect =
+    filterType === "students-class" &&
+    (isAdmin || isCoordinator);
+
   const coordinatorNoSelect =
     isCoordinator &&
-    ["professors", "disciplines", "classes"].includes(filterType as FilterType);
+    ["professors"].includes(filterType as FilterType);
 
   // Validação para habilitar busca
   let canSearch =
     !!filterType &&
     (!showUniversitySelect || !!selectedUniversity) &&
     (!showCourseSelect || !!selectedCourse) &&
-    (!showStudentDisciplineSelect || !!selectedDiscipline);
+    (!showStudentDisciplineSelect || !!selectedDiscipline) &&
+    (!showStudentClassSelect || !!selectedClass);
 
   if (coordinatorNoSelect) canSearch = true;
 
@@ -132,25 +140,57 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   }, [academicData]);
 
   const courses: Course[] = useMemo(() => {
-    if (!selectedUniversity || !universities.length) return [];
+    // Para admin, filtrar pela universidade selecionada
+    if (isAdmin && selectedUniversity && universities.length) {
+      const university = universities.find(u => u._id === selectedUniversity);
+      return university?.courses || [];
+    }
 
-    const university = universities.find(u => u._id === selectedUniversity);
-    return university?.courses || [];
-  }, [universities, selectedUniversity]);
+    // Para coordenador, mostrar todos os cursos da sua universidade
+    if ((isCoordinator || isProfessor) && fixedUniversity && universities.length) {
+      const university = universities.find(u => u._id === fixedUniversity);
+      return university?.courses || [];
+    }
+
+    return [];
+  }, [universities, selectedUniversity, fixedUniversity, isAdmin, isCoordinator, isProfessor]);
 
   const disciplines: Discipline[] = useMemo(() => {
-    if (!selectedCourse || !courses.length) return [];
+    if (!selectedCourse || !universities.length) return [];
 
-    const course = courses.find(c => c._id === selectedCourse);
-    return course?.disciplines || [];
-  }, [courses, selectedCourse]);
+    // Buscar em todas as universidades pelo curso selecionado
+    for (const university of universities) {
+      const course = university.courses.find(c => c._id === selectedCourse);
+      if (course) {
+        return course.disciplines || [];
+      }
+    }
+
+    return [];
+  }, [universities, selectedCourse]);
+
+  const classes = useMemo(() => {
+    if (!selectedCourse || !universities.length) return [];
+
+    // Buscar em todas as universidades pelo curso selecionado
+    for (const university of universities) {
+      const course = university.courses.find(c => c._id === selectedCourse);
+      if (course) {
+        return course.classes || [];
+      }
+    }
+
+    return [];
+  }, [universities, selectedCourse]);
 
   // Effects para reset de campos
   useEffect(() => {
-    if (!showCourseSelect && isAdmin) {
+    if (!showCourseSelect) {
       setSelectedCourse("");
+      setSelectedDiscipline("");
+      setSelectedClass("");
     }
-  }, [showCourseSelect, isAdmin]);
+  }, [showCourseSelect]);
 
   useEffect(() => {
     if (!showStudentDisciplineSelect) {
@@ -158,25 +198,44 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     }
   }, [showStudentDisciplineSelect]);
 
+  useEffect(() => {
+    if (!showStudentClassSelect) {
+      setSelectedClass("");
+    }
+  }, [showStudentClassSelect]);
+
+  // Effect para inicializar universidade para coordenador/professor
+  useEffect(() => {
+    if ((isCoordinator || isProfessor) && fixedUniversity && !selectedUniversity) {
+      setSelectedUniversity(fixedUniversity);
+    }
+  }, [isCoordinator, isProfessor, fixedUniversity, selectedUniversity]);
+
   // Handlers
   function handleSearchClick() {
     if (!canSearch) return;
 
+    // Para coordenador e professor, sempre usar a universidade fixa
+    const universityId = (isCoordinator || isProfessor)
+      ? fixedUniversity
+      : (showUniversitySelect ? selectedUniversity : undefined);
+
     onSearch({
       filterType,
-      universityId: isCoordinator || isProfessor ? fixedUniversity : showUniversitySelect ? selectedUniversity : undefined,
-      courseId: isCoordinator || isProfessor ? fixedCourse : showCourseSelect ? selectedCourse : undefined,
+      universityId,
+      courseId: showCourseSelect ? selectedCourse : undefined,
       disciplineId: showStudentDisciplineSelect ? selectedDiscipline : undefined,
-      classId: undefined,
+      classId: showStudentClassSelect ? selectedClass : undefined,
     });
   }
 
   function handleResetFilter() {
     setFilterType("");
+    setSelectedCourse("");
+    setSelectedDiscipline("");
+    setSelectedClass("");
     if (isAdmin) {
       setSelectedUniversity("");
-      setSelectedCourse("");
-      setSelectedDiscipline("");
     }
     onReset();
   }
@@ -244,7 +303,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
           </select>
         </div>
 
-        {/* Select de Universidade */}
+        {/* Select de Universidade - Apenas para Admin */}
         {showUniversitySelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white text-sm font-medium">Universidade:</label>
@@ -254,6 +313,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
                 setSelectedUniversity(e.target.value);
                 setSelectedCourse(""); // Reset curso
                 setSelectedDiscipline(""); // Reset disciplina
+                setSelectedClass(""); // Reset turma
               }}
               className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
               disabled={loading}
@@ -266,7 +326,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
           </div>
         )}
 
-        {/* Select de Curso */}
+        {/* Select de Curso - Para Admin e Coordenador */}
         {showCourseSelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-white text-sm font-medium">Curso:</label>
@@ -275,9 +335,10 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
               onChange={(e) => {
                 setSelectedCourse(e.target.value);
                 setSelectedDiscipline(""); // Reset disciplina
+                setSelectedClass(""); // Reset turma
               }}
               className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
-              disabled={loading || (!selectedUniversity && isAdmin)}
+              disabled={loading || courses.length === 0}
             >
               <option value="">Selecione o curso</option>
               {courses.map((c) => (
@@ -295,7 +356,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
               value={selectedDiscipline}
               onChange={(e) => setSelectedDiscipline(e.target.value)}
               className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
-              disabled={loading || (!selectedCourse && (isAdmin || isCoordinator))}
+              disabled={loading || disciplines.length === 0}
             >
               <option value="">Selecione a disciplina</option>
               {disciplines.map((d) => (
@@ -306,15 +367,33 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
             </select>
           </div>
         )}
+
+        {/* Select de Turma */}
+        {showStudentClassSelect && (
+          <div className="flex-1 min-w-[200px]">
+            <label className="block mb-1 text-white text-sm font-medium">Turma:</label>
+            <select
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
+              disabled={loading || classes.length === 0}
+            >
+              <option value="">Selecione a turma</option>
+              {classes.map((c) => (
+                <option key={c._id} value={c._id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Aviso para coordenadores */}
-      {(isCoordinator || isProfessor) && filterType && (
+      {(isCoordinator || isProfessor) && filterType && showCourseSelect && (
         <div className="mb-4 p-3 bg-yellow-600/20 border border-yellow-600/50 rounded-lg">
           <p className="text-yellow-300 text-sm">
             {isCoordinator
-              ? "Você está restrito aos dados do seu curso"
-              : "Você está restrito às suas disciplinas"}
+              ? "Você pode visualizar dados de todos os cursos da sua universidade"
+              : "Você está limitado às disciplinas dos cursos da sua universidade"}
           </p>
         </div>
       )}
