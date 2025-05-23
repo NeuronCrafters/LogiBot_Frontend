@@ -37,11 +37,9 @@ export function LastCreatedList({ items, onEdit, onDelete, loading = false }: La
     closeModal();
   };
 
-  // Gera uma chave única para cada item da lista
   const generateUniqueKey = (item: RecentItem, index: number): string => {
-    // Se o id existir, usamos ele; caso contrário, usamos o índice do array
     const itemId = item.id || `no-id-${index}`;
-    // Adiciona timestamp para garantir que mesmo com o mesmo id e action, a chave será única
+
     return `${itemId}-${item.action}-${Date.now()}-${index}`;
   };
 
@@ -74,23 +72,32 @@ export function LastCreatedList({ items, onEdit, onDelete, loading = false }: La
             {items.slice(0, 20).map((item, index) => (
               <li
                 key={generateUniqueKey(item, index)}
-                className="flex justify-between items-center bg-[#141414] p-3 rounded-xl border border-white/10"
+                className="flex justify-between items-center bg-[#141414] p-3 rounded-xl border border-white/10 min-h-[60px]"
               >
-                <div>
-                  <Typograph
-                    text={item.name || "Sem nome"}
-                    variant="text5"
-                    colorText="text-white"
-                    fontFamily="poppins"
-                    weight="regular"
-                  />
-                  <span className="text-xs text-slate-400">
-                    {item.action === "update" ? "Editado" : "Criado"} - {item.type}
-                  </span>
+                <div className="flex-1 min-w-0 pr-3">
+                  <div className="overflow-x-auto overflow-y-hidden" style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgba(255,255,255,0.1) transparent'
+                  }}>
+                    <div className="min-w-max">
+                      <Typograph
+                        text={item.name || "Sem nome"}
+                        variant="text5"
+                        colorText="text-white"
+                        fontFamily="poppins"
+                        weight="regular"
+                      />
+                      <div className="whitespace-nowrap">
+                        <span className="text-xs text-slate-400">
+                          {item.action === "update" ? "Editado" : "Criado"} - {item.type}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <ButtonCRUD action="update" onClick={() => handleEditClick(item)} compact />
-                  <ButtonCRUD action="delete" onClick={() => onDelete(item)} compact />
+                  {/* <ButtonCRUD action="delete" onClick={() => onDelete(item)} compact /> */}
                 </div>
               </li>
             ))}

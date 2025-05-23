@@ -1,9 +1,13 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-Auth";
 import { academicFiltersApi } from "@/services/apiClient";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 import { University } from "@/services/api/api_academicFilters";
 
 export interface DisciplineData {
+  id?: string | number;
+  _id?: string | number;
   name: string;
   courseId: string;
   classIds: string[];
@@ -16,35 +20,30 @@ export interface DisciplineFormProps {
 }
 
 function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
-  const [academicData, setAcademicData] = useState<{
-    universities: University[];
-  } | null>(null);
+  const { user } = useAuth();
 
-  // Estado dos campos do formulário
+  // Verificar permissões do usuário
+  const roles = Array.isArray(user?.role) ? user.role : [user?.role];
+  const isAdmin = roles.includes("admin");
+  const isCoordinator = roles.includes("course-coordinator");
+
+  // Query para buscar dados acadêmicos com cache
+  const { data: academicData, isLoading: loadingAcademicData } = useQuery({
+    queryKey: ['academicData'],
+    queryFn: async () => {
+      const response = await academicFiltersApi.getAcademicData();
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 10 * 60 * 1000, // 10 minutos
+  });
+
+  // Estados do formulário
   const [name, setName] = useState<string>(initialData ? initialData.name : "");
-  const [selectedUniversity, setSelectedUniversity] = useState<string>(
-    initialData?.courseId ?
-      academicData?.universities.find(u =>
-        u.courses.some(c => c._id === initialData.courseId)
-      )?._id || ""
-      : ""
-  );
+  const [selectedUniversity, setSelectedUniversity] = useState<string>("");
   const [selectedCourse, setSelectedCourse] = useState<string>(initialData ? initialData.courseId : "");
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>(initialData ? initialData.classIds : []);
   const [selectedProfessorIds, setSelectedProfessorIds] = useState<string[]>(initialData ? initialData.professorIds : []);
-
-  // Carregar dados acadêmicos uma única vez
-  useMemo(() => {
-    const fetchAcademicData = async () => {
-      try {
-        const response = await academicFiltersApi.getAcademicData();
-        setAcademicData(response.data);
-      } catch (error) {
-        console.error("Erro ao carregar dados acadêmicos:", error);
-      }
-    };
-    fetchAcademicData();
-  }, []);
 
   // Filtrar cursos baseado na universidade selecionada
   const availableCourses = useMemo(() => {
@@ -116,6 +115,14 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     setSelectedProfessorIds(options.map(option => option.value));
   }, []);
 
+  if (loadingAcademicData) {
+    return (
+      <div className="mt-4 space-y-4">
+        <div className="text-white">Carregando dados acadêmicos...</div>
+      </div>
+    );
+  }
+
   // Renderização do formulário
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
@@ -127,7 +134,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="p-2 rounded w-full bg-[#141414] text-white"
+          className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
         />
       </div>
 
@@ -141,7 +148,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
             setSelectedCourse(""); // Reset curso quando universidade muda
           }}
           required
-          className="p-2 rounded w-full bg-[#141414] text-white"
+          className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 outline-none"
         >
           <option value="">Selecione a universidade</option>
           {academicData?.universities.map(uni => (
@@ -158,7 +165,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
             required
-            className="p-2 rounded w-full bg-[#141414] text-white"
+            className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 outline-none"
           >
             <option value="">Selecione o curso</option>
             {availableCourses.map(course => (
@@ -176,12 +183,15 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
             multiple
             value={selectedClassIds}
             onChange={handleClassesChange}
-            className="p-2 rounded w-full bg-[#141414] text-white"
+            className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 outline-none min-h-[100px]"
           >
             {availableClasses.map(cls => (
               <option key={cls._id} value={cls._id}>{cls.name}</option>
             ))}
           </select>
+          <small className="text-gray-400 mt-1 block">
+            Segure Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplas turmas
+          </small>
         </div>
       )}
 
@@ -193,12 +203,15 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
             multiple
             value={selectedProfessorIds}
             onChange={handleProfessorsChange}
-            className="p-2 rounded w-full bg-[#141414] text-white"
+            className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 outline-none min-h-[100px]"
           >
             {availableProfessors.map(prof => (
               <option key={prof._id} value={prof._id}>{prof.name}</option>
             ))}
           </select>
+          <small className="text-gray-400 mt-1 block">
+            Segure Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos professores
+          </small>
         </div>
       )}
 

@@ -54,7 +54,7 @@ export const FormsCrud: React.FC<FormsCrudProps> = ({
 
   const allowedEntities: EntityType[] = isAdmin
     ? ["university", "course", "class", "professor", "discipline"]
-    : ["class"];
+    : ["class", "discipline"];
 
   const [selectedEntity, setSelectedEntity] = useState<EntityType | "">(
     initialData?.type && allowedEntities.includes(initialData.type)
@@ -154,7 +154,8 @@ export const FormsCrud: React.FC<FormsCrudProps> = ({
             />
           </motion.div>
         )}
-        {selectedEntity === "discipline" && isAdmin && animateForm && (
+        {/* CORREÇÃO: Agora coordenadores também podem acessar o formulário de disciplina */}
+        {selectedEntity === "discipline" && (isAdmin || isCoordinator) && animateForm && (
           <motion.div
             key="discipline"
             initial={{ opacity: 0, y: -10 }}

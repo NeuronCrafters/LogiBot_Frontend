@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/use-Auth";
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormsCrud } from "@/components/components/Forms/Crud/FormsCrud";
 import { Header } from "@/components/components/Header/Header";
 import { Avatar } from "@/components/components/Avatar/Avatar";
@@ -20,12 +21,92 @@ interface ApiResponse {
 
 export function CRUD() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showToast, setShowToast] = useState<"success" | "error" | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
-  const [loading, setLoading] = useState(false);
   const [confirmDeleteItem, setConfirmDeleteItem] = useState<RecentItem | null>(null);
+
+
+  const createMutation = useMutation({
+    mutationFn: async ({ entity, item }: { entity: string; item: any }) => {
+      console.log(`Enviando ${entity}:`, item);
+
+      let response: ApiResponse;
+
+      if (entity === "professor") {
+        const professorPayload = {
+          name: item.name,
+          email: item.email,
+          password: item.password,
+          school: item.school,
+          courses: item.courses
+        };
+
+        console.log("Professor payload para criação:", professorPayload);
+        response = await adminApi.createProfessor<ApiResponse>(professorPayload);
+      } else if (["university", "course", "class", "discipline"].includes(entity)) {
+        response = await academicApi.post<ApiResponse>(entity as AcademicEntityType, item);
+      } else {
+        throw new Error(`Tipo de entidade desconhecido: ${entity}`);
+      }
+
+      return { response, entity, item };
+    },
+    onSuccess: ({ response, entity, item }) => {
+      console.log("Resposta da API:", response);
+
+      const newItem: RecentItem = {
+        id: response?.id || response?._id || `temp-${Date.now()}`,
+        name: item.name || "Item sem nome",
+        type: entity,
+        action: "create"
+      };
+
+      setRecentItems((prev) => [newItem, ...prev.slice(0, 19)]);
+
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['recentItems'] });
+      queryClient.invalidateQueries({ queryKey: ['academicData'] });
+
+      triggerToast("success", "Cadastro realizado com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao enviar dados:", error);
+      triggerToast("error", "Erro ao cadastrar. Verifique o console para mais detalhes.");
+    }
+  });
+
+  // Mutation para deletar entidades
+  const deleteMutation = useMutation({
+    mutationFn: async (item: RecentItem) => {
+      if (item.type === "professor") {
+        await adminApi.deleteProfessor<ApiResponse>(item.id);
+      } else if (["university", "course", "class", "discipline"].includes(item.type)) {
+        await academicApi.delete<ApiResponse>(item.type as AcademicEntityType, item.id);
+      } else {
+        throw new Error(`Tipo de entidade desconhecido: ${item.type}`);
+      }
+      return item;
+    },
+    onSuccess: (deletedItem) => {
+      setRecentItems((prev) => prev.filter((item) => item.id !== deletedItem.id));
+
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['recentItems'] });
+      queryClient.invalidateQueries({ queryKey: ['academicData'] });
+
+      triggerToast("success", "Registro excluído com sucesso.");
+    },
+    onError: (error) => {
+      console.error("Erro ao excluir:", error);
+      triggerToast("error", "Erro ao excluir registro.");
+    },
+    onSettled: () => {
+      setConfirmDeleteItem(null);
+    }
+  });
 
   if (!user) return null;
 
@@ -42,49 +123,9 @@ export function CRUD() {
   }
 
   const handleSubmit = async (entity: string, item: any) => {
-    setLoading(true);
-    try {
-      console.log(`Enviando ${entity}:`, item);
-
-      let response: ApiResponse;
-
-      if (entity === "professor") {
-        const professorPayload = {
-          name: item.name,
-          email: item.email,
-          password: item.password,
-          school: item.school,
-          courses: item.courses
-        };
-
-        console.log("Professor payload para criação:", professorPayload);
-
-        response = await adminApi.createProfessor<ApiResponse>(professorPayload);
-      } else if (["university", "course", "class", "discipline"].includes(entity)) {
-        response = await academicApi.post<ApiResponse>(entity as AcademicEntityType, item);
-      } else {
-        throw new Error(`Tipo de entidade desconhecido: ${entity}`);
-      }
-
-      console.log("Resposta da API:", response);
-
-      const newItem: RecentItem = {
-        id: response?.id || response?._id || `temp-${Date.now()}`,
-        name: item.name || "Item sem nome",
-        type: entity,
-        action: "create"
-      };
-
-      setRecentItems((prev) => [newItem, ...prev.slice(0, 19)]);
-      triggerToast("success", "Cadastro realizado com sucesso!");
-
-    } catch (error) {
-      console.error("Erro ao enviar dados:", error);
-      triggerToast("error", "Erro ao cadastrar. Verifique o console para mais detalhes.");
-    } finally {
-      setLoading(false);
-    }
+    createMutation.mutate({ entity, item });
   };
+
   const handleEdit = async (item: RecentItem) => {
     try {
       const updated: RecentItem = { ...item, action: "update" as "update" };
@@ -102,26 +143,7 @@ export function CRUD() {
 
   const confirmDelete = async () => {
     if (!confirmDeleteItem) return;
-
-    setLoading(true);
-    try {
-      if (confirmDeleteItem.type === "professor") {
-        await adminApi.deleteProfessor<ApiResponse>(confirmDeleteItem.id);
-      } else if (["university", "course", "class", "discipline"].includes(confirmDeleteItem.type)) {
-        await academicApi.delete<ApiResponse>(confirmDeleteItem.type as AcademicEntityType, confirmDeleteItem.id);
-      } else {
-        throw new Error(`Tipo de entidade desconhecido: ${confirmDeleteItem.type}`);
-      }
-
-      setRecentItems((prev) => prev.filter((item) => item.id !== confirmDeleteItem.id));
-      triggerToast("success", "Registro excluído com sucesso.");
-    } catch (error) {
-      console.error("Erro ao excluir:", error);
-      triggerToast("error", "Erro ao excluir registro.");
-    } finally {
-      setConfirmDeleteItem(null);
-      setLoading(false);
-    }
+    deleteMutation.mutate(confirmDeleteItem);
   };
 
   const triggerToast = (type: "success" | "error", message: string) => {
@@ -129,6 +151,8 @@ export function CRUD() {
     setShowToast(type);
     setTimeout(() => setShowToast(null), 3000);
   };
+
+  const isLoading = createMutation.isPending || deleteMutation.isPending;
 
   return (
     <div className="min-h-screen bg-[#141414] text-white relative">
@@ -166,7 +190,7 @@ export function CRUD() {
           items={recentItems}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          loading={loading}
+          loading={isLoading}
         />
       </div>
 
