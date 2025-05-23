@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Popover,
@@ -54,14 +54,72 @@ export function AcademicFilter({
   additionalParams,
 }: AcademicFilterProps) {
   const { user } = useAuth();
-  const rawRoles = Array.isArray(user?.role) ? user.role : [user?.role];
-  const role = (rawRoles.find((r): r is Role =>
-    ["admin", "course-coordinator", "professor"].includes(r || "")
-  ) ?? "admin") as Role;
+  if (!user) return null;
 
-  const universityRef = useRef<string>("");
-  const courseRef = useRef<string>("");
-  const classRef = useRef<string>("");
+  // Determinar o papel do usuário seguindo o padrão estabelecido
+  const roles = Array.isArray(user.role) ? user.role : [user.role];
+  const isAdmin = roles.includes("admin");
+  const isCoordinator = roles.includes("course-coordinator");
+  const isProfessor = roles.includes("professor");
+
+  // Valores fixos do usuário baseado na interface User correta
+  const userUniversityId = user.school ||
+    (Array.isArray(user.schoolId) ? user.schoolId[0] : user.schoolId) ||
+    (typeof user.schoolName === 'string' ? user.schoolName :
+      Array.isArray(user.schoolName) ? user.schoolName[0] : "") || "";
+
+  const userCourseId = (() => {
+    // Se courseId existe
+    if (user.courseId) {
+      const courseId = Array.isArray(user.courseId) ? user.courseId[0] : user.courseId;
+      // Se é objeto, extrair id
+      if (typeof courseId === 'object' && courseId !== null && 'id' in courseId) {
+        return (courseId as { id: string }).id;
+      }
+      return courseId as string;
+    }
+    // Se course existe
+    if (user.course) {
+      const course = Array.isArray(user.course) ? user.course[0] : user.course;
+      if (typeof course === 'object' && course !== null && 'id' in course) {
+        return (course as { id: string }).id;
+      }
+      return course as string;
+    }
+    // Se courses existe (pode ser array de objetos {id, name} ou strings)
+    if (Array.isArray(user.courses) && user.courses.length > 0) {
+      const firstCourse = user.courses[0];
+      // Se é objeto com id, extrair o id
+      if (typeof firstCourse === 'object' && firstCourse !== null && 'id' in firstCourse) {
+        return (firstCourse as { id: string; name?: string }).id;
+      }
+      // Se é string, usar direto
+      return firstCourse as string;
+    }
+    return "";
+  })();
+
+  const userClassIds = (() => {
+    if (user.classId) {
+      const classIds = Array.isArray(user.classId) ? user.classId : [user.classId];
+      return classIds.map(id => {
+        if (typeof id === 'object' && id !== null && 'id' in id) {
+          return (id as { id: string }).id;
+        }
+        return id as string;
+      });
+    }
+    if (user.class) {
+      const classes = Array.isArray(user.class) ? user.class : [user.class];
+      return classes.map(cls => {
+        if (typeof cls === 'object' && cls !== null && 'id' in cls) {
+          return (cls as { id: string }).id;
+        }
+        return cls as string;
+      });
+    }
+    return [];
+  })();
 
   const [selectedUniversity, setSelectedUniversity] = useState(
     additionalParams?.universityId || ""
@@ -72,7 +130,6 @@ export function AcademicFilter({
   const [selectedClass, setSelectedClass] = useState(
     additionalParams?.classId || ""
   );
-  const [selectedDiscipline, setSelectedDiscipline] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,40 +146,119 @@ export function AcademicFilter({
     retry: 2,
   });
 
+  // Debug: mostrar dados do usuário para verificar
   useEffect(() => {
-    universityRef.current = selectedUniversity;
-    courseRef.current = selectedCourse;
-    classRef.current = selectedClass;
-  }, [selectedUniversity, selectedCourse, selectedClass]);
+    console.log("🔍 Debug User Data:", {
+      user: {
+        school: user.school,
+        schoolId: user.schoolId,
+        schoolName: user.schoolName,
+        courseId: user.courseId,
+        course: user.course,
+        courses: user.courses,
+        classId: user.classId,
+        class: user.class,
+      },
+      computed: {
+        userUniversityId,
+        userCourseId,
+        userClassIds,
+      },
+      isAdmin,
+      isCoordinator,
+      isProfessor,
+    });
 
-  const universities = useMemo(
-    () =>
-      academicData?.data?.universities?.map((u) => ({
-        _id: u._id,
-        name: u.name,
-        courses: u.courses || [],
-      })) || [],
-    [academicData]
-  );
+    // Log adicional para identificar campo correto da universidade
+    console.log("🎯 Campos de universidade disponíveis:", {
+      school: user.school,
+      schoolId: user.schoolId,
+      schoolName: user.schoolName,
+    });
+  }, [user, userUniversityId, userCourseId, userClassIds, isAdmin, isCoordinator, isProfessor]);
 
+  // Filtrar universidades baseado no papel do usuário
+  const universities = useMemo(() => {
+    const allUniversities = academicData?.data?.universities?.map((u) => ({
+      _id: u._id,
+      name: u.name,
+      courses: u.courses || [],
+    })) || [];
+
+    if (isAdmin) {
+      return allUniversities; // Admin vê todas
+    }
+
+    // Coordenador e Professor só veem SUA universidade
+    if (userUniversityId) {
+      return allUniversities.filter(u => u._id === userUniversityId);
+    }
+
+    return [];
+  }, [academicData, isAdmin, userUniversityId]);
+
+  // Filtrar cursos baseado no papel do usuário
   const courses = useMemo(() => {
     const university = universities.find((u) => u._id === selectedUniversity);
-    return university?.courses?.map((c) => ({
+    const allCourses = university?.courses?.map((c) => ({
       _id: c._id,
       name: c.name,
       classes: c.classes || [],
     })) || [];
-  }, [universities, selectedUniversity]);
 
+    if (isAdmin) {
+      return allCourses; // Admin vê todos os cursos da universidade selecionada
+    }
+
+    // Coordenador e Professor só veem SEU curso
+    if (userCourseId) {
+      return allCourses.filter(c => c._id === userCourseId);
+    }
+
+    return [];
+  }, [universities, selectedUniversity, isAdmin, userCourseId]);
+
+  // Filtrar turmas baseado no papel do usuário
   const classes = useMemo(() => {
     const course = courses.find((c) => c._id === selectedCourse);
-    return course?.classes?.map((cl) => ({
+    const allClasses = course?.classes?.map((cl) => ({
       _id: cl._id,
       name: cl.name,
       students: cl.students || [],
     })) || [];
-  }, [courses, selectedCourse]);
 
+    if (isAdmin) {
+      return allClasses; // Admin vê todas as turmas do curso selecionado
+    }
+
+    if (isCoordinator) {
+      return allClasses; // Coordenador vê todas as turmas do SEU curso
+    }
+
+    if (isProfessor) {
+      // Professor só vê SUAS turmas (onde ministra)
+      if (Array.isArray(userClassIds) && userClassIds.length > 0) {
+        return allClasses.filter(cl => userClassIds.includes(cl._id));
+      }
+    }
+
+    return [];
+  }, [courses, selectedCourse, isAdmin, isCoordinator, isProfessor, userClassIds]);
+
+  // Debug: mostrar dados filtrados
+  useEffect(() => {
+    console.log("📊 Debug Filtered Data:", {
+      entityType,
+      selectedValues: { selectedUniversity, selectedCourse, selectedClass },
+      availableData: {
+        universities: universities.map(u => ({ id: u._id, name: u.name })),
+        courses: courses.map(c => ({ id: c._id, name: c.name })),
+        classes: classes.map(cl => ({ id: cl._id, name: cl.name })),
+      },
+    });
+  }, [entityType, universities, courses, classes, selectedUniversity, selectedCourse, selectedClass]);
+
+  // Entidades finais para seleção
   const entities = useMemo(() => {
     switch (entityType) {
       case "university":
@@ -150,6 +286,35 @@ export function AcademicFilter({
     [entities, searchTerm]
   );
 
+  // Resetar seleções quando mudar o tipo de entidade
+  useEffect(() => {
+    setSelectedIds([]);
+    if (isAdmin) {
+      setSelectedUniversity("");
+      setSelectedCourse("");
+    }
+    setSelectedClass("");
+    setSearchTerm("");
+  }, [entityType, isAdmin]);
+
+  // Efeito cascata: limpar seleções dependentes
+  useEffect(() => {
+    if (isAdmin) {
+      setSelectedCourse("");
+    }
+    setSelectedClass("");
+    setSelectedIds([]);
+  }, [selectedUniversity, isAdmin]);
+
+  useEffect(() => {
+    setSelectedClass("");
+    setSelectedIds([]);
+  }, [selectedCourse]);
+
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [selectedClass]);
+
   const toggleItem = useCallback(
     (id: string) => {
       const updated = multiple
@@ -164,7 +329,6 @@ export function AcademicFilter({
         universityId: selectedUniversity || undefined,
         courseId: selectedCourse || undefined,
         classId: selectedClass || undefined,
-        disciplineId: selectedDiscipline || undefined,
       };
 
       onSelect(updated, hierarchyInfo);
@@ -177,20 +341,9 @@ export function AcademicFilter({
       selectedUniversity,
       selectedCourse,
       selectedClass,
-      selectedDiscipline,
       onSelect,
     ]
   );
-
-  const isCoursesDisabled =
-    !selectedUniversity || isLoading || universities.length === 0;
-  const isClassesDisabled =
-    !selectedCourse || isLoading || courses.length === 0;
-  const isEntitiesDisabled =
-    (entityType === "course" && !selectedUniversity) ||
-    (entityType === "class" && (!selectedUniversity || !selectedCourse)) ||
-    (entityType === "student" && !selectedClass) ||
-    isLoading;
 
   const selectedNames = selectedIds.map((id) => {
     const entity = entities.find((e) => e._id === id);
@@ -200,7 +353,36 @@ export function AcademicFilter({
   const selectionLimit = multiple ? 2 : 1;
   const hasReachedLimit = selectedIds.length >= selectionLimit;
 
-  if (error) return <div>Erro ao carregar dados</div>;
+  // Verificar se pode mostrar o seletor final baseado nas regras de permissão
+  const canShowEntitySelector = () => {
+    switch (entityType) {
+      case "university":
+        return isAdmin; // Só admin pode ver dados de universidade
+      case "course":
+        return !!selectedUniversity; // Precisa ter universidade selecionada
+      case "class":
+        return !!selectedUniversity && !!selectedCourse; // Precisa ter universidade e curso
+      case "student":
+        return !!selectedUniversity && !!selectedCourse && !!selectedClass; // Precisa ter tudo selecionado
+      default:
+        return false;
+    }
+  };
+
+  // Verificar quais selects mostrar baseado no entityType (SEMPRE os mesmos para todos)
+  const shouldShowUniversitySelect = () => {
+    return ["course", "class", "student"].includes(entityType);
+  };
+
+  const shouldShowCourseSelect = () => {
+    return ["class", "student"].includes(entityType);
+  };
+
+  const shouldShowClassSelect = () => {
+    return ["student"].includes(entityType);
+  };
+
+  if (error) return <div className="text-red-400">Erro ao carregar dados</div>;
 
   return (
     <motion.div
@@ -210,192 +392,248 @@ export function AcademicFilter({
       transition={{ duration: 0.4 }}
       className="space-y-4"
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Indicador do nível de acesso */}
+      <div className="text-xs text-white/60 bg-white/5 px-3 py-2 rounded-md border border-white/10">
+        <span className="font-medium">Nível de acesso:</span> {
+          isAdmin ? "Administrador (acesso total)" :
+            isCoordinator ? "Coordenador (limitado ao seu curso)" :
+              "Professor (limitado às suas turmas)"
+        }
+      </div>
+
+      {/* Grid de Hierarquia */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Universidade */}
-        <div className="relative">
-          <select
-            value={selectedUniversity}
-            onChange={(e) => {
-              const val = e.target.value;
-              setSelectedUniversity(val);
-              setSelectedCourse("");
-              setSelectedClass("");
-              setSelectedDiscipline("");
-              setSelectedIds([]);
-              onSelect([], { universityId: val });
-            }}
-            className="p-2 rounded-md bg-[#141414] text-white border border-white/10 w-full"
-            disabled={isLoading}
-          >
-            <option value="">Selecione a Universidade</option>
-            {universities.map((u) => (
-              <option key={u._id} value={u._id}>
-                {u.name}
-              </option>
-            ))}
-          </select>
-          {isLoading && (
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-              <Loader2 className="h-4 w-4 text-indigo-500 animate-spin" />
-            </div>
-          )}
-        </div>
+        {shouldShowUniversitySelect() && (
+          <div className="relative">
+            <label className="block text-sm font-medium text-white/70 mb-2">
+              Universidade
+              {!isAdmin && (
+                <span className="text-blue-400 ml-1">(Sua universidade)</span>
+              )}
+            </label>
+            <select
+              value={selectedUniversity}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedUniversity(val);
+                onSelect([], { universityId: val });
+              }}
+              className="p-3 rounded-md bg-[#141414] text-white border border-white/10 w-full focus:border-indigo-500 focus:outline-none transition-colors"
+              disabled={isLoading}
+            >
+              <option value="">Selecione a Universidade</option>
+              {universities.length === 0 && !isLoading && (
+                <option value="" disabled>
+                  {isAdmin ? "Carregando universidades..." : "Sua universidade não foi encontrada"}
+                </option>
+              )}
+              {universities.map((u) => (
+                <option key={u._id} value={u._id}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
+            {isLoading && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <Loader2 className="h-4 w-4 text-indigo-500 animate-spin" />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Curso */}
-        {["course", "class", "student", "discipline"].includes(entityType) && (
+        {shouldShowCourseSelect() && (
           <div className="relative">
+            <label className="block text-sm font-medium text-white/70 mb-2">
+              Curso
+              {isCoordinator && (
+                <span className="text-blue-400 ml-1">(Curso que coordena)</span>
+              )}
+              {isProfessor && (
+                <span className="text-blue-400 ml-1">(Curso onde ministra)</span>
+              )}
+            </label>
             <select
               value={selectedCourse}
               onChange={(e) => {
                 const val = e.target.value;
                 setSelectedCourse(val);
-                setSelectedClass("");
-                setSelectedDiscipline("");
-                setSelectedIds([]);
                 onSelect([], {
                   universityId: selectedUniversity,
                   courseId: val,
                 });
               }}
-              disabled={isCoursesDisabled}
+              disabled={!selectedUniversity || isLoading}
               className={cn(
-                "p-2 rounded-md bg-[#141414] text-white border border-white/10 w-full",
-                isCoursesDisabled && "opacity-50"
+                "p-3 rounded-md bg-[#141414] text-white border border-white/10 w-full focus:border-indigo-500 focus:outline-none transition-colors",
+                (!selectedUniversity || isLoading) && "opacity-50 cursor-not-allowed"
               )}
             >
-              <option value="">Selecione o Curso</option>
+              <option value="">
+                {!selectedUniversity ? "Primeiro selecione a Universidade" : "Selecione o Curso"}
+              </option>
+              {courses.length === 0 && selectedUniversity && !isLoading && (
+                <option value="" disabled>
+                  {isAdmin ? "Nenhum curso encontrado" : "Seu curso não foi encontrado"}
+                </option>
+              )}
               {courses.map((c) => (
                 <option key={c._id} value={c._id}>
                   {c.name}
                 </option>
               ))}
             </select>
-            {isLoading && (
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="h-4 w-4 text-indigo-500 animate-spin" />
-              </div>
-            )}
           </div>
         )}
 
         {/* Turma */}
-        {["class", "student"].includes(entityType) && (
+        {shouldShowClassSelect() && (
           <div className="relative">
+            <label className="block text-sm font-medium text-white/70 mb-2">
+              Turma
+              {isCoordinator && (
+                <span className="text-blue-400 ml-1">(Turmas do seu curso)</span>
+              )}
+              {isProfessor && (
+                <span className="text-blue-400 ml-1">(Suas turmas)</span>
+              )}
+            </label>
             <select
               value={selectedClass}
               onChange={(e) => {
                 const val = e.target.value;
                 setSelectedClass(val);
-                setSelectedIds([]);
                 onSelect([], {
                   universityId: selectedUniversity,
                   courseId: selectedCourse,
                   classId: val,
                 });
               }}
-              disabled={isClassesDisabled}
+              disabled={!selectedCourse || isLoading}
               className={cn(
-                "p-2 rounded-md bg-[#141414] text-white border border-white/10 w-full",
-                isClassesDisabled && "opacity-50"
+                "p-3 rounded-md bg-[#141414] text-white border border-white/10 w-full focus:border-indigo-500 focus:outline-none transition-colors",
+                (!selectedCourse || isLoading) && "opacity-50 cursor-not-allowed"
               )}
             >
-              <option value="">Selecione a Turma</option>
+              <option value="">
+                {!selectedCourse ? "Primeiro selecione o Curso" : "Selecione a Turma"}
+              </option>
+              {classes.length === 0 && selectedCourse && !isLoading && (
+                <option value="" disabled>
+                  {isAdmin ? "Nenhuma turma encontrada" :
+                    isProfessor ? "Suas turmas não foram encontradas" :
+                      "Turmas do curso não encontradas"}
+                </option>
+              )}
               {classes.map((c) => (
                 <option key={c._id} value={c._id}>
                   {c.name}
                 </option>
               ))}
             </select>
-            {isLoading && (
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="h-4 w-4 text-indigo-500 animate-spin" />
-              </div>
-            )}
           </div>
         )}
+
+        {/* Seletor Final */}
+        <div className="relative">
+          <label className="block text-sm font-medium text-white/70 mb-2">
+            {entityType === "student"
+              ? "Aluno(s)"
+              : entityType === "class"
+                ? "Turma(s)"
+                : entityType === "course"
+                  ? "Curso(s)"
+                  : "Universidade(s)"}
+          </label>
+
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                disabled={!canShowEntitySelector() || isLoading}
+                className={cn(
+                  "w-full justify-between bg-[#141414] text-white border border-white/10 p-3 h-[52px] focus:border-indigo-500 transition-colors",
+                  (!canShowEntitySelector() || isLoading) && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                <span className="truncate">
+                  {selectedIds.length > 0
+                    ? multiple
+                      ? `${selectedIds.length} selecionado(s)`
+                      : selectedNames[0] || selectedIds[0]
+                    : !canShowEntitySelector()
+                      ? "Complete a seleção anterior"
+                      : `Selecione ${entityType === "student"
+                        ? "o aluno"
+                        : entityType === "class"
+                          ? "a turma"
+                          : entityType === "course"
+                            ? "o curso"
+                            : "a universidade"
+                      }`}
+                </span>
+                {isLoading ? (
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin shrink-0" />
+                ) : (
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0 bg-[#1f1f1f] border border-white/10">
+              <Command>
+                <CommandInput
+                  placeholder="Buscar..."
+                  className="text-white border-0"
+                  value={searchTerm}
+                  onValueChange={setSearchTerm}
+                />
+                <CommandEmpty className="text-sm text-white/60 px-4 py-6 text-center">
+                  {isLoading ? "Carregando..." : "Nenhum encontrado."}
+                </CommandEmpty>
+                <CommandGroup className="max-h-[300px] overflow-y-auto">
+                  {filteredEntities.map((item) => {
+                    const isSelected = selectedIds.includes(item._id);
+                    const isDisabled = hasReachedLimit && !isSelected && multiple;
+                    return (
+                      <CommandItem
+                        key={item._id}
+                        onSelect={() => !isDisabled && toggleItem(item._id)}
+                        className={cn(
+                          "text-white hover:bg-white/5 cursor-pointer transition-colors px-4 py-3",
+                          isSelected && "bg-indigo-500/20",
+                          isDisabled && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-3 h-4 w-4 text-indigo-400",
+                            isSelected ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {item.name}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
-      {/* Entidades */}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            disabled={isEntitiesDisabled}
-            className={cn(
-              "w-full justify-between bg-[#141414] text-white border border-white/10",
-              isEntitiesDisabled && "opacity-50"
-            )}
-          >
-            {selectedIds.length > 0
-              ? multiple
-                ? `${selectedIds.length} selecionado(s)`
-                : selectedNames[0] || selectedIds[0]
-              : `Selecione ${entityType === "student"
-                ? "o aluno"
-                : entityType === "class"
-                  ? "a turma"
-                  : entityType === "course"
-                    ? "o curso"
-                    : "a universidade"
-              }`}
-            {isLoading ? (
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-            ) : (
-              <ChevronDown className="ml-2 h-4 w-4" />
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0 bg-[#1f1f1f] border border-white/10">
-          <Command>
-            <CommandInput
-              placeholder="Buscar..."
-              className="text-white"
-              value={searchTerm}
-              onValueChange={setSearchTerm}
-            />
-            <CommandEmpty className="text-sm text-white/60 px-2 py-4">
-              {isLoading ? "Carregando..." : "Nenhum encontrado."}
-            </CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-y-auto">
-              {filteredEntities.map((item) => {
-                const isSelected = selectedIds.includes(item._id);
-                const isDisabled = hasReachedLimit && !isSelected && multiple;
-                return (
-                  <CommandItem
-                    key={item._id}
-                    onSelect={() => !isDisabled && toggleItem(item._id)}
-                    className={cn(
-                      "text-white hover:bg-white/5 cursor-pointer transition-colors",
-                      isSelected && "bg-white/10",
-                      isDisabled && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        isSelected ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {item.name}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
+      {/* Tags dos Selecionados */}
       {selectedIds.length > 0 && multiple && (
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           {selectedNames.map((name, index) => (
             <div
               key={selectedIds[index]}
-              className="bg-indigo-500/20 border border-indigo-500/30 text-white px-2 py-1 rounded-md text-sm flex items-center"
+              className="bg-indigo-500/20 border border-indigo-500/30 text-white px-3 py-1 rounded-full text-sm flex items-center"
             >
               {name}
               <button
                 onClick={() => toggleItem(selectedIds[index])}
-                className="ml-2 text-white/70 hover:text-white"
+                className="ml-2 text-white/70 hover:text-white transition-colors"
               >
                 ×
               </button>
@@ -404,12 +642,20 @@ export function AcademicFilter({
         </div>
       )}
 
+      {/* Mensagem de Status para Comparação */}
       {multiple && (
-        <div className="text-xs text-white/60 mt-1">
+        <div className={cn(
+          "text-xs p-3 rounded-md border transition-colors",
+          selectedIds.length === 0
+            ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
+            : selectedIds.length === 1
+              ? "text-blue-400 bg-blue-400/10 border-blue-400/20"
+              : "text-green-400 bg-green-400/10 border-green-400/20"
+        )}>
           {selectedIds.length === 0
             ? "Selecione exatamente duas entidades para comparação"
             : selectedIds.length === 1
-              ? "Selecione mais uma entidade para comparação"
+              ? "Selecione mais uma entidade para completar a comparação"
               : "Comparação disponível com as entidades selecionadas"}
         </div>
       )}

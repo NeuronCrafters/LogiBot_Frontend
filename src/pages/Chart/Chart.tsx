@@ -122,21 +122,6 @@ export function Chart() {
           <div key={key} className="transition-opacity duration-300 opacity-100">
             {filter.mode === "individual" && validIds[0] && (
               <div className="space-y-6 mt-6">
-                <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30">
-                  <Typograph
-                    text={
-                      <>
-                        <span className="font-medium">Entidade selecionada:</span> {getEntityTypeLabel(filter.type)}
-                        <span className="px-2">•</span>
-                        <span className="font-medium">ID:</span> {validIds[0]}
-                      </>
-                    }
-                    variant="text9"
-                    weight="regular"
-                    fontFamily="montserrat"
-                    colorText="text-indigo-300"
-                  />
-                </div>
 
                 {/* UsageChart permanece em tela cheia */}
                 <UsageChart filter={{ ...filter, ids: validIds }} />
