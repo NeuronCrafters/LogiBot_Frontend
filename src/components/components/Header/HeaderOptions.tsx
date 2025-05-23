@@ -25,7 +25,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
 
   const menuItems = [
     {
-      show: !isAboutPage,
+      show: true,
       path: "/about",
       icon: <User className="w-5 h-5" />,
       label: "Detalhes",
@@ -73,23 +73,41 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
     >
       {menuItems
         .filter((item) => item.show)
-        .map(({ path, icon, label }) => (
-          <Link key={path} to={path}>
-            <Button
-              variant="ghost"
-              className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-white"
+        .map(({ path, icon, label }) => {
+          const isCurrent = location.pathname === path;
+
+          return isCurrent ? (
+            <div
+              key={path}
+              className="w-full flex items-center gap-2 text-gray-500 opacity-50 cursor-not-allowed px-4 py-2 rounded-md"
             >
               {icon}
               <Typograph
                 text={label}
-                colorText="text-[#E4E4E4]"
+                colorText="text-[#A1A1A1]"
                 variant="text4"
                 weight="regular"
                 fontFamily="poppins"
               />
-            </Button>
-          </Link>
-        ))}
+            </div>
+          ) : (
+            <Link key={path} to={path}>
+              <Button
+                variant="ghost"
+                className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-white"
+              >
+                {icon}
+                <Typograph
+                  text={label}
+                  colorText="text-[#E4E4E4]"
+                  variant="text4"
+                  weight="regular"
+                  fontFamily="poppins"
+                />
+              </Button>
+            </Link>
+          );
+        })}
 
       <Button
         variant="ghost"
