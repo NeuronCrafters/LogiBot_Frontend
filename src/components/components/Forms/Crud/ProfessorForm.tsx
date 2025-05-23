@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { academicFiltersApi } from "@/services/apiClient";
 import type { ProfessorData } from "@/@types/FormsDataTypes";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
@@ -11,9 +12,17 @@ export interface ProfessorFormProps {
 }
 
 function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
-  const [academicData, setAcademicData] = useState<{
-    universities: University[];
-  } | null>(null);
+  const { data: academicData, isLoading: loadingAcademicData, error } = useQuery({
+    queryKey: ['academicData'],
+    queryFn: async () => {
+      const response = await academicFiltersApi.getAcademicData();
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 2,
+    retryDelay: 1000,
+  });
 
   const [name, setName] = useState(initialData?.name ?? "");
   const [email, setEmail] = useState(initialData?.email ?? "");
@@ -22,26 +31,14 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
   const [courses, setCourses] = useState<string[]>(initialData?.courses ?? []);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Carregar dados acadêmicos uma única vez
-  useMemo(() => {
-    const fetchAcademicData = async () => {
-      try {
-        const response = await academicFiltersApi.getAcademicData();
-        setAcademicData(response.data);
-      } catch (error) {
-        console.error("Erro ao carregar dados acadêmicos:", error);
-      }
-    };
-    fetchAcademicData();
-  }, []);
-
   const availableCourses = useMemo(() => {
-    if (!academicData || !school) return [];
+    if (!academicData?.universities || !school) return [];
 
     const university = academicData.universities.find(u => u._id === school);
     return university?.courses || [];
   }, [academicData, school]);
 
+  // Handler para submit do formulário
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim() || !school || courses.length === 0) return;
@@ -54,6 +51,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       courses,
     });
 
+    // Reset dos campos após submit
     setName("");
     setEmail("");
     setPassword("");
@@ -61,8 +59,43 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     setCourses([]);
   }, [name, email, password, school, courses, onSubmit]);
 
+  // Handler para mudança de universidade
+  const handleUniversityChange = useCallback((universityId: string) => {
+    setSchool(universityId);
+    setCourses([]); // Reset courses quando universidade muda
+  }, []);
+
+  // Estados de loading e erro
+  if (loadingAcademicData) {
+    return (
+      <div className="mt-4 space-y-4">
+        <div className="text-white">Carregando dados acadêmicos...</div>
+        <div className="space-y-4">
+          {/* Skeleton loading */}
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-12 bg-white/10 rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-4 p-4 bg-red-600/20 border border-red-600/50 rounded-lg">
+        <p className="text-red-300">
+          Erro ao carregar dados acadêmicos. Tente novamente.
+        </p>
+        <p className="text-red-400 text-sm mt-1">
+          {error instanceof Error ? error.message : 'Erro desconhecido'}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+      {/* Nome do Professor */}
       <div>
         <label className="block text-white mb-2">Nome do Professor:</label>
         <input
@@ -70,10 +103,11 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="p-2 rounded w-full bg-[#141414] text-white"
+          className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
         />
       </div>
 
+      {/* Email */}
       <div>
         <label className="block text-white mb-2">Email:</label>
         <input
@@ -81,10 +115,11 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="p-2 rounded w-full bg-[#141414] text-white"
+          className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
         />
       </div>
 
+      {/* Senha com toggle de visibilidade */}
       <div>
         <label className="block text-white mb-2">Senha:</label>
         <div className="relative">
@@ -93,28 +128,26 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="p-2 pr-10 rounded w-full bg-[#141414] text-white"
+            className="p-2 pr-10 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
           />
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute inset-y-0 right-0 flex items-center pr-2 text-white"
+            className="absolute inset-y-0 right-0 flex items-center pr-2 text-white hover:text-gray-300 transition-colors"
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
       </div>
 
+      {/* Universidade */}
       <div>
         <label className="block text-white mb-2">Universidade:</label>
         <select
           value={school}
-          onChange={(e) => {
-            setSchool(e.target.value);
-            setCourses([]); // Reset courses quando universidade muda
-          }}
+          onChange={(e) => handleUniversityChange(e.target.value)}
           required
-          className="p-2 rounded w-full bg-[#141414] text-white"
+          className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
         >
           <option value="">Selecione a universidade</option>
           {academicData?.universities.map((uni) => (
@@ -125,14 +158,15 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </select>
       </div>
 
+      {/* Curso (aparece apenas quando universidade selecionada) */}
       {school && availableCourses.length > 0 && (
         <div>
           <label className="block text-white mb-2">Curso:</label>
           <select
             value={courses[0] ?? ""}
-            onChange={(e) => setCourses([e.target.value])}
+            onChange={(e) => setCourses(e.target.value ? [e.target.value] : [])}
             required
-            className="p-2 rounded w-full bg-[#141414] text-white"
+            className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
           >
             <option value="">Selecione o curso</option>
             {availableCourses.map((course) => (
@@ -144,6 +178,16 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </div>
       )}
 
+      {/* Aviso quando não há cursos disponíveis */}
+      {school && availableCourses.length === 0 && (
+        <div className="p-3 bg-yellow-600/20 border border-yellow-600/50 rounded-lg">
+          <p className="text-yellow-300 text-sm">
+            Nenhum curso encontrado para esta universidade.
+          </p>
+        </div>
+      )}
+
+      {/* Botão de submit */}
       <div className="pt-2">
         <ButtonCRUD
           action={initialData ? "update" : "create"}
