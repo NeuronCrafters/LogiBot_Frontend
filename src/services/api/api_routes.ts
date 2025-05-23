@@ -46,17 +46,6 @@ export const ACADEMIC_ROUTES: Record<
   },
 };
 
-// export const PUBLIC_ROUTES = {
-//   institutions: "/public/institutions",
-//   courses: "/public/courses",
-//   disciplines: "/public/disciplines",
-//   classes: "/public/classes",
-//   professors: "/public/professors",
-//   studentsByClass: "/public/students/by-class",
-//   studentsByDiscipline: "/public/students/by-discipline",
-//   studentsByCourse: "/public/students/by-course",
-// };
-
 export const ACADEMICFILTER_ROUTES = {
   academicData: "/academicFilters/data"
 };
@@ -82,6 +71,7 @@ export const ADMIN_ROUTES = {
   listProfessorsByCourse: "/admin/course/:courseId/professors",
   updateProfessorRole: "/admin/professor/:id/role",
   listStudents: "/admin/students",
+  deleteStudent: "/admin/coordinator/student",
 } as const;
 
 export const PROFESSOR_ROUTES = {

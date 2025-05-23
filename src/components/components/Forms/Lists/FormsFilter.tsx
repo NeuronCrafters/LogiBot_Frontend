@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-Auth";
 import { academicFiltersApi } from "@/services/apiClient";
 import type { FilterData, FilterType } from "@/@types/ChartsType";
@@ -23,14 +24,14 @@ interface Discipline {
   code: string;
 }
 
-export function FormsFilter({
-  onSearch,
-  onReset,
-}: {
+interface FormsFilterProps {
   onSearch: (data: FilterData) => void;
   onReset: () => void;
-}) {
+}
+
+export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   const { user } = useAuth();
+
   if (!user) return null;
 
   const roles = Array.isArray(user.role) ? user.role : [user.role];
@@ -38,10 +39,18 @@ export function FormsFilter({
   const isCoordinator = roles.includes("course-coordinator");
   const isProfessor = roles.includes("professor");
 
-  const fixedUniversity = String(user.school);
-  const fixedCourse = Array.isArray(user.courses) && user.courses.length > 0
-    ? user.courses[0]
-    : "";
+  // Helper para extrair IDs do usuário
+  const getFirstId = (value: string | string[] | undefined): string => {
+    if (!value) return "";
+    return Array.isArray(value) ? (value[0] || "") : value;
+  };
+
+  const fixedUniversity = getFirstId(user.schoolId) || String(user.school || "");
+  const fixedCourse = getFirstId(user.courseId) || (
+    Array.isArray(user.courses) && user.courses.length > 0
+      ? user.courses[0]
+      : ""
+  );
 
   const allowedFilters: FilterType[] = isAdmin
     ? [
@@ -57,6 +66,7 @@ export function FormsFilter({
         ? ["students-discipline"]
         : [];
 
+  // Estados do formulário
   const [filterType, setFilterType] = useState<FilterType | "">("");
   const [selectedUniversity, setSelectedUniversity] = useState<string>(
     isCoordinator || isProfessor ? fixedUniversity : ""
@@ -65,10 +75,26 @@ export function FormsFilter({
     isCoordinator || isProfessor ? fixedCourse : ""
   );
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
-  const [academicData, setAcademicData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
+  // Query para buscar dados acadêmicos com cache
+  const {
+    data: academicData,
+    isLoading: loading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['academicData'],
+    queryFn: async () => {
+      const response = await academicFiltersApi.getAcademicData();
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 10 * 60 * 1000,   // 10 minutos
+    retry: 2,
+    retryDelay: 1000,
+  });
+
+  // Lógica de exibição dos selects
   const showUniversitySelect =
     isAdmin &&
     [
@@ -91,6 +117,7 @@ export function FormsFilter({
     isCoordinator &&
     ["professors", "disciplines", "classes"].includes(filterType as FilterType);
 
+  // Validação para habilitar busca
   let canSearch =
     !!filterType &&
     (!showUniversitySelect || !!selectedUniversity) &&
@@ -99,28 +126,9 @@ export function FormsFilter({
 
   if (coordinatorNoSelect) canSearch = true;
 
-  useEffect(() => {
-    const fetchAcademicData = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const data = await academicFiltersApi.getAcademicData();
-        setAcademicData(data);
-      } catch (err: any) {
-        setError(err.message || 'Erro ao carregar dados acadêmicos');
-        console.error('Erro ao carregar dados acadêmicos:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAcademicData();
-  }, []); // ← UMA VEZ SÓ!
-
-  // 2️⃣ useMemo para filtros locais (SUBSTITUEM as requisições)
+  // Filtros computados com useMemo
   const universities: Institution[] = useMemo(() => {
-    return academicData?.data.universities || [];
+    return academicData?.universities || [];
   }, [academicData]);
 
   const courses: Course[] = useMemo(() => {
@@ -137,24 +145,23 @@ export function FormsFilter({
     return course?.disciplines || [];
   }, [courses, selectedCourse]);
 
-  // 3️⃣ useEffects simples para reset (OPCIONAL)
+  // Effects para reset de campos
   useEffect(() => {
-    // Reset curso quando não precisa mostrar o select
     if (!showCourseSelect && isAdmin) {
       setSelectedCourse("");
     }
   }, [showCourseSelect, isAdmin]);
 
   useEffect(() => {
-    // Reset disciplina quando não precisa mostrar o select
     if (!showStudentDisciplineSelect) {
       setSelectedDiscipline("");
     }
   }, [showStudentDisciplineSelect]);
 
-
+  // Handlers
   function handleSearchClick() {
     if (!canSearch) return;
+
     onSearch({
       filterType,
       universityId: isCoordinator || isProfessor ? fixedUniversity : showUniversitySelect ? selectedUniversity : undefined,
@@ -174,6 +181,25 @@ export function FormsFilter({
     onReset();
   }
 
+  // Estados de loading e erro
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-4 p-4 rounded-xl bg-red-600/20 border border-red-600/50"
+      >
+        <p className="text-red-300 mb-2">Erro ao carregar filtros</p>
+        <button
+          onClick={() => refetch()}
+          className="text-red-200 underline text-sm hover:text-red-100"
+        >
+          Tentar novamente
+        </button>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       layout
@@ -183,13 +209,20 @@ export function FormsFilter({
       transition={{ duration: 0.4 }}
       className="mb-4 p-4 rounded-xl bg-[#1f1f1f] border border-white/10 shadow-lg"
     >
+      {loading && (
+        <div className="mb-4 p-3 bg-blue-600/20 border border-blue-600/50 rounded-lg">
+          <p className="text-blue-300 text-sm">Carregando filtros...</p>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-4 mb-4">
+        {/* Tipo de Filtro */}
         <div className="flex-1 min-w-[200px]">
-          <label className="block mb-1 text-white">Tipo de Filtro:</label>
+          <label className="block mb-1 text-white text-sm font-medium">Tipo de Filtro:</label>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="w-full p-2 rounded-md bg-[#141414] text-white"
+            className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
             disabled={loading}
           >
             <option value="">Selecione</option>
@@ -211,13 +244,18 @@ export function FormsFilter({
           </select>
         </div>
 
+        {/* Select de Universidade */}
         {showUniversitySelect && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white">Universidade:</label>
+            <label className="block mb-1 text-white text-sm font-medium">Universidade:</label>
             <select
               value={selectedUniversity}
-              onChange={(e) => setSelectedUniversity(e.target.value)}
-              className="w-full p-2 rounded-md bg-[#141414] text-white"
+              onChange={(e) => {
+                setSelectedUniversity(e.target.value);
+                setSelectedCourse(""); // Reset curso
+                setSelectedDiscipline(""); // Reset disciplina
+              }}
+              className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
               disabled={loading}
             >
               <option value="">Selecione a universidade</option>
@@ -228,13 +266,17 @@ export function FormsFilter({
           </div>
         )}
 
+        {/* Select de Curso */}
         {showCourseSelect && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white">Curso:</label>
+            <label className="block mb-1 text-white text-sm font-medium">Curso:</label>
             <select
               value={selectedCourse}
-              onChange={(e) => setSelectedCourse(e.target.value)}
-              className="w-full p-2 rounded-md bg-[#141414] text-white"
+              onChange={(e) => {
+                setSelectedCourse(e.target.value);
+                setSelectedDiscipline(""); // Reset disciplina
+              }}
+              className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
               disabled={loading || (!selectedUniversity && isAdmin)}
             >
               <option value="">Selecione o curso</option>
@@ -245,13 +287,14 @@ export function FormsFilter({
           </div>
         )}
 
+        {/* Select de Disciplina */}
         {showStudentDisciplineSelect && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white">Disciplina:</label>
+            <label className="block mb-1 text-white text-sm font-medium">Disciplina:</label>
             <select
               value={selectedDiscipline}
               onChange={(e) => setSelectedDiscipline(e.target.value)}
-              className="w-full p-2 rounded-md bg-[#141414] text-white"
+              className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
               disabled={loading || (!selectedCourse && (isAdmin || isCoordinator))}
             >
               <option value="">Selecione a disciplina</option>
@@ -265,6 +308,18 @@ export function FormsFilter({
         )}
       </div>
 
+      {/* Aviso para coordenadores */}
+      {(isCoordinator || isProfessor) && filterType && (
+        <div className="mb-4 p-3 bg-yellow-600/20 border border-yellow-600/50 rounded-lg">
+          <p className="text-yellow-300 text-sm">
+            {isCoordinator
+              ? "Você está restrito aos dados do seu curso"
+              : "Você está restrito às suas disciplinas"}
+          </p>
+        </div>
+      )}
+
+      {/* Botões de ação */}
       <div className="flex gap-2">
         <ButtonCRUD
           action="search"

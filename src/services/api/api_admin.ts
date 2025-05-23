@@ -54,4 +54,7 @@ export const adminApi = {
 
   listStudents: <T>(): Promise<T> =>
     getRequest<T>(ADMIN_ROUTES.listStudents),
+
+  deleteStudent: <T>(studentId: string): Promise<T> =>
+    deleteRequest<T>(`${ADMIN_ROUTES.deleteStudent}?studentId=${studentId}`),
 };

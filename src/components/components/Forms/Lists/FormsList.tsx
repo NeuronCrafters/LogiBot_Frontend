@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-Auth";
 import {
   Table,
@@ -41,54 +42,103 @@ interface FormsListProps {
 
 export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Estados locais
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<ListItem | null>(null);
   const [addCoord, setAddCoord] = useState(false);
   const [removeCoord, setRemoveCoord] = useState(false);
   const [newCoordinator, setNewCoordinator] = useState<string>("");
-  const [candidates, setCandidates] = useState<ListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Query para buscar candidatos a coordenador
+  const {
+    data: candidates = [],
+    isLoading: loadingCandidates,
+    error: candidatesError,
+    refetch: refetchCandidates
+  } = useQuery({
+    queryKey: ['professors', 'candidates', editItem?.courseId],
+    queryFn: async () => {
+      if (!editItem?.courseId) return [];
+
+      try {
+        const result = await adminApi.listProfessorsByCourse<any[]>(editItem.courseId);
+        const filtered = result.filter(
+          (prof) => prof._id !== editItem.id && !prof.role?.includes("course-coordinator")
+        );
+        return filtered.map((p) => ({ id: p._id, name: p.name }));
+      } catch (error) {
+        console.error("Erro ao carregar candidatos:", error);
+        throw new Error("Falha ao carregar candidatos a coordenador");
+      }
+    },
+    enabled: !!editItem?.courseId && removeCoord, // Só executa quando necessário
+    staleTime: 2 * 60 * 1000, // 2 minutos
+    gcTime: 5 * 60 * 1000,    // 5 minutos
+    retry: 2,
+    retryDelay: 1000,
+  });
+
+  // Mutation para deletar registros
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      // Aqui você pode implementar a lógica de delete específica por entidade
+      return { id };
+    },
+    onSuccess: (data) => {
+      onDelete(data.id);
+      // toast.success("Registro deletado com sucesso!");
+      setDeleteId(null);
+
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['recentItems'] });
+      queryClient.invalidateQueries({ queryKey: ['academicData'] });
+    },
+    onError: (error) => {
+      console.error("Erro ao deletar:", error);
+      toast.error("Erro ao deletar registro.");
+    }
+  });
+
+  // Mutation para atualizar coordenador
+  const updateCoordinatorMutation = useMutation({
+    mutationFn: async ({ action, coordinatorId }: { action: 'add' | 'remove', coordinatorId?: string }) => {
+      if (!editItem) throw new Error("Item não selecionado");
+
+      // Implementar lógica de adicionar/remover coordenador
+      // Esta seria a chamada real para sua API
+      return { action, coordinatorId, itemId: editItem.id };
+    },
+    onSuccess: () => {
+      toast.success("Cargo atualizado com sucesso!");
+      setEditItem(null);
+      resetCoordinatorForm();
+
+      // Invalidar cache de candidatos e dados acadêmicos
+      queryClient.invalidateQueries({ queryKey: ['professors'] });
+      queryClient.invalidateQueries({ queryKey: ['academicData'] });
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar coordenador:", error);
+      toast.error("Erro ao atualizar cargo.");
+    }
+  });
+
+  // Efeito para simular loading inicial
   useEffect(() => {
     setLoading(true);
     const delay = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(delay);
   }, [items]);
 
+  // Tratar erro de candidatos
   useEffect(() => {
-    const fetchCandidates = async () => {
-      if (editItem && editItem.courseId) {
-        try {
-          // Opção 1: Usar adminApi (se ainda funcionar)
-          const result = await adminApi.listProfessorsByCourse<any[]>(editItem.courseId);
-          const filtered = result.filter(
-            (prof) => prof._id !== editItem.id && !prof.role?.includes("course-coordinator")
-          );
-          setCandidates(filtered.map((p) => ({ id: p._id, name: p.name })));
-
-          // Opção 2: Usar nova API (comentado, mas disponível)
-          // const academicData = await academicFiltersApi.getAcademicData();
-          // const professors = academicData.data.universities
-          //   .flatMap(uni => uni.courses)
-          //   .find(course => course._id === editItem.courseId)
-          //   ?.professors || [];
-          // 
-          // const filtered = professors.filter(
-          //   (prof) => prof._id !== editItem.id && !prof.role?.includes("course-coordinator")
-          // );
-          // setCandidates(filtered.map((p) => ({ id: p._id, name: p.name })));
-
-        } catch (err) {
-          console.error("Erro ao carregar candidatos a coordenador:", err);
-          toast.error("Erro ao carregar candidatos a coordenador");
-        }
-      }
-    };
-
-    if (removeCoord) {
-      fetchCandidates();
+    if (candidatesError) {
+      toast.error("Erro ao carregar candidatos a coordenador");
     }
-  }, [editItem, removeCoord]);
+  }, [candidatesError]);
 
   if (!user) return null;
 
@@ -102,11 +152,10 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         ? "Email"
         : "ID";
 
+  // Handlers
   const handleConfirmDelete = () => {
     if (deleteId) {
-      onDelete(deleteId);
-      toast.success("Registro deletado com sucesso!");
-      setDeleteId(null);
+      deleteMutation.mutate(deleteId);
     }
   };
 
@@ -116,17 +165,31 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
   };
 
   const handleEdit = (item: ListItem) => {
-    setAddCoord(false);
-    setRemoveCoord(false);
-    setNewCoordinator("");
+    resetCoordinatorForm();
     setEditItem(item);
     onEdit(item);
   };
 
+  const resetCoordinatorForm = () => {
+    setAddCoord(false);
+    setRemoveCoord(false);
+    setNewCoordinator("");
+  };
+
+  const handleConfirmCoordinator = () => {
+    if (addCoord) {
+      updateCoordinatorMutation.mutate({ action: 'add' });
+    } else if (removeCoord && newCoordinator) {
+      updateCoordinatorMutation.mutate({ action: 'remove', coordinatorId: newCoordinator });
+    }
+  };
+
+  // Validações
   const alreadyIsCoordinator = !!editItem?.roles?.includes("Coordenador de Curso");
   const confirmDisabled = (!addCoord && !removeCoord) ||
     (addCoord && alreadyIsCoordinator) ||
-    (removeCoord && (!alreadyIsCoordinator || newCoordinator.trim() === ""));
+    (removeCoord && (!alreadyIsCoordinator || newCoordinator.trim() === "")) ||
+    updateCoordinatorMutation.isPending;
 
   return (
     <motion.div
@@ -139,7 +202,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-white">Nª</TableHead>
+            <TableHead className="text-white">Nº</TableHead>
             <TableHead className="text-white">Nome</TableHead>
             <TableHead className="text-white">{headerLabel}</TableHead>
             {(entity === "professor" || entity === "student") && (
@@ -181,6 +244,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
                           action="update"
                           onClick={() => handleEdit(item)}
                           compact
+                          disabled={updateCoordinatorMutation.isPending}
                         />
                       )}
                       {isAdmin && (
@@ -188,6 +252,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
                           action="delete"
                           onClick={() => setDeleteId(item.id)}
                           compact
+                          disabled={deleteMutation.isPending}
                         />
                       )}
                     </div>
@@ -208,6 +273,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         </TableBody>
       </Table>
 
+      {/* Modal de confirmação de delete */}
       <AppModal
         isOpen={!!deleteId}
         type="delete"
@@ -218,31 +284,54 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         onConfirm={handleConfirmDelete}
       />
 
+      {/* Modal de edição de coordenador */}
       <AppModal
         isOpen={!!editItem}
         type="update"
         title="Editar Registro"
         description={`Você está editando: ${editItem?.name}`}
-        onClose={() => setEditItem(null)}
-        onConfirm={() => {
+        onClose={() => {
           setEditItem(null);
-          toast.success("Cargo atualizado com sucesso!");
+          resetCoordinatorForm();
         }}
-        acceptLabel="Confirmar"
+        onConfirm={handleConfirmCoordinator}
+        acceptLabel={updateCoordinatorMutation.isPending ? "Salvando..." : "Confirmar"}
         cancelLabel="Cancelar"
         disabled={confirmDisabled}
       >
-        <CoordinatorRoleSection
-          alreadyIsCoordinator={!!alreadyIsCoordinator}
-          addCoord={addCoord}
-          removeCoord={removeCoord}
-          newCoordinator={newCoordinator}
-          candidates={candidates}
-          currentCourseId={editItem?.courseId ?? ""}
-          onAddChange={setAddCoord}
-          onRemoveChange={setRemoveCoord}
-          onCoordinatorChange={setNewCoordinator}
-        />
+        <div className="space-y-4">
+          {/* Loading de candidatos */}
+          {loadingCandidates && removeCoord && (
+            <div className="p-3 bg-blue-600/20 border border-blue-600/50 rounded-lg">
+              <p className="text-blue-300 text-sm">Carregando candidatos...</p>
+            </div>
+          )}
+
+          {/* Erro ao carregar candidatos */}
+          {candidatesError && removeCoord && (
+            <div className="p-3 bg-red-600/20 border border-red-600/50 rounded-lg">
+              <p className="text-red-300 text-sm">Erro ao carregar candidatos.</p>
+              <button
+                onClick={() => refetchCandidates()}
+                className="text-red-200 underline text-xs mt-1 hover:text-red-100"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
+
+          <CoordinatorRoleSection
+            alreadyIsCoordinator={!!alreadyIsCoordinator}
+            addCoord={addCoord}
+            removeCoord={removeCoord}
+            newCoordinator={newCoordinator}
+            candidates={candidates}
+            currentCourseId={editItem?.courseId ?? ""}
+            onAddChange={setAddCoord}
+            onRemoveChange={setRemoveCoord}
+            onCoordinatorChange={setNewCoordinator}
+          />
+        </div>
       </AppModal>
     </motion.div>
   );
