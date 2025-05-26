@@ -211,15 +211,24 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     }
   }, [isCoordinator, isProfessor, fixedUniversity, selectedUniversity]);
 
-  // Handlers
   function handleSearchClick() {
     if (!canSearch) return;
 
-    // Para coordenador e professor, sempre usar a universidade fixa
+    // 1) calcula o universityId do mesmo jeito que vai no onSearch
     const universityId = (isCoordinator || isProfessor)
       ? fixedUniversity
       : (showUniversitySelect ? selectedUniversity : undefined);
 
+    // 2) loga exatamente o que vai pro back
+    console.log("vai buscar:", {
+      filterType,
+      universityId,
+      courseId: showCourseSelect ? selectedCourse : undefined,
+      disciplineId: showStudentDisciplineSelect ? selectedDiscipline : undefined,
+      classId: showStudentClassSelect ? selectedClass : undefined,
+    });
+
+    // 3) dispara a busca
     onSearch({
       filterType,
       universityId,
@@ -228,6 +237,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       classId: showStudentClassSelect ? selectedClass : undefined,
     });
   }
+
 
   function handleResetFilter() {
     setFilterType("");

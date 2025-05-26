@@ -13,6 +13,16 @@ export type EntityType =
   | "professor"
   | "student";
 
+type RawStudent = {
+  _id: string;
+  name: string;
+  email: string;
+  course?: string;
+  disciplines?: { _id: string }[];
+  classes?: string[];
+};
+
+
 export async function searchEntitiesByFilter(
   role: Role,
   filterData: FilterData
@@ -37,7 +47,9 @@ export async function searchEntitiesByFilter(
             return { items: [], entity: "student" };
           }
           const academicData = await academicFiltersApi.getAcademicData();
-          const university = academicData.data.universities.find(u => u._id === filterData.universityId);
+          const university = academicData.data.universities.find(
+            (u) => u._id === filterData.universityId
+          );
           if (!university) {
             toast.error("Universidade não encontrada");
             return { items: [], entity: "student" };
@@ -53,12 +65,16 @@ export async function searchEntitiesByFilter(
             return { items: [], entity: "student" };
           }
           const academicData = await academicFiltersApi.getAcademicData();
-          const university = academicData.data.universities.find(u => u._id === filterData.universityId);
+          const university = academicData.data.universities.find(
+            (u) => u._id === filterData.universityId
+          );
           if (!university) {
             toast.error("Universidade não encontrada");
             return { items: [], entity: "student" };
           }
-          const course = university.courses.find(c => c._id === filterData.courseId);
+          const course = university.courses.find(
+            (c) => c._id === filterData.courseId
+          );
           if (!course) {
             toast.error("Curso não encontrado");
             return { items: [], entity: "student" };
@@ -78,12 +94,16 @@ export async function searchEntitiesByFilter(
             return { items: [], entity: "student" };
           }
           const academicData = await academicFiltersApi.getAcademicData();
-          const university = academicData.data.universities.find(u => u._id === filterData.universityId);
+          const university = academicData.data.universities.find(
+            (u) => u._id === filterData.universityId
+          );
           if (!university) {
             toast.error("Universidade não encontrada");
             return { items: [], entity: "student" };
           }
-          const course = university.courses.find(c => c._id === filterData.courseId);
+          const course = university.courses.find(
+            (c) => c._id === filterData.courseId
+          );
           if (!course) {
             toast.error("Curso não encontrado");
             return { items: [], entity: "student" };
@@ -96,16 +116,44 @@ export async function searchEntitiesByFilter(
         case "students":
         case "students-course":
         case "students-discipline": {
-          let students = await adminApi.listStudents<any[]>();
+          // busca usuários cru
+          let students: RawStudent[] =
+            await adminApi.listStudents<RawStudent[]>();
+          // filtra por curso
           if (filterData.courseId) {
-            students = students.filter((s) => s.course === filterData.courseId);
-          }
-          if (filterData.disciplineId) {
-            students = students.filter((s) =>
-              s.disciplines?.some((d: any) => d._id === filterData.disciplineId)
+            students = students.filter(
+              (s) => s.course === filterData.courseId
             );
           }
+          // filtra por disciplina
+          if (filterData.disciplineId) {
+            students = students.filter(
+              (s) =>
+                Array.isArray(s.disciplines) &&
+                s.disciplines.some((d) => d._id === filterData.disciplineId)
+            );
+          }
+          // projeta para ListItem
           fetched = students.map((s) => ({
+            id: s._id,
+            name: s.name,
+            code: s.email,
+            roles: ["Estudante"],
+          }));
+          selectedEntity = "student";
+          break;
+        }
+
+        case "students-class": {
+          if (!filterData.classId) {
+            toast.error("Selecione uma turma");
+            return { items: [], entity: "student" };
+          }
+          const rawByClass = (await adminApi.listStudentsByClass(
+            filterData.classId,
+            filterData.courseId
+          )) as RawStudent[];
+          fetched = rawByClass.map((s) => ({
             id: s._id,
             name: s.name,
             code: s.email,
@@ -121,52 +169,18 @@ export async function searchEntitiesByFilter(
             return { items: [], entity: "student" };
           }
           const academicData = await academicFiltersApi.getAcademicData();
-          const university = academicData.data.universities.find(u => u._id === filterData.universityId);
+          const university = academicData.data.universities.find(
+            (u) => u._id === filterData.universityId
+          );
           if (!university) {
             toast.error("Universidade não encontrada");
             return { items: [], entity: "student" };
           }
-
-          // Coleta todos os professores de todos os cursos da universidade
-          const allProfessors: any[] = [];
-          university.courses.forEach(course => {
-            course.professors.forEach(prof => {
-              // Evita duplicatas
-              if (!allProfessors.find(p => p._id === prof._id)) {
-                allProfessors.push(prof);
-              }
-            });
-          });
-
-          fetched = allProfessors.map((p) => {
-            const rawRoles: string[] = Array.isArray(p.role)
-              ? p.role
-              : p.role
-                ? [p.role]
-                : [];
-
-            return {
-              id: p._id,
-              name: p.name,
-              code: p.email,
-              courseId: p.course ?? p.courseId ?? "",
-              roles: rawRoles.map((r) => {
-                switch (r) {
-                  case "admin":
-                    return "Administrador";
-                  case "professor":
-                    return "Professor";
-                  case "course-coordinator":
-                    return "Coordenador de Curso";
-                  case "student":
-                    return "Estudante";
-                  default:
-                    return r;
-                }
-              }),
-            };
-          });
-
+          // chama endpoint de professores por curso
+          const profs = await adminApi.listProfessorsByCourse<ListItem[]>(
+            filterData.courseId!
+          );
+          fetched = profs.map((p) => p);
           selectedEntity = "professor";
           break;
         }
@@ -176,63 +190,32 @@ export async function searchEntitiesByFilter(
     if (role === "course-coordinator") {
       switch (filterData.filterType) {
         case "disciplines": {
-          const res = await coordinatorApi.listDisciplines<{ _id: string; name: string; code?: string }[]>();
-          fetched = res.map((d) => ({
-            id: d._id,
-            name: d.name,
-            code: d.code
-          }));
+          const res = await coordinatorApi.listDisciplines<ListItem[]>();
+          fetched = res.map((d) => ({ id: d.id, name: d.name, code: d.code }));
           selectedEntity = "discipline";
           break;
         }
 
         case "classes": {
-          const res = await coordinatorApi.listClasses<{ _id: string; name: string }[]>();
-          fetched = res.map((c) => ({ id: c._id, name: c.name }));
+          const res = await coordinatorApi.listClasses<ListItem[]>();
+          fetched = res.map((c) => ({ id: c.id, name: c.name }));
           selectedEntity = "class";
           break;
         }
 
         case "professors": {
-          const res = await coordinatorApi.listMyProfessors<any[]>();
-          fetched = res.map((p) => {
-            const rawRoles: string[] = Array.isArray(p.role)
-              ? p.role
-              : p.role
-                ? [p.role]
-                : [];
-
-            return {
-              id: p._id,
-              name: p.name,
-              code: p.email,
-              courseId: p.course ?? p.courseId ?? "",
-              roles: rawRoles.map((r) => {
-                switch (r) {
-                  case "admin":
-                    return "Administrador";
-                  case "professor":
-                    return "Professor";
-                  case "course-coordinator":
-                    return "Coordenador de Curso";
-                  case "student":
-                    return "Estudante";
-                  default:
-                    return r;
-                }
-              }),
-            };
-          });
+          const res = await coordinatorApi.listMyProfessors<ListItem[]>();
+          fetched = res.map((p) => p);
           selectedEntity = "professor";
           break;
         }
 
         case "students-course": {
-          const res = await coordinatorApi.listMyStudents<any[]>();
+          const res = await coordinatorApi.listMyStudents<ListItem[]>();
           fetched = res.map((s) => ({
-            id: s._id,
+            id: s.id,
             name: s.name,
-            code: s.email,
+            code: s.code,
             roles: ["Estudante"],
           }));
           selectedEntity = "student";
@@ -244,8 +227,28 @@ export async function searchEntitiesByFilter(
             toast.error("Selecione uma disciplina");
             return { items: [], entity: "student" };
           }
-          const res = await coordinatorApi.listStudentsByDiscipline<any[]>(filterData.disciplineId);
+          const res = await coordinatorApi.listStudentsByDiscipline<RawStudent[]>(
+            filterData.disciplineId
+          );
           fetched = res.map((s) => ({
+            id: s._id,
+            name: s.name,
+            code: s.email,
+            roles: ["Estudante"],
+          }));
+          selectedEntity = "student";
+          break;
+        }
+
+        case "students-class": {
+          if (!filterData.classId) {
+            toast.error("Selecione uma turma");
+            return { items: [], entity: "student" };
+          }
+          const rawByClass = (await adminApi.listStudentsByClass(
+            filterData.classId
+          )) as RawStudent[];
+          fetched = rawByClass.map((s) => ({
             id: s._id,
             name: s.name,
             code: s.email,
@@ -258,8 +261,8 @@ export async function searchEntitiesByFilter(
     }
 
     if (role === "professor" && filterData.filterType === "students-discipline") {
-      const res = await professorApi.listMyStudents<any[]>();
-      fetched = res.map((s) => ({
+      const raw = (await professorApi.listMyStudents()) as RawStudent[];
+      fetched = raw.map((s) => ({
         id: s._id,
         name: s.name,
         code: s.email,

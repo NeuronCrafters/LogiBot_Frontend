@@ -71,6 +71,7 @@ export const ADMIN_ROUTES = {
   listProfessorsByCourse: "/admin/course/:courseId/professors",
   updateProfessorRole: "/admin/professor/:id/role",
   listStudents: "/admin/students",
+  listStudentsByClass: "/admin/classes/:classId/students",
   deleteStudent: "/admin/coordinator/student",
 } as const;
 

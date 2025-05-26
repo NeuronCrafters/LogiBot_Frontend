@@ -95,6 +95,18 @@ export const adminApi = {
 
   listStudents: <T>() => getRequest<T>(ADMIN_ROUTES.listStudents),
 
+  listStudentsByClass: (
+    classId: string,
+    courseId?: string
+  ): Promise<Array<{
+    id: any;
+    code: any; _id: string; name: string; email: string
+  }>> => {
+    const base = ADMIN_ROUTES.listStudentsByClass.replace(":classId", classId);
+    const url = courseId ? `${base}?courseId=${courseId}` : base;
+    return getRequest(url);
+  },
+
   deleteStudent: <T>(studentId: string): Promise<T> =>
     deleteRequest<T>(`${ADMIN_ROUTES.deleteStudent}?studentId=${studentId}`),
 };
