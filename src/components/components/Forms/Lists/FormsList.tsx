@@ -224,7 +224,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
             ) : items.length > 0 ? (
               items.map((item, idx) => (
                 <motion.tr
-                  key={item.id}
+                  key={item.id || `row-${idx}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}

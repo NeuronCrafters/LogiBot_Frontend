@@ -162,28 +162,39 @@ export async function searchEntitiesByFilter(
           selectedEntity = "student";
           break;
         }
-
         case "professors": {
           if (!filterData.universityId) {
             toast.error("Universidade obrigatória");
             return { items: [], entity: "student" };
           }
-          const academicData = await academicFiltersApi.getAcademicData();
-          const university = academicData.data.universities.find(
-            (u) => u._id === filterData.universityId
-          );
-          if (!university) {
-            toast.error("Universidade não encontrada");
-            return { items: [], entity: "student" };
-          }
-          // chama endpoint de professores por curso
-          const profs = await adminApi.listProfessorsByCourse<ListItem[]>(
-            filterData.courseId!
-          );
-          fetched = profs.map((p) => p);
+
+          const profs = await adminApi.listProfessorsByUniversity<
+            { _id: string; name: string; email: string; role: string | string[]; course?: string; courseId?: string }[]
+          >(filterData.universityId);
+
+          // mapeia para ListItem
+          fetched = profs.map((p) => {
+            const rawRoles = Array.isArray(p.role) ? p.role : [p.role];
+            return {
+              id: p._id,
+              name: p.name,
+              code: p.email,
+              courseId: p.course?.toString() || p.courseId || "",
+              roles: rawRoles.map((r) => {
+                switch (r) {
+                  case "admin": return "Administrador";
+                  case "professor": return "Professor";
+                  case "course-coordinator": return "Coordenador de Curso";
+                  case "student": return "Estudante";
+                  default: return r;
+                }
+              }),
+            };
+          });
           selectedEntity = "professor";
           break;
         }
+
       }
     }
 

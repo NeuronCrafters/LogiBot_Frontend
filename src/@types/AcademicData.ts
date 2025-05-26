@@ -4,6 +4,7 @@ export interface Student {
 }
 
 export interface Class {
+  professors: never[];
   _id: string;
   name: string;
   students?: Student[];
