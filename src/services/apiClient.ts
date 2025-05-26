@@ -1,8 +1,6 @@
 import { api } from "@/services/api/api";
 import {
   ACADEMIC_ROUTES,
-  // PUBLIC_ROUTES,
-  ACADEMICFILTER_ROUTES,
   RASA_ROUTES,
   ADMIN_ROUTES,
   PROFESSOR_ROUTES,

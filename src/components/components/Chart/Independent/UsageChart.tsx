@@ -2,36 +2,34 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart, Bar, CartesianGrid, XAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { api } from "@/services/api/api";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
 interface UsageChartProps {
-  filter: ChartFilterState;
-  universityId?: string;
-  courseId?: string;
-  classId?: string;
+  filter: ChartFilterState & {
+    hierarchyParams: {
+      universityId?: string;
+      courseId?: string;
+      classId?: string;
+    };
+  };
 }
 
-function useUsageData(
-  filter: ChartFilterState,
-  universityId?: string,
-  courseId?: string,
-  classId?: string
-) {
-  const validIds = Array.isArray(filter.ids) ?
-    filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') :
-    [];
-
+function useUsageData(filter: UsageChartProps['filter']) {
+  const validIds = Array.isArray(filter.ids)
+      ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
+      : [];
   const mainId = validIds[0] || "";
 
   const isStudent = filter.type === "student";
-  const studentId = isStudent ? mainId : "";
+  const { universityId, courseId, classId } = filter.hierarchyParams;
 
+  const studentId = isStudent ? mainId : undefined;
   const hasRequiredIds = isStudent
-    ? Boolean(universityId && courseId && classId && studentId)
-    : Boolean(mainId);
+      ? Boolean(universityId && courseId && classId && studentId)
+      : Boolean(mainId);
 
   console.log("Dados para requisição de uso:", {
     type: filter.type,
@@ -44,30 +42,20 @@ function useUsageData(
   });
 
   return useQuery({
-    queryKey: ['usage', filter.type, mainId, universityId, courseId, classId, studentId],
+    queryKey: ['usage', filter.type, mainId, universityId, courseId, classId],
     queryFn: async () => {
       if (!hasRequiredIds) {
         throw new Error(`IDs insuficientes para tipo: ${filter.type}`);
       }
 
-      let response;
-
       try {
-        // Baseado no tipo, usa a rota correta
+        let response;
         if (isStudent) {
-          // POST para /logs/student/summary/filtered
-          const requestBody = {
-            universityId,
-            courseId,
-            classId,
-            studentId
-          };
-
+          const requestBody = { universityId, courseId, classId, studentId };
           console.log("Enviando POST para /logs/student/summary/filtered com corpo:", requestBody);
           response = await api.post('/logs/student/summary/filtered', requestBody);
         } else {
-          // GET para /{tipo}/{id}/summary
-          let url;
+          let url: string;
           switch (filter.type) {
             case "university":
               url = `/logs/university/${mainId}/summary`;
@@ -79,13 +67,11 @@ function useUsageData(
               url = `/logs/class/${mainId}/summary`;
               break;
             case "discipline":
-              // Para discipline, usamos a mesma rota de curso
               url = `/logs/course/${mainId}/summary`;
               break;
             default:
               throw new Error(`Tipo de entidade não suportado: ${filter.type}`);
           }
-
           console.log(`Enviando GET para ${url}`);
           response = await api.get(url);
         }
@@ -105,66 +91,36 @@ function useUsageData(
   });
 }
 
-export function UsageChart({
-  filter,
-  universityId,
-  courseId,
-  classId
-}: UsageChartProps) {
-  const {
-    data: usageData,
-    isLoading,
-    isError,
-    error,
-    refetch
-  } = useUsageData(filter, universityId, courseId, classId);
+export function UsageChart({ filter }: UsageChartProps) {
+  const { data: usageData, isLoading, isError, error, refetch } = useUsageData(filter);
 
-  // Extrai o ID principal do array de IDs
-  const validIds = Array.isArray(filter.ids) ?
-    filter.ids.filter(id => typeof id === 'string' && id.trim() !== '') :
-    [];
-
+  const validIds = Array.isArray(filter.ids)
+      ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
+      : [];
   const mainId = validIds[0] || "";
 
-  // Se for tipo student, precisamos de todos os 4 IDs
   const isStudent = filter.type === "student";
-
-  // Verifica se temos os IDs necessários
+  const { universityId, courseId, classId } = filter.hierarchyParams;
   const hasRequiredIds = isStudent
-    ? Boolean(universityId && courseId && classId && mainId)
-    : Boolean(mainId);
+      ? Boolean(universityId && courseId && classId && mainId)
+      : Boolean(mainId);
 
-  // Configuração do gráfico
-  const chartConfig = useMemo(() => {
-    return {
-      usage: {
-        label: "Minutos",
-        color: "hsl(var(--chart-1))"
-      }
-    };
-  }, []);
+  const chartConfig = useMemo(() => ({
+    usage: { label: "Minutos", color: "hsl(var(--chart-1))" }
+  }), []);
 
-  // Verifica e prepara os dados para o gráfico
   const chartData = useMemo(() => {
     if (!usageData) return [];
-
-    // Usa o dailyUsage se disponível
-    if (usageData.dailyUsage && Array.isArray(usageData.dailyUsage) && usageData.dailyUsage.length > 0) {
-      // Ordenar por data (mais antigas primeiro)
+    if (Array.isArray(usageData.dailyUsage) && usageData.dailyUsage.length > 0) {
       return [...usageData.dailyUsage].sort((a, b) => a.date.localeCompare(b.date));
     }
-
-    // Fallback para dados vazios
     return [];
   }, [usageData]);
 
-  // Verifica se temos dados para exibir
   const hasData = chartData.length > 0;
 
-  // Formata o tempo total
   const formattedTime = useMemo(() => {
-    if (!usageData) return "00:00:00";
-    return usageData.usageTime?.formatted || "00:00:00";
+    return usageData?.usageTime?.formatted || "00:00:00";
   }, [usageData]);
 
   return (
