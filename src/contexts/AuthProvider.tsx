@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/services/api/api";
 import { AuthContext, AuthContextData, User } from "./AuthContext";
+import { useCategoryClickTracker } from "@/hooks/use-CategoryClickTracker";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { flushClicks } = useCategoryClickTracker(user?._id || null);
 
   const isAuthenticated = !!user;
 
@@ -32,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function logout() {
     try {
+      await flushClicks();
       await api.post("/logout", {}, { withCredentials: true });
     } catch (error) {
       console.error("Erro ao fazer logout:", error);

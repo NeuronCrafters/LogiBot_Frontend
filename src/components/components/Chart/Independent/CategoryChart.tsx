@@ -75,7 +75,7 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
     },
     enabled: hasRequired,
     staleTime: 15 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     select: (raw: any) => {
       const subjectCounts: Record<string, number> = raw.subjectCounts || raw.subjectFrequency || {};
       const chartData = [
