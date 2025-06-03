@@ -41,7 +41,7 @@ export function QuestionsDisplay({
   };
 
   return (
-    <div className="space-y-8 mt-6">
+    <div className="mt-6 space-y-8">
       {questions.map((q, i) => (
         <div key={i} className="space-y-4">
           <div className="border border-white/20 rounded-2xl p-4 bg-[#141414] shadow-md w-full max-w-[520px] mx-auto">
@@ -63,7 +63,7 @@ export function QuestionsDisplay({
                   onClick={() => handleSelect(i, opt)}
                   text={
                     <span className="flex items-start gap-2">
-                      <span className="font-bold text-blue-400">{letter})</span>
+                      <span className="font-bold text-blue-400">{letter}</span>
                       <span className="text-white">{opt}</span>
                     </span>
                   }
