@@ -208,7 +208,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
             {(entity === "professor" || entity === "student") && (
               <TableHead className="text-white">Ocupação</TableHead>
             )}
-            <TableHead className="text-center text-white">Ações</TableHead>
+            {isAdmin && <TableHead className="text-center text-white">Ações</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -217,7 +217,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
               [...Array(3)].map((_, idx) => (
                 <TableRow key={idx}>
                   <TableCell colSpan={5}>
-                    <Skeleton className="h-10 w-full bg-white/10 rounded-md" />
+                    <Skeleton className="w-full h-10 rounded-md bg-white/10" />
                   </TableCell>
                 </TableRow>
               ))
@@ -238,7 +238,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
                     <TableCell>{item.roles?.join(", ") ?? "—"}</TableCell>
                   )}
                   <TableCell className="text-center">
-                    <div className="inline-flex gap-2 justify-center">
+                    <div className="inline-flex justify-center gap-2">
                       {isAdmin && entity === "professor" && (
                         <ButtonCRUD
                           action="update"
@@ -302,18 +302,18 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         <div className="space-y-4">
           {/* Loading de candidatos */}
           {loadingCandidates && removeCoord && (
-            <div className="p-3 bg-blue-600/20 border border-blue-600/50 rounded-lg">
-              <p className="text-blue-300 text-sm">Carregando candidatos...</p>
+            <div className="p-3 border rounded-lg bg-blue-600/20 border-blue-600/50">
+              <p className="text-sm text-blue-300">Carregando candidatos...</p>
             </div>
           )}
 
           {/* Erro ao carregar candidatos */}
           {candidatesError && removeCoord && (
-            <div className="p-3 bg-red-600/20 border border-red-600/50 rounded-lg">
-              <p className="text-red-300 text-sm">Erro ao carregar candidatos.</p>
+            <div className="p-3 border rounded-lg bg-red-600/20 border-red-600/50">
+              <p className="text-sm text-red-300">Erro ao carregar candidatos.</p>
               <button
                 onClick={() => refetchCandidates()}
-                className="text-red-200 underline text-xs mt-1 hover:text-red-100"
+                className="mt-1 text-xs text-red-200 underline hover:text-red-100"
               >
                 Tentar novamente
               </button>
