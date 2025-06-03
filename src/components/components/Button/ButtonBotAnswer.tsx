@@ -34,7 +34,7 @@ export function ButtonBotAnswer({
     ${isSubmit ? submitClass : selectedClass}
     ${isSubmit
           ? "px-6 py-2.5 text-center"
-          : "justify-start text-left text-base leading-snug w-full max-w-[520px] min-w-[300px] px-4 py-3 whitespace-normal h-min"}
+          : "justify-start text-left text-base leading-snug w-full max-w-[520px] px-4 py-3 whitespace-normal h-min"}
   `}
     >
       {text}
