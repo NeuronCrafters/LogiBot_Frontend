@@ -16,7 +16,7 @@ export function Logo({ className, type }: LogoProps) {
     <a href="/" className={`flex items-center ${className}`}>
       <img
         src={logos[type]}
-        alt={type === "mascote" ? "Logo Mascote do SAEL" : "Logo Completa do SAEL"}
+        alt={type === "mascote" ? "Logo Mascote do LogiBot" : "Logo Completa do LogiBot"}
         className="object-contain"
       />
     </a>

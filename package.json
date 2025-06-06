@@ -29,6 +29,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "framer-motion": "^12.10.5",
+    "frontend_chat_sael": "file:",
     "html-react-parser": "^5.2.4",
     "html-to-image": "^1.11.11",
     "lucide-react": "^0.294.0",

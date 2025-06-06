@@ -24,8 +24,8 @@ export function Home() {
         <AppModal
           isOpen={true}
           type="info"
-          title="Bem-vindo ao SAEL"
-          description="O SAEL é um sistema de apoio acadêmico gratuito. Para usar todas as funcionalidades, é necessário criar uma conta gratuita."
+          title="Bem-vindo ao LogiBot"
+          description="O LogiBot é um sistema de apoio acadêmico gratuito. Para usar todas as funcionalidades, é necessário criar uma conta gratuita."
           onConfirm={handleAccept}
           onClose={() => setShowInfo(false)}
         />
@@ -41,16 +41,16 @@ export function Home() {
         />
         <button
           onClick={handlePlayClick}
-          className="px-4 py-2 bg-blue-500 rounded hover:bg-blue-600 transition"
+          className="px-4 py-2 transition bg-blue-500 rounded hover:bg-blue-600"
         >
           Jogar
         </button>
       </header>
 
-      <main className="flex-1 flex flex-col md:flex-row items-center justify-center text-center p-6 gap-10">
-        <div className="w-full md:w-1/2 flex flex-col items-center">
+      <main className="flex flex-col items-center justify-center flex-1 gap-10 p-6 text-center md:flex-row">
+        <div className="flex flex-col items-center w-full md:w-1/2">
           <Typograph
-            text="Bem-vindo ao SAEL"
+            text="Bem-vindo ao LogiBot"
             colorText="text-white"
             variant="title10"
             weight="bold"
@@ -58,7 +58,7 @@ export function Home() {
             className="mb-4"
           />
           <Typograph
-            text="SAEL é um sistema de apoio acadêmico. Com nosso suporte, você irá aprender assuntos de lógica de programação, além de reforçar sua base com atividades."
+            text="LogiBot é um sistema de apoio acadêmico. Com nosso suporte, você irá aprender assuntos de lógica de programação, além de reforçar sua base com atividades."
             colorText="text-white"
             variant="text5"
             weight="regular"
@@ -66,7 +66,7 @@ export function Home() {
             className="max-w-md"
           />
         </div>
-        <div className="w-full md:w-1/2 flex items-center justify-center">
+        <div className="flex items-center justify-center w-full md:w-1/2">
           <AnimatedLogo />
         </div>
       </main>

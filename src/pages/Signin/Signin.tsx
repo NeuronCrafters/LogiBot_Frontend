@@ -52,18 +52,18 @@ function Signin() {
         isOpen={showConsent}
         type="consent"
         title="Consentimento para Coleta de Dados"
-        description="O SAEL coleta dados de uso com finalidade educacional e para melhorar a sua experiência. Tudo em conformidade com a LGPD."
+        description="O LogiBot coleta dados de uso com finalidade educacional e para melhorar a sua experiência. Tudo em conformidade com a LGPD."
         onConfirm={handleAcceptConsent}
         onClose={() => setShowConsent(false)}
       />
 
       <div
-        className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900"
+        className="items-center justify-center flex-1 hidden md:flex bg-gradient-to-b from-blue-700 to-blue-900"
         style={{ flex: 2 }}
       >
         <AnimatedLogo />
         <Typograph
-          text="SAEL"
+          text="LogiBot"
           colorText="text-slate-100"
           variant="title10"
           weight="bold"
@@ -105,7 +105,7 @@ function Signin() {
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               type="email"
-              className="bg-neutral-800 w-full"
+              className="w-full bg-neutral-800"
               placeholder="E-mail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -114,7 +114,7 @@ function Signin() {
 
             <Input
               type="password"
-              className="bg-neutral-800 w-full"
+              className="w-full bg-neutral-800"
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -147,7 +147,7 @@ function Signin() {
             variant="text9"
             weight="regular"
             fontFamily="poppins"
-            className="text-center mt-4"
+            className="mt-4 text-center"
           />
         </div>
       </div>

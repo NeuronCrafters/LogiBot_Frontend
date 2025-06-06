@@ -44,12 +44,12 @@ function Signup() {
   return (
     <div className="flex min-h-screen">
       <div
-        className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900"
+        className="items-center justify-center flex-1 hidden md:flex bg-gradient-to-b from-blue-700 to-blue-900"
         style={{ flex: 2 }}
       >
         <AnimatedLogo />
         <Typograph
-          text="SAEL"
+          text="LogiBot"
           colorText="text-slate-100"
           variant="title10"
           weight="bold"
@@ -92,7 +92,7 @@ function Signup() {
             <Input
               type="text"
               placeholder="Nome completo"
-              className="bg-neutral-800 mb-4"
+              className="mb-4 bg-neutral-800"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -100,7 +100,7 @@ function Signup() {
             <Input
               type="email"
               placeholder="Email"
-              className="bg-neutral-800 mb-4"
+              className="mb-4 bg-neutral-800"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -108,7 +108,7 @@ function Signup() {
             <Input
               type="password"
               placeholder="Senha"
-              className="bg-neutral-800 mb-4"
+              className="mb-4 bg-neutral-800"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -116,7 +116,7 @@ function Signup() {
             <Input
               type="text"
               placeholder="Código"
-              className="bg-neutral-800 mb-4"
+              className="mb-4 bg-neutral-800"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               required
@@ -144,7 +144,7 @@ function Signup() {
             variant="text9"
             weight="regular"
             fontFamily="poppins"
-            className="text-center mt-4"
+            className="mt-4 text-center"
           />
         </div>
       </div>

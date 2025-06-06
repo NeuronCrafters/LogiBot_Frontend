@@ -6,18 +6,18 @@ import { Typograph } from '@/components/components/Typograph/Typograph';
 
 export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles }) => {
   return (
-    <div className="flex-1 w-full max-w-2xl mx-auto pt-32 pb-40 px-4">
+    <div className="flex-1 w-full max-w-2xl px-4 pt-32 pb-40 mx-auto">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-8"
+        className="mb-8 text-center"
       >
-        <div className="mx-auto bg-gradient-to-r from-violet-500 to-purple-600 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg">
+        <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full shadow-lg bg-gradient-to-r from-violet-500 to-purple-600">
           <MessageSquare size={32} className="text-white" />
         </div>
         <Typograph
-          text="Bem-vindo ao Chat SAEL"
+          text="Bem-vindo ao Chat LogiBot"
           colorText="text-white"
           variant="text1"
           weight="bold"
@@ -40,7 +40,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
         className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg"
       >
         <div className="flex items-start gap-4 mb-4">
-          <Lock className="text-purple-500 mt-1" size={24} />
+          <Lock className="mt-1 text-purple-500" size={24} />
           <div>
             <Typograph
               text="Acesso Restrito"
@@ -61,7 +61,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
         </div>
 
         <Alert className="bg-[#2a2a2a] border-purple-600 mt-4">
-          <Info className="h-5 w-5 text-purple-500" />
+          <Info className="w-5 h-5 text-purple-500" />
           <AlertTitle className="text-white">
             <Typograph
               text="Você não tem acesso a esta área"
@@ -91,7 +91,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
       >
         {/* <Button
           onClick={() => window.location.href = '/'}
-          className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-lg"
+          className="px-6 py-3 text-white transition-all duration-300 rounded-md shadow-md bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 hover:shadow-lg"
         >
           <Typograph
             text="Voltar para a Home"
@@ -109,14 +109,14 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
 // Componente para a página de boas-vindas de administradores
 export const AdminWelcome: React.FC = () => {
   return (
-    <div className="flex-1 w-full max-w-2xl mx-auto pt-32 pb-40 px-4">
+    <div className="flex-1 w-full max-w-2xl px-4 pt-32 pb-40 mx-auto">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-8"
+        className="mb-8 text-center"
       >
-        <div className="mx-auto bg-gradient-to-r from-fuchsia-500 to-orange-600 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg">
+        <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full shadow-lg bg-gradient-to-r from-fuchsia-500 to-orange-600">
           <Lock size={32} className="text-white" />
         </div>
         <Typograph
@@ -143,7 +143,7 @@ export const AdminWelcome: React.FC = () => {
         className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg"
       >
         <div className="flex items-start gap-4 mb-4">
-          <Info className="text-fuchsia-400 mt-1" size={24} />
+          <Info className="mt-1 text-fuchsia-400" size={24} />
           <div>
             <Typograph
               text="Chat Exclusivo para Estudantes"
@@ -165,7 +165,7 @@ export const AdminWelcome: React.FC = () => {
 
         <div className="p-[2px] rounded-lg bg-gradient-to-r from-fuchsia-500 to-orange-600">
           <Alert className="bg-[#2a2a2a] rounded-lg">
-            <Info className="h-5 w-5 text-fuchsia-400" />
+            <Info className="w-5 h-5 text-fuchsia-400" />
             <AlertTitle className="text-white">
               <Typograph
                 text="Permissão de Administrador"
@@ -196,7 +196,7 @@ export const AdminWelcome: React.FC = () => {
       >
         {/* <Button
           onClick={() => window.location.href = '/crud'}
-          className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-lg mr-4"
+          className="px-6 py-3 mr-4 text-white transition-all duration-300 rounded-md shadow-md bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 hover:shadow-lg"
         >
           <Typograph
             text="Ir para o CRUD"
