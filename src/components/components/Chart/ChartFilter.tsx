@@ -160,7 +160,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       <h3 className="text-xl font-semibold text-white">Filtros</h3>
 
       {/* Indicador de nível de acesso */}
-      <div className="text-xs text-white/60 bg-white/5 px-3 py-2 rounded-md border border-white/10">
+      <div className="px-3 py-2 text-xs border rounded-md text-white/60 bg-white/5 border-white/10">
         <span className="font-medium">Nível de acesso:</span>{" "}
         {userLevel === "admin"
           ? "Administrador (todos os tipos)"
@@ -170,10 +170,10 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       </div>
 
       {/* Seletor de Tipo de Entidade e Modo */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Tipo de Entidade */}
         <div className="space-y-3">
-          <Label htmlFor="entity-type" className="text-white font-medium">
+          <Label htmlFor="entity-type" className="font-medium text-white">
             Tipo de Entidade
           </Label>
           <Select value={entityType} onValueChange={handleEntityTypeChange}>
@@ -190,9 +190,10 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
           </Select>
         </div>
 
+        {/* Modo de Visualização - Comentado devido a não estar sendo utilizado atualmente */}
         {/* Modo de Visualização */}
-        <div className="space-y-3">
-          <Label htmlFor="view-mode" className="text-white font-medium">
+        {/* <div className="space-y-3">
+          <Label htmlFor="view-mode" className="font-medium text-white">
             Modo de Visualização
           </Label>
           <Select value={mode} onValueChange={handleModeChange}>
@@ -204,7 +205,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
               <SelectItem value="comparison">Comparar dois</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
       </div>
 
       {/* Filtro Acadêmico (universidade, curso, disciplina, turma) */}
