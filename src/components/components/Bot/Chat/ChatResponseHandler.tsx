@@ -33,12 +33,12 @@ function ChatResponseHandler({ onSend }: ChatResponseHandlerProps) {
   };
 
   return (
-    <div className="flex flex-wrap justify-center gap-3 mt-4 max-w-2xl mx-auto">
+    <div className="flex flex-wrap justify-center max-w-2xl gap-3 mx-auto mt-4">
       {buttons.map((btn, index) => (
         <Button
           key={index}
           onClick={() => handleButtonClick(btn.payload)}
-          className="bg-blue-700 hover:bg-blue-800 text-white rounded-lg px-4 py-2"
+          className="px-4 py-2 text-white bg-blue-700 rounded-lg hover:bg-blue-800"
         >
           {btn.title}
         </Button>
