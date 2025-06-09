@@ -1,5 +1,5 @@
 import { api } from "@/services/api/api";
-import { LOG_ROUTES } from "./api_routes";
+import { LOG_ROUTES, PROFESSOR_LOG_ROUTES } from "./api_routes";
 import { LogApiResponse, UserAnalysisLog, LogFilterParams } from "../../@types/Log";
 
 // Funções HTTP genéricas
@@ -67,6 +67,14 @@ export const logApi = {
     return {
       subjectFrequency: summary.subjectCounts
     };
+  },
+
+  getProfessorStudentsByDiscipline: async (disciplineId: string) => {
+    return getRequest<LogApiResponse<UserAnalysisLog>>(PROFESSOR_LOG_ROUTES.listStudentsByDiscipline(disciplineId));
+  },
+
+  getProfessorStudentDetails: async (studentId: string, disciplineId: string) => {
+    return getRequest<LogApiResponse<UserAnalysisLog>>(PROFESSOR_LOG_ROUTES.getStudentDetails(studentId, disciplineId));
   },
 
   // Única função genérica central de resumo

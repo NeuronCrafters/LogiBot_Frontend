@@ -123,6 +123,11 @@ export const LOG_ROUTES = {
   }
 } as const;
 
+export const PROFESSOR_LOG_ROUTES = {
+  listStudentsByDiscipline: (disciplineId: string) => `/logs/professor/students?disciplineId=${disciplineId}`,
+  getStudentDetails: (studentId: string, disciplineId: string) => `/logs/professor/students/${studentId}?disciplineId=${disciplineId}`,
+} as const;
+
 export const USER_ANALYSIS_ROUTES = {
   addInteraction: "/useranalysis/interaction",
 } as const;
