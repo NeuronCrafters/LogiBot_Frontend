@@ -20,6 +20,7 @@ interface CorrectWrongChartProps {
       universityId?: string;
       courseId?: string;
       classId?: string;
+      disciplineId?: string;
     };
   };
 }

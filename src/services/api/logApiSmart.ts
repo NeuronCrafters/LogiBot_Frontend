@@ -2,11 +2,13 @@ import { api } from "@/services/api/api";
 import { LOG_ROUTES, PROFESSOR_LOG_ROUTES } from "./api_routes";
 import { LogApiResponse, UserAnalysisLog, LogFilterParams } from "../../@types/Log";
 
+// Função genérica para GET
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
   return response.data;
 };
 
+// Função genérica para POST
 const postRequest = async <T>(url: string, data: object): Promise<T> => {
   const response = await api.post<T>(url, data, { withCredentials: true });
   return response.data;
@@ -23,6 +25,7 @@ export const logApiSmart = {
 
     const isProfessor = userRole.includes("professor");
 
+    // Quando é professor:
     if (isProfessor) {
       if (entity === "discipline") {
         const response = await getRequest<LogApiResponse<UserAnalysisLog>>(
@@ -42,6 +45,7 @@ export const logApiSmart = {
       }
     }
 
+    // Para Admin e Coordenador (e professores nos demais casos)
     switch (entity) {
       case "university":
         return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.university(id))).data;

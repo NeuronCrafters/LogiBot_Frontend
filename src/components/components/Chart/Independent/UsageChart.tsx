@@ -20,14 +20,78 @@ interface UsageChartProps {
   };
 }
 
+// function useUsageData(filter: UsageChartProps['filter']) {
+//   const validIds = Array.isArray(filter.ids)
+//     ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
+//     : [];
+//   const mainId = validIds[0] || "";
+
+//   const isStudent = filter.type === "student";
+//   const { universityId, courseId, classId } = filter.hierarchyParams;
+
+//   const studentId = isStudent ? mainId : undefined;
+//   const hasRequiredIds = isStudent
+//     ? Boolean(universityId && courseId && classId && studentId)
+//     : Boolean(mainId);
+
+//   return useQuery({
+//     queryKey: ['usage', filter.type, mainId, universityId, courseId, classId],
+//     queryFn: async () => {
+//       if (!hasRequiredIds) {
+//         throw new Error(`IDs insuficientes para tipo: ${filter.type}`);
+//       }
+
+//       let responseData;
+
+//       if (isStudent) {
+//         const requestBody = { universityId, courseId, classId, studentId };
+//         const response = await api.post('/logs/student/summary/filtered', requestBody);
+//         responseData = response.data;
+//       } else {
+//         let url: string;
+//         switch (filter.type) {
+//           case "university":
+//             url = `/logs/university/${mainId}/summary`;
+//             break;
+//           case "course":
+//             url = `/logs/course/${mainId}/summary`;
+//             break;
+//           case "class":
+//             url = `/logs/class/${mainId}/summary`;
+//             break;
+//           default:
+//             throw new Error(`Tipo de entidade não suportado: ${filter.type}`);
+//         }
+//         const response = await api.get(url);
+//         responseData = response.data;
+//       }
+
+//       return {
+//         totalUsageTime: responseData.usageTimeInSeconds,
+//         usageTime: responseData.usageTime,
+//         dailyUsage: responseData.dailyUsage || [],
+//         sessions: responseData.sessions || []
+//       };
+//     },
+//     enabled: hasRequiredIds,
+//     staleTime: 15 * 60 * 1000,
+//     gcTime: 30 * 60 * 1000,
+//     refetchOnWindowFocus: false,
+//     retry: 2
+//   });
+// }
+
 function useUsageData(filter: UsageChartProps['filter']) {
+  const { user } = useAuth();
+  const userRoles: string[] = Array.isArray(user?.role) ? user.role : user?.role ? [user.role] : [];
+
   const validIds = Array.isArray(filter.ids)
     ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
     : [];
   const mainId = validIds[0] || "";
 
   const isStudent = filter.type === "student";
-  const { universityId, courseId, classId } = filter.hierarchyParams;
+  const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
 
   const studentId = isStudent ? mainId : undefined;
   const hasRequiredIds = isStudent
@@ -39,6 +103,22 @@ function useUsageData(filter: UsageChartProps['filter']) {
     queryFn: async () => {
       if (!hasRequiredIds) {
         throw new Error(`IDs insuficientes para tipo: ${filter.type}`);
+      }
+
+      const isProfessor = userRoles.includes("professor");
+      if (isProfessor && (filter.type === "discipline" || filter.type === "student")) {
+        const response = await logApiSmart.fetchSummary(
+          userRoles,
+          filter.type,
+          mainId,
+          { universityId, courseId, classId, studentId, disciplineId }
+        );
+        return {
+          totalUsageTime: response.usageTimeInSeconds,
+          usageTime: response.usageTime,
+          dailyUsage: response.dailyUsage || [],
+          sessions: response.sessions || []
+        };
       }
 
       let responseData;
@@ -58,6 +138,9 @@ function useUsageData(filter: UsageChartProps['filter']) {
             break;
           case "class":
             url = `/logs/class/${mainId}/summary`;
+            break;
+          case "discipline":
+            url = `/logs/discipline/${mainId}/summary`;
             break;
           default:
             throw new Error(`Tipo de entidade não suportado: ${filter.type}`);
@@ -80,6 +163,7 @@ function useUsageData(filter: UsageChartProps['filter']) {
     retry: 2
   });
 }
+
 
 export function UsageChart({ filter }: UsageChartProps) {
   const { data: usageData, isLoading, isError, error, refetch } = useUsageData(filter);
