@@ -46,6 +46,7 @@ export const logApiSmart = {
       }
     }
 
+    // Caso de professor
     if (isProfessor) {
       if (entity === "discipline") {
         const response = await getRequest<LogApiResponse<UserAnalysisLog>>(
@@ -73,7 +74,7 @@ export const logApiSmart = {
     entity: "university" | "course" | "class" | "discipline" | "student",
     id: string,
     filters?: LogFilterParams
-  ): Promise<UserAnalysisLog> => {
+  ) => {
     return await logApiSmart.fetchSummary(userRole, entity, id, filters);
   }
 };

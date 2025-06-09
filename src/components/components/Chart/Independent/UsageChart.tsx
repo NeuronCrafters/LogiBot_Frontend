@@ -66,7 +66,6 @@ function useUsageData(filter: UsageChartProps['filter']) {
         responseData = response.data;
       }
 
-      // Ajusta o retorno
       return {
         totalUsageTime: responseData.usageTimeInSeconds,
         usageTime: responseData.usageTime,
