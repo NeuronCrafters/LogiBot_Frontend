@@ -7,9 +7,9 @@ import {
   COORDINATOR_ROUTES,
   LOG_ROUTES,
   AcademicEntityType,
-  LogEntityType,
-  LogMetricType,
-  LogModeType
+  // LogEntityType,
+  // LogMetricType,
+  // LogModeType
 } from "./api/api_routes";
 import { academicFiltersApi } from "./api/api_academicFilters";
 
