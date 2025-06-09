@@ -23,30 +23,6 @@ export const logApiSmart = {
 
     const isProfessor = userRole.includes("professor");
 
-    if (!isProfessor || (entity !== "discipline" && entity !== "student")) {
-      switch (entity) {
-        case "university":
-          return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.university(id))).data;
-        case "course":
-          return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.course(id))).data;
-        case "class":
-          return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.class(id))).data;
-        case "discipline":
-          return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.discipline(id))).data;
-        case "student":
-          const response = await postRequest<LogApiResponse<UserAnalysisLog>>(
-            LOG_ROUTES.summary.filteredStudent, {
-            universityId: filters?.universityId || "",
-            courseId: filters?.courseId,
-            classId: filters?.classId,
-            studentId: id
-          });
-          if (!response.success) throw new Error(response.error || "Erro ao buscar dados de aluno");
-          return response.data;
-      }
-    }
-
-    // Caso de professor
     if (isProfessor) {
       if (entity === "discipline") {
         const response = await getRequest<LogApiResponse<UserAnalysisLog>>(
@@ -66,16 +42,34 @@ export const logApiSmart = {
       }
     }
 
-    throw new Error("Rota não suportada");
-  },
+    switch (entity) {
+      case "university":
+        return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.university(id))).data;
 
-  getUsageSummary: async (
-    userRole: string[],
-    entity: "university" | "course" | "class" | "discipline" | "student",
-    id: string,
-    filters?: LogFilterParams
-  ) => {
-    return await logApiSmart.fetchSummary(userRole, entity, id, filters);
+      case "course":
+        return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.course(id))).data;
+
+      case "class":
+        return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.class(id))).data;
+
+      case "discipline":
+        return (await getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.discipline(id))).data;
+
+      case "student":
+        const response = await postRequest<LogApiResponse<UserAnalysisLog>>(
+          LOG_ROUTES.summary.filteredStudent, {
+          universityId: filters?.universityId || "",
+          courseId: filters?.courseId,
+          classId: filters?.classId,
+          studentId: id
+        }
+        );
+        if (!response.success) throw new Error(response.error || "Erro ao buscar dados do estudante");
+        return response.data;
+
+      default:
+        throw new Error("Entidade inválida");
+    }
   }
 };
 
