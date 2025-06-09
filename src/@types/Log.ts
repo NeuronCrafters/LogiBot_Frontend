@@ -58,11 +58,12 @@ export interface LogApiResponse<T> {
 
 // Parâmetros de filtro para chamadas à API
 export interface LogFilterParams {
-  startDate?: string;   // "YYYY-MM-DD"
+  startDate?: string;
   endDate?: string;
   universityId?: string;
   courseId?: string;
   classId?: string;
   studentId?: string;
   subject?: string;
+  disciplineId?: string;
 }

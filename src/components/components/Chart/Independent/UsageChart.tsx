@@ -6,6 +6,8 @@ import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { api } from "@/services/api/api";
 import type { ChartFilterState } from "@/@types/ChartsType";
+import logApiSmart from "@/services/api/logApiSmart";
+import { useAuth } from "@/hooks/use-Auth";
 
 interface UsageChartProps {
   filter: ChartFilterState & {
@@ -13,6 +15,7 @@ interface UsageChartProps {
       universityId?: string;
       courseId?: string;
       classId?: string;
+      disciplineId?: string;
     };
   };
 }
