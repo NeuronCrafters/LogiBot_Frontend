@@ -393,25 +393,25 @@ export function AcademicFilter({
       className="space-y-4"
     >
       {/* Indicador do nível de acesso */}
-      <div className="text-xs text-white/60 bg-white/5 px-3 py-2 rounded-md border border-white/10">
+      {/* <div className="text-xs text-white/60 bg-white/5 px-3 py-2 rounded-md border border-white/10">
         <span className="font-medium">Nível de acesso:</span> {
           isAdmin ? "Administrador (acesso total)" :
             isCoordinator ? "Coordenador (limitado ao seu curso)" :
               "Professor (limitado às suas turmas)"
         }
-      </div>
+      </div> */}
 
       {/* Grid de Hierarquia */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Universidade */}
         {shouldShowUniversitySelect() && (
           <div className="relative">
-            <label className="block text-sm font-medium text-white/70 mb-2">
+            {/* <label className="block text-sm font-medium text-white/70 mb-2">
               Universidade
               {!isAdmin && (
                 <span className="text-blue-400 ml-1">(Sua universidade)</span>
               )}
-            </label>
+            </label> */}
             <select
               value={selectedUniversity}
               onChange={(e) => {
@@ -445,7 +445,7 @@ export function AcademicFilter({
         {/* Curso */}
         {shouldShowCourseSelect() && (
           <div className="relative">
-            <label className="block text-sm font-medium text-white/70 mb-2">
+            {/* <label className="block text-sm font-medium text-white/70 mb-2">
               Curso
               {isCoordinator && (
                 <span className="text-blue-400 ml-1">(Curso que coordena)</span>
@@ -453,7 +453,7 @@ export function AcademicFilter({
               {isProfessor && (
                 <span className="text-blue-400 ml-1">(Curso onde ministra)</span>
               )}
-            </label>
+            </label> */}
             <select
               value={selectedCourse}
               onChange={(e) => {
@@ -490,7 +490,7 @@ export function AcademicFilter({
         {/* Turma */}
         {shouldShowClassSelect() && (
           <div className="relative">
-            <label className="block text-sm font-medium text-white/70 mb-2">
+            {/* <label className="block text-sm font-medium text-white/70 mb-2">
               Turma
               {isCoordinator && (
                 <span className="text-blue-400 ml-1">(Turmas do seu curso)</span>
@@ -498,7 +498,7 @@ export function AcademicFilter({
               {isProfessor && (
                 <span className="text-blue-400 ml-1">(Suas turmas)</span>
               )}
-            </label>
+            </label> */}
             <select
               value={selectedClass}
               onChange={(e) => {
@@ -537,7 +537,7 @@ export function AcademicFilter({
 
         {/* Seletor Final */}
         <div className="relative">
-          <label className="block text-sm font-medium text-white/70 mb-2">
+          {/* <label className="block text-sm font-medium text-white/70 mb-2">
             {entityType === "student"
               ? "Aluno(s)"
               : entityType === "class"
@@ -545,7 +545,7 @@ export function AcademicFilter({
                 : entityType === "course"
                   ? "Curso(s)"
                   : "Universidade(s)"}
-          </label>
+          </label> */}
 
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -643,7 +643,7 @@ export function AcademicFilter({
       )}
 
       {/* Mensagem de Status para Comparação */}
-      {multiple && (
+      {/* {multiple && (
         <div className={cn(
           "text-xs p-3 rounded-md border transition-colors",
           selectedIds.length === 0
@@ -658,7 +658,7 @@ export function AcademicFilter({
               ? "Selecione mais uma entidade para completar a comparação"
               : "Comparação disponível com as entidades selecionadas"}
         </div>
-      )}
+      )} */}
     </motion.div>
   );
 }

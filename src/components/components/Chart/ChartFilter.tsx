@@ -160,14 +160,14 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       <h3 className="text-xl font-semibold text-white">Filtros</h3>
 
       {/* Indicador de nível de acesso */}
-      <div className="px-3 py-2 text-xs border rounded-md text-white/60 bg-white/5 border-white/10">
+      {/* <div className="px-3 py-2 text-xs border rounded-md text-white/60 bg-white/5 border-white/10">
         <span className="font-medium">Nível de acesso:</span>{" "}
         {userLevel === "admin"
           ? "Administrador (todos os tipos)"
           : userLevel === "coordinator"
             ? "Coordenador (aluno, turma, curso)"
             : "Professor (disciplina, turma, aluno)"}
-      </div>
+      </div> */}
 
       {/* Seletor de Tipo de Entidade e Modo */}
       <div className="grid grid-cols-1 gap-6">
@@ -218,8 +218,8 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       {/* Status da seleção para comparação */}
       {mode === "comparison" && (
         <div className={`text-sm p-3 rounded-md border ${selectedIds.length < 2
-            ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
-            : "text-green-400 bg-green-400/10 border-green-400/20"
+          ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
+          : "text-green-400 bg-green-400/10 border-green-400/20"
           }`}>
           {getSelectionStatus()}
         </div>
