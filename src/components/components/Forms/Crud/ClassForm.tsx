@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-Auth";
 import { academicFiltersApi } from "@/services/apiClient";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
-import { University } from "@/services/api/api_academicFilters";
 
 export interface ClassData {
   id?: string | number;
@@ -145,7 +144,7 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-white mb-1">Nome da Turma:</label>
+        <label className="block mb-1 text-sm font-medium text-white">Nome da Turma:</label>
         <input
           type="text"
           value={name}
@@ -157,7 +156,7 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
 
       {/* Select de Universidade - Admin vê todas, Coordenador vê só a sua */}
       <div>
-        <label className="block text-sm font-medium text-white mb-1">Universidade:</label>
+        <label className="block mb-1 text-sm font-medium text-white">Universidade:</label>
         <select
           value={selectedUniversity}
           onChange={(e) => {
@@ -177,7 +176,7 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
       {/* Select de Curso - Admin vê todos da universidade, Coordenador vê só o seu */}
       {selectedUniversity && (
         <div>
-          <label className="block text-sm font-medium text-white mb-1">Curso:</label>
+          <label className="block mb-1 text-sm font-medium text-white">Curso:</label>
           <select
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}

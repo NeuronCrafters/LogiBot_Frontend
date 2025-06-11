@@ -1,4 +1,4 @@
-import { LogEntityType, LogMetricType, LogModeType } from "@/services/api/api_routes";
+import { LogEntityType, LogModeType } from "@/services/api/api_routes";
 
 // Estado do filtro de gráficos
 export interface ChartFilterState {

@@ -19,7 +19,6 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { academicFiltersApi } from "@/services/apiClient";
 import { LogEntityType } from "@/services/api/api_routes";
-import { FilterType, Role } from "@/@types/ChartsType";
 import { AcademicDataResponse } from "@/@types/AcademicData";
 
 interface AcademicFilterProps {
@@ -41,11 +40,11 @@ interface AcademicFilterProps {
   };
 }
 
-type Option = { _id: string; name: string };
-type University = { _id: string; name: string; courses: Course[] };
-type Course = { _id: string; name: string; classes: Class[] };
-type Class = { _id: string; name: string; students: Student[] };
-type Student = { _id: string; name: string };
+// type Option = { _id: string; name: string };
+// type University = { _id: string; name: string; courses: Course[] };
+// type Course = { _id: string; name: string; classes: Class[] };
+// type Class = { _id: string; name: string; students: Student[] };
+// type Student = { _id: string; name: string };
 
 export function AcademicFilter({
   entityType,
@@ -73,9 +72,10 @@ export function AcademicFilter({
     if (user.courseId) {
       const courseId = Array.isArray(user.courseId) ? user.courseId[0] : user.courseId;
       // Se é objeto, extrair id
-      if (typeof courseId === 'object' && courseId !== null && 'id' in courseId) {
+      if (typeof courseId === 'object' && courseId !== null && 'id' in Array(courseId)) {
         return (courseId as { id: string }).id;
       }
+
       return courseId as string;
     }
     // Se course existe
@@ -90,7 +90,7 @@ export function AcademicFilter({
     if (Array.isArray(user.courses) && user.courses.length > 0) {
       const firstCourse = user.courses[0];
       // Se é objeto com id, extrair o id
-      if (typeof firstCourse === 'object' && firstCourse !== null && 'id' in firstCourse) {
+      if (typeof firstCourse === 'object' && firstCourse !== null && 'id' in Array(firstCourse)) {
         return (firstCourse as { id: string; name?: string }).id;
       }
       // Se é string, usar direto
@@ -103,7 +103,7 @@ export function AcademicFilter({
     if (user.classId) {
       const classIds = Array.isArray(user.classId) ? user.classId : [user.classId];
       return classIds.map(id => {
-        if (typeof id === 'object' && id !== null && 'id' in id) {
+        if (typeof id === 'object' && id !== null && 'id' in Array(id)) {
           return (id as { id: string }).id;
         }
         return id as string;
@@ -112,7 +112,7 @@ export function AcademicFilter({
     if (user.class) {
       const classes = Array.isArray(user.class) ? user.class : [user.class];
       return classes.map(cls => {
-        if (typeof cls === 'object' && cls !== null && 'id' in cls) {
+        if (typeof cls === 'object' && cls !== null && 'id' in Array(cls)) {
           return (cls as { id: string }).id;
         }
         return cls as string;
@@ -393,7 +393,7 @@ export function AcademicFilter({
       className="space-y-4"
     >
       {/* Indicador do nível de acesso */}
-      {/* <div className="text-xs text-white/60 bg-white/5 px-3 py-2 rounded-md border border-white/10">
+      {/* <div className="px-3 py-2 text-xs border rounded-md text-white/60 bg-white/5 border-white/10">
         <span className="font-medium">Nível de acesso:</span> {
           isAdmin ? "Administrador (acesso total)" :
             isCoordinator ? "Coordenador (limitado ao seu curso)" :
@@ -402,14 +402,14 @@ export function AcademicFilter({
       </div> */}
 
       {/* Grid de Hierarquia */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         {/* Universidade */}
         {shouldShowUniversitySelect() && (
           <div className="relative">
-            {/* <label className="block text-sm font-medium text-white/70 mb-2">
+            {/* <label className="block mb-2 text-sm font-medium text-white/70">
               Universidade
               {!isAdmin && (
-                <span className="text-blue-400 ml-1">(Sua universidade)</span>
+                <span className="ml-1 text-blue-400">(Sua universidade)</span>
               )}
             </label> */}
             <select
@@ -435,8 +435,8 @@ export function AcademicFilter({
               ))}
             </select>
             {isLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="h-4 w-4 text-indigo-500 animate-spin" />
+              <div className="absolute transform -translate-y-1/2 right-3 top-1/2">
+                <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />
               </div>
             )}
           </div>
@@ -445,13 +445,13 @@ export function AcademicFilter({
         {/* Curso */}
         {shouldShowCourseSelect() && (
           <div className="relative">
-            {/* <label className="block text-sm font-medium text-white/70 mb-2">
+            {/* <label className="block mb-2 text-sm font-medium text-white/70">
               Curso
               {isCoordinator && (
-                <span className="text-blue-400 ml-1">(Curso que coordena)</span>
+                <span className="ml-1 text-blue-400">(Curso que coordena)</span>
               )}
               {isProfessor && (
-                <span className="text-blue-400 ml-1">(Curso onde ministra)</span>
+                <span className="ml-1 text-blue-400">(Curso onde ministra)</span>
               )}
             </label> */}
             <select
@@ -490,13 +490,13 @@ export function AcademicFilter({
         {/* Turma */}
         {shouldShowClassSelect() && (
           <div className="relative">
-            {/* <label className="block text-sm font-medium text-white/70 mb-2">
+            {/* <label className="block mb-2 text-sm font-medium text-white/70">
               Turma
               {isCoordinator && (
-                <span className="text-blue-400 ml-1">(Turmas do seu curso)</span>
+                <span className="ml-1 text-blue-400">(Turmas do seu curso)</span>
               )}
               {isProfessor && (
-                <span className="text-blue-400 ml-1">(Suas turmas)</span>
+                <span className="ml-1 text-blue-400">(Suas turmas)</span>
               )}
             </label> */}
             <select
@@ -526,7 +526,7 @@ export function AcademicFilter({
                       "Turmas do curso não encontradas"}
                 </option>
               )}
-              {classes.map((c) => (
+              {classes.map((c: any) => (
                 <option key={c._id} value={c._id}>
                   {c.name}
                 </option>
@@ -537,7 +537,7 @@ export function AcademicFilter({
 
         {/* Seletor Final */}
         <div className="relative">
-          {/* <label className="block text-sm font-medium text-white/70 mb-2">
+          {/* <label className="block mb-2 text-sm font-medium text-white/70">
             {entityType === "student"
               ? "Aluno(s)"
               : entityType === "class"
@@ -574,9 +574,9 @@ export function AcademicFilter({
                       }`}
                 </span>
                 {isLoading ? (
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin shrink-0" />
+                  <Loader2 className="w-4 h-4 ml-2 animate-spin shrink-0" />
                 ) : (
-                  <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                  <ChevronDown className="w-4 h-4 ml-2 shrink-0" />
                 )}
               </Button>
             </PopoverTrigger>
@@ -588,11 +588,11 @@ export function AcademicFilter({
                   value={searchTerm}
                   onValueChange={setSearchTerm}
                 />
-                <CommandEmpty className="text-sm text-white/60 px-4 py-6 text-center">
+                <CommandEmpty className="px-4 py-6 text-sm text-center text-white/60">
                   {isLoading ? "Carregando..." : "Nenhum encontrado."}
                 </CommandEmpty>
                 <CommandGroup className="max-h-[300px] overflow-y-auto">
-                  {filteredEntities.map((item) => {
+                  {filteredEntities.map((item: any) => {
                     const isSelected = selectedIds.includes(item._id);
                     const isDisabled = hasReachedLimit && !isSelected && multiple;
                     return (
@@ -628,12 +628,12 @@ export function AcademicFilter({
           {selectedNames.map((name, index) => (
             <div
               key={selectedIds[index]}
-              className="bg-indigo-500/20 border border-indigo-500/30 text-white px-3 py-1 rounded-full text-sm flex items-center"
+              className="flex items-center px-3 py-1 text-sm text-white border rounded-full bg-indigo-500/20 border-indigo-500/30"
             >
               {name}
               <button
                 onClick={() => toggleItem(selectedIds[index])}
-                className="ml-2 text-white/70 hover:text-white transition-colors"
+                className="ml-2 transition-colors text-white/70 hover:text-white"
               >
                 ×
               </button>

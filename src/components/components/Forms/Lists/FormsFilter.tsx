@@ -52,11 +52,11 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   };
 
   const fixedUniversity = getFirstId(user.schoolId) || String(user.school || "");
-  const userCourseId = getFirstId(user.courseId) || (
-    Array.isArray(user.courses) && user.courses.length > 0
-      ? user.courses[0]
-      : ""
-  );
+//   const userCourseId = getFirstId(user.courseId) || (
+//     Array.isArray(user.courses) && user.courses.length > 0
+//       ? user.courses[0]
+//       : ""
+//   );
 
   const allowedFilters: FilterType[] = isAdmin
     ? [
@@ -256,12 +256,12 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-4 p-4 rounded-xl bg-red-600/20 border border-red-600/50"
+        className="p-4 mb-4 border rounded-xl bg-red-600/20 border-red-600/50"
       >
-        <p className="text-red-300 mb-2">Erro ao carregar filtros</p>
+        <p className="mb-2 text-red-300">Erro ao carregar filtros</p>
         <button
           onClick={() => refetch()}
-          className="text-red-200 underline text-sm hover:text-red-100"
+          className="text-sm text-red-200 underline hover:text-red-100"
         >
           Tentar novamente
         </button>
@@ -279,15 +279,15 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       className="mb-4 p-4 rounded-xl bg-[#1f1f1f] border border-white/10 shadow-lg"
     >
       {loading && (
-        <div className="mb-4 p-3 bg-blue-600/20 border border-blue-600/50 rounded-lg">
-          <p className="text-blue-300 text-sm">Carregando filtros...</p>
+        <div className="p-3 mb-4 border rounded-lg bg-blue-600/20 border-blue-600/50">
+          <p className="text-sm text-blue-300">Carregando filtros...</p>
         </div>
       )}
 
       <div className="flex flex-wrap gap-4 mb-4">
         {/* Tipo de Filtro */}
         <div className="flex-1 min-w-[200px]">
-          <label className="block mb-1 text-white text-sm font-medium">Tipo de Filtro:</label>
+          <label className="block mb-1 text-sm font-medium text-white">Tipo de Filtro:</label>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
@@ -316,7 +316,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
         {/* Select de Universidade - Apenas para Admin */}
         {showUniversitySelect && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white text-sm font-medium">Universidade:</label>
+            <label className="block mb-1 text-sm font-medium text-white">Universidade:</label>
             <select
               value={selectedUniversity}
               onChange={(e) => {
@@ -339,7 +339,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
         {/* Select de Curso - Para Admin e Coordenador */}
         {showCourseSelect && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white text-sm font-medium">Curso:</label>
+            <label className="block mb-1 text-sm font-medium text-white">Curso:</label>
             <select
               value={selectedCourse}
               onChange={(e) => {
@@ -361,7 +361,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
         {/* Select de Disciplina */}
         {showStudentDisciplineSelect && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white text-sm font-medium">Disciplina:</label>
+            <label className="block mb-1 text-sm font-medium text-white">Disciplina:</label>
             <select
               value={selectedDiscipline}
               onChange={(e) => setSelectedDiscipline(e.target.value)}
@@ -381,7 +381,7 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
         {/* Select de Turma */}
         {showStudentClassSelect && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block mb-1 text-white text-sm font-medium">Turma:</label>
+            <label className="block mb-1 text-sm font-medium text-white">Turma:</label>
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
@@ -399,8 +399,8 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
 
       {/* Aviso para coordenadores */}
       {(isCoordinator || isProfessor) && filterType && showCourseSelect && (
-        <div className="mb-4 p-3 bg-yellow-600/20 border border-yellow-600/50 rounded-lg">
-          <p className="text-yellow-300 text-sm">
+        <div className="p-3 mb-4 border rounded-lg bg-yellow-600/20 border-yellow-600/50">
+          <p className="text-sm text-yellow-300">
             {isCoordinator
               ? "Você pode visualizar dados de todos os cursos da sua universidade"
               : "Você está limitado às disciplinas dos cursos da sua universidade"}

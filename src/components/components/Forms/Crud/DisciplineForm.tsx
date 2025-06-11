@@ -1,9 +1,8 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-Auth";
+// import { useAuth } from "@/hooks/use-Auth";
 import { academicFiltersApi } from "@/services/apiClient";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
-import { University } from "@/services/api/api_academicFilters";
 
 export interface DisciplineData {
   id?: string | number;
@@ -20,12 +19,12 @@ export interface DisciplineFormProps {
 }
 
 function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
-  const { user } = useAuth();
+//   const { user } = useAuth();
 
   // Verificar permissões do usuário
-  const roles = Array.isArray(user?.role) ? user.role : [user?.role];
-  const isAdmin = roles.includes("admin");
-  const isCoordinator = roles.includes("course-coordinator");
+//   const roles = Array.isArray(user?.role) ? user.role : [user?.role];
+//   const isAdmin = roles.includes("admin");
+//   const isCoordinator = roles.includes("course-coordinator");
 
   // Query para buscar dados acadêmicos com cache
   const { data: academicData, isLoading: loadingAcademicData } = useQuery({
@@ -128,7 +127,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
       {/* Campo de nome da disciplina */}
       <div>
-        <label className="block text-white mb-2">Nome da Disciplina:</label>
+        <label className="block mb-2 text-white">Nome da Disciplina:</label>
         <input
           type="text"
           value={name}
@@ -140,7 +139,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
 
       {/* Seleção de universidade */}
       <div>
-        <label className="block text-white mb-2">Universidade:</label>
+        <label className="block mb-2 text-white">Universidade:</label>
         <select
           value={selectedUniversity}
           onChange={(e) => {
@@ -160,7 +159,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
       {/* Seleção de curso */}
       {selectedUniversity && (
         <div>
-          <label className="block text-white mb-2">Curso:</label>
+          <label className="block mb-2 text-white">Curso:</label>
           <select
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
@@ -178,7 +177,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
       {/* Seleção de classes */}
       {selectedCourse && (
         <div>
-          <label className="block text-white mb-2">Turmas (Selecione uma ou mais):</label>
+          <label className="block mb-2 text-white">Turmas (Selecione uma ou mais):</label>
           <select
             multiple
             value={selectedClassIds}
@@ -189,7 +188,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               <option key={cls._id} value={cls._id}>{cls.name}</option>
             ))}
           </select>
-          <small className="text-gray-400 mt-1 block">
+          <small className="block mt-1 text-gray-400">
             Segure Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplas turmas
           </small>
         </div>
@@ -198,7 +197,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
       {/* Seleção de professores */}
       {selectedCourse && (
         <div>
-          <label className="block text-white mt-4 mb-2">Professores (Selecione um ou mais):</label>
+          <label className="block mt-4 mb-2 text-white">Professores (Selecione um ou mais):</label>
           <select
             multiple
             value={selectedProfessorIds}
@@ -209,7 +208,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               <option key={prof._id} value={prof._id}>{prof.name}</option>
             ))}
           </select>
-          <small className="text-gray-400 mt-1 block">
+          <small className="block mt-1 text-gray-400">
             Segure Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos professores
           </small>
         </div>

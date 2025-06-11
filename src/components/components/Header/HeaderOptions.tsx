@@ -5,7 +5,6 @@ import {
   PieChart,
   LogOut,
   Settings,
-  HelpCircle,
   MessageSquare,
   TableProperties,
 } from "lucide-react";
@@ -20,8 +19,8 @@ interface MenuOptionsProps {
 export function MenuOptions({ role, logout }: MenuOptionsProps) {
   const location = useLocation();
 
-  const isAboutPage = location.pathname === "/about";
-  const isFaqPage = location.pathname === "/faq";
+//   const isAboutPage = location.pathname === "/about";
+//   const isFaqPage = location.pathname === "/faq";
 
   const menuItems = [
     {
@@ -79,7 +78,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
           return isCurrent ? (
             <div
               key={path}
-              className="w-full flex items-center gap-2 text-gray-500 opacity-50 cursor-not-allowed px-4 py-2 rounded-md"
+              className="flex items-center w-full gap-2 px-4 py-2 text-gray-500 rounded-md opacity-50 cursor-not-allowed"
             >
               {icon}
               <Typograph
@@ -94,7 +93,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
             <Link key={path} to={path}>
               <Button
                 variant="ghost"
-                className="w-full justify-start flex items-center gap-2 text-gray-300 hover:text-white"
+                className="flex items-center justify-start w-full gap-2 text-gray-300 hover:text-white"
               >
                 {icon}
                 <Typograph
@@ -112,7 +111,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
       <Button
         variant="ghost"
         onClick={logout}
-        className="w-full justify-start flex items-center gap-2 text-red-500 hover:text-red-300 mt-4"
+        className="flex items-center justify-start w-full gap-2 mt-4 text-red-500 hover:text-red-300"
       >
         <LogOut className="w-5 h-5 text-red-500" />
         <Typograph

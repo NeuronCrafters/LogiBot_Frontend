@@ -71,7 +71,7 @@ const markdownComponents = {
     ),
 };
 
-function ChatMessages({ messages, userName, userId }: ChatMessagesProps) {
+function ChatMessages({ messages, userId }: ChatMessagesProps) {
     const formatMessage = (message: Message) => {
         const { content } = message;
 

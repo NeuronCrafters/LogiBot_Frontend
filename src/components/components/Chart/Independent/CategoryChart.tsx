@@ -87,7 +87,7 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
 }
 
 export function CategoryChart({ filter }: CategoryChartProps) {
-  const { data, isLoading, isError, error, refetch } = useSubjectsData(filter);
+  const { data, isLoading, isError, refetch } = useSubjectsData(filter);
 
   const validIds = Array.isArray(filter.ids) ? filter.ids.filter(id => id && id.trim()) : [];
   const id = validIds[0] || '';
@@ -117,7 +117,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
 
   return (
     <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
-      <CardHeader className="flex flex-col space-y-0 border-b border-white/10 pb-4">
+      <CardHeader className="flex flex-col pb-4 space-y-0 border-b border-white/10">
         <CardTitle className="text-white">Distribuição por Assunto</CardTitle>
         <CardDescription className="text-white/70">
           Acessos por categoria de conteúdo
@@ -127,7 +127,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
       <CardContent className="px-2 sm:p-6 h-[299px] flex items-center justify-center">
         {(!hasRequired || isLoading || isError || !hasData) && (
           <div className="flex flex-col items-center">
-            {isLoading && <div className="animate-pulse w-10 h-10 rounded-full bg-indigo-600/30 mb-3"></div>}
+            {isLoading && <div className="w-10 h-10 mb-3 rounded-full animate-pulse bg-indigo-600/30"></div>}
             {isError && (
               <svg className="mb-3 text-indigo-400/60" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -138,21 +138,21 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             {!isLoading && !isError && !hasRequired && <p className="text-white/70">Selecione uma entidade para visualizar dados</p>}
             {!isLoading && !isError && hasRequired && !hasData && <p className="text-white/70">Nenhum dado de categorias disponível.</p>}
             {(isError || (!hasData && hasRequired)) && (
-              <button onClick={() => refetch()} className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Tentar novamente</button>
+              <button onClick={() => refetch()} className="mt-3 text-xs text-indigo-400 transition-colors hover:text-indigo-300">Tentar novamente</button>
             )}
           </div>
         )}
 
         {!isLoading && !isError && hasData && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
-            <ChartContainer config={chartConfig} className="aspect-auto h-full w-full text-white">
+            <ChartContainer config={chartConfig} className="w-full h-full text-white aspect-auto">
               <RadarChart data={data!.chartData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                 <ChartTooltip cursor={false} content={({ active, payload }) => {
                   if (!active || !payload?.[0]) return null;
                   const entry = payload[0].payload;
                   return (
                     <div className="p-2 bg-[#1f1f1f] border border-[#333] rounded shadow text-white text-sm">
-                      <p className="font-semibold mb-1">{entry.category}</p>
+                      <p className="mb-1 font-semibold">{entry.category}</p>
                       <p><span className="text-[#999] mr-2">Acessos:</span><span className="font-medium">{entry.acessos}</span></p>
                     </div>
                   );
@@ -168,7 +168,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
       </CardContent>
 
       {hasData && (
-        <CardFooter className="flex justify-between items-center border-t border-white/10 px-6 py-4">
+        <CardFooter className="flex items-center justify-between px-6 py-4 border-t border-white/10">
           <div className="flex flex-col">
             <div className="flex items-center space-x-2">
               <span className="font-medium text-white">Total: {data!.totalAccesses}</span>

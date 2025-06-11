@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-Auth";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormsCrud } from "@/components/components/Forms/Crud/FormsCrud";
 import { Header } from "@/components/components/Header/Header";
 import { Avatar } from "@/components/components/Avatar/Avatar";
@@ -160,8 +160,8 @@ export function CRUD() {
         <Typograph text="Cadastro" colorText="text-white" variant="text2" weight="bold" fontFamily="poppins" />
         {user && (
           <div className="ml-auto">
-            <Button onClick={() => setMenuOpen(true)} className="p-0 flex items-center justify-center">
-              <div className="rainbow-avatar w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
+            <Button onClick={() => setMenuOpen(true)} className="flex items-center justify-center p-0">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
                 <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
               </div>
             </Button>
@@ -171,7 +171,7 @@ export function CRUD() {
 
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
-      <div className="w-full flex flex-col pt-24 px-4 sm:px-6 lg:px-8 gap-6 max-w-screen-md mx-auto">
+      <div className="flex flex-col w-full max-w-screen-md gap-6 px-4 pt-24 mx-auto sm:px-6 lg:px-8">
         <motion.div
           key="crud-section"
           initial={{ opacity: 0, y: -20 }}

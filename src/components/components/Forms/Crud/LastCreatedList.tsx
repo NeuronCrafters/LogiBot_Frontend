@@ -14,11 +14,11 @@ export interface RecentItem {
 interface LastCreatedListProps {
   items: RecentItem[];
   onEdit: (item: RecentItem) => void;
-  onDelete: (item: RecentItem) => void;
+  onDelete?: (item: RecentItem) => void;
   loading?: boolean;
 }
 
-export function LastCreatedList({ items, onEdit, onDelete, loading = false }: LastCreatedListProps) {
+export function LastCreatedList({ items, onEdit, loading = false }: LastCreatedListProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<RecentItem | null>(null);
 
@@ -62,7 +62,7 @@ export function LastCreatedList({ items, onEdit, onDelete, loading = false }: La
         />
 
         {loading ? (
-          <div className="mt-4 h-20 w-full rounded-md bg-white/10 animate-pulse" />
+          <div className="w-full h-20 mt-4 rounded-md bg-white/10 animate-pulse" />
         ) : items.length === 0 ? (
           <div className="mt-4 p-3 text-center text-slate-400 bg-[#141414] rounded-xl border border-white/10">
             <p>Nenhum registro encontrado</p>
@@ -95,7 +95,7 @@ export function LastCreatedList({ items, onEdit, onDelete, loading = false }: La
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex flex-shrink-0 gap-2">
                   <ButtonCRUD action="update" onClick={() => handleEditClick(item)} compact />
                   {/* <ButtonCRUD action="delete" onClick={() => onDelete(item)} compact /> */}
                 </div>

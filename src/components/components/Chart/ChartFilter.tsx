@@ -10,7 +10,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
-import type { ChartFilterState } from "@/@types/ChartsType";
 import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
 
 interface ChartFilterProps {
@@ -35,7 +34,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   const userRoles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = userRoles.includes("admin");
   const isCoordinator = userRoles.includes("course-coordinator");
-  const isProfessor = userRoles.includes("professor");
 
   // Hierarquia: admin > coordinator > professor
   const userLevel = isAdmin
@@ -70,7 +68,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
 
   // Estados locais
   const [entityType, setEntityType] = useState<LogEntityType>(getInitialEntityType());
-  const [mode, setMode] = useState<LogModeType>("individual");
+  const [mode] = useState<LogModeType>("individual");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [hierarchyParams, setHierarchyParams] = useState<{
     universityId?: string;
@@ -105,12 +103,12 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   }, [allowedEntityTypes, mode, notifyParent, userLevel]);
 
   // Handler para mudança de modo (individual/comparison)
-  const handleModeChange = useCallback((value: string) => {
-    const newMode = value as LogModeType;
-    setMode(newMode);
-    setSelectedIds([]);
-    notifyParent(entityType, [], newMode, hierarchyParams);
-  }, [entityType, hierarchyParams, notifyParent]);
+//   const handleModeChange = useCallback((value: string) => {
+//     const newMode = value as LogModeType;
+//     setMode(newMode);
+//     setSelectedIds([]);
+//     notifyParent(entityType, [], newMode, hierarchyParams);
+//   }, [entityType, hierarchyParams, notifyParent]);
 
   // Recebe seleção do AcademicFilter
   const handleEntitySelection = useCallback((ids: string[], params?: typeof hierarchyParams) => {
@@ -138,7 +136,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       default: return "Entidade";
     }
   };
-  const getModeTitle = (m: LogModeType) => (m === "individual" ? "Visualizar um" : "Comparar dois");
+//   const getModeTitle = (m: LogModeType) => (m === "individual" ? "Visualizar um" : "Comparar dois");
 
   // Mensagem de status para comparação
   const getSelectionStatus = () => {

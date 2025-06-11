@@ -4,7 +4,6 @@ import { academicFiltersApi } from "@/services/apiClient";
 import type { ProfessorData } from "@/@types/FormsDataTypes";
 import { ButtonCRUD } from "@/components/components/Button/ButtonCRUD";
 import { Eye, EyeOff } from "lucide-react";
-import { University } from "@/services/api/api_academicFilters";
 
 export interface ProfessorFormProps {
   onSubmit: (data: ProfessorData) => void;
@@ -73,7 +72,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         <div className="space-y-4">
           {/* Skeleton loading */}
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-12 bg-white/10 rounded animate-pulse" />
+            <div key={i} className="h-12 rounded bg-white/10 animate-pulse" />
           ))}
         </div>
       </div>
@@ -82,11 +81,11 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
   if (error) {
     return (
-      <div className="mt-4 p-4 bg-red-600/20 border border-red-600/50 rounded-lg">
+      <div className="p-4 mt-4 border rounded-lg bg-red-600/20 border-red-600/50">
         <p className="text-red-300">
           Erro ao carregar dados acadêmicos. Tente novamente.
         </p>
-        <p className="text-red-400 text-sm mt-1">
+        <p className="mt-1 text-sm text-red-400">
           {error instanceof Error ? error.message : 'Erro desconhecido'}
         </p>
       </div>
@@ -97,7 +96,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
       {/* Nome do Professor */}
       <div>
-        <label className="block text-white mb-2">Nome do Professor:</label>
+        <label className="block mb-2 text-white">Nome do Professor:</label>
         <input
           type="text"
           value={name}
@@ -109,7 +108,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
       {/* Email */}
       <div>
-        <label className="block text-white mb-2">Email:</label>
+        <label className="block mb-2 text-white">Email:</label>
         <input
           type="email"
           value={email}
@@ -121,7 +120,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
       {/* Senha com toggle de visibilidade */}
       <div>
-        <label className="block text-white mb-2">Senha:</label>
+        <label className="block mb-2 text-white">Senha:</label>
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
@@ -133,7 +132,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute inset-y-0 right-0 flex items-center pr-2 text-white hover:text-gray-300 transition-colors"
+            className="absolute inset-y-0 right-0 flex items-center pr-2 text-white transition-colors hover:text-gray-300"
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -142,7 +141,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
       {/* Universidade */}
       <div>
-        <label className="block text-white mb-2">Universidade:</label>
+        <label className="block mb-2 text-white">Universidade:</label>
         <select
           value={school}
           onChange={(e) => handleUniversityChange(e.target.value)}
@@ -161,7 +160,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       {/* Curso (aparece apenas quando universidade selecionada) */}
       {school && availableCourses.length > 0 && (
         <div>
-          <label className="block text-white mb-2">Curso:</label>
+          <label className="block mb-2 text-white">Curso:</label>
           <select
             value={courses[0] ?? ""}
             onChange={(e) => setCourses(e.target.value ? [e.target.value] : [])}
@@ -180,8 +179,8 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
       {/* Aviso quando não há cursos disponíveis */}
       {school && availableCourses.length === 0 && (
-        <div className="p-3 bg-yellow-600/20 border border-yellow-600/50 rounded-lg">
-          <p className="text-yellow-300 text-sm">
+        <div className="p-3 border rounded-lg bg-yellow-600/20 border-yellow-600/50">
+          <p className="text-sm text-yellow-300">
             Nenhum curso encontrado para esta universidade.
           </p>
         </div>

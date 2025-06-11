@@ -30,7 +30,7 @@ export function List() {
   const userRoles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isAdmin = userRoles.includes("admin");
   const isCoordinator = userRoles.includes("course-coordinator");
-  const isProfessor = userRoles.includes("professor");
+//   const isProfessor = userRoles.includes("professor");
 
   const userRole: "admin" | "course-coordinator" | "professor" =
     isAdmin ? "admin" : isCoordinator ? "course-coordinator" : "professor";
@@ -94,7 +94,7 @@ export function List() {
       }
       return id;
     },
-    onSuccess: (deletedId) => {
+    onSuccess: () => {
       toast.success("Registro deletado com sucesso!");
 
       // Invalidar cache de busca para atualizar a lista
@@ -171,9 +171,9 @@ export function List() {
           <div className="ml-auto">
             <Button
               onClick={() => setMenuOpen(true)}
-              className="p-0 flex items-center justify-center"
+              className="flex items-center justify-center p-0"
             >
-              <div className="rainbow-avatar w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
                 <Avatar
                   seed={user._id}
                   backgroundColor="#141414"
@@ -189,7 +189,7 @@ export function List() {
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
       {/* Conteúdo Central */}
-      <div className="w-full flex justify-center pt-24 px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-center w-full px-4 pt-24 sm:px-6 lg:px-8">
         <div className="w-full max-w-screen-md">
           <div className="flex items-center gap-3 mb-6">
             <TableProperties className="text-3xl text-white" />
@@ -213,7 +213,7 @@ export function List() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-4 bg-blue-600/20 border border-blue-600/50 rounded-lg"
+              className="p-4 mt-6 border rounded-lg bg-blue-600/20 border-blue-600/50"
             >
               <p className="text-blue-300">Buscando registros...</p>
             </motion.div>
@@ -223,12 +223,12 @@ export function List() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-4 bg-red-600/20 border border-red-600/50 rounded-lg"
+              className="p-4 mt-6 border rounded-lg bg-red-600/20 border-red-600/50"
             >
-              <p className="text-red-300 mb-2">Erro ao buscar registros.</p>
+              <p className="mb-2 text-red-300">Erro ao buscar registros.</p>
               <button
                 onClick={handleRetrySearch}
-                className="text-red-200 underline text-sm hover:text-red-100 transition-colors"
+                className="text-sm text-red-200 underline transition-colors hover:text-red-100"
                 disabled={isSearching}
               >
                 {isSearching ? "Tentando novamente..." : "Tentar novamente"}
@@ -247,7 +247,7 @@ export function List() {
                 transition={{ duration: 0.25 }}
                 className="mt-6"
               >
-                <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <Typograph
                     text={`${items.length} ${displayEntity}(s) encontrado(s)`}
                     colorText="text-gray-300"
@@ -281,8 +281,8 @@ export function List() {
               animate={{ opacity: 1, y: 0 }}
               className="mt-6 p-6 bg-[#1f1f1f] border border-white/10 rounded-lg text-center"
             >
-              <p className="text-gray-400 mb-2">Nenhum registro encontrado</p>
-              <p className="text-gray-500 text-sm">
+              <p className="mb-2 text-gray-400">Nenhum registro encontrado</p>
+              <p className="text-sm text-gray-500">
                 Tente ajustar os filtros de busca
               </p>
             </motion.div>
@@ -296,8 +296,8 @@ export function List() {
               className="mt-6 p-8 bg-[#1f1f1f] border border-white/10 rounded-lg text-center"
             >
               <TableProperties className="mx-auto mb-4 text-4xl text-gray-500" />
-              <p className="text-gray-400 mb-2">Use os filtros acima para buscar registros</p>
-              <p className="text-gray-500 text-sm">
+              <p className="mb-2 text-gray-400">Use os filtros acima para buscar registros</p>
+              <p className="text-sm text-gray-500">
                 Selecione os critérios de busca e clique em "Buscar"
               </p>
             </motion.div>
