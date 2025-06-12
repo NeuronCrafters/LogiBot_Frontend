@@ -1,28 +1,32 @@
-# Etapa de build
+# Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+# Copia arquivos de dependência
+COPY package*.json ./
 
-RUN npm install
+# Instala dependências
+RUN npm ci
 
+# Copia código fonte
 COPY . .
 
+# Build de produção
 RUN npm run build
 
-# Etapa de produção
-FROM nginx:alpine
+# Production stage - serve estático simples
+FROM node:20-alpine
 
-# Remove o default do nginx
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
 
-# Copia o build do Vite para o nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Instala serve para servir arquivos estáticos
+RUN npm install -g serve
 
-# Copia configuração customizada do nginx (opcional, caso queira usar nginx.conf)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copia apenas os arquivos buildados
+COPY --from=builder /app/dist ./dist
 
-EXPOSE 80
+EXPOSE 3001
 
-CMD ["nginx", "-g", "daemon off;"]
+# Serve os arquivos estáticos
+CMD ["serve", "-s", "dist", "-l", "3001"]
