@@ -67,36 +67,21 @@ export function AcademicFilter({
     (typeof user.schoolName === 'string' ? user.schoolName :
       Array.isArray(user.schoolName) ? user.schoolName[0] : "") || "";
 
-  const userCourseId = (() => {
-    // Se courseId existe
-    if (user.courseId) {
-      const courseId = Array.isArray(user.courseId) ? user.courseId[0] : user.courseId;
-      // Se é objeto, extrair id
-      if (typeof courseId === 'object' && courseId !== null && 'id' in Array(courseId)) {
-        return (courseId as { id: string }).id;
+  const userCourseId: string = (() => {
+    const extractId = (value: unknown): string => {
+      if (Array.isArray(value)) return extractId(value[0]);
+      if (value && typeof value === 'object' && 'id' in value && typeof (value as any).id === 'string') {
+        return (value as any).id;
       }
+      if (typeof value === 'string') return value;
+      return '';
+    };
 
-      return courseId as string;
-    }
-    // Se course existe
-    if (user.course) {
-      const course = Array.isArray(user.course) ? user.course[0] : user.course;
-      if (typeof course === 'object' && course !== null && 'id' in course) {
-        return (course as { id: string }).id;
-      }
-      return course as string;
-    }
-    // Se courses existe (pode ser array de objetos {id, name} ou strings)
-    if (Array.isArray(user.courses) && user.courses.length > 0) {
-      const firstCourse = user.courses[0];
-      // Se é objeto com id, extrair o id
-      if (typeof firstCourse === 'object' && firstCourse !== null && 'id' in Array(firstCourse)) {
-        return (firstCourse as { id: string; name?: string }).id;
-      }
-      // Se é string, usar direto
-      return firstCourse as string;
-    }
-    return "";
+    return (
+      extractId(user.courseId) ||
+      extractId(user.course) ||
+      extractId(user.courses)
+    );
   })();
 
   const userClassIds = (() => {
