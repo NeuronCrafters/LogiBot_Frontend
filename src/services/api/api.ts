@@ -6,6 +6,9 @@ const api = axios.create({
     //baseURL: "http://localhost:3000",
     baseURL: "https://saellogibot.com/api",
     withCredentials: true,
+    headers: {
+        "x-api-key": API_KEY
+    }
 });
 
 api.interceptors.response.use(
