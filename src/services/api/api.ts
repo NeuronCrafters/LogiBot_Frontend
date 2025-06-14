@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const API_KEY = "AMOMINHAESPOSAtZt8wuV*2@d7^bi195lO7^!8@L6$$!D$h4tSU8etv&7c&";
+
 const api = axios.create({
     //baseURL: "http://localhost:3000",
     baseURL: "https://saellogibot.com/api",
