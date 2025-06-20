@@ -20,13 +20,10 @@ function Signin() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
-
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("Captcha token a ser enviado:", captchaToken);
 
     if (!captchaToken) {
       alert("Por favor, confirme o captcha.");
