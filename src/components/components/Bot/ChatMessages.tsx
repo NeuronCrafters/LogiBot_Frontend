@@ -22,9 +22,26 @@ const markdownComponents = {
     code: ({ node, inline, className, children, ...props }: any) => {
         const match = /language-(\w+)/.exec(className || "");
         return !inline && match ? (
-            <SyntaxHighlighter style={oneDark} language={match[1]} PreTag="div" className="rounded-xl" {...props}>
-                {String(children).replace(/\n$/, "")}
-            </SyntaxHighlighter>
+            <div className="relative my-4 border border-neutral-700 rounded-xl overflow-hidden">
+                <div className="flex justify-between items-center px-4 py-2 bg-neutral-800 border-b border-neutral-700 text-xs text-white font-mono">
+                    <span className="text-neutral-400">{match[1]}</span>
+                    <button
+                        className="text-white bg-neutral-700 hover:bg-neutral-600 px-2 py-0.5 rounded text-xs"
+                        onClick={() => navigator.clipboard.writeText(String(children))}
+                    >
+                        Copiar
+                    </button>
+                </div>
+                <SyntaxHighlighter
+                    style={oneDark}
+                    language={match[1]}
+                    PreTag="div"
+                    customStyle={{ margin: 0, padding: "1rem", fontSize: "0.875rem" }}
+                    {...props}
+                >
+                    {String(children).replace(/\n$/, "")}
+                </SyntaxHighlighter>
+            </div>
         ) : (
             <code className="bg-muted rounded-md px-1.5 py-0.5 text-sm" {...props}>
                 {children}
@@ -76,11 +93,11 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
         const { content } = message;
 
         const isInstruction =
-            content.toLowerCase().includes("escolha seu n\u00edvel") ||
+            content.toLowerCase().includes("escolha seu nível") ||
             content.toLowerCase().includes("escolha um assunto") ||
-            content.toLowerCase().includes("escolha um t\u00f3pico") ||
-            content.toLowerCase().includes("t\u00f3pico selecionado") ||
-            content.toLowerCase().includes("suas perguntas est\u00e3o prontas") ||
+            content.toLowerCase().includes("escolha um tópico") ||
+            content.toLowerCase().includes("tópico selecionado") ||
+            content.toLowerCase().includes("suas perguntas estão prontas") ||
             content.toLowerCase().includes("respostas:") ||
             content.toLowerCase().includes("⚠️") ||
             content.toLowerCase().includes("praticar") ||
@@ -98,14 +115,6 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
             );
         }
 
-        if (content.includes("\n")) {
-            return content.split("\n").map((line, idx) => (
-                <p key={idx} className="mb-1 leading-snug text-left whitespace-pre-wrap">
-                    {line}
-                </p>
-            ));
-        }
-
         return <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents} children={content} />;
     };
 
@@ -119,9 +128,8 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
                 return (
                     <div
                         key={index}
-                        className={`flex items-end w-full mb-3 ${
-                            isUser ? "justify-end" : "justify-start"
-                        } animate-fade-in`}
+                        className={`flex items-end w-full mb-3 ${isUser ? "justify-end" : "justify-start"
+                            } animate-fade-in`}
                     >
                         {!isUser && (
                             <div className="mr-2">
@@ -130,11 +138,10 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
                         )}
 
                         <div
-                            className={`px-3 rounded-xl max-w-[75%] ${
-                                isUser
+                            className={`px-4 py-2 rounded-xl max-w-[80%] text-sm leading-relaxed ${isUser
                                     ? "bg-blue-600 text-white ml-auto rounded-br-none"
                                     : "bg-[#2a2a2a] text-white mr-auto rounded-bl-none"
-                            }`}
+                                }`}
                         >
                             {content}
                         </div>
