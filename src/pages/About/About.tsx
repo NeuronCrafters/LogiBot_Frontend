@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  User as UserIcon,
+  Mail,
+  Briefcase,
+  School as SchoolIcon,
+  BookOpen,
+  Users,
+  Layers,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
 import { Avatar } from "@/components/components/Avatar/Avatar";
@@ -104,7 +113,10 @@ export function About() {
           fontFamily="poppins"
         />
         {isAuthenticated && (
-          <Button onClick={() => setMenuOpen(true)} className="p-0 flex items-center justify-center">
+          <Button
+            onClick={() => setMenuOpen(true)}
+            className="p-0 flex items-center justify-center"
+          >
             <div className="rainbow-avatar w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
               <Avatar
                 seed={user._id}
@@ -121,7 +133,8 @@ export function About() {
           <div className="card-content space-y-6">
             <div className="flex justify-center -mt-16">
               <div
-                className={`rainbow-avatar ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}`}>
+                className={`rainbow-avatar ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}`}
+              >
                 <Avatar
                   seed={user._id}
                   backgroundColor="#2a2a2a"
@@ -130,22 +143,22 @@ export function About() {
               </div>
             </div>
             <div className="space-y-4">
-              <Detail label="Nome" value={user.name} />
-              <Detail label="Email" value={user.email} />
-              <Detail label="Ocupação" value={occupation} />
+              <Detail icon={<UserIcon size={18} />} label="Nome" value={user.name} />
+              <Detail icon={<Mail size={18} />} label="Email" value={user.email} />
+              <Detail icon={<Briefcase size={18} />} label="Ocupação" value={occupation} />
               {!isAdmin && (
                 <>
-                  <Detail label="Universidade" value={schoolName} />
+                  <Detail icon={<SchoolIcon size={18} />} label="Universidade" value={schoolName} />
                   {isProfessor ? (
                     <>
-                      <Detail label="Curso(s)" value={professorCourses} />
-                      <Detail label="Turma(s)" value={professorClasses} />
-                      <Detail label="Disciplina(s)" value={professorDisciplines} />
+                      <Detail icon={<BookOpen size={18} />} label="Curso(s)" value={professorCourses} />
+                      <Detail icon={<Users size={18} />} label="Turma(s)" value={professorClasses} />
+                      <Detail icon={<Layers size={18} />} label="Disciplina(s)" value={professorDisciplines} />
                     </>
                   ) : (
                     <>
-                      <Detail label="Curso" value={courseName} />
-                      <Detail label="Turma" value={className} />
+                      <Detail icon={<BookOpen size={18} />} label="Curso" value={courseName} />
+                      <Detail icon={<Users size={18} />} label="Turma" value={className} />
                     </>
                   )}
                 </>
@@ -163,11 +176,13 @@ export function About() {
 interface DetailProps {
   label: string;
   value: string;
+  icon: React.ReactNode;
 }
 
-function Detail({ label, value }: DetailProps) {
+function Detail({ label, value, icon }: DetailProps) {
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="flex gap-2 flex-wrap items-center">
+      {icon}
       <Typograph
         text={`${label}:`}
         colorText="text-gray-300"
@@ -179,7 +194,7 @@ function Detail({ label, value }: DetailProps) {
         text={value}
         colorText="text-white"
         variant="text6"
-        weight="medium"
+        weight="semibold"
         fontFamily="poppins"
       />
     </div>
