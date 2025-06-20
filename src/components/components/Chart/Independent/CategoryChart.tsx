@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { logApi } from "@/services/apiClient";
+import logApiSmart from "@/services/api/logApiSmart";
+import { useAuth } from "@/hooks/use-Auth";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
 const chartConfig = {
@@ -28,25 +30,42 @@ interface CategoryChartProps {
       universityId?: string;
       courseId?: string;
       classId?: string;
+      disciplineId?: string;
     };
   };
 }
 
 function useSubjectsData(filter: CategoryChartProps['filter']) {
+  const { user } = useAuth();
+  const userRoles: string[] = Array.isArray(user?.role) ? user.role : user?.role ? [user.role] : [];
+
   const validIds = Array.isArray(filter.ids)
     ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
     : [];
   const targetId = validIds[0] || "";
-  const { universityId, courseId, classId } = filter.hierarchyParams;
+  const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
   const isStudent = filter.type === 'student';
   const hasRequired = isStudent
-    ? Boolean(universityId && courseId && classId && targetId)
+    ? Boolean(universityId && courseId && (classId || disciplineId) && targetId)
     : Boolean(targetId);
 
   return useQuery({
-    queryKey: ['subjects', filter.type, isStudent ? universityId : targetId, targetId],
+    queryKey: ['subjects', filter.type, targetId, universityId, courseId, classId, disciplineId],
     queryFn: async () => {
       if (!hasRequired) throw new Error('Selecione todos os filtros para visualizar');
+
+      const isProfessor = userRoles.includes("professor");
+      if (isProfessor && (filter.type === "discipline" || filter.type === "student")) {
+        console.log("📊 CategoryChart - Usando logApiSmart para professor");
+        const response = await logApiSmart.fetchSummary(
+          userRoles,
+          filter.type,
+          targetId,
+          { universityId, courseId, classId, disciplineId }
+        );
+        console.log("📊 CategoryChart - Dados do logApiSmart:", response);
+        return response;
+      }
 
       if (isStudent) {
         return await logApi.getFilteredStudentSummary({
@@ -64,6 +83,8 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
           return await logApi.getCourseSummary(targetId);
         case 'class':
           return await logApi.getClassSummary(targetId);
+        case 'discipline':
+          return await logApi.getDisciplineSummary(targetId);
         default:
           throw new Error(`Tipo inválido: ${filter.type}`);
       }
@@ -72,6 +93,7 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     select: (raw: any) => {
+      console.log("📊 CategoryChart - Dados brutos recebidos:", raw);
       const subjectCounts: Record<string, number> = raw.subjectCounts ?? {};
       const chartData = [
         { category: 'Variáveis', acessos: subjectCounts.variaveis ?? 0 },
@@ -81,6 +103,7 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
         { category: 'Verificações', acessos: subjectCounts.verificacoes ?? 0 },
       ];
       const totalAccesses = chartData.reduce((sum, d) => sum + d.acessos, 0);
+      console.log("📊 CategoryChart - Dados processados:", { chartData, subjectCounts, totalAccesses });
       return { chartData, subjectCounts, totalAccesses };
     }
   });
@@ -127,7 +150,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
       <CardContent className="px-2 sm:p-6 h-[299px] flex items-center justify-center">
         {(!hasRequired || isLoading || isError || !hasData) && (
           <div className="flex flex-col items-center">
-            {isLoading && <div className="w-10 h-10 mb-3 rounded-full animate-pulse bg-indigo-600/30"></div>}
+            {isLoading && <div className="mb-3 w-10 h-10 rounded-full animate-pulse bg-indigo-600/30"></div>}
             {isError && (
               <svg className="mb-3 text-indigo-400/60" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -168,7 +191,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
       </CardContent>
 
       {hasData && (
-        <CardFooter className="flex items-center justify-between px-6 py-4 border-t border-white/10">
+        <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex flex-col">
             <div className="flex items-center space-x-2">
               <span className="font-medium text-white">Total: {data!.totalAccesses}</span>

@@ -108,6 +108,8 @@ export function AcademicFilter({
     additionalParams?.classId || ""
   );
 
+  const [selectedDiscipline, setSelectedDiscipline] = useState("");
+
   /* ---------- Listas filtradas ---------- */
   const universities = useMemo(() => {
     const all = data?.data?.universities ?? [];
@@ -170,11 +172,16 @@ export function AcademicFilter({
         }
         if (isProfessor) {
           const allStudents: Student[] = [];
-          classes.forEach((classe) => {
-            if (classe.students) {
-              allStudents.push(...classe.students);
-            }
-          });
+          if (selectedDiscipline) {
+            classes.forEach((classe) => {
+              if (
+                classe.disciplines?.some(d => d._id === selectedDiscipline) &&
+                classe.students
+              ) {
+                allStudents.push(...classe.students);
+              }
+            });
+          }
           return allStudents.filter((student, index, self) =>
             index === self.findIndex((s) => s._id === student._id)
           );
@@ -184,7 +191,7 @@ export function AcademicFilter({
       default:
         return [];
     }
-  }, [entityType, universities, courses, classes, disciplines, selectedClass, isAdmin, isCoordinator, isProfessor, user?._id]);
+  }, [entityType, universities, courses, classes, disciplines, selectedClass, isAdmin, isCoordinator, isProfessor, user?._id, selectedDiscipline]);
 
   /* ---------- Filtro de busca ---------- */
   const filteredEntities = entities.filter((e) =>
@@ -209,13 +216,14 @@ export function AcademicFilter({
         universityId: selectedUniversity || undefined,
         courseId: selectedCourse || undefined,
         classId: selectedClass || undefined,
+        disciplineId: entityType === 'discipline' ? id : selectedDiscipline || undefined,
       };
 
       onSelect(updated, hierarchy);
 
       if (!multiple) setOpen(false);
     },
-    [multiple, selectedIds, selectedUniversity, selectedCourse, selectedClass, onSelect]
+    [multiple, selectedIds, selectedUniversity, selectedCourse, selectedClass, onSelect, entityType, selectedDiscipline]
   );
 
   const selectedNames = selectedIds
@@ -254,11 +262,21 @@ export function AcademicFilter({
       case "discipline":
         return !!selectedUniversity && !!selectedCourse;
       case "student":
-        if (isProfessor) return !!selectedUniversity && !!selectedCourse && disciplines.length > 0;
+        if (isProfessor) return !!selectedUniversity && !!selectedCourse && !!selectedDiscipline;
         return !!selectedUniversity && !!selectedCourse && !!selectedClass;
       default:
         return false;
     }
+  };
+
+  const handleDisciplineChange = (disciplineId: string) => {
+    setSelectedDiscipline(disciplineId);
+    setSelectedIds([]); // Limpa outras seleções
+    onSelect([], {
+      universityId: selectedUniversity,
+      courseId: selectedCourse,
+      disciplineId: disciplineId,
+    });
   };
 
   console.log("🧩 AcademicFilter Debug", {
@@ -342,6 +360,26 @@ export function AcademicFilter({
           </select>
         )}
 
+        {/* Select de Disciplina (para professor) */}
+        {isProfessor && entityType === "student" && (
+          <select
+            className={cn(
+              "p-3 rounded-md bg-[#141414] text-white border border-white/10",
+              !isCourseEnabled && "opacity-50 cursor-not-allowed"
+            )}
+            disabled={!isCourseEnabled || isLoading}
+            value={selectedDiscipline}
+            onChange={(e) => handleDisciplineChange(e.target.value)}
+          >
+            <option value="">Selecione a Disciplina</option>
+            {disciplines.map((d) => (
+              <option key={d._id} value={d._id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        )}
+
         {/* Select de Turma (não mostrado para professores) */}
         {showClassSelect && (
           <select
@@ -419,7 +457,7 @@ export function AcademicFilter({
           {selectedNames.map((name, idx) => (
             <div
               key={selectedIds[idx]}
-              className="flex items-center px-3 py-1 text-sm text-white border rounded-full bg-indigo-500/20 border-indigo-500/30"
+              className="flex items-center px-3 py-1 text-sm text-white rounded-full border bg-indigo-500/20 border-indigo-500/30"
             >
               {name}
               <button

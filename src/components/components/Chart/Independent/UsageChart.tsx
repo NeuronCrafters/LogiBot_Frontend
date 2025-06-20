@@ -82,6 +82,7 @@ interface UsageChartProps {
 // }
 
 function useUsageData(filter: UsageChartProps['filter']) {
+  console.log("Filtro para useUsageData:", filter);
   const { user } = useAuth();
   const userRoles: string[] = Array.isArray(user?.role) ? user.role : user?.role ? [user.role] : [];
 
@@ -91,15 +92,16 @@ function useUsageData(filter: UsageChartProps['filter']) {
   const mainId = validIds[0] || "";
 
   const isStudent = filter.type === "student";
-  const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
-
+  const { universityId, courseId, classId, disciplineId: disciplineIdFromHierarchy } = filter.hierarchyParams;
+  const disciplineId = filter.type === 'discipline' ? mainId : disciplineIdFromHierarchy;
   const studentId = isStudent ? mainId : undefined;
+  
   const hasRequiredIds = isStudent
-    ? Boolean(universityId && courseId && classId && studentId)
+    ? Boolean(universityId && courseId && (classId || disciplineId) && mainId)
     : Boolean(mainId);
 
   return useQuery({
-    queryKey: ['usage', filter.type, mainId, universityId, courseId, classId],
+    queryKey: ['usage', filter.type, mainId, universityId, courseId, classId, disciplineId],
     queryFn: async () => {
       if (!hasRequiredIds) {
         throw new Error(`IDs insuficientes para tipo: ${filter.type}`);
@@ -113,6 +115,7 @@ function useUsageData(filter: UsageChartProps['filter']) {
           mainId,
           { universityId, courseId, classId, studentId, disciplineId }
         );
+        console.log("Dados de logApiSmart:", response);
         return {
           totalUsageTime: response.usageTimeInSeconds,
           usageTime: response.usageTime,
@@ -149,6 +152,8 @@ function useUsageData(filter: UsageChartProps['filter']) {
         responseData = response.data;
       }
 
+      console.log("Dados da API:", responseData);
+
       return {
         totalUsageTime: responseData.usageTimeInSeconds,
         usageTime: responseData.usageTime,
@@ -166,7 +171,9 @@ function useUsageData(filter: UsageChartProps['filter']) {
 
 
 export function UsageChart({ filter }: UsageChartProps) {
+  console.log("Props do UsageChart:", { filter });
   const { data: usageData, isLoading, isError, error, refetch } = useUsageData(filter);
+  console.log("Dados do hook useUsageData:", { usageData, isLoading, isError });
 
   const validIds = Array.isArray(filter.ids)
     ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
@@ -174,9 +181,12 @@ export function UsageChart({ filter }: UsageChartProps) {
   const mainId = validIds[0] || "";
 
   const isStudent = filter.type === "student";
-  const { universityId, courseId, classId } = filter.hierarchyParams;
+  const { universityId, courseId, classId, disciplineId: disciplineIdFromHierarchy } = filter.hierarchyParams;
+  const disciplineId = filter.type === 'discipline' ? mainId : disciplineIdFromHierarchy;
+  const studentId = isStudent ? mainId : undefined;
+  
   const hasRequiredIds = isStudent
-    ? Boolean(universityId && courseId && classId && mainId)
+    ? Boolean(universityId && courseId && (classId || disciplineId) && mainId)
     : Boolean(mainId);
 
   const chartConfig = useMemo(() => ({
@@ -186,7 +196,9 @@ export function UsageChart({ filter }: UsageChartProps) {
   const chartData = useMemo(() => {
     if (!usageData) return [];
     if (Array.isArray(usageData.dailyUsage) && usageData.dailyUsage.length > 0) {
-      return [...usageData.dailyUsage].sort((a, b) => a.date.localeCompare(b.date));
+      const data = [...usageData.dailyUsage].sort((a, b) => a.date.localeCompare(b.date));
+      console.log("Dados para o gráfico:", data);
+      return data;
     }
     return [];
   }, [usageData]);
@@ -194,13 +206,14 @@ export function UsageChart({ filter }: UsageChartProps) {
   const hasData = chartData.length > 0;
 
   const formattedTime = useMemo(() => {
+    console.log("Dados de uso para formatar tempo:", usageData);
     return usageData?.usageTime?.formatted || "00:00:00";
   }, [usageData]);
 
   return (
     <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
-      <CardHeader className="flex flex-col items-stretch space-y-0 border-b border-white/10 p-0">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5">
+      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+        <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Tempo de Uso Diário</CardTitle>
           <CardDescription className="text-white/70">
             Minutos de utilização nos últimos dias
@@ -225,7 +238,7 @@ export function UsageChart({ filter }: UsageChartProps) {
         {!hasRequiredIds && (
           <div className="flex items-center justify-center h-[250px] text-center text-white/70">
             {isStudent ? (
-              <p>Selecione uma universidade, curso, turma e aluno para visualizar dados.</p>
+              <p>Selecione uma universidade, curso, turma/disciplina e aluno para visualizar dados.</p>
             ) : (
               <p>Selecione uma entidade para visualizar dados.</p>
             )}
@@ -235,7 +248,7 @@ export function UsageChart({ filter }: UsageChartProps) {
         {hasRequiredIds && isLoading && (
           <div className="flex items-center justify-center h-[250px] text-center text-white/70">
             <div className="flex flex-col items-center">
-              <div className="animate-pulse w-10 h-10 rounded-full bg-indigo-600/30 mb-3"></div>
+              <div className="mb-3 w-10 h-10 rounded-full animate-pulse bg-indigo-600/30"></div>
               <p>Carregando dados...</p>
             </div>
           </div>
@@ -252,7 +265,7 @@ export function UsageChart({ filter }: UsageChartProps) {
               <p>{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
               <button
                 onClick={() => refetch()}
-                className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="mt-3 text-xs text-indigo-400 transition-colors hover:text-indigo-300"
               >
                 Tentar novamente
               </button>
@@ -334,7 +347,7 @@ export function UsageChart({ filter }: UsageChartProps) {
 
                     return (
                       <div className="p-2 bg-[#1f1f1f] border border-[#333] rounded shadow text-white text-sm">
-                        <p className="font-semibold mb-1">{formattedDate}</p>
+                        <p className="mb-1 font-semibold">{formattedDate}</p>
                         <p>
                           <span className="text-[#999] mr-2">Tempo:</span>
                           <span className="font-medium">{formattedTime}</span>
@@ -371,7 +384,7 @@ export function UsageChart({ filter }: UsageChartProps) {
               <p>Nenhum dado de uso disponível para esta entidade.</p>
               <button
                 onClick={() => refetch()}
-                className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="mt-3 text-xs text-indigo-400 transition-colors hover:text-indigo-300"
               >
                 Tentar novamente
               </button>
