@@ -54,7 +54,7 @@ export function About() {
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#141414]">
-        <Loader2 className="w-12 h-12 animate-spin text-gray-500" />
+        <Loader2 className="w-12 h-12 text-gray-500 animate-spin" />
       </div>
     );
 
@@ -104,7 +104,7 @@ export function About() {
   return (
     <div className="flex flex-col min-h-screen bg-[#141414] text-white">
       {/* --- Header --- */}
-      <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-800">
+      <header className="flex items-center justify-between px-4 py-4 border-b sm:px-6 border-neutral-800">
         <Typograph
           text="Sobre Mim"
           colorText="text-white"
@@ -113,8 +113,8 @@ export function About() {
           fontFamily="poppins"
         />
         {isAuthenticated && (
-          <Button onClick={() => setMenuOpen(true)} className="p-0 flex items-center justify-center">
-            <div className="rainbow-avatar w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
+          <Button onClick={() => setMenuOpen(true)} className="flex items-center justify-center p-0">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
               <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
             </div>
           </Button>
@@ -122,9 +122,9 @@ export function About() {
       </header>
 
       {/* --- Conteúdo --- */}
-      <main className="flex flex-1 items-center justify-center px-4 py-8">
-        <div className="rainbow-card w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl">
-          <div className="card-content space-y-6">
+      <main className="flex items-center justify-center flex-1 px-4 py-8">
+        <div className="w-full max-w-md shadow-2xl rainbow-card sm:max-w-lg md:max-w-xl">
+          <div className="space-y-6 card-content">
 
             {/* Avatar grande */}
             <div className="flex justify-center -mt-16">
@@ -149,7 +149,7 @@ export function About() {
                       <Detail icon={<Users size={18} />} label="Turma(s)" value={profClasses} />
 
                       {/* Disciplinas + modal de códigos */}
-                      <div className="flex gap-2 flex-wrap items-center">
+                      <div className="flex flex-wrap items-center gap-2">
                         <Layers size={18} />
                         <Typograph
                           text="Disciplina(s):"
@@ -158,15 +158,8 @@ export function About() {
                           weight="medium"
                           fontFamily="poppins"
                         />
-                        <Typograph
-                          text={profDisciplines}
-                          colorText="text-white"
-                          variant="text6"
-                          weight="semibold"
-                          fontFamily="poppins"
-                        />
                         {disciplineObjects.length > 0 && (
-                          <DisciplineCode disciplines={disciplineObjects} />
+                          <DisciplineCode text={profDisciplines} disciplines={disciplineObjects} />
                         )}
                       </div>
                     </>
@@ -180,11 +173,11 @@ export function About() {
               )}
 
               {/* Alterar senha */}
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <KeyRound size={18} />
                 <Button
                   variant="outline"
-                  className="text-sm border-neutral-600 text-white hover:bg-neutral-800"
+                  className="text-sm text-white border-neutral-600 hover:bg-neutral-800"
                   onClick={() => setShowChangePassword(true)}
                 >
                   Alterar senha
@@ -215,7 +208,7 @@ interface DetailProps {
 }
 function Detail({ label, value, icon }: DetailProps) {
   return (
-    <div className="flex gap-2 flex-wrap items-center">
+    <div className="flex flex-wrap items-center gap-2">
       {icon}
       <Typograph
         text={`${label}:`}
