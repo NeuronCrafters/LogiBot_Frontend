@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
@@ -57,20 +57,19 @@ function Signin() {
         onClose={() => setShowConsent(false)}
       />
 
-      <div
-        className="items-center justify-center flex-1 hidden md:flex bg-gradient-to-b from-blue-700 to-blue-900"
-        style={{ flex: 2 }}
-      >
-        <AnimatedLogo />
-        <Typograph
-          text="LogiBots.AI"
-          colorText="text-slate-100"
-          variant="title10"
-          weight="bold"
-          fontFamily="poppins"
-          className="mt-12 ml-8"
-        />
-      </div>
+      <Link to="/" className="flex-1 hidden md:flex" style={{ flex: 2 }}>
+        <div className="items-center justify-center flex-1 flex bg-gradient-to-b from-blue-700 to-blue-900">
+          <AnimatedLogo />
+          <Typograph
+            text="LogiBots.AI"
+            colorText="text-slate-100"
+            variant="title10"
+            weight="bold"
+            fontFamily="poppins"
+            className="mt-12 ml-8"
+          />
+        </div>
+      </Link>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
