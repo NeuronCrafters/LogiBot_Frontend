@@ -30,7 +30,7 @@ export function List() {
   const userRoles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isAdmin = userRoles.includes("admin");
   const isCoordinator = userRoles.includes("course-coordinator");
-//   const isProfessor = userRoles.includes("professor");
+  //   const isProfessor = userRoles.includes("professor");
 
   const userRole: "admin" | "course-coordinator" | "professor" =
     isAdmin ? "admin" : isCoordinator ? "course-coordinator" : "professor";
@@ -255,13 +255,6 @@ export function List() {
                     weight="regular"
                     fontFamily="poppins"
                   />
-
-                  {/* Indicador de cache */}
-                  {!isSearching && !searchMutation.isPending && (
-                    <span className="text-xs text-green-400">
-                      ✓ Dados em cache
-                    </span>
-                  )}
                 </div>
 
                 <FormsList
