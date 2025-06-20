@@ -49,7 +49,7 @@ function Signup() {
       >
         <AnimatedLogo />
         <Typograph
-          text="LogiBot"
+          text="LogiBots.IA"
           colorText="text-slate-100"
           variant="title10"
           weight="bold"

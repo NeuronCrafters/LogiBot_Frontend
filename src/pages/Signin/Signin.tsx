@@ -63,7 +63,7 @@ function Signin() {
       >
         <AnimatedLogo />
         <Typograph
-          text="LogiBot"
+          text="LogiBots.AI"
           colorText="text-slate-100"
           variant="title10"
           weight="bold"
