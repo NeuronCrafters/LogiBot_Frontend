@@ -157,8 +157,8 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                     </div>
                   );
                 }} />
-                <PolarGrid gridType="polygon" radialLines stroke="#333" strokeOpacity={0.6} strokeDasharray="2 2" />
-                <PolarAngleAxis dataKey="category" tick={{ fill: '#999', fontSize: 11 }} />
+                <PolarGrid gridType="polygon" radialLines stroke="#d4d0d0" strokeOpacity={0.6} strokeDasharray="2 2" />
+                <PolarAngleAxis dataKey="category" tick={{ fill: '#FFF', fontSize: 11 }} />
                 <PolarRadiusAxis angle={90} domain={[0, 'dataMax']} tick={false} axisLine={false} />
                 <Radar dataKey="acessos" fill="#274a96" fillOpacity={0.3} stroke="#274a96" strokeWidth={2} dot={{ fill: '#274a96', strokeWidth: 0, r: 4 }} />
               </RadarChart>
