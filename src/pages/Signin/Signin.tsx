@@ -15,7 +15,7 @@ function Signin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
-  const [redirectToSignup, setRedirectToSignup] = useState(false);
+  const [redirectTo, setRedirectTo] = useState<"/signup" | "/forgot-password" | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -45,17 +45,15 @@ function Signin() {
     }
   };
 
-  const handleAcceptConsent = () => {
-    setShowConsent(false);
-    if (redirectToSignup) {
-      navigate("/signup");
-    }
+  const handleOpenConsent = (route: "/signup" | "/forgot-password") => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setRedirectTo(route);
+    setShowConsent(true);
   };
 
-  const handleOpenConsent = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setRedirectToSignup(true);
-    setShowConsent(true);
+  const handleAcceptConsent = () => {
+    setShowConsent(false);
+    if (redirectTo) navigate(redirectTo);
   };
 
   return (
@@ -136,10 +134,10 @@ function Signin() {
                 Não possui conta?{" "}
                 <a
                   href="#"
-                  onClick={handleOpenConsent}
+                  onClick={handleOpenConsent("/signup")}
                   className="text-blue-500 no-underline hover:underline"
                 >
-                  Faça seu cadastro.
+                  Faça seu cadastro
                 </a>
               </>
             }
@@ -148,6 +146,22 @@ function Signin() {
             weight="regular"
             fontFamily="poppins"
             className="mt-4 text-center"
+          />
+
+          <Typograph
+            text={
+              <Link
+                to="/forgot-password"
+                className="text-blue-400 no-underline hover:underline"
+              >
+                Esqueci minha senha
+              </Link>
+            }
+            colorText="text-gray-400"
+            variant="text9"
+            weight="regular"
+            fontFamily="poppins"
+            className="mt-2 text-center"
           />
 
           <Captcha ref={recaptchaRef} onChange={setCaptchaToken} />
