@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { api } from "@/services/api/api";
 import { AuthContext, AuthContextData, User } from "./AuthContext";
 import { useCategoryClickTracker } from "@/hooks/use-CategoryClickTracker";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { flushClicks } = useCategoryClickTracker(user?._id || null);
 
   const isAuthenticated = !!user;
@@ -29,6 +31,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message =
         error?.response?.data?.message || "Erro ao autenticar. Verifique suas credenciais.";
       throw new Error(`Login inválido. ${message}`);
+    } finally {
+      queryClient.resetQueries();
+      queryClient.clear();
+      queryClient.removeQueries();
     }
   }
 
@@ -63,6 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
     } finally {
+      queryClient.resetQueries();
+      queryClient.clear();
+      queryClient.removeQueries();
       setUser(null);
       navigate("/signin");
     }

@@ -44,7 +44,7 @@ export function AcademicFilter({
 
   /* ---------- Query de dados acadêmicos ---------- */
   const { data, isLoading, error } = useQuery<AcademicDataResponse>({
-    queryKey: ["academicData"],
+    queryKey: ["academicData", user?._id],
     queryFn: academicFiltersApi.getAcademicData,
     staleTime: 1000 * 60 * 60 * 4,
   });
@@ -91,7 +91,7 @@ export function AcademicFilter({
     return collectIds(
       user.disciplines ?? user.disciplineId ?? user.discipline
     );
-  }, [user, isProfessor]);
+  }, [user, isProfessor, user?._id]);
 
   /* ---------- Estados de seleção ---------- */
   const [selectedUniversity, setSelectedUniversity] = useState(
@@ -113,7 +113,7 @@ export function AcademicFilter({
     const all = data?.data?.universities ?? [];
     if (isAdmin) return all;
     return all.filter((u) => u._id === userUniversityId);
-  }, [data, isAdmin, userUniversityId]);
+  }, [data, isAdmin, userUniversityId, user?._id]);
 
   const courses = useMemo(() => {
     const uni = universities.find((u) => u._id === selectedUniversity);
@@ -125,7 +125,7 @@ export function AcademicFilter({
       return all.filter((c) => userCourseIds.includes(c._id));
     }
     return [];
-  }, [universities, selectedUniversity, isAdmin, isCoordinator, isProfessor, userCourseIds]);
+  }, [universities, selectedUniversity, isAdmin, isCoordinator, isProfessor, userCourseIds, user?._id]);
 
   const classes = useMemo(() => {
     const crs = courses.find((c) => c._id === selectedCourse);
@@ -138,7 +138,7 @@ export function AcademicFilter({
       );
     }
     return [];
-  }, [courses, selectedCourse, isAdmin, isCoordinator, isProfessor, userDisciplineIds]);
+  }, [courses, selectedCourse, isAdmin, isCoordinator, isProfessor, userDisciplineIds, user?._id]);
 
 
   const disciplines = useMemo(() => {
@@ -150,7 +150,7 @@ export function AcademicFilter({
       return all.filter((disc) => userDisciplineIds.includes(disc._id));
     }
     return [];
-  }, [courses, selectedCourse, isAdmin, isCoordinator, isProfessor, userDisciplineIds]);
+  }, [courses, selectedCourse, isAdmin, isCoordinator, isProfessor, userDisciplineIds, user?._id]);
 
   /* ---------- Entidades finais ---------- */
   const entities = useMemo(() => {
@@ -184,7 +184,7 @@ export function AcademicFilter({
       default:
         return [];
     }
-  }, [entityType, universities, courses, classes, disciplines, selectedClass, isAdmin, isCoordinator, isProfessor]);
+  }, [entityType, universities, courses, classes, disciplines, selectedClass, isAdmin, isCoordinator, isProfessor, user?._id]);
 
   /* ---------- Filtro de busca ---------- */
   const filteredEntities = entities.filter((e) =>
@@ -419,7 +419,7 @@ export function AcademicFilter({
           {selectedNames.map((name, idx) => (
             <div
               key={selectedIds[idx]}
-              className="flex items-center px-3 py-1 text-sm text-white rounded-full bg-indigo-500/20 border border-indigo-500/30"
+              className="flex items-center px-3 py-1 text-sm text-white border rounded-full bg-indigo-500/20 border-indigo-500/30"
             >
               {name}
               <button

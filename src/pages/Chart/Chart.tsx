@@ -72,8 +72,8 @@ export function Chart() {
         <div className="absolute bg-[#141414] w-full flex items-center justify-between border-b border-neutral-800 px-8 py-4 z-10">
           <Typograph text="Dashboard" variant="text2" weight="bold" colorText="text-white" fontFamily="poppins" />
           {user && (
-              <Button onClick={() => setMenuOpen(true)} className="p-0 flex items-center justify-center">
-                <div className="rainbow-avatar w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
+              <Button onClick={() => setMenuOpen(true)} className="flex items-center justify-center p-0">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
                   <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
                 </div>
               </Button>
@@ -82,7 +82,7 @@ export function Chart() {
 
         <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
-        <div className="flex-1 w-full max-w-6xl mx-auto pt-24 pb-20 px-4 space-y-6">
+        <div className="flex-1 w-full max-w-6xl px-4 pt-24 pb-20 mx-auto space-y-6">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-4">
             <Typograph text="Dashboard de Atividades" variant="text3" weight="semibold" colorText="text-white" fontFamily="montserrat" />
             <Typograph
@@ -110,15 +110,15 @@ export function Chart() {
           ) : (
               <div key={key} className="transition-opacity duration-300 opacity-100">
                 {filter.mode === "individual" && validIds[0] && (
-                    <div className="space-y-6 mt-6">
+                    <div className="mt-6 space-y-6">
                       <UsageChart filter={filter} />
                       <div className="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0 md:h-[450px]">
-                        <div className="w-full md:w-1/2 h-full flex flex-col">
+                        <div className="flex flex-col w-full h-full md:w-1/2">
                           <div className="flex-1 min-h-0">
                             <CorrectWrongChart filter={filter} />
                           </div>
                         </div>
-                        <div className="w-full md:w-1/2 h-full flex flex-col">
+                        <div className="flex flex-col w-full h-full md:w-1/2">
                           <div className="flex-1 min-h-0">
                             <CategoryChart filter={filter} />
                           </div>
@@ -128,8 +128,8 @@ export function Chart() {
                 )}
 
                 {filter.mode === "comparison" && validIds.length === 2 && (
-                    <div className="space-y-6 mt-6">
-                      <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30">
+                    <div className="mt-6 space-y-6">
+                      <div className="p-3 border rounded-lg bg-indigo-500/10 border-indigo-500/30">
                         <Typograph
                             text={
                               <>
@@ -144,12 +144,12 @@ export function Chart() {
                       </div>
                       <UsageChart filter={filter} />
                       <div className="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0 md:h-[450px]">
-                        <div className="w-full md:w-1/2 h-full flex flex-col">
+                        <div className="flex flex-col w-full h-full md:w-1/2">
                           <div className="flex-1 min-h-0">
                             <CorrectWrongChart filter={filter} />
                           </div>
                         </div>
-                        <div className="w-full md:w-1/2 h-full flex flex-col">
+                        <div className="flex flex-col w-full h-full md:w-1/2">
                           <div className="flex-1 min-h-0">
                             <CategoryChart filter={filter} />
                           </div>
