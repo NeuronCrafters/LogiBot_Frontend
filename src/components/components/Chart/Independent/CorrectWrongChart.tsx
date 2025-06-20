@@ -12,7 +12,8 @@ import { motion } from "framer-motion";
 import { logApi } from "@/services/apiClient";
 import type { ChartFilterState } from "@/@types/ChartsType";
 
-const COLORS = ["#10b981", "#ef4444"];
+const COLORS = ["#3f7d7d", "#7d3f3f"];
+
 
 interface CorrectWrongChartProps {
   filter: ChartFilterState & {
