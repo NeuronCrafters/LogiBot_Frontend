@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Captcha } from "@/components/components/Security/Captcha";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
@@ -20,24 +21,25 @@ function Signin() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+
+    console.log("Captcha token a ser enviado:", captchaToken);
 
     if (!captchaToken) {
-      setError("Por favor, confirme o captcha.");
-      setLoading(false);
+      alert("Por favor, confirme o captcha.");
       return;
     }
 
     try {
-      await login(email, password);
-    } catch (err) {
-      console.error("Erro ao fazer login:", err);
-      setError("Email ou senha inválidos.");
-    } finally {
-      setLoading(false);
+      await login(email, password, captchaToken);
+      recaptchaRef.current?.reset();
+      setCaptchaToken(null);
+    } catch (error) {
+      recaptchaRef.current?.reset();
+      setCaptchaToken(null);
     }
   };
 
@@ -108,6 +110,7 @@ function Signin() {
               className="text-center"
             />
           )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               type="email"
@@ -156,7 +159,7 @@ function Signin() {
             className="mt-4 text-center"
           />
 
-          <Captcha onChange={(token) => setCaptchaToken(token)} />
+          <Captcha ref={recaptchaRef} onChange={setCaptchaToken} />
         </div>
       </div>
     </div>

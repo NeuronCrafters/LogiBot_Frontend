@@ -12,5 +12,10 @@ declare module 'react-google-recaptcha' {
     badge?: 'bottomright' | 'bottomleft' | 'inline';
   }
 
-  export default class ReCAPTCHA extends React.Component<ReCAPTCHAProps> { }
+  export default class ReCAPTCHA extends React.Component<ReCAPTCHAProps> {
+    reset: any;
+    execute(): any {
+      throw new Error("Method not implemented.");
+    }
+  }
 }

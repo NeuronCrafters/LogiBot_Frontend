@@ -12,13 +12,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = !!user;
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string, recaptchaToken: string) {
+    if (!recaptchaToken) {
+      throw new Error("Token do reCAPTCHA ausente.");
+    }
+
     try {
-      await api.post("/session", { email, password }, { withCredentials: true });
+      await api.post(
+        "/session",
+        { email, password, recaptchaToken },
+        { withCredentials: true }
+      );
       await getUser();
       navigate("/chat");
-    } catch (error) {
-      throw new Error(`Login inválido. ${error}`);
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || "Erro ao autenticar. Verifique suas credenciais.";
+      throw new Error(`Login inválido. ${message}`);
     }
   }
 
@@ -46,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-
   async function logout() {
     try {
       await flushClicks();
@@ -72,5 +81,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getUser,
   };
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
