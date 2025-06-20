@@ -8,12 +8,12 @@ import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedLogo";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { AppModal } from "@/components/components/Modal/AppModal";
+import { toast } from "react-hot-toast";
 
 function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [showConsent, setShowConsent] = useState(false);
   const [redirectToSignup, setRedirectToSignup] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -26,17 +26,22 @@ function Signin() {
     e.preventDefault();
 
     if (!captchaToken) {
-      alert("Por favor, confirme o captcha.");
+      toast.error("Por favor, confirme o captcha.");
       return;
     }
 
     try {
+      setLoading(true);
       await login(email, password, captchaToken);
       recaptchaRef.current?.reset();
       setCaptchaToken(null);
-    } catch (error) {
+    } catch (error: any) {
       recaptchaRef.current?.reset();
       setCaptchaToken(null);
+      const msg = error?.response?.data?.message ?? "Erro ao fazer login.";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,17 +101,6 @@ function Signin() {
             fontFamily="poppins"
             className="mb-4 text-start"
           />
-
-          {error && (
-            <Typograph
-              text={error}
-              colorText="text-red-500"
-              variant="text9"
-              weight="medium"
-              fontFamily="poppins"
-              className="text-center"
-            />
-          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
