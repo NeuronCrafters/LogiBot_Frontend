@@ -56,6 +56,10 @@ export function About() {
     ? user.role.includes("admin")
     : user.role === "admin";
 
+  const isProfessor = Array.isArray(user.role)
+    ? user.role.includes("professor")
+    : user.role === "professor";
+
   const schoolName =
     typeof user.schoolName === "string"
       ? user.schoolName
@@ -63,10 +67,9 @@ export function About() {
         ? user.schoolName.join(", ")
         : "";
 
-  const courseName =
-    Array.isArray(user.courses) && user.courses.length > 0
-      ? (user.courses[0] as any).name
-      : "-";
+  const courseName = Array.isArray(user.courseName)
+    ? user.courseName.join(", ")
+    : user.courseName;
 
   const className =
     Array.isArray(user.className)
@@ -74,6 +77,21 @@ export function About() {
       : typeof user.className === "string"
         ? user.className
         : "-";
+
+  const professorCourses =
+    Array.isArray(user.courses) && user.courses.length > 0
+      ? user.courses.map((c: any) => c.name).join(", ")
+      : "-";
+
+  const professorClasses =
+    Array.isArray(user.classes) && user.classes.length > 0
+      ? user.classes.map((c: any) => c.name).join(", ")
+      : "-";
+
+  const professorDisciplines =
+    Array.isArray(user.disciplines) && user.disciplines.length > 0
+      ? user.disciplines.map((d: any) => d.name).join(", ")
+      : "-";
 
   return (
     <div className="flex flex-col min-h-screen bg-[#141414] text-white">
@@ -118,9 +136,17 @@ export function About() {
               {!isAdmin && (
                 <>
                   <Detail label="Universidade" value={schoolName} />
-                  <Detail label="Curso" value={courseName} />
-                  {Array.isArray(user.role) && user.role.includes("student") && (
-                    <Detail label="Turma" value={className} />
+                  {isProfessor ? (
+                    <>
+                      <Detail label="Curso(s)" value={professorCourses} />
+                      <Detail label="Turma(s)" value={professorClasses} />
+                      <Detail label="Disciplina(s)" value={professorDisciplines} />
+                    </>
+                  ) : (
+                    <>
+                      <Detail label="Curso" value={courseName} />
+                      <Detail label="Turma" value={className} />
+                    </>
                   )}
                 </>
               )}
@@ -153,7 +179,7 @@ function Detail({ label, value }: DetailProps) {
         text={value}
         colorText="text-white"
         variant="text6"
-        weight="semibold"
+        weight="medium"
         fontFamily="poppins"
       />
     </div>
