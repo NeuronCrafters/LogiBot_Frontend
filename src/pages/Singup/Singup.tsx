@@ -7,6 +7,8 @@ import { Input } from "@/components/components/Input/Input";
 import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 import { Typograph } from "@/components/components/Typograph/Typograph";
+import { toast } from "react-hot-toast";
+
 
 function Signup() {
   /* ── form states ─────────────────────────────────────────────── */
@@ -27,15 +29,45 @@ function Signup() {
     e.preventDefault();
     setError("");
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]{3,}$/;
+
+    if (!name.trim()) {
+      toast.error("Nome é obrigatório.");
+      return;
+    } else if (!nameRegex.test(name.trim())) {
+      toast.error("Use ao menos 3 letras e evite símbolos.");
+      return;
+    }
+
+    if (!email) {
+      toast.error("E-mail é obrigatório.");
+      return;
+    } else if (!emailRegex.test(email)) {
+      toast.error("Formato de e-mail inválido.");
+      return;
+    }
+
+    if (!password) {
+      toast.error("Senha é obrigatória.");
+      return;
+    } else if (password.length < 6) {
+      toast.error("Use pelo menos 6 caracteres.");
+      return;
+    }
+
+    if (!code) {
+      toast.error("Código é obrigatório.");
+      return;
+    }
+
     if (!captchaToken) {
-      setError("Por favor, confirme o captcha.");
+      toast.error("Por favor, confirme o captcha.");
       return;
     }
 
     setLoading(true);
-
     try {
-      // --- Cadastro
       await api.post("/users", {
         name,
         email,
@@ -44,12 +76,10 @@ function Signup() {
         recaptchaToken: captchaToken,
       });
 
-      // --- Login automático
       await login(email, password, captchaToken);
     } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ?? "Erro ao realizar o cadastro.";
-      setError(msg);
+      const msg = err?.response?.data?.message ?? "Erro ao realizar o cadastro.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
