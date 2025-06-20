@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Captcha } from "@/components/components/Security/Captcha";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { Input } from "@/components/components/Input/Input";
@@ -14,6 +15,7 @@ function Signin() {
   const [error, setError] = useState("");
   const [showConsent, setShowConsent] = useState(false);
   const [redirectToSignup, setRedirectToSignup] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -22,6 +24,12 @@ function Signin() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    if (!captchaToken) {
+      setError("Por favor, confirme o captcha.");
+      setLoading(false);
+      return;
+    }
 
     try {
       await login(email, password);
@@ -100,7 +108,6 @@ function Signin() {
               className="text-center"
             />
           )}
-
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               type="email"
@@ -148,6 +155,8 @@ function Signin() {
             fontFamily="poppins"
             className="mt-4 text-center"
           />
+
+          <Captcha onChange={(token) => setCaptchaToken(token)} />
         </div>
       </div>
     </div>

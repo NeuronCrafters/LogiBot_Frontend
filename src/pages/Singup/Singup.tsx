@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Captcha } from "@/components/components/Security/Captcha";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { api } from "@/services/api/api";
@@ -14,6 +15,7 @@ function Signup() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const { login } = useAuth();
 
@@ -39,6 +41,13 @@ function Signup() {
     } finally {
       setLoading(false);
     }
+
+    if (!captchaToken) {
+      setError("Por favor, confirme o captcha.");
+      setLoading(false);
+      return;
+    }
+
   };
 
   return (
@@ -145,6 +154,8 @@ function Signup() {
             fontFamily="poppins"
             className="mt-4 text-center"
           />
+
+          <Captcha onChange={(token) => setCaptchaToken(token)} />
         </div>
       </div>
     </div>
