@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import { AppModal } from "@/components/components/Modal/AppModal";
 import { Input } from "@/components/components/Input/Input";
-import { Typograph } from "@/components/components/Typograph/Typograph";
 import { api } from "@/services/api/api";
 import { useAuth } from "@/hooks/use-Auth";
 
@@ -18,24 +18,24 @@ export function ChangePasswordModal({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleChangePassword = async () => {
-    setError("");
-    setSuccessMessage("");
-
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setError("Preencha todos os campos.");
+      toast.error("Preencha todos os campos.");
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      toast.error("A nova senha deve ser diferente da atual.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("As senhas não coincidem.");
+      toast.error("As senhas não coincidem.");
       return;
     }
 
@@ -47,22 +47,27 @@ export function ChangePasswordModal({
         newPassword,
       });
 
-      setSuccessMessage(
-        response.data.message || "Senha atualizada com sucesso."
-      );
+      const msg =
+        response.data?.message ||
+        "Senha atualizada com sucesso. Você será deslogado em 2 segundos.";
+
+      toast.success(msg);
+
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
 
-      /* ---------------- logout automático ---------------- */
       setTimeout(() => {
-        logout();            // limpa token / contexto
-        navigate("/signin"); // direciona para login
-      }, 2000);              // 2 s para o usuário ler a mensagem
+        logout();
+        navigate("/signin");
+      }, 2000);
     } catch (err: any) {
-      const message =
-        err.response?.data?.message || "Erro ao atualizar a senha.";
-      setError(message);
+      const errorData = err?.response?.data;
+      const msg =
+        errorData?.message ||
+        errorData?.error ||
+        "Erro ao atualizar a senha.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -76,33 +81,11 @@ export function ChangePasswordModal({
       title="Alterar senha"
       description="Atualize sua senha com segurança. Use uma senha forte e única."
       onConfirm={handleChangePassword}
-      acceptLabel="Salvar"
+      acceptLabel={loading ? "Salvando..." : "Salvar"}
       cancelLabel="Cancelar"
       disabled={loading}
     >
       <div className="flex flex-col items-center w-full max-w-md mx-auto space-y-4 mt-4 px-3">
-        {error && (
-          <Typograph
-            text={error}
-            colorText="text-red-500"
-            variant="text9"
-            weight="medium"
-            fontFamily="poppins"
-            className="text-center"
-          />
-        )}
-
-        {successMessage && (
-          <Typograph
-            text={successMessage}
-            colorText="text-green-500"
-            variant="text9"
-            weight="medium"
-            fontFamily="poppins"
-            className="text-center"
-          />
-        )}
-
         <Input
           type="password"
           placeholder="Senha atual"
