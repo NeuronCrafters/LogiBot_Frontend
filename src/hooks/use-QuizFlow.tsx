@@ -35,7 +35,8 @@ interface useQuizFlowProps {
 
 export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
-  const [step, setStep] = useState<"levels" | "categories" | "subsubjects" | "questions" | "results">("levels");
+  const [step, setStep] = useState<"initial" | "levels" | "categories" | "subsubjects" | "questions" | "results">("initial");
+  const [mode, setMode] = useState<"none" | "quiz" | "chat">("none");
   const [categoryButtons, setCategoryButtons] = useState<any[]>([]);
   const [subsubjectButtons, setSubsubjectButtons] = useState<any[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -46,11 +47,21 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [greetingDone, setGreetingDone] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [inputText, setInputText] = useState("");
-  const [mode, setMode] = useState<"none" | "quiz" | "chat">("none");
   const [fakeTypingDelay, setFakeTypingDelay] = useState(false);
 
   const [previousQuestions, setPreviousQuestions] = useState<Question[][]>([]);
   const [previousResults, setPreviousResults] = useState<QuizResult[]>([]);
+
+  const resetToInitial = () => {
+    setMessages([]);
+    setPreviousQuestions([]);
+    setPreviousResults([]);
+    setGreetingDone(true);
+    setMode("none");
+    setStep("initial");
+    setShowLevels(false);
+  };
+
 
   const sendMessage = async (message: string) => {
     if (!message.trim()) return;
@@ -287,5 +298,6 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     sendMessage,
     setPreviousQuestions,
     setPreviousResults,
+    resetToInitial
   };
 }

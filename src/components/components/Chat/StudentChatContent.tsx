@@ -41,7 +41,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     handleCategoryNext,
     handleSubsubjectNext,
     handleSubmitAnswers,
-    handleRestart,
+    resetToInitial,
     sendMessage,
     setStep,
     setShowLevels,
@@ -84,10 +84,16 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
             className="flex justify-center mt-2 mb-4"
           >
             <ButtonBotAnswer
-              text={<span className="flex items-center gap-2"><RefreshCcw className="w-4 h-4" />Trocar modo (quiz/conversa)</span>}
-              onClick={handleRestart}
+              text={
+                <span className="flex items-center gap-2">
+                  <RefreshCcw className="w-4 h-4" />
+                  Voltar à escolha inicial
+                </span>
+              }
+              onClick={resetToInitial}
               isSubmit
             />
+
           </motion.div>
         )}
 
