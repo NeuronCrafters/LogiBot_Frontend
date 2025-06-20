@@ -139,8 +139,8 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
 
                         <div
                             className={`px-4 py-2 rounded-xl max-w-[80%] text-sm leading-relaxed ${isUser
-                                    ? "bg-blue-600 text-white ml-auto rounded-br-none"
-                                    : "bg-[#2a2a2a] text-white mr-auto rounded-bl-none"
+                                ? "bg-blue-600 text-white ml-auto rounded-br-none"
+                                : "bg-[#2a2a2a] text-white mr-auto rounded-bl-none"
                                 }`}
                         >
                             {content}
