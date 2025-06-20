@@ -8,6 +8,7 @@ import {
   BookOpen,
   Users,
   Layers,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";
@@ -15,6 +16,7 @@ import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { DisciplineCode } from "@/components/components/About/DisciplineCode";
+import { ChangePasswordModal } from "@/components/components/Security/ChangePasswordModal";
 
 /* ───────── Types ───────── */
 interface DisciplineObject {
@@ -46,6 +48,7 @@ function isDisciplineObj(d: unknown): d is DisciplineObject {
 export function About() {
   const { user, isAuthenticated, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   /* ---------- Loading & Erros ---------- */
   if (loading)
@@ -92,7 +95,6 @@ export function About() {
       return acc;
     }, [])
     : [];
-
 
   const profDisciplines =
     disciplineObjects.length > 0
@@ -176,6 +178,18 @@ export function About() {
                   )}
                 </>
               )}
+
+              {/* Alterar senha */}
+              <div className="flex gap-2 items-center">
+                <KeyRound size={18} />
+                <Button
+                  variant="outline"
+                  className="text-sm border-neutral-600 text-white hover:bg-neutral-800"
+                  onClick={() => setShowChangePassword(true)}
+                >
+                  Alterar senha
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -183,6 +197,12 @@ export function About() {
 
       {/* --- Drawer menu --- */}
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
+
+      {/* --- Modal alterar senha --- */}
+      <ChangePasswordModal
+        isOpen={showChangePassword}
+        onClose={() => setShowChangePassword(false)}
+      />
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { ButtonRainbow } from "@/components/components/Button/ButtonRainbow";
 
 interface AppModalProps {
   isOpen: boolean;
-  type: "consent" | "info" | "delete" | "create" | "update";
+  type: "consent" | "info" | "delete" | "create" | "update" | "password";
   title?: string;
   description?: string;
   acceptLabel?: string;
@@ -37,6 +37,10 @@ const defaultConfig = {
   },
   update: {
     acceptLabel: "Atualizar",
+    cancelLabel: "Cancelar",
+  },
+  password: {
+    acceptLabel: "Salvar",
     cancelLabel: "Cancelar",
   },
 };
