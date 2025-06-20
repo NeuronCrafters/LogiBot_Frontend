@@ -6,15 +6,19 @@ export interface User {
     email: string;
     role: string[] | string;
     school: string;
-    course?: string;
-    courses?: string[];
-    class?: string[] | string;
     schoolId: string[] | string;
     schoolName: string[] | string;
+    course?: string;
+    courses?: string[];
     courseId?: string[] | string;
     courseName?: string[] | string;
-    classId?: string[] | string;
+    class?: string[] | string;
+    classes?: (string | { _id: string; id?: string })[];
     className?: string[] | string;
+    disciplines?: string | string[];
+    disciplineId?: string | string[];
+    discipline?: string | string[];
+    classId?: string[] | string;
 }
 
 export interface AuthContextData {

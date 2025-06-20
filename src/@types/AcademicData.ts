@@ -3,17 +3,25 @@ export interface Student {
   name: string;
 }
 
+export interface Discipline {
+  _id: string;
+  name: string;
+}
+
 export interface Class {
+  disciplines: any;
   professors?: never[];
   _id: string;
   name: string;
   students?: Student[];
+  disciplineIds?: string[];
 }
 
 export interface Course {
   _id: string;
   name: string;
   classes?: Class[];
+  disciplines?: Discipline[];
 }
 
 export interface University {

@@ -25,12 +25,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function getUser() {
     try {
       const response = await api.get("/me", { withCredentials: true });
-      setUser(response.data);
+      const data = response.data;
+
+      const safeUser: User = {
+        ...data,
+        courses: Array.isArray(data.courses) ? data.courses : [],
+        classes: Array.isArray(data.classes) ? data.classes : [],
+        schoolId: Array.isArray(data.schoolId) ? data.schoolId : [data.schoolId],
+        schoolName: Array.isArray(data.schoolName) ? data.schoolName : [data.schoolName],
+        courseId: Array.isArray(data.courseId) ? data.courseId : [data.courseId],
+        courseName: Array.isArray(data.courseName) ? data.courseName : [data.courseName],
+        classId: Array.isArray(data.classId) ? data.classId : [data.classId],
+        className: Array.isArray(data.className) ? data.className : [data.className],
+      };
+
+      setUser(safeUser);
     } catch (error) {
       console.error("Erro ao obter usuário:", error);
       setUser(null);
     }
   }
+
 
   async function logout() {
     try {

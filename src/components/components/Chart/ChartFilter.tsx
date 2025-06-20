@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { AcademicFilter } from "./AcademicFilter";
+import { AcademicFilter } from "./AcademicFilter.tsx";
 import {
   Select,
   SelectTrigger,
@@ -102,14 +102,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     notifyParent(newType, [], mode, {});
   }, [allowedEntityTypes, mode, notifyParent, userLevel]);
 
-  // Handler para mudança de modo (individual/comparison)
-//   const handleModeChange = useCallback((value: string) => {
-//     const newMode = value as LogModeType;
-//     setMode(newMode);
-//     setSelectedIds([]);
-//     notifyParent(entityType, [], newMode, hierarchyParams);
-//   }, [entityType, hierarchyParams, notifyParent]);
-
   // Recebe seleção do AcademicFilter
   const handleEntitySelection = useCallback((ids: string[], params?: typeof hierarchyParams) => {
     setSelectedIds(ids);
@@ -136,7 +128,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       default: return "Entidade";
     }
   };
-//   const getModeTitle = (m: LogModeType) => (m === "individual" ? "Visualizar um" : "Comparar dois");
 
   // Mensagem de status para comparação
   const getSelectionStatus = () => {
@@ -156,16 +147,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       className="space-y-6 mb-8 p-6 bg-[#1f1f1f] rounded-xl border border-white/10"
     >
       <h3 className="text-xl font-semibold text-white">Filtros</h3>
-
-      {/* Indicador de nível de acesso */}
-      {/* <div className="px-3 py-2 text-xs border rounded-md text-white/60 bg-white/5 border-white/10">
-        <span className="font-medium">Nível de acesso:</span>{" "}
-        {userLevel === "admin"
-          ? "Administrador (todos os tipos)"
-          : userLevel === "coordinator"
-            ? "Coordenador (aluno, turma, curso)"
-            : "Professor (disciplina, turma, aluno)"}
-      </div> */}
 
       {/* Seletor de Tipo de Entidade e Modo */}
       <div className="grid grid-cols-1 gap-6">
@@ -187,23 +168,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
             </SelectContent>
           </Select>
         </div>
-
-        {/* Modo de Visualização - Comentado devido a não estar sendo utilizado atualmente */}
-        {/* Modo de Visualização */}
-        {/* <div className="space-y-3">
-          <Label htmlFor="view-mode" className="font-medium text-white">
-            Modo de Visualização
-          </Label>
-          <Select value={mode} onValueChange={handleModeChange}>
-            <SelectTrigger className="bg-[#141414] text-white border-white/10 h-12">
-              <SelectValue>{getModeTitle(mode)}</SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
-              <SelectItem value="individual">Visualizar um</SelectItem>
-              <SelectItem value="comparison">Comparar dois</SelectItem>
-            </SelectContent>
-          </Select>
-        </div> */}
       </div>
 
       {/* Filtro Acadêmico (universidade, curso, disciplina, turma) */}
