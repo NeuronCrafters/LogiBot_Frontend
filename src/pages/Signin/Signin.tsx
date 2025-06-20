@@ -126,6 +126,11 @@ function Signin() {
             >
               {loading ? "Entrando..." : "Entrar"}
             </ButtonLogin>
+
+            <ButtonLogin
+              type="google"
+              className="w-full mt-2"
+            />
           </form>
 
           <Typograph

@@ -29,7 +29,8 @@ export function ButtonLogin({
     } else if (type === "cadastrar") {
       window.location.href = "/signin";
     } else if (type === "google") {
-      window.location.href = "/chat";
+      const apiBase = import.meta.env.VITE_API_BASE_URL;
+      window.location.href = `${apiBase}/auth/google/login`;
     }
   };
 
