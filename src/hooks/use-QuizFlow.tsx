@@ -159,6 +159,8 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
       { role: "user", content: formatTitle(subtopico) },
       { role: "assistant", content: "Gerando suas perguntas..." },
     ]);
+    setSubsubjectButtons([]);
+    setCategoryButtons([]);
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
