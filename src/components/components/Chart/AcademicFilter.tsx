@@ -38,9 +38,9 @@ export function AcademicFilter({
   const { user } = useAuth();
 
   /* ---------- Estados de UI ---------- */
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [open, setOpen] = useState(false);
+  const [, setOpen] = useState(false);
 
   /* ---------- Query de dados acadêmicos ---------- */
   const { data, isLoading, error } = useQuery<AcademicDataResponse>({

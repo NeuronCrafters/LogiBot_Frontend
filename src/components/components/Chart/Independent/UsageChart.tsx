@@ -183,7 +183,7 @@ export function UsageChart({ filter }: UsageChartProps) {
   const isStudent = filter.type === "student";
   const { universityId, courseId, classId, disciplineId: disciplineIdFromHierarchy } = filter.hierarchyParams;
   const disciplineId = filter.type === 'discipline' ? mainId : disciplineIdFromHierarchy;
-  const studentId = isStudent ? mainId : undefined;
+//   const studentId = isStudent ? mainId : undefined;
   
   const hasRequiredIds = isStudent
     ? Boolean(universityId && courseId && (classId || disciplineId) && mainId)
