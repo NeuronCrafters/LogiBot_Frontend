@@ -2,6 +2,7 @@ import { useState } from "react";
 import { publicApi } from "@/services/api/api";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -49,6 +50,12 @@ export default function ForgotPassword() {
         <Link to="/signin" className="block text-center text-sm text-blue-400 hover:underline">
           Voltar ao login
         </Link>
+        <ReCAPTCHA
+          ref={recaptchaRef}
+          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+          onChange={setCaptchaToken}
+          theme="dark"
+        />
       </form>
     </div>
   );
