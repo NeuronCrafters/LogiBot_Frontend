@@ -3,30 +3,28 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copia arquivos de dependência
+# Copia apenas arquivos de dependência primeiro (melhor cache)
 COPY package*.json ./
-
-# Instala dependências
 RUN npm ci
 
-# Copia código fonte
+# Copia o restante do projeto
 COPY . .
 
-# Build de produção
+# Gera build de produção
 RUN npm run build
 
-# Production stage - serve estático simples
+# Production stage - apenas arquivos finais
 FROM node:22-alpine
 
 WORKDIR /app
 
-# Instala serve para servir arquivos estáticos
+# Instala o servidor estático
 RUN npm install -g serve
 
-# Copia apenas os arquivos buildados
+# Copia build final
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3001
 
-# Serve os arquivos estáticos
+# Comando para servir os arquivos
 CMD ["serve", "-s", "dist", "-l", "3001"]
