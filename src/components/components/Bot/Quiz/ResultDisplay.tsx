@@ -4,17 +4,14 @@ import { CheckCircle2, XCircle, PartyPopper } from "lucide-react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface AnswerDetail {
-  level: string;
-  subject: string;
+  question: string;
   selectedOption: {
     question: string;
     isCorrect: string;
     isSelected: string;
   };
-  correctOption?: string;
-  totalCorrectAnswers: number;
-  totalWrongAnswers: number;
-  timestamp: string;
+  correctOption: string;
+  explanation: string;
 }
 
 interface ResultDisplayProps {
@@ -109,13 +106,24 @@ export function ResultDisplay({
               ) : (
                 <XCircle className="w-5 h-5 mt-1" />
               )}
-              <Typograph
-                text={q.selectedOption.question}
-                variant="text8"
-                weight="regular"
-                fontFamily="poppins"
-                colorText="text-white"
-              />
+              <div>
+                <Typograph
+                  text={q.selectedOption.question}
+                  variant="text8"
+                  weight="regular"
+                  fontFamily="poppins"
+                  colorText="text-white"
+                />
+                <div className="mt-2 text-sm text-white/70">
+                  <Typograph
+                    text={`Explicação: ${q.explanation}`}
+                    variant="text8"
+                    weight="regular"
+                    fontFamily="poppins"
+                    colorText="text-white"
+                  />
+                </div>
+              </div>
             </div>
           );
         })}
