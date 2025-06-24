@@ -32,10 +32,9 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     questions,
     resultData,
     showLevels,
+    setShowLevels,
     categoryButtons,
     subsubjectButtons,
-    setPreviousQuestions,
-    setPreviousResults,
     handleInitialChoice,
     handleLevelNext,
     handleCategoryNext,
@@ -43,8 +42,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     handleSubmitAnswers,
     resetToInitial,
     sendMessage,
-    setStep,
-    setShowLevels,
   } = useQuizFlow({ userId });
 
   return (
@@ -76,6 +73,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
           )}
         </AnimatePresence>
 
+        {/* botão de voltar à escolha inicial */}
         {mode !== "none" && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -90,106 +88,105 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                   Voltar à escolha inicial
                 </span>
               }
-              onClick={resetToInitial}
+              onClick={() => {
+                resetToInitial();
+                setShowLevels(false);
+              }}
               isSubmit
             />
-
           </motion.div>
         )}
 
-        {greetingDone && mode !== "none" && (
-          <>
-            <ChatMessages messages={messages} userName={userName} userId={userId} />
+        {/* === MODO CHAT === */}
+        {greetingDone && mode === "chat" && (
+          <ChatMessages messages={messages} userName={userName} userId={userId} />
+        )}
 
-            <AnimatePresence mode="wait">
-              {mode === "quiz" && showLevels && step === "levels" && (
-                <motion.div
-                  key="levels"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-4"
-                >
-                  <LevelStep onNext={handleLevelNext} />
-                </motion.div>
-              )}
+        {/* === MODO QUIZ === */}
+        {greetingDone && mode === "quiz" && (
+          <AnimatePresence mode="wait">
+            {showLevels && step === "levels" && (
+              <motion.div
+                key="levels"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="mt-4"
+              >
+                <LevelStep onNext={btns => {
+                  handleLevelNext(btns, "");
+                  setShowLevels(false);
+                }} />
+              </motion.div>
+            )}
 
-              {mode === "quiz" && step === "categories" && (
-                <motion.div
-                  key="categories"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-4"
-                >
-                  <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />
-                </motion.div>
-              )}
+            {step === "categories" && (
+              <motion.div
+                key="categories"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="mt-4"
+              >
+                <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />
+              </motion.div>
+            )}
 
-              {mode === "quiz" && step === "subsubjects" && (
-                <motion.div
-                  key="subsubjects"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-4"
-                >
-                  <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />
-                </motion.div>
-              )}
+            {step === "subsubjects" && (
+              <motion.div
+                key="subsubjects"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="mt-4"
+              >
+                <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />
+              </motion.div>
+            )}
 
-              {mode === "quiz" && step === "questions" && (
-                <motion.div
-                  key="questions"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-4"
-                >
-                  <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />
-                </motion.div>
-              )}
+            {step === "questions" && (
+              <motion.div
+                key="questions"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="mt-4"
+              >
+                <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />
+              </motion.div>
+            )}
 
-              {mode === "quiz" && step === "results" && resultData && (
-                <motion.div
-                  key="results"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-6 space-y-6"
-                >
-                  <ResultDisplay
-                    detalhes={resultData.detalhes}
-                    totalCorrectAnswers={resultData.totalCorrectAnswers}
-                    totalWrongAnswers={resultData.totalWrongAnswers}
+            {step === "results" && resultData && (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="mt-6 space-y-6"
+              >
+                <ResultDisplay detalhes={resultData.detalhes} />
+                <div className="flex justify-center">
+                  <ButtonBotAnswer
+                    text="Continuar praticando"
+                    isSubmit
+                    onClick={() => {
+                      handleInitialChoice("quiz");
+                      setShowLevels(true);
+                    }}
                   />
-                  <div className="flex justify-center">
-                    <ButtonBotAnswer
-                      text="Continuar praticando"
-                      isSubmit
-                      onClick={() => {
-                        if (questions.length > 0 && resultData) {
-                          setPreviousQuestions((prev) => [...prev, questions]);
-                          setPreviousResults((prev) => [...prev, resultData]);
-                        }
-                        setStep("levels");
-                        setShowLevels(true);
-                        setGreetingDone(true);
-                      }}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         )}
       </div>
 
+      {/* input de chat apenas em chat */}
       <AnimatePresence mode="wait">
         {greetingDone && mode === "chat" && (
           <motion.div

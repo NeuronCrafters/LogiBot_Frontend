@@ -3,30 +3,12 @@ import { rasaService } from "@/services/api/api_rasa";
 import { Question } from "@/@types/QuestionType";
 import { formatTitle } from "@/utils/formatText";
 import { ButtonData } from "@/components/components/Bot/Quiz/CategoryStep";
+import type { QuizResult } from "@/@types/QuizResult";
+import { usePersistedArray } from "@/hooks/use-PersistedArray";
 
 interface ChatMsg {
   role: "user" | "assistant";
   content: string;
-}
-
-interface AnswerDetail {
-  level: string;
-  subject: string;
-  selectedOption: {
-    question: string;
-    isCorrect: string;
-    isSelected: string;
-  };
-  correctOption?: string;
-  totalCorrectAnswers: number;
-  totalWrongAnswers: number;
-  timestamp: string;
-}
-
-interface QuizResult {
-  detalhes?: { questions?: AnswerDetail[] };
-  totalCorrectAnswers: number;
-  totalWrongAnswers: number;
 }
 
 interface useQuizFlowProps {
@@ -34,8 +16,15 @@ interface useQuizFlowProps {
 }
 
 export function useQuizFlow({ userId }: useQuizFlowProps) {
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
-  const [step, setStep] = useState<"initial" | "levels" | "categories" | "subsubjects" | "questions" | "results">("initial");
+  const {
+    state: messages,
+    push: pushMessage,
+    clear: clearMessages,
+  } = usePersistedArray<ChatMsg>("LOGIBOT_MESSAGES", []);
+
+  const [step, setStep] = useState<
+    "initial" | "levels" | "categories" | "subsubjects" | "questions" | "results"
+  >("initial");
   const [mode, setMode] = useState<"none" | "quiz" | "chat">("none");
   const [categoryButtons, setCategoryButtons] = useState<any[]>([]);
   const [subsubjectButtons, setSubsubjectButtons] = useState<any[]>([]);
@@ -43,7 +32,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [resultData, setResultData] = useState<QuizResult | null>(null);
   const [typing, setTyping] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
-  const [pendingLevelIntro, setPendingLevelIntro] = useState(false);
+  const [pendingLevelIntro] = useState(false);
   const [greetingDone, setGreetingDone] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -52,220 +41,189 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [previousQuestions, setPreviousQuestions] = useState<Question[][]>([]);
   const [previousResults, setPreviousResults] = useState<QuizResult[]>([]);
 
-  const resetToInitial = () => {
-    setMessages([]);
+  function resetToInitial() {
+    clearMessages();
     setPreviousQuestions([]);
     setPreviousResults([]);
     setGreetingDone(true);
     setMode("none");
     setStep("initial");
     setShowLevels(false);
-  };
+  }
 
-
-  const sendMessage = async (message: string) => {
+  // Chat mode
+  async function sendMessage(message: string) {
     if (!message.trim()) return;
-    setMessages((m) => [...m, { role: "user", content: message }]);
+    pushMessage({ role: "user", content: message });
     setTyping(true);
     setFakeTypingDelay(true);
 
     try {
       const res = await rasaService.perguntar(message, userId);
       setTimeout(() => {
-        setMessages((m) => [
-          ...m,
-          { role: "assistant", content: res.responses[0]?.text || "..." },
-        ]);
+        pushMessage({
+          role: "assistant",
+          content: res.responses[0]?.text || "...",
+        });
         setTyping(false);
         setFakeTypingDelay(false);
       }, 1200);
     } catch (err: any) {
-      const errorMsg =
-        err.response?.data?.message ||
-        "Erro no chat.";
+      const errorMsg = err.response?.data?.message || "Erro no chat.";
       console.error("Erro no chat:", err.response?.status, errorMsg);
-
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: errorMsg },
-      ]);
-
+      pushMessage({ role: "assistant", content: errorMsg });
       setTyping(false);
       setFakeTypingDelay(false);
     }
-  };
+  }
 
-  const handleInitialChoice = async (choice: "quiz" | "chat") => {
-    setMessages([]);
+  // User chooses quiz or chat
+  async function handleInitialChoice(choice: "quiz" | "chat") {
+    clearMessages();
     setPreviousQuestions([]);
     setPreviousResults([]);
+
     if (choice === "quiz") {
-      setPendingLevelIntro(true);
-      setStep("levels");
       setMode("quiz");
+      setStep("levels");
+      setShowLevels(true);
     } else {
       setMode("chat");
       try {
         await rasaService.conversar();
-        setMessages([{ role: "assistant", content: "Vamos conversar, sobre o que quer falar?" }]);
+        pushMessage({
+          role: "assistant",
+          content: "Vamos conversar, sobre o que quer falar?",
+        });
       } catch (e) {
         console.error("Erro ao iniciar modo conversa:", e);
       }
     }
-    setGreetingDone(true);
-  };
 
-  const handleLevelNext = (btns: any[], nivel: string) => {
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: formatTitle(nivel) },
-      { role: "assistant", content: "Agora escolha um assunto para praticar:" },
-    ]);
+    setGreetingDone(true);
+  }
+
+  function handleLevelNext(btns: any[], nivel: string) {
+    pushMessage({ role: "user", content: formatTitle(nivel) });
+    pushMessage({
+      role: "assistant",
+      content: "Agora escolha um assunto para praticar:",
+    });
     setCategoryButtons(btns);
     setStep("categories");
-  };
+  }
 
-  const handleCategoryNext = (btns: ButtonData[], payload: string) => {
+  function handleCategoryNext(btns: ButtonData[], payload: string) {
     let categoria = "";
     try {
-      const jsonStart = payload.indexOf("{");
-      if (jsonStart >= 0) {
-        const jsonString = payload.slice(jsonStart);
-        const parsed = JSON.parse(jsonString);
+      const idx = payload.indexOf("{");
+      if (idx >= 0) {
+        const parsed = JSON.parse(payload.slice(idx));
         categoria = parsed.categoria || "";
       }
     } catch (e) {
       console.error("Erro ao extrair categoria:", e);
     }
-
     if (!categoria) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: formatTitle(categoria) },
-      { role: "assistant", content: `Escolha um tópico dentro de ${formatTitle(categoria)}:` },
-    ]);
-
+    pushMessage({ role: "user", content: formatTitle(categoria) });
+    pushMessage({
+      role: "assistant",
+      content: `Escolha um tópico dentro de ${formatTitle(categoria)}:`,
+    });
     setSubsubjectButtons(btns);
-    setTimeout(() => {
-      setStep("subsubjects");
-    }, 100);
-  };
+    setStep("subsubjects");
+  }
 
+  function handleSubsubjectNext(qs: Question[], subtopico: string) {
+    pushMessage({ role: "user", content: formatTitle(subtopico) });
+    pushMessage({ role: "assistant", content: "Gerando suas perguntas..." });
 
-  const handleSubsubjectNext = (qs: Question[], subtopico: string) => {
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: formatTitle(subtopico) },
-      { role: "assistant", content: "Gerando suas perguntas..." },
-    ]);
     setSubsubjectButtons([]);
     setCategoryButtons([]);
     setTyping(true);
+
     setTimeout(() => {
       setTyping(false);
-      setMessages((prev) => [...prev, { role: "assistant", content: "Suas perguntas estão prontas:" }]);
+      pushMessage({
+        role: "assistant",
+        content: "Suas perguntas estão prontas:",
+      });
       setQuestions(qs);
       setStep("questions");
     }, 1500);
-  };
+  }
 
-  const handleSubmitAnswers = async (answers: string[]) => {
-    const convertToOptionKey = (answer: string) => {
-      const prefix = answer.trim().toLowerCase().charAt(0);
-      switch (prefix) {
-        case "a": return "A";
-        case "b": return "B";
-        case "c": return "C";
-        case "d": return "D";
-        case "e": return "E";
-        default: return "?";
-      }
+  async function handleSubmitAnswers(answers: string[]) {
+    const convertKey = (a: string) => {
+      const p = a.trim().toLowerCase().charAt(0);
+      return ["a", "b", "c", "d", "e"].includes(p) ? p.toUpperCase() : "?";
     };
+    const letters = answers.map(convertKey);
 
-    const lettersOnly = answers.map(convertToOptionKey);
-    const formattedAnswers = lettersOnly.map((l) => `options ${l}`);
-
-    setMessages((m) => [
-      ...m,
-      { role: "user", content: `Respostas escolhidas: ${lettersOnly.join(", ")}` },
-    ]);
+    pushMessage({
+      role: "user",
+      content: `Respostas escolhidas: ${letters.join(", ")}`,
+    });
 
     try {
-      const res = await rasaService.verificarRespostas(formattedAnswers);
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: res.message },
-      ]);
+      const result = await rasaService.verificarRespostas(letters);
+      setResultData(result);
 
-      if (Array.isArray(previousQuestions)) {
+      if (questions.length) {
         setPreviousQuestions((prev) => [...prev, questions]);
+        setPreviousResults((prev) => [...prev, result]);
       }
 
-      setPreviousResults((prev) => [...prev, res]);
-
-      setResultData(res);
       setStep("results");
     } catch (err: any) {
       const errorMsg =
-        err.response?.data?.message ??
-        "Erro ao verificar respostas.";
-      console.error(
-        "Erro ao enviar respostas:",
-        err.response?.status,
-        errorMsg
-      );
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: errorMsg },
-      ]);
+        err.response?.data?.message ?? "Erro ao verificar respostas.";
+      console.error("Erro ao enviar respostas:", err.response?.status, errorMsg);
+      pushMessage({ role: "assistant", content: errorMsg });
     }
-  };
+  }
 
-  const handleRestart = async () => {
+  async function handleRestart() {
     setGreetingDone(true);
     setStep("levels");
     setCategoryButtons([]);
     setSubsubjectButtons([]);
     setQuestions([]);
     setResultData(null);
-    setMessages([]);
+    clearMessages();
 
-    const currentMode = mode;
-
-    if (currentMode === "quiz") {
-      // Saindo do modo quiz → entrando em chat
+    if (mode === "quiz") {
       setShowLevels(false);
       setMode("chat");
-
       try {
         await rasaService.conversar();
-        setMessages([{ role: "assistant", content: "Vamos conversar, sobre o que quer falar?" }]);
+        pushMessage({
+          role: "assistant",
+          content: "Vamos conversar, sobre o que quer falar?",
+        });
       } catch (e) {
         console.error("Erro ao iniciar modo conversa:", e);
       }
-    } else if (currentMode === "chat") {
-      // Saindo do modo chat → entrando em quiz
+    } else {
       setMode("quiz");
-      setMessages([{ role: "assistant", content: "Olá! Escolha seu nível abaixo 👇" }]);
-
-      // Exibe os níveis após um pequeno delay (apenas para UX suave)
-      setTimeout(() => {
-        setShowLevels(true);
-      }, 200);
+      pushMessage({
+        role: "assistant",
+        content: "Olá! Escolha seu nível abaixo 👇",
+      });
+      setTimeout(() => setShowLevels(true), 200);
     }
-  };
+  }
 
   useEffect(() => {
     if (pendingLevelIntro) {
       const timer = setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: "Olá! Escolha seu nível abaixo 👇" },
-        ]);
+        pushMessage({
+          role: "assistant",
+          content: "Olá! Escolha seu nível abaixo 👇",
+        });
         setTimeout(() => setShowLevels(true), 800);
       }, 800);
-
       return () => clearTimeout(timer);
     }
   }, [pendingLevelIntro]);
@@ -300,6 +258,6 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     sendMessage,
     setPreviousQuestions,
     setPreviousResults,
-    resetToInitial
+    resetToInitial,
   };
 }
