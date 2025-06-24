@@ -84,9 +84,9 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setPreviousResults([]);
 
     if (choice === "quiz") {
-      setPendingLevelIntro(true);
-      setStep("levels");
       setMode("quiz");
+      setStep("levels");
+      setShowLevels(true);
     } else {
       setMode("chat");
       try {
