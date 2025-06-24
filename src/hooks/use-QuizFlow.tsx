@@ -32,7 +32,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [resultData, setResultData] = useState<QuizResult | null>(null);
   const [typing, setTyping] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
-  const [pendingLevelIntro, setPendingLevelIntro] = useState(false);
+  const [pendingLevelIntro] = useState(false);
   const [greetingDone, setGreetingDone] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [inputText, setInputText] = useState("");
