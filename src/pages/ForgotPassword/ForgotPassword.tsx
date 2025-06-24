@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { publicApi } from "@/services/api/api";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
@@ -7,14 +7,27 @@ import ReCAPTCHA from "react-google-recaptcha";
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return toast.error("Digite seu e-mail.");
+
+    if (!email) {
+      return toast.error("Digite seu e-mail.");
+    }
+
+    if (!captchaToken) {
+      return toast.error("Confirme que você não é um robô.");
+    }
 
     try {
       setLoading(true);
-      const res = await publicApi.post("/password/send-reset-password", { email });
+      const res = await publicApi.post("/password/send-reset-password", {
+        email,
+        captcha: captchaToken,
+      });
+
       if (res.status === 200) {
         toast.success("📩 Verifique seu e-mail");
       } else {
@@ -24,6 +37,7 @@ export default function ForgotPassword() {
       toast.error(err.response?.data?.error || "Erro ao enviar e-mail.");
     } finally {
       setLoading(false);
+      recaptchaRef.current?.reset();
     }
   };
 
@@ -40,6 +54,12 @@ export default function ForgotPassword() {
           className="w-full p-2 bg-zinc-700 rounded"
           required
         />
+        <ReCAPTCHA
+          ref={recaptchaRef}
+          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+          onChange={setCaptchaToken}
+          theme="dark"
+        />
         <button
           type="submit"
           disabled={loading}
@@ -50,12 +70,6 @@ export default function ForgotPassword() {
         <Link to="/signin" className="block text-center text-sm text-blue-400 hover:underline">
           Voltar ao login
         </Link>
-        <ReCAPTCHA
-          ref={recaptchaRef}
-          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-          onChange={setCaptchaToken}
-          theme="dark"
-        />
       </form>
     </div>
   );
