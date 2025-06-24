@@ -5,7 +5,7 @@ import { ButtonBotAnswer } from "@/components/components/Button/ButtonBotAnswer"
 
 interface QuestionsDisplayProps {
   questions: Question[];
-  onSubmitAnswers: (answers: string[]) => void;
+  onSubmitAnswers: (answers: string[]) => Promise<void>;
 }
 
 export function QuestionsDisplay({
@@ -13,8 +13,10 @@ export function QuestionsDisplay({
   onSubmitAnswers,
 }: QuestionsDisplayProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSelect = (questionIndex: number, option: string) => {
+    if (isSubmitting) return;
     setSelectedAnswers((prev) => {
       const current = prev[questionIndex];
       if (current === option) {
@@ -27,9 +29,10 @@ export function QuestionsDisplay({
     });
   };
 
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-
-  const handleSubmit = () => {
     const answers = questions.map((q, index) => {
       const selected = selectedAnswers[index];
       const optionIndex = q.options.findIndex((opt) => opt === selected);
@@ -37,8 +40,17 @@ export function QuestionsDisplay({
       return letter;
     });
 
-    onSubmitAnswers(answers);
+    try {
+      await onSubmitAnswers(answers);
+      // se quiser reabilitar depois:
+      // setIsSubmitting(false);
+    } catch (err) {
+      console.error(err);
+      setIsSubmitting(false);
+    }
   };
+
+  const allAnswered = Object.keys(selectedAnswers).length === questions.length;
 
   return (
     <div className="mt-6 space-y-8">
@@ -61,6 +73,7 @@ export function QuestionsDisplay({
                   key={j}
                   selected={selectedAnswers[i] === opt}
                   onClick={() => handleSelect(i, opt)}
+                  disabled={isSubmitting}
                   text={
                     <span className="flex items-start gap-2">
                       <span className="font-bold text-blue-400">{letter}</span>
@@ -70,18 +83,28 @@ export function QuestionsDisplay({
                 />
               );
             })}
-
           </div>
         </div>
       ))}
 
-      <div className="flex justify-center pt-2">
+      <div className="flex flex-col items-center pt-2">
         <ButtonBotAnswer
           isSubmit
-          text="Enviar respostas"
           onClick={handleSubmit}
-          disabled={questions.length === 0 || Object.keys(selectedAnswers).length !== questions.length}
+          disabled={!allAnswered || isSubmitting}
+          text={isSubmitting ? "Analisando respostas..." : "Enviar respostas"}
         />
+
+        {isSubmitting && (
+          <Typograph
+            text="Por favor, aguarde enquanto suas respostas são analisadas..."
+            variant="text10"
+            fontFamily="poppins"
+            weight="regular"
+            colorText="text-white/70"
+            className="mt-2"
+          />
+        )}
       </div>
     </div>
   );
