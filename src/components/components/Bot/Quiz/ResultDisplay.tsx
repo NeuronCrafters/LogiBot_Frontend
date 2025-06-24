@@ -7,7 +7,7 @@ interface AnswerDetail {
   question: string;
   selectedOption: {
     question: string;
-    isCorrect: string;
+    isCorrect: boolean | string;
     isSelected: string;
   };
   correctOption: string;
@@ -18,17 +18,21 @@ interface ResultDisplayProps {
   detalhes?: {
     questions?: AnswerDetail[];
   };
-  totalCorrectAnswers: number;
-  totalWrongAnswers: number;
 }
 
-export function ResultDisplay({
-  detalhes,
-  totalCorrectAnswers,
-  totalWrongAnswers,
-}: ResultDisplayProps) {
+export function ResultDisplay({ detalhes }: ResultDisplayProps) {
   const [showCelebration, setShowCelebration] = useState(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const questions = detalhes?.questions || [];
+
+  const isCorrectFlag = (flag: boolean | string) =>
+    flag === true || String(flag).toLowerCase() === "true";
+
+  const totalCorrectAnswers = questions.filter(q =>
+    isCorrectFlag(q.selectedOption.isCorrect)
+  ).length;
+  const totalWrongAnswers = questions.length - totalCorrectAnswers;
 
   useEffect(() => {
     if (totalCorrectAnswers > 0 && totalWrongAnswers === 0) {
@@ -38,18 +42,16 @@ export function ResultDisplay({
     }
   }, [totalCorrectAnswers, totalWrongAnswers]);
 
-  const questions = detalhes?.questions || [];
-
   return (
     <motion.div
-      className="w-full mt-4 max-w-2xl mx-auto space-y-4 text-left"  // <— text-left aqui
+      className="w-full mt-4 max-w-2xl mx-auto space-y-4 text-left whitespace-normal break-words"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       {showCelebration && (
         <motion.div
-          className="flex items-center justify-center gap-2 text-green-400 bg-green-900/20 rounded-xl px-4 py-2 shadow text-left whitespace-normal break-words"
+          className="flex items-center justify-start gap-2 text-green-400 bg-green-900/20 rounded-xl px-4 py-2 shadow"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -67,7 +69,7 @@ export function ResultDisplay({
       )}
 
       {/* Resumo */}
-      <div className="bg-[#2a2a2a] rounded-xl p-4 shadow-sm space-y-2 text-left whitespace-normal break-words">
+      <div className="bg-[#2a2a2a] rounded-xl p-4 shadow-sm space-y-2">
         <div className="flex items-center gap-2 text-green-400 text-sm">
           <CheckCircle2 className="w-4 h-4" />
           <Typograph
@@ -91,9 +93,9 @@ export function ResultDisplay({
       </div>
 
       {/* Perguntas */}
-      <div className="space-y-3 text-left whitespace-normal break-words">
+      <div className="space-y-3">
         {questions.map((q, i) => {
-          const isCorrect = q.selectedOption.isCorrect === "true";
+          const isCorrect = isCorrectFlag(q.selectedOption.isCorrect);
           const isOpen = openIndex === i;
 
           return (
@@ -197,7 +199,6 @@ export function ResultDisplay({
                   </motion.div>
                 )}
               </AnimatePresence>
-
             </div>
           );
         })}
