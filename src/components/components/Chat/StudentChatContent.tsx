@@ -93,7 +93,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
               onClick={resetToInitial}
               isSubmit
             />
-
           </motion.div>
         )}
 

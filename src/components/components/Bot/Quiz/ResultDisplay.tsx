@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { CheckCircle2, XCircle, PartyPopper } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, XCircle, PartyPopper, ChevronDown, ChevronUp } from "lucide-react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface AnswerDetail {
@@ -28,6 +28,7 @@ export function ResultDisplay({
   totalWrongAnswers,
 }: ResultDisplayProps) {
   const [showCelebration, setShowCelebration] = useState(false);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (totalCorrectAnswers > 0 && totalWrongAnswers === 0) {
@@ -56,7 +57,7 @@ export function ResultDisplay({
         >
           <PartyPopper className="w-5 h-5 animate-bounce" />
           <Typograph
-            text="Parabéns! Você acertou todas as questões!"
+            text="🏆 Parabéns! Você acertou todas as questões!"
             variant="text4"
             weight="medium"
             fontFamily="poppins"
@@ -65,7 +66,7 @@ export function ResultDisplay({
         </motion.div>
       )}
 
-      {/* Bloco de resumo com ícones */}
+      {/* Resumo */}
       <div className="bg-[#2a2a2a] rounded-xl p-4 shadow-sm space-y-2">
         <div className="flex items-center gap-2 text-green-400 text-sm">
           <CheckCircle2 className="w-4 h-4" />
@@ -89,41 +90,83 @@ export function ResultDisplay({
         </div>
       </div>
 
-      {/* Lista de questões respondidas */}
+      {/* Perguntas */}
       <div className="space-y-3">
         {questions.map((q, i) => {
           const isCorrect = q.selectedOption.isCorrect === "true";
+          const isOpen = openIndex === i;
+
           return (
             <div
               key={i}
-              className={`p-3 rounded-lg border flex items-start gap-2 text-sm ${isCorrect
-                ? "border-green-500 bg-green-900/10 text-green-300"
-                : "border-red-500 bg-red-900/10 text-red-300"
+              className={`rounded-xl border p-4 ${isCorrect
+                  ? "border-green-500 bg-green-900/10"
+                  : "border-red-500 bg-red-900/10"
                 }`}
             >
-              {isCorrect ? (
-                <CheckCircle2 className="w-5 h-5 mt-1" />
-              ) : (
-                <XCircle className="w-5 h-5 mt-1" />
-              )}
-              <div>
-                <Typograph
-                  text={q.selectedOption.question}
-                  variant="text8"
-                  weight="regular"
-                  fontFamily="poppins"
-                  colorText="text-white"
-                />
-                <div className="mt-2 text-sm text-white/70">
+              <button
+                onClick={() =>
+                  setOpenIndex(isOpen ? null : i)
+                }
+                className="w-full flex justify-between items-start"
+              >
+                <div className="flex items-start gap-2">
+                  {isCorrect ? (
+                    <CheckCircle2 className="w-5 h-5 mt-1 text-green-400" />
+                  ) : (
+                    <XCircle className="w-5 h-5 mt-1 text-red-400" />
+                  )}
                   <Typograph
-                    text={`Explicação: ${q.explanation}`}
+                    text={`${i + 1}. ${q.selectedOption.question}`}
                     variant="text8"
-                    weight="regular"
+                    weight="medium"
                     fontFamily="poppins"
                     colorText="text-white"
                   />
                 </div>
-              </div>
+                {isOpen ? (
+                  <ChevronUp className="w-5 h-5 text-white/70" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-white/70" />
+                )}
+              </button>
+
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="content"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-3 overflow-hidden"
+                  >
+                    <div className="text-sm text-white/70 space-y-2">
+                      <Typograph
+                        text={`Resposta correta: ${q.correctOption}`}
+                        variant="text8"
+                        weight="regular"
+                        fontFamily="poppins"
+                        colorText="text-white"
+                      />
+                      <Typograph
+                        text={`Sua resposta: ${q.selectedOption.isSelected}`}
+                        variant="text8"
+                        weight="regular"
+                        fontFamily="poppins"
+                        colorText="text-white"
+                      />
+                      <Typograph
+                        text={`Explicação: ${q.explanation}`}
+                        variant="text8"
+                        weight="regular"
+                        fontFamily="poppins"
+                        colorText="text-white"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
