@@ -42,18 +42,18 @@ export function ResultDisplay({
 
   return (
     <motion.div
-      className="w-full mt-4 max-w-2xl mx-auto space-y-4"
+      className="w-full mt-4 max-w-2xl mx-auto space-y-4 text-left"  // <— text-left aqui
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       {showCelebration && (
         <motion.div
+          className="flex items-center justify-center gap-2 text-green-400 bg-green-900/20 rounded-xl px-4 py-2 shadow text-left whitespace-normal break-words"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.4 }}
-          className="flex items-center justify-center gap-2 text-green-400 bg-green-900/20 rounded-xl px-4 py-2 shadow"
         >
           <PartyPopper className="w-5 h-5 animate-bounce" />
           <Typograph
@@ -67,7 +67,7 @@ export function ResultDisplay({
       )}
 
       {/* Resumo */}
-      <div className="bg-[#2a2a2a] rounded-xl p-4 shadow-sm space-y-2">
+      <div className="bg-[#2a2a2a] rounded-xl p-4 shadow-sm space-y-2 text-left whitespace-normal break-words">
         <div className="flex items-center gap-2 text-green-400 text-sm">
           <CheckCircle2 className="w-4 h-4" />
           <Typograph
@@ -91,7 +91,7 @@ export function ResultDisplay({
       </div>
 
       {/* Perguntas */}
-      <div className="space-y-3">
+      <div className="space-y-3 text-left whitespace-normal break-words">
         {questions.map((q, i) => {
           const isCorrect = q.selectedOption.isCorrect === "true";
           const isOpen = openIndex === i;
@@ -100,14 +100,12 @@ export function ResultDisplay({
             <div
               key={i}
               className={`rounded-xl border p-4 ${isCorrect
-                  ? "border-green-500 bg-green-900/10"
-                  : "border-red-500 bg-red-900/10"
+                ? "border-green-500 bg-green-900/10"
+                : "border-red-500 bg-red-900/10"
                 }`}
             >
               <button
-                onClick={() =>
-                  setOpenIndex(isOpen ? null : i)
-                }
+                onClick={() => setOpenIndex(isOpen ? null : i)}
                 className="w-full flex justify-between items-start"
               >
                 <div className="flex items-start gap-2">
@@ -139,34 +137,67 @@ export function ResultDisplay({
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="mt-3 overflow-hidden"
+                    className="mt-3 overflow-hidden text-left whitespace-normal break-words"
                   >
                     <div className="text-sm text-white/70 space-y-2">
-                      <Typograph
-                        text={`Resposta correta: ${q.correctOption}`}
-                        variant="text8"
-                        weight="regular"
-                        fontFamily="poppins"
-                        colorText="text-white"
-                      />
-                      <Typograph
-                        text={`Sua resposta: ${q.selectedOption.isSelected}`}
-                        variant="text8"
-                        weight="regular"
-                        fontFamily="poppins"
-                        colorText="text-white"
-                      />
-                      <Typograph
-                        text={`Explicação: ${q.explanation}`}
-                        variant="text8"
-                        weight="regular"
-                        fontFamily="poppins"
-                        colorText="text-white"
-                      />
+                      {/* Resposta correta */}
+                      <div className="flex flex-wrap items-baseline gap-1">
+                        <Typograph
+                          text="Resposta correta:"
+                          variant="text8"
+                          weight="semibold"
+                          fontFamily="poppins"
+                          colorText="text-white"
+                        />
+                        <Typograph
+                          text={q.correctOption}
+                          variant="text8"
+                          weight="regular"
+                          fontFamily="poppins"
+                          colorText="text-white"
+                        />
+                      </div>
+
+                      {/* Sua resposta */}
+                      <div className="flex flex-wrap items-baseline gap-1">
+                        <Typograph
+                          text="Sua resposta:"
+                          variant="text8"
+                          weight="semibold"
+                          fontFamily="poppins"
+                          colorText="text-white"
+                        />
+                        <Typograph
+                          text={q.selectedOption.isSelected}
+                          variant="text8"
+                          weight="regular"
+                          fontFamily="poppins"
+                          colorText="text-white"
+                        />
+                      </div>
+
+                      {/* Explicação */}
+                      <div className="flex flex-wrap items-baseline gap-1">
+                        <Typograph
+                          text="Explicação:"
+                          variant="text8"
+                          weight="semibold"
+                          fontFamily="poppins"
+                          colorText="text-white"
+                        />
+                        <Typograph
+                          text={q.explanation}
+                          variant="text8"
+                          weight="regular"
+                          fontFamily="poppins"
+                          colorText="text-white"
+                        />
+                      </div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
+
             </div>
           );
         })}
