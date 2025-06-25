@@ -15,9 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!user;
 
   async function login(email: string, password: string, recaptchaToken: string) {
-    if (!recaptchaToken) {
-      throw new Error("Token do reCAPTCHA ausente.");
-    }
+    if (!recaptchaToken) throw new Error("Token do reCAPTCHA ausente.");
 
     try {
       await api.post(
@@ -25,16 +23,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         { email, password, recaptchaToken },
         { withCredentials: true }
       );
+
       await getUser();
       navigate("/chat");
     } catch (error: any) {
-      const message =
-        error?.response?.data?.message || "Erro ao autenticar. Verifique suas credenciais.";
+      const message = error?.response?.data?.message || "Erro ao autenticar.";
       throw new Error(`Login inválido. ${message}`);
     } finally {
-      queryClient.resetQueries();
       queryClient.clear();
-      queryClient.removeQueries();
     }
   }
 
@@ -69,9 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
     } finally {
-      queryClient.resetQueries();
       queryClient.clear();
-      queryClient.removeQueries();
       setUser(null);
       navigate("/signin");
     }
