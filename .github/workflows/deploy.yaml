@@ -54,10 +54,10 @@ jobs:
             # Cria a rede Docker (se não existir)
             docker network inspect logibot-network >/dev/null 2>&1 || docker network create logibot-network
 
-            # Injeta as variáveis de ambiente no shell remoto
             export VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}"
             export VITE_API_KEY="${{ secrets.VITE_API_KEY }}"
             export VITE_RECAPTCHA_SITE_KEY="${{ secrets.VITE_RECAPTCHA_SITE_KEY }}"
+
 
             # Puxa o código e atualiza a imagem
             git pull origin main
