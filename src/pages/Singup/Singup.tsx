@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Captcha } from "@/components/components/Security/Captcha";
+// import { Captcha } from "@/components/components/Security/Captcha";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { api } from "@/services/api/api";
@@ -9,14 +9,13 @@ import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo"
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { toast } from "react-hot-toast";
 
-
 function Signup() {
   /* ── form states ─────────────────────────────────────────────── */
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   /* ── ui feedback ─────────────────────────────────────────────── */
   const [loading, setLoading] = useState(false);
@@ -29,54 +28,64 @@ function Signup() {
     e.preventDefault();
     setError("");
 
+    // Remove espaços antes da validação e do envio
+    const finalName = name.trim();
+    const finalEmail = email.replace(/\s/g, '');
+    const finalPassword = password.replace(/\s/g, '');
+    const finalCode = code.replace(/\s/g, '');
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]{3,}$/;
 
-    if (!name.trim()) {
+    if (!finalName) {
       toast.error("Nome é obrigatório.");
       return;
-    } else if (!nameRegex.test(name.trim())) {
+    } else if (!nameRegex.test(finalName)) {
       toast.error("Use ao menos 3 letras e evite símbolos.");
       return;
     }
 
-    if (!email) {
+    if (!finalEmail) {
       toast.error("E-mail é obrigatório.");
       return;
-    } else if (!emailRegex.test(email)) {
+    } else if (!emailRegex.test(finalEmail)) {
       toast.error("Formato de e-mail inválido.");
       return;
     }
 
-    if (!password) {
+    if (!finalPassword) {
       toast.error("Senha é obrigatória.");
       return;
-    } else if (password.length < 13) {
+    } else if (finalPassword.length < 13) {
       toast.error("A senha deve ter pelo menos 12 caracteres!.");
       return;
     }
 
-    if (!code) {
+    if (!finalCode) {
       toast.error("Código é obrigatório.");
       return;
     }
 
+    // Validação do reCAPTCHA desabilitada temporariamente
+    /*
     if (!captchaToken) {
       toast.error("Por favor, confirme o captcha.");
       return;
     }
+    */
 
     setLoading(true);
     try {
       await api.post("/users", {
-        name,
-        email,
-        password,
-        code,
-        recaptchaToken: captchaToken,
+        name: finalName,
+        email: finalEmail,
+        password: finalPassword,
+        code: finalCode,
+        // recaptchaToken: captchaToken, // Desabilitado
       });
 
-      await login(email, password, captchaToken);
+      // Passa um valor substituto para o captchaToken para não quebrar a função login
+      await login(finalEmail, finalPassword, "captcha-disabled");
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? "Erro ao realizar o cadastro.";
       toast.error(msg);
@@ -150,7 +159,7 @@ function Signup() {
               placeholder="Email"
               className="mb-4 bg-neutral-800"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
               required
             />
 
@@ -159,7 +168,7 @@ function Signup() {
               placeholder="Senha"
               className="mb-4 bg-neutral-800"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
               required
             />
 
@@ -168,7 +177,7 @@ function Signup() {
               placeholder="Código"
               className="mb-4 bg-neutral-800"
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(e) => setCode(e.target.value.replace(/\s/g, ''))}
               required
             />
 
@@ -198,7 +207,7 @@ function Signup() {
           />
 
           {/* captcha centralizado */}
-          <Captcha onChange={setCaptchaToken} />
+          {/* <Captcha onChange={setCaptchaToken} /> */}
         </div>
       </div>
     </div>

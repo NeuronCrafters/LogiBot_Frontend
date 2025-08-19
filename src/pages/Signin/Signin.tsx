@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
-import { Captcha } from "@/components/components/Security/Captcha";
+// import ReCAPTCHA from "react-google-recaptcha";
+// import { Captcha } from "@/components/components/Security/Captcha";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { Input } from "@/components/components/Input/Input";
@@ -16,28 +16,36 @@ function Signin() {
   const [loading, setLoading] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
   const [redirectTo, setRedirectTo] = useState<"/signup" | "/forgot-password" | null>(null);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { login } = useAuth();
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  // const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Remove espaços antes do envio
+    const finalEmail = email.replace(/\s/g, '');
+    const finalPassword = password.replace(/\s/g, '');
+
+    // Validação do reCAPTCHA desabilitada temporariamente
+    /*
     if (!captchaToken) {
       toast.error("Por favor, confirme o captcha.");
       return;
     }
+    */
 
     try {
       setLoading(true);
-      await login(email, password, captchaToken);
-      recaptchaRef.current?.reset();
-      setCaptchaToken(null);
+      // Passa um valor substituto para o captchaToken para não quebrar a função login
+      await login(finalEmail, finalPassword, "captcha-disabled");
+      // recaptchaRef.current?.reset();
+      // setCaptchaToken(null);
     } catch (error: any) {
-      recaptchaRef.current?.reset();
-      setCaptchaToken(null);
+      // recaptchaRef.current?.reset();
+      // setCaptchaToken(null);
       const msg = error?.response?.data?.message ?? "Erro ao fazer login.";
       toast.error(msg);
     } finally {
@@ -106,7 +114,7 @@ function Signin() {
               className="w-full bg-neutral-800"
               placeholder="E-mail"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
               required
             />
 
@@ -115,7 +123,7 @@ function Signin() {
               className="w-full bg-neutral-800"
               placeholder="Senha"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
               required
             />
 
@@ -169,7 +177,7 @@ function Signin() {
             className="mt-2 text-center"
           />
 
-          <Captcha ref={recaptchaRef} onChange={setCaptchaToken} />
+          {/* <Captcha ref={recaptchaRef} onChange={setCaptchaToken} /> */}
         </div>
       </div>
     </div>

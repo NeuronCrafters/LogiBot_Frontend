@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/services/api/api";
 import { AuthContext, AuthContextData, User } from "./AuthContext";
@@ -58,7 +58,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function logout() {
+  // async function logout() {
+  //   try {
+  //     await flushClicks();
+  //     await api.post("/logout", {}, { withCredentials: true });
+  //   } catch (error) {
+  //     console.error("Erro ao fazer logout:", error);
+  //   } finally {
+  //     queryClient.clear();
+  //     setUser(null);
+  //     navigate("/signin");
+  //   }
+  // }
+
+  const logout = useCallback(async () => {
     try {
       await flushClicks();
       await api.post("/logout", {}, { withCredentials: true });
@@ -69,7 +82,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       navigate("/signin");
     }
-  }
+  }, [flushClicks, queryClient, navigate]);
+
+  const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
+  const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000;
+
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimer.current) {
+      clearTimeout(inactivityTimer.current);
+    }
+    inactivityTimer.current = setTimeout(() => {
+      if (isAuthenticated) {
+        console.log("Usuário inativo por 2 horas. Desconectando...");
+        logout();
+      }
+    }, INACTIVITY_TIMEOUT);
+  }, [isAuthenticated, logout]);
+
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+
+      const reset = () => resetInactivityTimer();
+
+      resetInactivityTimer();
+
+      events.forEach(event => window.addEventListener(event, reset));
+
+      return () => {
+        if (inactivityTimer.current) {
+          clearTimeout(inactivityTimer.current);
+        }
+        events.forEach(event => window.removeEventListener(event, reset));
+      };
+    }
+  }, [isAuthenticated, resetInactivityTimer]);
 
   useEffect(() => {
     getUser().finally(() => setLoading(false));
