@@ -51,8 +51,8 @@ function Signup() {
     if (!password) {
       toast.error("Senha é obrigatória.");
       return;
-    } else if (password.length < 6) {
-      toast.error("Use pelo menos 6 caracteres.");
+    } else if (password.length < 13) {
+      toast.error("A senha deve ter pelo menos 12 caracteres!.");
       return;
     }
 
