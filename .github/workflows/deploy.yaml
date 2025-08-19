@@ -51,17 +51,23 @@ jobs:
           script: |
             # Navega até o diretório do seu projeto
             cd ../logibot/LogiBot_Frontend
-            
+
             # Cria a rede Docker (se não existir)
             docker network inspect logibot-network >/dev/null 2>&1 || docker network create logibot-network
+
+            # Injeta as variáveis de ambiente diretamente no shell
+            export VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}"
+            export VITE_API_KEY="${{ secrets.VITE_API_KEY }}"
+            export VITE_RECAPTCHA_SITE_KEY="${{ secrets.VITE_RECAPTCHA_SITE_KEY }}"
 
             # Puxa o docker-compose.yml mais recente do Git
             git pull origin main
 
-            # Baixa a imagem mais recente do GHCR
+            # Autenticação e pull da imagem
             REPO_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker pull ghcr.io/$REPO_LOWERCASE:latest
-            
+
             # Sobe o serviço, que lerá as variáveis do environment do docker-compose.yml
             docker-compose down
             docker-compose up -d

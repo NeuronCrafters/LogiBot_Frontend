@@ -5,9 +5,9 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
-      - VITE_API_KEY=${{ secrets.VITE_API_KEY }}
-      - VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+      - VITE_API_BASE_URL
+      - VITE_API_KEY
+      - VITE_RECAPTCHA_SITE_KEY
     restart: always
     networks:
       - logibot-network
