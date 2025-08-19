@@ -1,18 +1,13 @@
-version: "3.8"
-
 services:
   frontend:
     container_name: LogiBot_Frontend
-    image: logibot_frontend:latest
+    image: ghcr.io/ramoncbarbosa/logibot_frontend:latest
     ports:
-     - "3001:3001"
+      - "3001:3001"
     environment:
-    - VITE_API_BASE_URL
-    - VITE_API_KEY
-    - VITE_RECAPTCHA_SITE_KEY
-    - SSH_HOST
-    - SSH_KEY
-    - SSH_USERNAME
+      - VITE_API_BASE_URL
+      - VITE_API_KEY
+      - VITE_RECAPTCHA_SITE_KEY
     restart: always
     networks:
       - logibot-network
