@@ -1,14 +1,14 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { publicApi } from "@/services/api/api";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
-import ReCAPTCHA from "react-google-recaptcha";
+// import ReCAPTCHA from "react-google-recaptcha";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,15 +17,15 @@ export default function ForgotPassword() {
       return toast.error("Digite seu e-mail.");
     }
 
-    if (!captchaToken) {
-      return toast.error("Confirme que você não é um robô.");
-    }
+    // if (!captchaToken) {
+    //   return toast.error("Confirme que você não é um robô.");
+    // }
 
     try {
       setLoading(true);
       const res = await publicApi.post("/password/send-reset-password", {
         email,
-        captcha: captchaToken,
+        // captcha: captchaToken,
       });
 
       if (res.status === 200) {
@@ -37,7 +37,7 @@ export default function ForgotPassword() {
       toast.error(err.response?.data?.error || "Erro ao enviar e-mail.");
     } finally {
       setLoading(false);
-      recaptchaRef.current?.reset();
+      // recaptchaRef.current?.reset();
     }
   };
 
@@ -54,12 +54,12 @@ export default function ForgotPassword() {
           className="w-full p-2 bg-zinc-700 rounded"
           required
         />
-        <ReCAPTCHA
+        {/* <ReCAPTCHA
           ref={recaptchaRef}
           sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
           onChange={setCaptchaToken}
           theme="dark"
-        />
+        /> */}
         <button
           type="submit"
           disabled={loading}
