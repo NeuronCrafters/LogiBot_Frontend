@@ -1,8 +1,10 @@
 services:
   app:
-    container_name: logibots
+    container_name: logibots_frontend
 
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
 
     ports:
       - "5173:5173"
@@ -10,3 +12,10 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+
+    networks:
+      - logibots
+
+networks:
+  logibots:
+    external: true
