@@ -59,7 +59,7 @@ export function QuestionsDisplay({
           <div className="border border-white/20 rounded-2xl p-4 bg-[#141414] shadow-md w-full max-w-[520px] mx-auto">
             <Typograph
               text={`${i + 1}. ${q.question}`}
-              variant="text7"
+              variant="text2"
               fontFamily="poppins"
               weight="medium"
               colorText="text-white"
