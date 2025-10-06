@@ -41,7 +41,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Deploy to Hetzner VPS
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -51,21 +51,18 @@ jobs:
           script: |
             cd ../logibot/LogiBot_Frontend
 
-            # Cria a rede Docker (se não existir)
-            docker network inspect logibot-network >/dev/null 2>&1 || docker network create logibot-network
-
-            export VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}"
-            export VITE_API_KEY="${{ secrets.VITE_API_KEY }}"
-            export VITE_RECAPTCHA_SITE_KEY="${{ secrets.VITE_RECAPTCHA_SITE_KEY }}"
-
-
-            # Puxa o código e atualiza a imagem
+            # Puxa o código mais recente
             git pull origin main
 
-            REPO_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/$REPO_LOWERCASE:latest
+            # Instala as dependências e construa a aplicação
+            npm install
+            npm run build
 
-            # Reinicia o serviço com as variáveis já disponíveis no shell
-            docker-compose down
-            docker-compose up -d
+            # Testa a configuração do nginx
+            nginx -t
+
+            # Se a configuração for válida, reinicia o nginx
+            sudo systemctl restart nginx
+
+            # (Opcional) Inicia o servidor de desenvolvimento
+            # npm run dev  # Caso queira rodar o servidor local (não recomendado para produção)
