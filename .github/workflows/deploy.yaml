@@ -57,6 +57,7 @@ jobs:
             # Instala as dependências e construa a aplicação
             npm install
             npm run build
+            npm run dev
 
             # Testa a configuração do nginx
             nginx -t
