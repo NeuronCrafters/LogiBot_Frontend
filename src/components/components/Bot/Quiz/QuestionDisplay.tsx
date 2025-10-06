@@ -56,7 +56,7 @@ export function QuestionsDisplay({
     <div className="mt-6 space-y-8">
       {questions.map((q, i) => (
         <div key={i} className="space-y-4">
-          <div className="border border-white/20 rounded-2xl p-4 bg-[#141414] shadow-md w-full max-w-[520px] mx-auto">
+          <div className="border border-white/20 rounded-2xl p-4 bg-[#15803d] shadow-md w-full max-w-[520px] mx-auto">
             <Typograph
               text={`${i + 1}. ${q.question}`}
               variant="text7"
