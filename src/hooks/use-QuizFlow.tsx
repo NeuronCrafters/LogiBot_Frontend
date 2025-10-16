@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Question } from "@/@types/QuestionType";
 import { formatTitle } from "@/utils/formatText";
 import { ButtonData } from "@/components/components/Bot/Quiz/CategoryStep";
