@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { rasaService } from "@/services/api/api_rasa";
-import { ButtonChoiceBot } from "@/components/components/Button/ButtonChoiceBot";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
+import { ButtonChoiceBot } from "@/components/components/Button/ButtonChoiceBot";
 import { formatTitle } from "@/utils/formatText";
-import { ButtonData } from "./CategoryStep";
-import { Question } from "../../../../@types/QuestionType";
+import { quizService } from "@/services/api/api_quiz"; // MUDANÇA: Novo import
+import { Question } from "@/@types/QuestionType";
+
+type ButtonData = { title: string; payload: string };
 
 interface SubsubjectStepProps {
   buttons: ButtonData[];
@@ -15,24 +16,16 @@ interface SubsubjectStepProps {
 export function SubsubjectStep({ buttons, onNext }: SubsubjectStepProps) {
   const [loading, setLoading] = useState(false);
 
-  const handleClick = async (payload: string) => {
+  const handleClick = async (subtopicoPayload: string) => {
     setLoading(true);
     try {
-      const idx = payload.indexOf("{");
-      const json = idx >= 0 ? payload.slice(idx) : "";
-      const obj = json ? JSON.parse(json) : {};
-      const subtopico = obj.subtopico as string || "";
-
-      const res = await rasaService.gerarPerguntas(subtopico);
+      const res = await quizService.generateQuiz(subtopicoPayload);
       const qs: Question[] = Array.isArray(res.questions) ? res.questions : [];
-
-      onNext(qs, subtopico); // Subtópico puro enviado
+      onNext(qs, subtopicoPayload);
     } catch (error: any) {
       console.error("SubsubjectStep erro ao gerar perguntas:", error);
       const msg = error.response?.data?.message || "Erro ao gerar perguntas";
       onNext([], msg);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -52,7 +45,7 @@ export function SubsubjectStep({ buttons, onNext }: SubsubjectStepProps) {
           <ButtonChoiceBot
             options={buttons.map((btn) => ({
               label: formatTitle(btn.title),
-              value: btn.payload
+              value: btn.payload,
             }))}
             onSelect={handleClick}
           />

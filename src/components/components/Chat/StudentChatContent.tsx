@@ -12,6 +12,7 @@ import { ChatInput } from '@/components/components/Input/ChatInput';
 import { ButtonBotAnswer } from '@/components/components/Button/ButtonBotAnswer';
 import { useQuizFlow } from '@/hooks/use-QuizFlow';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 
 interface StudentChatContentProps {
   user: User;
@@ -23,18 +24,14 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
 
   const {
     messages,
-    greetingDone,
-    setGreetingDone,
-    inputText,
-    setInputText,
     step,
     mode,
     questions,
     resultData,
-    showLevels,
-    setShowLevels,
     categoryButtons,
     subsubjectButtons,
+    inputText,
+    setInputText,
     handleInitialChoice,
     handleLevelNext,
     handleCategoryNext,
@@ -43,6 +40,8 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     resetToInitial,
     sendMessage,
   } = useQuizFlow({ userId });
+
+  const [greetingDone, setGreetingDone] = useState(false);
 
   return (
     <>
@@ -73,7 +72,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
           )}
         </AnimatePresence>
 
-        {/* botão de voltar à escolha inicial */}
         {mode !== "none" && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -88,74 +86,40 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                   Voltar à escolha inicial
                 </span>
               }
-              onClick={() => {
-                resetToInitial();
-                setShowLevels(false);
-              }}
+              onClick={resetToInitial}
               isSubmit
             />
           </motion.div>
         )}
 
-        {/* === MODO CHAT === */}
+        {/* MODO CHAT */}
         {greetingDone && mode === "chat" && (
           <ChatMessages messages={messages} userName={userName} userId={userId} />
         )}
 
-        {/* === MODO QUIZ === */}
+        {/* MODO QUIZ */}
         {greetingDone && mode === "quiz" && (
           <AnimatePresence mode="wait">
-            {showLevels && step === "levels" && (
-              <motion.div
-                key="levels"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="mt-4"
-              >
-                <LevelStep onNext={btns => {
-                  handleLevelNext(btns, "");
-                  setShowLevels(false);
-                }} />
+            {step === "levels" && (
+              <motion.div key="levels" /* ...animacões... */ className="mt-4">
+                <LevelStep onNext={handleLevelNext} />
               </motion.div>
             )}
 
             {step === "categories" && (
-              <motion.div
-                key="categories"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="mt-4"
-              >
+              <motion.div key="categories" /* ...animacões... */ className="mt-4">
                 <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />
               </motion.div>
             )}
 
             {step === "subsubjects" && (
-              <motion.div
-                key="subsubjects"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="mt-4"
-              >
+              <motion.div key="subsubjects" /* ...animacões... */ className="mt-4">
                 <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />
               </motion.div>
             )}
 
             {step === "questions" && (
-              <motion.div
-                key="questions"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="mt-4"
-              >
+              <motion.div key="questions" /* ...animacões... */ className="mt-4">
                 <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />
               </motion.div>
             )}
@@ -169,15 +133,18 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                 transition={{ duration: 0.5 }}
                 className="mt-6 space-y-6"
               >
-                <ResultDisplay detalhes={resultData.detalhes} />
+                {/* MUDANÇA AQUI 👇: Passando todas as props necessárias */}
+                <ResultDisplay
+                  totalCorrectAnswers={resultData.totalCorrectAnswers}
+                  totalWrongAnswers={resultData.totalWrongAnswers}
+                  detalhes={resultData.detalhes}
+                />
+
                 <div className="flex justify-center">
                   <ButtonBotAnswer
                     text="Continuar praticando"
                     isSubmit
-                    onClick={() => {
-                      handleInitialChoice("quiz");
-                      setShowLevels(true);
-                    }}
+                    onClick={() => handleInitialChoice("quiz")}
                   />
                 </div>
               </motion.div>
@@ -186,7 +153,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         )}
       </div>
 
-      {/* input de chat apenas em chat */}
+      {/* Input de chat apenas no modo chat */}
       <AnimatePresence mode="wait">
         {greetingDone && mode === "chat" && (
           <motion.div
@@ -194,11 +161,8 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{
-              duration: 0.4,
-              ease: "easeInOut"
-            }}
-            className="w-full max-w-2xl fixed bottom-0 left-0 right-0 px-4 pb-6 z-10"
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="w-full max-w-2xl fixed bottom-0 left-0 right-0 px-4 pb-6 z-10 mx-auto"
           >
             <ChatInput inputText={inputText} setInputText={setInputText} sendMessage={sendMessage} />
           </motion.div>

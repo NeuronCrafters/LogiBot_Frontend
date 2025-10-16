@@ -17,16 +17,7 @@ export function QuestionsDisplay({
 
   const handleSelect = (questionIndex: number, option: string) => {
     if (isSubmitting) return;
-    setSelectedAnswers((prev) => {
-      const current = prev[questionIndex];
-      if (current === option) {
-        const updated = { ...prev };
-        delete updated[questionIndex];
-        return updated;
-      } else {
-        return { ...prev, [questionIndex]: option };
-      }
-    });
+    setSelectedAnswers((prev) => ({ ...prev, [questionIndex]: option }));
   };
 
   const handleSubmit = async () => {
@@ -36,14 +27,11 @@ export function QuestionsDisplay({
     const answers = questions.map((q, index) => {
       const selected = selectedAnswers[index];
       const optionIndex = q.options.findIndex((opt) => opt === selected);
-      const letter = ["A", "B", "C", "D", "E"][optionIndex] || "?";
-      return letter;
+      return ["A", "B", "C", "D", "E"][optionIndex] || "?";
     });
 
     try {
       await onSubmitAnswers(answers);
-      // se quiser reabilitar depois:
-      // setIsSubmitting(false);
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
@@ -94,7 +82,6 @@ export function QuestionsDisplay({
           disabled={!allAnswered || isSubmitting}
           text={isSubmitting ? "Analisando respostas..." : "Enviar respostas"}
         />
-
         {isSubmitting && (
           <Typograph
             text="Por favor, aguarde enquanto suas respostas são analisadas..."
