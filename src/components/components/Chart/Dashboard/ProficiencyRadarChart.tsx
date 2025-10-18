@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, PolarRadiusAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
@@ -20,27 +20,84 @@ const chartConfig = {
 function useChartData(filters: ChartProps['filters']) {
   return useQuery({
     queryKey: ['proficiencyRadar', filters],
-    queryFn: () => dashboardApi.getProficiencyRadar(filters).then(res => res.data),
+    queryFn: async () => {
+      console.log('🔍 [ProficiencyRadar] Iniciando requisição com filtros:', filters);
+      try {
+        const response = await dashboardApi.getProficiencyRadar(filters);
+        console.log('✅ [ProficiencyRadar] Resposta da API recebida:', response);
+        console.log('📊 [ProficiencyRadar] Data da resposta:', response.data);
+        return response.data;
+      } catch (error) {
+        console.error('❌ [ProficiencyRadar] Erro na requisição:', error);
+        throw error;
+      }
+    },
     enabled: !!filters.universityId,
     staleTime: 1000 * 60 * 5,
     select: (apiData) => {
-      if (!apiData || apiData.labels.length === 0) return [];
-      return apiData.labels.map((label, index) => ({
+      console.log('🔄 [ProficiencyRadar] Processando dados no select:', apiData);
+
+      if (!apiData) {
+        console.warn('⚠️ [ProficiencyRadar] apiData é null/undefined');
+        return [];
+      }
+
+      if (!apiData.labels) {
+        console.warn('⚠️ [ProficiencyRadar] apiData.labels não existe. Estrutura completa:', JSON.stringify(apiData, null, 2));
+        return [];
+      }
+
+      if (!Array.isArray(apiData.labels)) {
+        console.warn('⚠️ [ProficiencyRadar] apiData.labels não é um array:', typeof apiData.labels);
+        return [];
+      }
+
+      if (apiData.labels.length === 0) {
+        console.warn('⚠️ [ProficiencyRadar] apiData.labels está vazio');
+        return [];
+      }
+
+      if (!apiData.data) {
+        console.warn('⚠️ [ProficiencyRadar] apiData.data não existe');
+        return [];
+      }
+
+      if (!Array.isArray(apiData.data)) {
+        console.warn('⚠️ [ProficiencyRadar] apiData.data não é um array:', typeof apiData.data);
+        return [];
+      }
+
+      const processedData = apiData.labels.map((label, index) => ({
         subject: label.charAt(0).toUpperCase() + label.slice(1),
         score: apiData.data[index],
       }));
+
+      console.log('✅ [ProficiencyRadar] Dados processados com sucesso:', processedData);
+      return processedData;
     }
   });
 }
 
 export function ProficiencyRadarChart({ filters }: ChartProps) {
-  const { data, isLoading, isError, refetch } = useChartData(filters);
+  const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
 
-  // --- NOVA LÓGICA PARA O FOOTER ---
-  // Calcula as métricas de proficiência (melhor, pior, média)
+  useEffect(() => {
+    console.log('📈 [ProficiencyRadar] Estado do componente:', {
+      isLoading,
+      isError,
+      error: error?.message,
+      hasData,
+      dataLength: data?.length,
+      data
+    });
+  }, [isLoading, isError, error, hasData, data]);
+
   const performanceMetrics = useMemo(() => {
-    if (!hasData) return null;
+    if (!hasData) {
+      console.log('⚠️ [ProficiencyRadar] Não há dados para calcular métricas');
+      return null;
+    }
 
     const totalScore = data.reduce((sum, item) => sum + item.score, 0);
     const averageScore = totalScore / data.length;
@@ -48,13 +105,15 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
     const bestSubject = data.reduce((max, item) => item.score > max.score ? item : max, data[0]);
     const worstSubject = data.reduce((min, item) => item.score < min.score ? item : min, data[0]);
 
-    return {
+    const metrics = {
       average: averageScore,
       best: bestSubject,
       worst: worstSubject,
     };
+
+    console.log('📊 [ProficiencyRadar] Métricas calculadas:', metrics);
+    return metrics;
   }, [data, hasData]);
-  // --- FIM DA NOVA LÓGICA ---
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
@@ -75,8 +134,20 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                 </svg>
               )}
               {isLoading && <p className="text-white/70">Carregando dados...</p>}
-              {!isLoading && !isError && !hasData && <p className="text-white/70">Nenhum dado de proficiência disponível.</p>}
-              {isError && <button onClick={() => refetch()} className="mt-3 text-xs text-indigo-400 transition-colors hover:text-indigo-300">Tentar novamente</button>}
+              {!isLoading && !isError && !hasData && (
+                <div className="text-center">
+                  <p className="text-white/70">Nenhum dado de proficiência disponível.</p>
+                  <p className="text-xs text-white/50 mt-2">Verifique o console para mais detalhes</p>
+                </div>
+              )}
+              {isError && (
+                <div className="text-center">
+                  <p className="text-red-400 text-sm mb-2">{error?.message || 'Erro ao carregar dados'}</p>
+                  <button onClick={() => refetch()} className="mt-3 text-xs text-indigo-400 transition-colors hover:text-indigo-300">
+                    Tentar novamente
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -114,7 +185,6 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
           )}
         </CardContent>
 
-        {/* --- CardFooter CORRIGIDO --- */}
         {hasData && performanceMetrics && (
           <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
             <div className="flex flex-col">
@@ -129,7 +199,6 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
             </div>
           </CardFooter>
         )}
-        {/* --- FIM DA CORREÇÃO --- */}
       </Card>
     </motion.div>
   );
