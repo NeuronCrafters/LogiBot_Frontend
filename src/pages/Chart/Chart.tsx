@@ -164,8 +164,7 @@
 //   );
 // }
 
-
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { Avatar } from "@/components/components/Avatar/Avatar";
@@ -174,6 +173,11 @@ import { Typograph } from "@/components/components/Typograph/Typograph";
 import { ChartFilter } from "@/components/components/Chart/ChartFilter";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+
+// Importações para o filtro de datas
+import { DateRange } from "react-day-picker";
+import { addDays, format } from "date-fns";
+// import { DateRangePicker } from "@/components/components/Chart/DateRangePicker"; // Certifique-se que o caminho está correto
 
 // Tipos
 import type { ChartFilterState } from "@/@types/ChartsType";
@@ -197,52 +201,67 @@ export function Chart() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   // --- ESTADO CENTRALIZADO ---
-  // Estado para os novos gráficos (formato direto para a API)
   const [dashboardFilters, setDashboardFilters] = useState<DashboardFilterParams>({});
-
-  // Estado para manter a compatibilidade com os gráficos antigos
   const [legacyFilter, setLegacyFilter] = useState<ChartFilterState & {
-    hierarchyParams: DashboardFilterParams;
+    hierarchyParams: Omit<DashboardFilterParams, 'startDate' | 'endDate'>;
   }>({ type: "student", ids: [], mode: "individual", hierarchyParams: {} });
 
-  const [hasSelection, setHasSelection] = useState(false);
-  const [key, setKey] = useState(0); // Força o re-render dos gráficos
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: addDays(new Date(), -30), // Padrão: últimos 30 dias
+    to: new Date(),
+  });
 
-  const handleFilterChange = useCallback((
+  const [hasSelection, setHasSelection] = useState(false);
+  const [key, setKey] = useState(0);
+
+  // Função central que atualiza todos os filtros quando algo muda
+  const updateAllFilters = useCallback((
+    currentLegacyFilter: typeof legacyFilter,
+    currentDateRange: typeof dateRange
+  ) => {
+    const validIds = currentLegacyFilter.ids.filter(id => id && id.trim() !== "");
+    const mainId = validIds[0] || "";
+
+    const newDashboardFilters: DashboardFilterParams = {
+      ...currentLegacyFilter.hierarchyParams,
+      startDate: currentDateRange?.from ? format(currentDateRange.from, 'yyyy-MM-dd') : undefined,
+      endDate: currentDateRange?.to ? format(currentDateRange.to, 'yyyy-MM-dd') : undefined,
+    };
+
+    if (currentLegacyFilter.type === 'student') {
+      newDashboardFilters.studentId = mainId;
+    } else if (mainId) {
+      newDashboardFilters[`${currentLegacyFilter.type}Id` as keyof DashboardFilterParams] = mainId;
+    }
+
+    setDashboardFilters(newDashboardFilters);
+    setHasSelection(!!mainId);
+    setKey(k => k + 1);
+  }, []);
+
+  // Handler para quando o filtro de entidade (aluno, turma, etc.) muda
+  const handleEntityFilterChange = useCallback((
     type: LogEntityType,
     ids: string[],
     mode: LogModeType,
-    hierarchyParams?: DashboardFilterParams
+    hierarchyParams?: Omit<DashboardFilterParams, 'startDate' | 'endDate'>
   ) => {
-    const validIds = ids.filter(id => id && id.trim() !== "");
-    const mainId = validIds[0] || "";
-
-    // 1. Prepara os filtros para os NOVOS gráficos (formato plano)
-    const newDashboardFilters: DashboardFilterParams = {
-      universityId: hierarchyParams?.universityId || "",
-      courseId: hierarchyParams?.courseId,
-      classId: hierarchyParams?.classId,
-      disciplineId: hierarchyParams?.disciplineId,
-    };
-    if (type === 'student') {
-      newDashboardFilters.studentId = mainId;
-    } else if (mainId) {
-      newDashboardFilters[`${type}Id` as keyof DashboardFilterParams] = mainId;
-    }
-    setDashboardFilters(newDashboardFilters);
-
-    // 2. Prepara os filtros para os gráficos ANTIGOS (formato legado)
-    setLegacyFilter({
+    const newLegacyFilter = {
       type,
-      ids: validIds,
+      ids: ids.filter(id => id && id.trim() !== ""),
       mode,
       hierarchyParams: hierarchyParams || {},
-    });
+    };
+    setLegacyFilter(newLegacyFilter);
+    updateAllFilters(newLegacyFilter, dateRange);
+  }, [dateRange, updateAllFilters]);
 
-    // 3. Atualiza o estado da UI
-    setHasSelection(!!mainId);
-    setKey(k => k + 1); // Força a atualização de todos os gráficos
-  }, []);
+  // Efeito para atualizar os filtros quando APENAS a data muda
+  useEffect(() => {
+    if (hasSelection) {
+      updateAllFilters(legacyFilter, dateRange);
+    }
+  }, [dateRange, hasSelection, legacyFilter, updateAllFilters]);
 
   return (
     <div className="flex min-h-screen bg-[#141414] flex-col items-center w-full">
@@ -262,32 +281,22 @@ export function Chart() {
       <div className="flex-1 w-full max-w-7xl px-4 pt-24 pb-20 mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-4">
           <Typograph text="Dashboard de Atividades" variant="text3" weight="semibold" colorText="text-white" fontFamily="montserrat" />
-          <Typograph
-            text="Visualize métricas detalhadas por entidade"
-            variant="text7"
-            weight="regular"
-            fontFamily="montserrat"
-            colorText="text-white/60"
-            className="mt-2"
-          />
+          <Typograph text="Visualize métricas detalhadas por entidade e período" variant="text7" colorText="text-white/60" className="mt-2" weight={"bold"} fontFamily={"montserrat"} />
         </motion.div>
 
-        <ChartFilter onChange={handleFilterChange} />
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-grow">
+            <ChartFilter onChange={handleEntityFilterChange} />
+          </div>
+        </div>
 
         {!hasSelection ? (
           <div className="flex items-center justify-center h-64 bg-[#1f1f1f] rounded-xl border border-dashed border-white/10 mt-8">
-            <Typograph
-              text="Selecione uma entidade nos filtros acima para visualizar os dados"
-              variant="text7"
-              weight="regular"
-              fontFamily="montserrat"
-              colorText="text-white/70"
-            />
+            <Typograph text="Selecione uma entidade nos filtros acima para visualizar os dados" variant="text7" colorText="text-white/70" weight={"bold"} fontFamily={"montserrat"} />
           </div>
         ) : (
           <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="mt-8 space-y-12">
 
-            {/* --- SEÇÃO DE GRÁFICOS ANTIGOS --- */}
             <div>
               <Typograph text="Visão Geral (Legado)" variant="text4" weight="semibold" colorText="text-white" fontFamily="montserrat" className="mb-6" />
               <div className="space-y-6">
@@ -301,9 +310,8 @@ export function Chart() {
 
             <Separator className="bg-white/10" />
 
-            {/* --- SEÇÃO DE NOVOS GRÁFICOS --- */}
             <div>
-              <Typograph text="NOVOS GRÁFICOS PARA ANALISE DO PROJETO" variant="text4" weight="semibold" colorText="text-white" fontFamily="montserrat" className="mb-6" />
+              <Typograph text="Análise Detalhada de Desempenho e Acesso" variant="text4" weight="semibold" colorText="text-white" fontFamily="montserrat" className="mb-6" />
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <TopicPerformanceChart filters={dashboardFilters} />
                 <EffortMatrixChart filters={dashboardFilters} />

@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react"; // Adicionada a importação do useMemo
+import { useMemo } from "react";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, PolarRadiusAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
-import { ChartLoader, ChartError, NoData } from "./ChartStates";
 
 interface ChartProps {
   filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };

@@ -1,23 +1,36 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMemo } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
-import { ChartLoader, ChartError, NoData } from "./ChartStates";
+import { ChartLoader, ChartError, NoData } from "../ChartStates";
+
+interface TopicData {
+  topic: string;
+  successPercentage: number;
+  errorPercentage: number;
+}
 
 interface ChartProps {
   filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };
 }
 
-// ======================================================================
-// ## ONDE MUDAR AS CORES ##
-// Altere os códigos hexadecimais abaixo para mudar as cores das barras.
-// ======================================================================
-const COLOR_SUCCESS = "#3f7d7d"; // Verde/Teal para acertos
-const COLOR_ERROR = "#7d3f3f";   // Vermelho para erros
+// Configuração centralizada do gráfico para fácil manutenção
+const chartConfig = {
+  successPercentage: {
+    label: "Acertos",
+    color: "hsl(180 31% 37%)",
+  },
+  errorPercentage: {
+    label: "Erros",
+    color: "hsl(0 31% 37%)",
+  },
+} satisfies ChartConfig;
 
 function useChartData(filters: ChartProps['filters']) {
-  return useQuery({
+  return useQuery<TopicData[]>({
     queryKey: ['topicPerformance', filters],
     queryFn: () => dashboardApi.getTopicPerformance(filters).then(res => res.data),
     enabled: !!filters.universityId,
@@ -29,40 +42,103 @@ export function TopicPerformanceChart({ filters }: ChartProps) {
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
 
+  // Calcula os tópicos com maior acerto e erro
+  const { topicWithHighestSuccess, topicWithHighestError } = useMemo(() => {
+    if (!hasData) {
+      return { topicWithHighestSuccess: null, topicWithHighestError: null };
+    }
+
+    const highestSuccess = data.reduce((max, item) => item.successPercentage > max.successPercentage ? item : max, data[0]);
+    const highestError = data.reduce((max, item) => item.errorPercentage > max.errorPercentage ? item : max, data[0]);
+
+    return {
+      topicWithHighestSuccess: highestSuccess,
+      topicWithHighestError: highestError
+    };
+  }, [data, hasData]);
+
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <Card className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
-        <CardHeader>
+        <CardHeader className="border-b border-white/10 pb-4">
           <CardTitle className="text-white">Desempenho por Tópico Individual</CardTitle>
           <CardDescription className="text-white/70">Proporção de acertos vs. erros em cada assunto do quiz.</CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow">
+
+        <CardContent className="flex-grow pt-6">
           {isLoading && <ChartLoader />}
-          {isError && <ChartError message={error.message} onRetry={refetch} />}
+          {isError && <ChartError message={error instanceof Error ? error.message : "Erro desconhecido"} onRetry={refetch} />}
           {!isLoading && !isError && !hasData && <NoData onRetry={refetch} />}
           {!isLoading && !isError && hasData && (
-            // ======================================================================
-            // ## ONDE MUDAR ALTURA E LARGURA ##
-            // A LARGURA é 100% para ser responsiva.
-            // A ALTURA é controlada aqui. Altere o valor `height={300}`.
-            // ======================================================================
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-                <XAxis type="number" domain={[0, 100]} stroke="#ffffff80" tick={{ fill: '#ffffffb0', fontSize: 12 }} tickFormatter={(value) => `${value}%`} />
-                <YAxis type="category" dataKey="topic" stroke="#ffffff80" width={80} tick={{ fill: '#ffffffb0', fontSize: 12 }} />
-                <Tooltip
-                  cursor={{ fill: '#ffffff10' }}
-                  contentStyle={{ backgroundColor: "#1f1f1f", borderColor: "#333", borderRadius: '0.5rem' }}
-                  labelStyle={{ color: "#fff" }}
-                />
-                <Legend formatter={value => <span className="text-white/80">{value}</span>} />
-                <Bar dataKey="successPercentage" name="Acertos" stackId="a" fill={COLOR_SUCCESS} />
-                <Bar dataKey="errorPercentage" name="Erros" stackId="a" fill={COLOR_ERROR} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="min-h-[300px] w-full">
+              <ChartContainer config={chartConfig} className="w-full h-full">
+                <BarChart
+                  accessibilityLayer
+                  data={data}
+                  layout="vertical"
+                  stackOffset="expand"
+                  margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+                >
+                  <CartesianGrid vertical={true} horizontal={false} stroke="rgba(255, 255, 255, 0.1)" />
+                  <YAxis
+                    dataKey="topic"
+                    type="category"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    width={80}
+                    tick={{ fill: 'rgba(255, 255, 255, 0.7)', fontSize: 12 }}
+                  />
+                  <XAxis
+                    type="number"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={(value) => `${Math.round(value * 100)}%`}
+                    tick={{ fill: 'rgba(255, 255, 255, 0.7)', fontSize: 12 }}
+                  />
+                  <ChartTooltip
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                    content={
+                      <ChartTooltipContent
+                        className="bg-[#1f1f1f] border-white/10 text-white"
+                        indicator="dot"
+                        formatter={(value, name) => [
+                          `${(Number(value) || 0).toFixed(1)}%`,
+                          chartConfig[name as keyof typeof chartConfig]?.label
+                        ]}
+                        labelStyle={{ color: "#fff" }}
+                      />
+                    }
+                  />
+                  <Bar dataKey="errorPercentage" stackId="a" fill="var(--color-errorPercentage)" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="successPercentage" stackId="a" fill="var(--color-successPercentage)" radius={[4, 0, 0, 4]} />
+                </BarChart>
+              </ChartContainer>
+            </div>
           )}
         </CardContent>
+
+        {hasData && (
+          <CardFooter className="flex-col items-start gap-4 px-6 py-4 border-t border-white/10">
+            <div className="flex w-full items-center gap-2">
+              <div className="flex-1">
+                <p className="text-sm text-white/70">Maior Índice de Acerto</p>
+                <p className="font-bold text-white truncate" title={topicWithHighestSuccess?.topic}>
+                  {topicWithHighestSuccess?.topic ?? 'N/A'}
+                </p>
+              </div>
+              <div className="h-10 w-px bg-white/10"></div>
+              <div className="flex-1">
+                <p className="text-sm text-white/70">Maior Índice de Erro</p>
+                <p className="font-bold text-white truncate" title={topicWithHighestError?.topic}>
+                  {topicWithHighestError?.topic ?? 'N/A'}
+                </p>
+              </div>
+            </div>
+          </CardFooter>
+        )}
       </Card>
     </motion.div>
   );

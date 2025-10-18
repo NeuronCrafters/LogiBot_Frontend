@@ -3,7 +3,7 @@ import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Responsive
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
-import { ChartLoader, ChartError, NoData } from "./ChartStates";
+import { ChartLoader, ChartError, NoData } from "../ChartStates";
 
 interface ChartProps {
   filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };

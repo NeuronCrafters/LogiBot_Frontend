@@ -4,16 +4,18 @@ import type {
   EffortMatrixData,
   ProficiencyRadarData,
   LearningJourneyData,
-  AccessPatternData
+  AccessPatternData,
+  SessionDetailsData
 } from "@/@types/Dashboard";
 
-// Interface para os filtros que serão enviados no corpo da requisição
 export interface DashboardFilterParams {
   universityId?: string;
   courseId?: string;
   classId?: string;
   studentId?: string;
-  disciplineId?: string; // Adicionado para consistência, mesmo que nem todos usem
+  disciplineId?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const dashboardApi = {
@@ -31,4 +33,7 @@ export const dashboardApi = {
 
   getAccessPattern: (filters: DashboardFilterParams) =>
     api.post<AccessPatternData>('/dashboard/access-pattern', filters),
+
+  getSessionDetails: (filters: DashboardFilterParams) =>
+    api.post<SessionDetailsData[]>('/dashboard/session-details', filters),
 };

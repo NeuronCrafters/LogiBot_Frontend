@@ -1,28 +1,26 @@
 import { useState, useCallback, useEffect } from "react";
-import { AcademicFilter } from "./AcademicFilter.tsx";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
-import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
+import { AcademicFilter } from "./AcademicFilter";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
+// Importações necessárias para o filtro de datas
+import { DateRange } from "react-day-picker";
+import { addDays, format } from "date-fns";
+import { DateRangePicker } from "./DateRangePicker"; // Assegure-se que este caminho está correto
+
+// Tipos
+import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
+import { DashboardFilterParams } from "@/services/api/api_dashboard";
+
+// A interface é atualizada para refletir que o objeto de parâmetros é o mesmo da API
 interface ChartFilterProps {
   onChange: (
     type: LogEntityType,
     ids: string[],
     mode: LogModeType,
-    hierarchyParams?: {
-      universityId?: string;
-      courseId?: string;
-      classId?: string;
-      disciplineId?: string;
-    }
+    allParams?: DashboardFilterParams
   ) => void;
 }
 
@@ -30,94 +28,85 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   const { user } = useAuth();
   if (!user) return null;
 
-  // Extrai papéis do usuário e define flags
+  // --- LÓGICA DE PERMISSÕES DE USUÁRIO (inalterada) ---
   const userRoles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = userRoles.includes("admin");
   const isCoordinator = userRoles.includes("course-coordinator");
+  const userLevel = isAdmin ? "admin" : isCoordinator ? "coordinator" : "professor";
 
-  // Hierarquia: admin > coordinator > professor
-  const userLevel = isAdmin
-    ? "admin"
-    : isCoordinator
-      ? "coordinator"
-      : "professor";
-
-  // Define tipos de entidade permitidos por papel
   const getAllowedEntityTypes = (): LogEntityType[] => {
-    if (userLevel === "admin") {
-      return ["student", "class", "course", "university"];
-    }
-    if (userLevel === "coordinator") {
-      return ["student", "class", "course"];
-    }
-    // Agora professor também vê disciplina
-    if (userLevel === "professor") {
-      return ["discipline", "class", "student"];
-    }
+    if (userLevel === "admin") return ["student", "class", "course", "university"];
+    if (userLevel === "coordinator") return ["student", "class", "course"];
+    if (userLevel === "professor") return ["discipline", "class", "student"];
     return ["student"];
   };
   const allowedEntityTypes = getAllowedEntityTypes();
 
-  // Tipo inicial por papel
   const getInitialEntityType = (): LogEntityType => {
-    if (userLevel === "admin") return "student";
-    if (userLevel === "coordinator") return "student";
     if (userLevel === "professor") return "discipline";
     return "student";
   };
 
-  // Estados locais
+  // --- ESTADOS LOCAIS CENTRALIZADOS ---
   const [entityType, setEntityType] = useState<LogEntityType>(getInitialEntityType());
   const [mode] = useState<LogModeType>("individual");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [hierarchyParams, setHierarchyParams] = useState<{
-    universityId?: string;
-    courseId?: string;
-    classId?: string;
-    disciplineId?: string;
-  }>({});
+  const [hierarchyParams, setHierarchyParams] = useState<Omit<DashboardFilterParams, 'startDate' | 'endDate'>>({});
 
-  // Notifica o componente pai
+  // Estado para o filtro de datas, agora vivendo aqui
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: addDays(new Date(), -30),
+    to: new Date(),
+  });
+
+  // Função centralizada que combina TODOS os filtros e notifica o componente pai
   const notifyParent = useCallback((
-    type: LogEntityType,
-    ids: string[],
-    viewMode: LogModeType,
-    params?: typeof hierarchyParams
+    currentType: LogEntityType,
+    currentIds: string[],
+    currentMode: LogModeType,
+    currentHierarchy?: typeof hierarchyParams,
+    currentDateRange?: DateRange
   ) => {
-    const validIds = ids.filter((i) => i && i.trim() !== "");
-    console.log("ChartFilter - notifyParent chamado:", { type, validIds, viewMode, params });
-    onChange(type, validIds, viewMode, params);
+    const validIds = currentIds.filter((i) => i && i.trim() !== "");
+
+    // Combina os filtros acadêmicos com os de data em um único objeto
+    const allParams: DashboardFilterParams = {
+      ...currentHierarchy,
+      startDate: currentDateRange?.from ? format(currentDateRange.from, 'yyyy-MM-dd') : undefined,
+      endDate: currentDateRange?.to ? format(currentDateRange.to, 'yyyy-MM-dd') : undefined,
+    };
+
+    onChange(currentType, validIds, currentMode, allParams);
   }, [onChange]);
 
-  // Handler para mudança de tipo de entidade
+  // Efeito para atualizar os gráficos se APENAS a data for alterada
+  // Isso garante reatividade total
+  useEffect(() => {
+    // Só dispara a atualização se já houver uma entidade selecionada
+    if (selectedIds.length > 0) {
+      notifyParent(entityType, selectedIds, mode, hierarchyParams, dateRange);
+    }
+  }, [dateRange]); // A única dependência é o dateRange
+
+  // Handler para quando o tipo de entidade (aluno, turma) muda
   const handleEntityTypeChange = useCallback((value: string) => {
     const newType = value as LogEntityType;
-    if (!allowedEntityTypes.includes(newType)) {
-      console.warn(`Tipo ${newType} não permitido para ${userLevel}`);
-      return;
-    }
     setEntityType(newType);
-    setSelectedIds([]);
+    setSelectedIds([]); // Limpa a seleção anterior
     setHierarchyParams({});
-    notifyParent(newType, [], mode, {});
-  }, [allowedEntityTypes, mode, notifyParent, userLevel]);
+    // Notifica o pai para limpar os gráficos, mas mantém o período selecionado
+    notifyParent(newType, [], mode, {}, dateRange);
+  }, [mode, notifyParent, dateRange]);
 
-  // Recebe seleção do AcademicFilter
+  // Handler para quando uma entidade é selecionada no AcademicFilter
   const handleEntitySelection = useCallback((ids: string[], params?: typeof hierarchyParams) => {
     setSelectedIds(ids);
     if (params) setHierarchyParams(params);
-    notifyParent(entityType, ids, mode, params);
-  }, [entityType, mode, notifyParent]);
+    // Notifica o pai com a nova seleção e o período atual
+    notifyParent(entityType, ids, mode, params, dateRange);
+  }, [entityType, mode, notifyParent, dateRange]);
 
-  // Resetar seleção em comparação quando passar de 2
-  useEffect(() => {
-    if (mode === "comparison" && selectedIds.length > 2) {
-      setSelectedIds([]);
-      notifyParent(entityType, [], mode, hierarchyParams);
-    }
-  }, [mode, selectedIds.length, entityType, hierarchyParams, notifyParent]);
-
-  // Rótulos para UI
+  // --- FUNÇÕES AUXILIARES (completas) ---
   const getEntityTypeTitle = (t: LogEntityType) => {
     switch (t) {
       case "student": return "Aluno";
@@ -129,7 +118,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     }
   };
 
-  // Mensagem de status para comparação
   const getSelectionStatus = () => {
     if (mode !== "comparison") return null;
     if (selectedIds.length === 0) return "Selecione duas entidades para comparação";
@@ -148,36 +136,43 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     >
       <h3 className="text-xl font-semibold text-white">Filtros</h3>
 
-      {/* Seletor de Tipo de Entidade e Modo */}
-      <div className="grid grid-cols-1 gap-6">
-        {/* Tipo de Entidade */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-end">
+        {/* Coluna 1: Filtros Acadêmicos */}
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <Label htmlFor="entity-type" className="font-medium text-white">
+              Analisar por
+            </Label>
+            <Select value={entityType} onValueChange={handleEntityTypeChange}>
+              <SelectTrigger className="bg-[#141414] text-white border-white/10 h-12">
+                <SelectValue placeholder="Selecione um tipo de entidade" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
+                {allowedEntityTypes.map(type => (
+                  <SelectItem key={type} value={type}>{getEntityTypeTitle(type)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <AcademicFilter
+            key={entityType} // Força o reset do AcademicFilter ao mudar o tipo de entidade
+            entityType={entityType}
+            multiple={mode === "comparison"}
+            onSelect={handleEntitySelection}
+          />
+        </div>
+
+        {/* Coluna 2: Filtro de Data */}
         <div className="space-y-3">
-          <Label htmlFor="entity-type" className="font-medium text-white">
-            Tipo de Entidade
+          <Label className="font-medium text-white">
+            Período de Análise
           </Label>
-          <Select value={entityType} onValueChange={handleEntityTypeChange}>
-            <SelectTrigger className="bg-[#141414] text-white border-white/10 h-12">
-              <SelectValue>{getEntityTypeTitle(entityType)}</SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
-              {allowedEntityTypes.includes("student") && <SelectItem value="student">Aluno</SelectItem>}
-              {allowedEntityTypes.includes("discipline") && <SelectItem value="discipline">Disciplina</SelectItem>}
-              {allowedEntityTypes.includes("class") && <SelectItem value="class">Turma</SelectItem>}
-              {allowedEntityTypes.includes("course") && <SelectItem value="course">Curso</SelectItem>}
-              {allowedEntityTypes.includes("university") && <SelectItem value="university">Universidade</SelectItem>}
-            </SelectContent>
-          </Select>
+          <DateRangePicker date={dateRange} setDate={setDateRange} />
         </div>
       </div>
 
-      {/* Filtro Acadêmico (universidade, curso, disciplina, turma) */}
-      <AcademicFilter
-        entityType={entityType}
-        multiple={mode === "comparison"}
-        onSelect={handleEntitySelection}
-      />
-
-      {/* Status da seleção para comparação */}
+      {/* Status da seleção para comparação (lógica mantida) */}
       {mode === "comparison" && (
         <div className={`text-sm p-3 rounded-md border ${selectedIds.length < 2
           ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"

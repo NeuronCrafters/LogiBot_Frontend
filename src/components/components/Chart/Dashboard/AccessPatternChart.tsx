@@ -1,99 +1,111 @@
 import { useQuery } from "@tanstack/react-query";
-import { Scatter, ScatterChart, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, ZAxis, CartesianGrid } from "recharts";
+import { Scatter, ScatterChart, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { dashboardApi } from "@/services/api/api_dashboard";
-import { ChartLoader, ChartError, NoData } from "./ChartStates";
+import { dashboardApi, DashboardFilterParams } from "@/services/api/api_dashboard";
+import { ChartLoader, ChartError, NoData } from "../ChartStates";
+import { format, formatDistanceStrict } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-interface ChartProps {
-  filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };
+// Interface para a NOVA estrutura de dados da API
+interface SessionData {
+  startTime: string;
+  endTime: string;
 }
 
-const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+// Interface para os dados processados pelo gráfico
+interface ProcessedSession {
+  day: number;     // 0 (Dom) a 6 (Sáb)
+  hour: number;    // Hora de início (ex: 14.5 para 14:30)
+  startTime: Date;
+  endTime: Date;
+  duration: string;
+}
 
-function useChartData(filters: ChartProps['filters']) {
+interface ChartProps {
+  filters: DashboardFilterParams;
+}
+
+// Componente de Tooltip que mostra os detalhes exatos
+const CustomSessionTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data: ProcessedSession = payload[0].payload;
+    const options = { locale: ptBR };
+
+    return (
+      <div className="p-3 bg-[#1f1f1f] border border-white/20 rounded-lg text-white text-sm shadow-xl space-y-1">
+        <p><strong>Entrada:</strong> {format(data.startTime, "HH:mm:ss 'de' dd/MM/yy", options)}</p>
+        <p><strong>Saída:</strong> {format(data.endTime, "HH:mm:ss 'de' dd/MM/yy", options)}</p>
+        <p className="border-t border-white/10 pt-1 mt-1"><strong>Duração:</strong> {data.duration}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Hook para buscar e processar os DADOS INDIVIDUAIS
+function useIndividualSessionData(filters: ChartProps['filters']) {
   return useQuery({
-    queryKey: ['accessPattern', filters],
-    queryFn: () => dashboardApi.getAccessPattern(filters).then(res => res.data),
-    enabled: !!filters.universityId,
+    queryKey: ['individualSessions', filters],
+    // Chama a nova função na API que busca os detalhes das sessões
+    queryFn: () => dashboardApi.getSessionDetails(filters).then(res => res.data),
+    enabled: !!(filters.universityId && (filters.studentId || filters.classId || filters.courseId)),
     staleTime: 1000 * 60 * 5,
-    select: (apiData) => {
-      if (!apiData || apiData.length === 0) {
-        return { data: [], max: 0 };
-      }
-      const max = Math.max(...apiData.map(item => item[2]));
-      return { data: apiData.map(item => ({ day: item[0], hour: item[1], value: item[2] })), max };
+    select: (apiData: SessionData[] | undefined) => {
+      if (!apiData) return [];
+
+      return apiData.map(session => {
+        const startTime = new Date(session.startTime);
+        const endTime = new Date(session.endTime);
+
+        // Formata a duração (ex: "30 minutos", "1 hora", "5 segundos")
+        const duration = formatDistanceStrict(endTime, startTime, { locale: ptBR });
+
+        return {
+          day: startTime.getDay(),
+          // Converte hora e minutos para um valor decimal para plotagem precisa (ex: 14:30 se torna 14.5)
+          hour: startTime.getHours() + startTime.getMinutes() / 60,
+          startTime,
+          endTime,
+          duration,
+        };
+      });
     }
   });
 }
 
 export function AccessPatternChart({ filters }: ChartProps) {
-  const { data, isLoading, isError, error, refetch } = useChartData(filters);
-
-  // ======================================================================
-  // ## ONDE MUDAR A COR ##
-  // Altere o valor de HUE (0 a 360) para mudar a cor do heatmap.
-  // Exemplos: 262 (Roxo), 217 (Azul), 142 (Verde), 25 (Laranja)
-  // ======================================================================
-  const HUE_COLOR = 262;
-
-  const getColor = (value: number, max: number) => {
-    if (value === 0) return "#1f1f1f"; // Cor de fundo para células vazias
-    const intensity = Math.min(1, value / (max * 0.8 || 1));
-    return `hsla(${HUE_COLOR}, 83%, 77%, ${intensity})`;
-  };
-
-  const hasData = data && data.data.length > 0;
+  const { data: sessions, isLoading, isError, error, refetch } = useIndividualSessionData(filters);
+  const hasData = sessions && sessions.length > 0;
+  const shortDaysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
       <Card className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
         <CardHeader>
-          <CardTitle className="text-white">Padrões de Acesso</CardTitle>
-          <CardDescription className="text-white/70">Horários e dias da semana com maior atividade de sessões.</CardDescription>
+          <CardTitle className="text-white">Detalhes de Acesso por Sessão</CardTitle>
+          <CardDescription className="text-white/70">Cada ponto representa uma sessão individual. Passe o mouse para ver os detalhes.</CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow">
+        <CardContent className="flex-grow pt-4">
           {isLoading && <ChartLoader />}
-          {isError && <ChartError message={error.message} onRetry={refetch} />}
+          {isError && <ChartError message={(error as Error)?.message} onRetry={refetch} />}
           {!isLoading && !isError && !hasData && <NoData onRetry={refetch} />}
           {!isLoading && !isError && hasData && (
-            // ======================================================================
-            // ## ONDE MUDAR ALTURA E LARGURA ##
-            // A LARGURA é 100% para ser responsiva.
-            // A ALTURA é controlada aqui. Altere o valor `height={250}`.
-            // ======================================================================
             <ResponsiveContainer width="100%" height={250}>
-              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <CartesianGrid stroke="#ffffff20" />
+              <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
+                <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" />
                 <XAxis
                   type="number" dataKey="hour" name="Hora"
-                  domain={[-1, 24]} ticks={[0, 3, 6, 9, 12, 15, 18, 21]}
-                  tickFormatter={(h) => `${h}h`} stroke="#ffffff80" tick={{ fill: '#ffffffb0', fontSize: 12 }}
+                  domain={[0, 24]} ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
+                  tickFormatter={(h) => `${Math.floor(h)}h`} stroke="#ffffff80" tick={{ fill: 'rgba(255, 255, 255, 0.7)', fontSize: 12 }}
                 />
                 <YAxis
                   type="number" dataKey="day" name="Dia"
-                  domain={[-1, 7]} ticks={[0, 1, 2, 3, 4, 5, 6]}
-                  tickFormatter={(d) => days[d]} stroke="#ffffff80" tick={{ fill: '#ffffffb0', fontSize: 12 }}
+                  domain={[-0.5, 6.5]} ticks={[0, 1, 2, 3, 4, 5, 6]}
+                  tickFormatter={(d) => shortDaysOfWeek[d]} stroke="#ffffff80" tick={{ fill: 'rgba(255, 255, 255, 0.7)', fontSize: 12 }}
                 />
-                <Tooltip
-                  cursor={{ strokeDasharray: '3 3' }}
-                  content={({ payload }) => {
-                    if (!payload || payload.length === 0) return null;
-                    const { day, hour, value } = payload[0].payload;
-                    return (
-                      <div className="p-2 bg-[#2a2a2a] border border-white/20 rounded-md text-white text-sm shadow-lg">
-                        <p>{`${days[day]}, ${hour}h: ${value} sessão(s)`}</p>
-                      </div>
-                    );
-                  }}
-                />
-                {/* O ZAxis controla o tamanho do quadrado. Ajuste o valor [200, 200] se necessário */}
-                <ZAxis dataKey="value" range={[200, 200]} />
-                <Scatter data={data.data} shape="square">
-                  {data.data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getColor(entry.value, data.max)} />
-                  ))}
-                </Scatter>
+                <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<CustomSessionTooltip />} />
+                <Scatter data={sessions} fill="hsl(262, 83%, 77%)" shape="circle" />
               </ScatterChart>
             </ResponsiveContainer>
           )}
