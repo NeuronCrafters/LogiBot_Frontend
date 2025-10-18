@@ -8,7 +8,7 @@ import { dashboardApi } from "@/services/api/api_dashboard";
 const chartConfig = {
   score: {
     label: "Acerto",
-    color: "#274a96", // Cor mantida do seu exemplo
+    color: "#274a96",
   },
 } satisfies ChartConfig;
 
@@ -122,7 +122,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                 />
                 <PolarGrid gridType="polygon" radialLines stroke="#d4d0d0" strokeOpacity={0.6} strokeDasharray="2 2" />
                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#FFF', fontSize: 11 }} />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                <PolarRadiusAxis angle={90} domain={[0, 'dataMax']} tick={false} axisLine={false} />
                 <Radar dataKey="score" fill="#274a96" fillOpacity={0.3} stroke="#274a96" strokeWidth={2} dot={{ fill: '#274a96', strokeWidth: 0, r: 4 }} />
               </RadarChart>
             </ChartContainer>
