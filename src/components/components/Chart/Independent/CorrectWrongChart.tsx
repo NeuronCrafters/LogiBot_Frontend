@@ -142,7 +142,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
   return (
     <Card className="bg-[#1f1f1f] border-white/10 w-full mb-0">
       <CardHeader className="flex flex-col pb-4 space-y-0 border-b border-white/10">
-        <CardTitle className="text-white">Taxa de Acertos e Erros</CardTitle>
+        <CardTitle className="text-white">Desempenho por Tópico Geral</CardTitle>
         <CardDescription className="text-white/70">
           Acertos e Erros com Base na interação do Quiz
         </CardDescription>

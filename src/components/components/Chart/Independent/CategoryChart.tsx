@@ -141,7 +141,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
   return (
     <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
       <CardHeader className="flex flex-col pb-4 space-y-0 border-b border-white/10">
-        <CardTitle className="text-white">Distribuição por Assunto</CardTitle>
+        <CardTitle className="text-white">Assunto Mais Acessado: Chat</CardTitle>
         <CardDescription className="text-white/70">
           Acessos por categoria de conteúdo
         </CardDescription>
