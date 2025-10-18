@@ -22,7 +22,6 @@ interface ChartProps {
   };
 }
 
-// Hook de dados refatorado para seguir o padrão do CategoryChart
 function useProficiencyData(filters: ChartProps['filters']) {
   const hasRequiredFilters = !!filters.universityId;
 
@@ -34,19 +33,19 @@ function useProficiencyData(filters: ChartProps['filters']) {
     select: (response) => {
       const apiData = response.data;
 
-      const fixedSubjects = ['Variáveis', 'Tipos', 'Funções', 'Loops', 'Verificações'];
+      if (!apiData.labels || !apiData.data) {
+        return { chartData: [], hasPerformanceData: false, metrics: null };
+      }
 
-      const chartData = fixedSubjects.map(subject => {
-        const index = apiData.labels?.findIndex(l => l.toLowerCase() === subject.toLowerCase());
-        return {
-          subject,
-          score: index !== -1 ? apiData.data?.[index] ?? 0 : 0
-        };
-      });
+      // Monta dados para todos os assuntos que vieram da API
+      const chartData = apiData.labels.map((subject: string, index: number) => ({
+        subject,
+        score: apiData.data[index] ?? 0,
+      }));
 
       const hasPerformanceData = chartData.some(item => item.score > 0);
 
-      // Métricas opcionais
+      // Métricas opcionais calculadas com todos os dados
       const interactedData = chartData.filter(item => item.score > 0);
       const totalScore = interactedData.reduce((sum, item) => sum + item.score, 0);
       const averageScore = interactedData.length > 0 ? totalScore / interactedData.length : 0;
@@ -61,14 +60,12 @@ function useProficiencyData(filters: ChartProps['filters']) {
 
       return { chartData, hasPerformanceData, metrics };
     }
-
   });
 }
 
 export function ProficiencyRadarChart({ filters }: ChartProps) {
   const { data, isLoading, isError, refetch } = useProficiencyData(filters);
 
-  // Lógica de verificação replicada para a UI
   const hasRequired = !!filters.universityId;
   const hasData = data?.hasPerformanceData ?? false;
 
@@ -80,7 +77,6 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6 h-[299px] flex items-center justify-center">
-        {/* Bloco de renderização condicional unificado, igual ao CategoryChart */}
         {(!hasRequired || isLoading || isError || !hasData) && (
           <div className="flex flex-col items-center text-center">
             {isLoading && <div className="mb-3 w-10 h-10 rounded-full animate-pulse bg-indigo-600/30"></div>}
@@ -99,7 +95,6 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
           </div>
         )}
 
-        {/* Renderização do gráfico quando há dados */}
         {!isLoading && !isError && hasData && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
             <ChartContainer config={chartConfig} className="w-full h-full text-white aspect-auto">
@@ -127,7 +122,6 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         )}
       </CardContent>
 
-      {/* Rodapé condicional, exibindo as métricas calculadas no hook */}
       {hasData && (
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex flex-col">
