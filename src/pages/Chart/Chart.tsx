@@ -206,7 +206,7 @@ export function Chart() {
     hierarchyParams: Omit<DashboardFilterParams, 'startDate' | 'endDate'>;
   }>({ type: "student", ids: [], mode: "individual", hierarchyParams: {} });
 
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+  const [dateRange] = useState<DateRange | undefined>({
     from: addDays(new Date(), -30), // Padrão: últimos 30 dias
     to: new Date(),
   });

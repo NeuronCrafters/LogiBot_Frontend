@@ -34,7 +34,7 @@ function useChartData(filters: ChartProps['filters']) {
 }
 
 export function ProficiencyRadarChart({ filters }: ChartProps) {
-  const { data, isLoading, isError, error, refetch } = useChartData(filters);
+  const { data, isLoading, isError, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
 
   // --- NOVA LÓGICA PARA O FOOTER ---

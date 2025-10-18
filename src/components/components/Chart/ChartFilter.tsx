@@ -54,7 +54,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   const [hierarchyParams, setHierarchyParams] = useState<Omit<DashboardFilterParams, 'startDate' | 'endDate'>>({});
 
   // Estado para o filtro de datas, agora vivendo aqui
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+  const [dateRange] = useState<DateRange | undefined>({
     from: addDays(new Date(), -30),
     to: new Date(),
   });
