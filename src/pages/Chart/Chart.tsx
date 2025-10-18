@@ -172,7 +172,6 @@ import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { ChartFilter } from "@/components/components/Chart/ChartFilter";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 // Importações para o filtro de datas
 import { DateRange } from "react-day-picker";
