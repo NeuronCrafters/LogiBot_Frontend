@@ -33,38 +33,35 @@ function useProficiencyData(filters: ChartProps['filters']) {
     staleTime: 1000 * 60 * 5, // 5 minutos
     select: (response) => {
       const apiData = response.data;
-      if (!apiData || !Array.isArray(apiData.labels)) {
-        return { chartData: [], hasPerformanceData: false, metrics: null };
-      }
 
-      // 1. Processa os dados brutos para o formato do gráfico
-      const chartData = apiData.labels.map((label, index) => ({
-        subject: label.charAt(0).toUpperCase() + label.slice(1),
-        score: apiData.data?.[index] ?? 0,
-      }));
+      const fixedSubjects = ['Variáveis', 'Tipos', 'Funções', 'Loops', 'Verificações'];
 
-      // 2. Determina se há dados significativos para exibir
+      const chartData = fixedSubjects.map(subject => {
+        const index = apiData.labels?.findIndex(l => l.toLowerCase() === subject.toLowerCase());
+        return {
+          subject,
+          score: index !== -1 ? apiData.data?.[index] ?? 0 : 0
+        };
+      });
+
       const hasPerformanceData = chartData.some(item => item.score > 0);
-      if (!hasPerformanceData) {
-        return { chartData, hasPerformanceData: false, metrics: null };
-      }
 
-      // 3. Calcula as métricas, similar ao 'topCategory'
+      // Métricas opcionais
       const interactedData = chartData.filter(item => item.score > 0);
       const totalScore = interactedData.reduce((sum, item) => sum + item.score, 0);
-      const averageScore = totalScore / interactedData.length;
+      const averageScore = interactedData.length > 0 ? totalScore / interactedData.length : 0;
       const bestSubject = interactedData.reduce((max, item) => item.score > max.score ? item : max, interactedData[0]);
       const worstSubject = interactedData.reduce((min, item) => item.score < min.score ? item : min, interactedData[0]);
 
-      const metrics = {
+      const metrics = hasPerformanceData ? {
         average: averageScore,
         best: bestSubject,
         worst: worstSubject,
-      };
+      } : null;
 
-      // Retorna um objeto estruturado, assim como no seu exemplo de referência
       return { chartData, hasPerformanceData, metrics };
     }
+
   });
 }
 
