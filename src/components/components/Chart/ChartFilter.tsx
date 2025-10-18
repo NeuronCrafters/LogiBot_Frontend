@@ -135,39 +135,42 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       className="space-y-6 mb-8 p-6 bg-[#1f1f1f] rounded-xl border border-white/10"
     >
       <h3 className="text-xl font-semibold text-white">Filtros</h3>
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6">
-        {/* Coluna 1: Filtros Acadêmicos */}
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <Label htmlFor="entity-type" className="font-medium text-white">
-              Analisar por
-            </Label>
-            <Select value={entityType} onValueChange={handleEntityTypeChange}>
-              <SelectTrigger className="bg-[#141414] text-white border-white/10 h-12">
-                <SelectValue placeholder="Selecione um tipo de entidade" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
-                {allowedEntityTypes.map(type => (
-                  <SelectItem key={type} value={type}>{getEntityTypeTitle(type)}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <div className="space-y-6">
+        {/* Layout responsivo: Stack no mobile, lado a lado no desktop */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
+          {/* Filtros Acadêmicos */}
+          <div className="space-y-6 flex-1">
+            <div className="space-y-3">
+              <Label htmlFor="entity-type" className="font-medium text-white">
+                Analisar por
+              </Label>
+              <Select value={entityType} onValueChange={handleEntityTypeChange}>
+                <SelectTrigger className="bg-[#141414] text-white border-white/10 h-12">
+                  <SelectValue placeholder="Selecione um tipo de entidade" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
+                  {allowedEntityTypes.map(type => (
+                    <SelectItem key={type} value={type}>{getEntityTypeTitle(type)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <AcademicFilter
+              key={entityType} // Força o reset do AcademicFilter ao mudar o tipo de entidade
+              entityType={entityType}
+              multiple={mode === "comparison"}
+              onSelect={handleEntitySelection}
+            />
           </div>
 
-          <AcademicFilter
-            key={entityType} // Força o reset do AcademicFilter ao mudar o tipo de entidade
-            entityType={entityType}
-            multiple={mode === "comparison"}
-            onSelect={handleEntitySelection}
-          />
-        </div>
-
-        {/* Coluna 2: Filtro de Data */}
-        <div className="space-y-3 md:self-start">
-          <Label className="font-medium text-white">
-            Período de Análise
-          </Label>
-          <DateRangePicker date={dateRange} setDate={setDateRange} />
+          {/* Filtro de Data - extremo direito no desktop */}
+          <div className="space-y-3 md:min-w-fit">
+            <Label className="font-medium text-white">
+              Período de Análise
+            </Label>
+            <DateRangePicker date={dateRange} setDate={setDateRange} />
+          </div>
         </div>
       </div>
 
