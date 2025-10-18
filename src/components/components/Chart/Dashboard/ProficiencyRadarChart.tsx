@@ -113,11 +113,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                 <PolarGrid gridType="polygon" radialLines stroke="#d4d0d0" strokeOpacity={0.6} strokeDasharray="2 2" />
                 <PolarAngleAxis dataKey="category" tick={{ fill: '#FFF', fontSize: 11 }} />
                 <PolarRadiusAxis angle={90} domain={[0, 'dataMax']} tick={false} axisLine={false} />
-
-                {/* A área azul só é renderizada se houver dados de performance */}
-                {hasPerformanceData && (
-                  <Radar dataKey="acessos" fill="#274a96" fillOpacity={0.3} stroke="#274a96" strokeWidth={2} dot={{ fill: '#274a96', strokeWidth: 0, r: 4 }} />
-                )}
+                <Radar dataKey="acessos" fill="#274a96" fillOpacity={0.3} stroke="#274a96" strokeWidth={2} dot={{ fill: '#274a96', strokeWidth: 0, r: 4 }} />
               </RadarChart>
             </ChartContainer>
           )}
