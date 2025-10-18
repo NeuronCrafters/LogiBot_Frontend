@@ -10,44 +10,30 @@ interface ChartProps {
   filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };
 }
 
-// Cor azul mais vibrante para melhor visualização
+// Usando o mesmo padrão de cor do seu exemplo de referência
 const chartConfig = {
   score: {
     label: "Acerto",
-    color: "#3b82f6", // tailwind-css blue-500
+    color: "#274a96",
   },
 } satisfies ChartConfig;
 
-// Dados padrão para exibir a estrutura do gráfico mesmo quando não há dados da API
-const defaultData = [
-  { subject: "Variáveis", score: 0 },
-  { subject: "Tipos", score: 0 },
-  { subject: "Funções", score: 0 },
-  { subject: "Loops", score: 0 },
-  { subject: "Verificações", score: 0 },
-];
-
 function useChartData(filters: ChartProps['filters']) {
+  // Flag para verificar se os filtros mínimos necessários estão presentes
+  const hasRequiredFilters = !!filters.universityId;
+
   return useQuery({
     queryKey: ['proficiencyRadar', filters],
-    queryFn: async () => {
-      console.log('🔍 [ProficiencyRadar] Iniciando requisição com filtros:', filters);
-      try {
-        const response = await dashboardApi.getProficiencyRadar(filters);
-        console.log('✅ [ProficiencyRadar] Resposta da API recebida:', response);
-        return response.data;
-      } catch (error) {
-        console.error('❌ [ProficiencyRadar] Erro na requisição:', error);
-        throw error;
+    queryFn: () => dashboardApi.getProficiencyRadar(filters),
+    // A query só é executada se 'hasRequiredFilters' for verdadeiro
+    enabled: hasRequiredFilters,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    select: (response) => {
+      const apiData = response.data;
+      if (!apiData || !apiData.labels || !Array.isArray(apiData.labels)) {
+        return [];
       }
-    },
-    enabled: !!filters.universityId,
-    staleTime: 1000 * 60 * 5,
-    select: (apiData) => {
-      if (!apiData || !apiData.labels || !Array.isArray(apiData.labels) || apiData.labels.length === 0) {
-        console.warn('⚠️ [ProficiencyRadar] Nenhum dado válido da API. Usando array vazio.');
-        return []; // Retorna um array vazio se não houver dados
-      }
+      // Confia que o backend sempre enviará a lista completa de assuntos
       return apiData.labels.map((label, index) => ({
         subject: label.charAt(0).toUpperCase() + label.slice(1),
         score: apiData.data?.[index] ?? 0,
@@ -57,23 +43,27 @@ function useChartData(filters: ChartProps['filters']) {
 }
 
 export function ProficiencyRadarChart({ filters }: ChartProps) {
-  const { data, isLoading, isError, error, refetch } = useChartData(filters);
+  const { data: chartData, isLoading, isError, error, refetch } = useChartData(filters);
 
-  // A verificação de 'hasData' continua a mesma.
-  const hasData = data && data.length > 0;
+  // Replica a mesma lógica de verificação de filtros do seu componente de referência
+  const hasRequired = !!filters.universityId;
 
-  // Escolhe entre os dados da API ou os dados padrão.
-  // Isso garante que o gráfico sempre tenha uma estrutura para renderizar.
-  const chartData = hasData ? data : defaultData;
+  // Verifica se há dados de performance para desenhar a área azul
+  const hasPerformanceData = useMemo(() => chartData?.some(item => item.score > 0) ?? false, [chartData]);
 
+  // Calcula as métricas apenas se houver dados de performance
   const performanceMetrics = useMemo(() => {
-    if (!hasData || !data) return null;
-    const totalScore = data.reduce((sum, item) => sum + item.score, 0);
-    const averageScore = totalScore / data.length;
-    const bestSubject = data.reduce((max, item) => item.score > max.score ? item : max, data[0]);
-    const worstSubject = data.reduce((min, item) => item.score < min.score ? item : min, data[0]);
+    if (!hasPerformanceData || !chartData) return null;
+    const interactedData = chartData.filter(item => item.score > 0);
+    if (interactedData.length === 0) return null;
+
+    const totalScore = interactedData.reduce((sum, item) => sum + item.score, 0);
+    const averageScore = totalScore / interactedData.length;
+    const bestSubject = interactedData.reduce((max, item) => item.score > max.score ? item : max, interactedData[0]);
+    const worstSubject = interactedData.reduce((min, item) => item.score < min.score ? item : min, interactedData[0]);
+
     return { average: averageScore, best: bestSubject, worst: worstSubject };
-  }, [data, hasData]);
+  }, [chartData, hasPerformanceData]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
@@ -83,7 +73,12 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
           <CardDescription className="text-white/70">Nível de acerto médio em cada assunto principal.</CardDescription>
         </CardHeader>
         <CardContent className="px-2 sm:p-6 h-[299px] flex items-center justify-center">
-          {isLoading ? (
+
+          {/* Lógica de renderização de estados, espelhada do seu componente CategoryChart */}
+
+          {!hasRequired ? (
+            <p className="text-white/70 text-center">Selecione uma universidade para visualizar os dados.</p>
+          ) : isLoading ? (
             <div className="flex flex-col items-center">
               <div className="mb-3 w-10 h-10 rounded-full animate-pulse bg-indigo-600/30"></div>
               <p className="text-white/70">Carregando dados...</p>
@@ -99,12 +94,13 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
               </button>
             </div>
           ) : (
+            // O gráfico é renderizado com a lista de assuntos vinda do backend
             <ChartContainer config={chartConfig} className="w-full h-full text-white aspect-auto">
               <RadarChart data={chartData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                 <ChartTooltip
                   cursor={false}
                   content={({ active, payload }) => {
-                    if (!active || !payload?.[0] || !hasData) return null;
+                    if (!active || !payload?.[0] || !hasPerformanceData) return null;
                     const entry = payload[0].payload;
                     return (
                       <div className="p-2 bg-[#1f1f1f] border border-[#333] rounded shadow text-white text-sm">
@@ -118,7 +114,8 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#FFF', fontSize: 11 }} />
                 <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
 
-                {hasData && (
+                {/* A área azul só é renderizada se houver dados de performance */}
+                {hasPerformanceData && (
                   <Radar
                     dataKey="score"
                     fill="var(--color-score)"
@@ -133,7 +130,8 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
           )}
         </CardContent>
 
-        {hasData && performanceMetrics && (
+        {/* O rodapé só aparece se houver dados de performance */}
+        {hasPerformanceData && performanceMetrics && (
           <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
