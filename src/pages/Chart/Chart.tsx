@@ -298,31 +298,19 @@ export function Chart() {
           <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="mt-8 space-y-12">
 
             <div>
-              <Typograph text="Visão Geral (Legado)" variant="text4" weight="semibold" colorText="text-white" fontFamily="montserrat" className="mb-6" />
               <div className="space-y-6">
                 <UsageChart filter={legacyFilter} />
+                <AccessPatternChart filters={dashboardFilters} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <CorrectWrongChart filter={legacyFilter} />
+                  <TopicPerformanceChart filters={dashboardFilters} />
                   <CategoryChart filter={legacyFilter} />
+                  <ProficiencyRadarChart filters={dashboardFilters} />
+                  <EffortMatrixChart filters={dashboardFilters} />
+                  <LearningJourneyChart filters={dashboardFilters} />
                 </div>
               </div>
             </div>
-
-            <Separator className="bg-white/10" />
-
-            <div>
-              <Typograph text="Análise Detalhada de Desempenho e Acesso" variant="text4" weight="semibold" colorText="text-white" fontFamily="montserrat" className="mb-6" />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <TopicPerformanceChart filters={dashboardFilters} />
-                <EffortMatrixChart filters={dashboardFilters} />
-                <ProficiencyRadarChart filters={dashboardFilters} />
-                <LearningJourneyChart filters={dashboardFilters} />
-                <div className="lg:col-span-2">
-                  <AccessPatternChart filters={dashboardFilters} />
-                </div>
-              </div>
-            </div>
-
           </motion.div>
         )}
       </div>
