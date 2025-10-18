@@ -147,6 +147,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
               <Select value={entityType} onValueChange={handleEntityTypeChange}>
                 <SelectTrigger className="bg-[#141414] text-white border-white/10 h-12">
                   <SelectValue placeholder="Selecione um tipo de entidade" />
+                  <DateRangePicker date={dateRange} setDate={setDateRange} />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
                   {allowedEntityTypes.map(type => (
@@ -165,12 +166,12 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
           </div>
 
           {/* Filtro de Data - extremo direito no desktop */}
-          <div className="space-y-3 md:min-w-fit">
+          {/* <div className="space-y-3 md:min-w-fit">
             <Label className="font-medium text-white">
               Período de Análise
             </Label>
             <DateRangePicker date={dateRange} setDate={setDateRange} />
-          </div>
+          </div> */}
         </div>
       </div>
 
