@@ -10,7 +10,7 @@ interface ChartProps {
   filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };
 }
 
-// Cor azul mais vibrante para melhor visualização
+// Cor azul mais vibrante para melhor visualizaçãos
 const chartConfig = {
   score: {
     label: "Acerto",
