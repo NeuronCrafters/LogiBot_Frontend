@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 // Importações necessárias para o filtro de datas
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
-import { DateRangePicker } from "./DateRangePicker"; // Assegure-se que este caminho está correto
+// import { DateRangePicker } from "./DateRangePicker"; // Assegure-se que este caminho está correto
 
 // Tipos
 import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
@@ -168,7 +168,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
           <Label className="font-medium text-white">
             Período de Análise
           </Label>
-          <DateRangePicker date={dateRange} setDate={setDateRange} />
+          {/* <DateRangePicker date={dateRange} setDate={setDateRange} /> */}
         </div>
       </div>
 
