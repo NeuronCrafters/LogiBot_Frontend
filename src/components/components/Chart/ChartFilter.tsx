@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 // Importações necessárias para o filtro de datas
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
-// import { DateRangePicker } from "./DateRangePicker"; // Assegure-se que este caminho está correto
+import { DateRangePicker } from "./DateRangePicker"; // Assegure-se que este caminho está correto
 
 // Tipos
 import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
@@ -54,7 +54,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   const [hierarchyParams, setHierarchyParams] = useState<Omit<DashboardFilterParams, 'startDate' | 'endDate'>>({});
 
   // Estado para o filtro de datas, agora vivendo aqui
-  const [dateRange] = useState<DateRange | undefined>({
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: addDays(new Date(), -30),
     to: new Date(),
   });
@@ -135,8 +135,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       className="space-y-6 mb-8 p-6 bg-[#1f1f1f] rounded-xl border border-white/10"
     >
       <h3 className="text-xl font-semibold text-white">Filtros</h3>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6">
         {/* Coluna 1: Filtros Acadêmicos */}
         <div className="space-y-6">
           <div className="space-y-3">
@@ -164,11 +163,11 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
         </div>
 
         {/* Coluna 2: Filtro de Data */}
-        <div className="space-y-3">
+        <div className="space-y-3 md:self-start">
           <Label className="font-medium text-white">
             Período de Análise
           </Label>
-          {/* <DateRangePicker date={dateRange} setDate={setDateRange} /> */}
+          <DateRangePicker date={dateRange} setDate={setDateRange} />
         </div>
       </div>
 
