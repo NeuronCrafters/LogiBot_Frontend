@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { AreaChart, Area, XAxis, CartesianGrid } from 'recharts';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
@@ -47,9 +47,12 @@ function useChartData(filters: ChartProps['filters']) {
 export function LearningJourneyChart({ filters }: ChartProps) {
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasDataForFooter = data && data.length > 1;
+  const hasData = data && data.length > 0;
+
+  const hasRequiredIds = !!filters.universityId; // Condição de enable do hook
 
   const performanceSummary = useMemo(() => {
-    if (!hasDataForFooter) return null;
+    if (!hasDataForFooter || !data) return null;
 
     const peak = data.reduce((max, item) => item.performance > max.performance ? item : max, data[0]);
     const low = data.reduce((min, item) => item.performance < min.performance ? item : min, data[0]);
@@ -58,79 +61,106 @@ export function LearningJourneyChart({ filters }: ChartProps) {
   }, [data, hasDataForFooter]);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
-      <Card className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
-        <CardHeader className="border-b border-white/10 pb-4">
+    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      {/* HEADER PADRONIZADO EM ALTURA */}
+      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+        <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Jornada de Aprendizagem</CardTitle>
-          <CardDescription className="text-white/70">Evolução do desempenho ao longo das questões.</CardDescription>
-        </CardHeader>
+          <CardDescription className="text-white/70">
+            Evolução do desempenho ao longo das questões.
+          </CardDescription>
+        </div>
+        {/* Adiciona uma div que simula o espaço do sumário, para manter a altura do header similar ao UsageChart */}
+        <div className="flex">
+          <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true">
+            {/* Elemento invisível para manter a altura do CardHeader consistente */}
+          </div>
+        </div>
+      </CardHeader>
 
-        <CardContent className="flex-grow pt-6">
-          {isLoading && <ChartLoader />}
-          {isError && <ChartError message={error.message} onRetry={refetch} />}
-          {!isLoading && !isError && !(data && data.length > 0) && <NoData onRetry={refetch} />}
-          {!isLoading && !isError && (data && data.length > 0) && (
-            <div className="min-h-[300px] w-full">
-              <ChartContainer config={chartConfig} className="w-full h-full">
-                <AreaChart accessibilityLayer data={data} margin={{ left: 12, right: 12, top: 10, bottom: 5 }}>
-                  <CartesianGrid vertical={false} stroke="rgba(255, 255, 255, 0.1)" />
-                  <XAxis
-                    dataKey="name"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tick={{ fill: 'rgba(255, 255, 255, 0.7)', fontSize: 12 }}
-                    tickFormatter={(value) => value.replace('Questões ', '')}
-                    interval="preserveStartEnd"
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={
-                      <ChartTooltipContent
-                        className="bg-[#1f1f1f] border-white/10 text-white"
-                        indicator="line"
-                        labelStyle={{ color: "#fff", fontWeight: 'bold' }}
-                        formatter={(value) => [`${Number(value).toFixed(1)}%`, "Desempenho"]}
-                      />
-                    }
-                  />
-                  <Area
-                    dataKey="performance"
-                    type="natural"
-                    fill="var(--color-performance)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-performance)"
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ChartContainer>
-            </div>
-          )}
-        </CardContent>
-
-        {hasDataForFooter && performanceSummary && (
-          <CardFooter className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4 border-t border-white/10">
-            <div className="flex items-center gap-3">
-              <div>
-                <p className="text-sm text-white/70">Pico de Desempenho</p>
-                <p className="font-bold text-white">
-                  {performanceSummary.peak.performance.toFixed(1)}%
-                  <span className="font-normal text-white/80"> em "{performanceSummary.peak.name}"</span>
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div>
-                <p className="text-sm text-white/70">Ponto de Dificuldade</p>
-                <p className="font-bold text-white">
-                  {performanceSummary.low.performance.toFixed(1)}%
-                  <span className="font-normal text-white/80"> em "{performanceSummary.low.name}"</span>
-                </p>
-              </div>
-            </div>
-          </CardFooter>
+      <CardContent className="px-2 sm:p-6">
+        {/* Estados: falta seleção */}
+        {!hasRequiredIds && (
+          <NoData onRetry={refetch}>
+            <p>Selecione uma universidade para visualizar a Jornada de Aprendizagem.</p>
+          </NoData>
         )}
-      </Card>
-    </motion.div>
+
+        {/* Estados: loading */}
+        {hasRequiredIds && isLoading && <ChartLoader text="Carregando dados..." />}
+
+        {/* Estados: erro */}
+        {hasRequiredIds && isError && <ChartError message={(error as Error)?.message} onRetry={refetch} />}
+
+        {/* Gráfico */}
+        {hasRequiredIds && !isLoading && !isError && hasData && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+            {/* Altura padronizada para h-[250px] */}
+            <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
+              <AreaChart accessibilityLayer data={data} margin={{ left: 12, right: 12, top: 10, bottom: 5 }}>
+                <CartesianGrid vertical={false} stroke="rgba(255, 255, 255, 0.1)" />
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tick={{ fill: 'rgba(255, 255, 255, 0.7)', fontSize: 12 }}
+                  tickFormatter={(value) => value.replace('Questões ', '')}
+                  interval="preserveStartEnd"
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      className="bg-[#1f1f1f] border-white/10 text-white"
+                      indicator="line"
+                      labelStyle={{ color: "#fff", fontWeight: 'bold' }}
+                      formatter={(value) => [`${Number(value).toFixed(1)}%`, "Desempenho"]}
+                    />
+                  }
+                />
+                <Area
+                  dataKey="performance"
+                  type="natural"
+                  fill="var(--color-performance)"
+                  fillOpacity={0.4}
+                  stroke="var(--color-performance)"
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ChartContainer>
+          </motion.div>
+        )}
+
+        {/* Sem dados */}
+        {hasRequiredIds && !isLoading && !isError && !hasData && (
+          <NoData onRetry={refetch}>Nenhum dado de jornada disponível para esta entidade.</NoData>
+        )}
+      </CardContent>
+
+      {/* Footer mantido para dados de resumo */}
+      {hasDataForFooter && performanceSummary && (
+        <CardFooter className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4 border-t border-white/10">
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="text-sm text-white/70">Pico de Desempenho</p>
+              <p className="font-bold text-white">
+                {performanceSummary.peak.performance.toFixed(1)}%
+                <span className="font-normal text-white/80"> em "{performanceSummary.peak.name}"</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="text-sm text-white/70">Ponto de Dificuldade</p>
+              <p className="font-bold text-white">
+                {performanceSummary.low.performance.toFixed(1)}%
+                <span className="font-normal text-white/80"> em "{performanceSummary.low.name}"</span>
+              </p>
+            </div>
+          </div>
+        </CardFooter>
+      )}
+    </Card>
   );
 }

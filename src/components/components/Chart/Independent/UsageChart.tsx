@@ -15,12 +15,6 @@ import type { ChartFilterState } from "@/@types/ChartsType";
 import logApiSmart from "@/services/api/logApiSmart";
 import { useAuth } from "@/hooks/use-Auth";
 
-/**
- * Utilitário para converter segundos em uma string DD:HH:MM:SS.
- * - Dias: sempre número absoluto (pode ter mais de 2 dígitos).
- * - Horas, minutos e segundos: sempre 2 dígitos.
- * - Exemplo: 05:10:23:56 (menos de 100 dias), 100:02:30:10 (100 dias ou mais)
- */
 export function formatTimeWithDays(seconds: number): string {
   const totalSeconds = Math.floor(seconds);
 
@@ -29,7 +23,6 @@ export function formatTimeWithDays(seconds: number): string {
   const minutes = Math.floor((totalSeconds % 3_600) / 60);
   const remainingSeconds = totalSeconds % 60;
 
-  // Dias pode ter quantos dígitos precisar
   const daysStr = days.toString();
   const hoursStr = hours.toString().padStart(2, "0");
   const minutesStr = minutes.toString().padStart(2, "0");
@@ -310,10 +303,6 @@ export function UsageChart({ filter }: UsageChartProps) {
     </Card>
   );
 }
-
-/* --------------------------------------------------------------------------
- * Componentes auxiliares para estados (opcionalmente mova para outro arquivo)
- * -------------------------------------------------------------------------- */
 
 function EmptyState({ children }: { children: React.ReactNode }) {
   return (

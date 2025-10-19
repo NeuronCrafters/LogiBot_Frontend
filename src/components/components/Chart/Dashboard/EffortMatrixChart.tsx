@@ -13,8 +13,8 @@ interface ChartProps {
 // ## ONDE MUDAR AS CORES ##
 // Altere os códigos hexadecimais abaixo.
 // ======================================================================
-const COLOR_PRIMARY = "#8884d8";   // Roxo para pontos de alunos/entidades
-const COLOR_AVERAGE = "#ff7300";   // Laranja para o ponto de "Média"
+const COLOR_PRIMARY = "#8884d8";   // Roxo para pontos de alunos/entidades
+const COLOR_AVERAGE = "#ff7300";   // Laranja para o ponto de "Média"
 
 function useChartData(filters: ChartProps['filters']) {
   return useQuery({
@@ -29,24 +29,45 @@ export function EffortMatrixChart({ filters }: ChartProps) {
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.points.length > 0;
 
+  const hasRequiredIds = !!filters.universityId; // Condição de enable do hook
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-      <Card className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
-        <CardHeader>
+    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      {/* HEADER PADRONIZADO EM ALTURA */}
+      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+        <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Matriz Desempenho vs. Esforço</CardTitle>
-          <CardDescription className="text-white/70">Perfil dos alunos: tempo de uso e taxa de acertos.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-grow">
-          {isLoading && <ChartLoader />}
-          {isError && <ChartError message={error.message} onRetry={refetch} />}
-          {!isLoading && !isError && !hasData && <NoData onRetry={refetch} />}
-          {!isLoading && !isError && hasData && (
-            // ======================================================================
-            // ## ONDE MUDAR ALTURA E LARGURA ##
-            // A LARGURA é 100% para ser responsiva.
-            // A ALTURA é controlada aqui. Altere o valor `height={300}`.
-            // ======================================================================
-            <ResponsiveContainer width="100%" height={300}>
+          <CardDescription className="text-white/70">
+            Perfil dos alunos: tempo de uso e taxa de acertos.
+          </CardDescription>
+        </div>
+        {/* Adiciona uma div que simula o espaço do sumário, para manter a altura do header similar ao UsageChart */}
+        <div className="flex">
+          <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true">
+            {/* Elemento invisível para manter a altura do CardHeader consistente */}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="px-2 sm:p-6">
+        {/* Estados: falta seleção */}
+        {!hasRequiredIds && (
+          <NoData onRetry={refetch}>
+            <p>Selecione uma universidade para visualizar o Desempenho vs. Esforço.</p>
+          </NoData>
+        )}
+
+        {/* Estados: loading */}
+        {hasRequiredIds && isLoading && <ChartLoader text="Carregando dados..." />}
+
+        {/* Estados: erro */}
+        {hasRequiredIds && isError && <ChartError message={(error as Error)?.message} onRetry={refetch} />}
+
+        {/* Gráfico */}
+        {hasRequiredIds && !isLoading && !isError && hasData && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+            {/* Altura padronizada para h-[250px] */}
+            <ResponsiveContainer width="100%" height={250}>
               <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                 <XAxis type="number" dataKey="effort" name="Esforço" unit=" min" stroke="#ffffff80" tick={{ fontSize: 12, fill: '#ffffffb0' }} />
@@ -77,9 +98,14 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                 </Scatter>
               </ScatterChart>
             </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
+          </motion.div>
+        )}
+
+        {/* Sem dados */}
+        {hasRequiredIds && !isLoading && !isError && !hasData && (
+          <NoData onRetry={refetch}>Nenhum dado de matriz disponível para esta entidade.</NoData>
+        )}
+      </CardContent>
+    </Card>
   );
 }

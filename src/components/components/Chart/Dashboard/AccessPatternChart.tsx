@@ -15,8 +15,8 @@ interface SessionData {
 
 // Interface para os dados processados pelo gráfico
 interface ProcessedSession {
-  day: number;     // 0 (Dom) a 6 (Sáb)
-  hour: number;    // Hora de início (ex: 14.5 para 14:30)
+  day: number;     // 0 (Dom) a 6 (Sáb)
+  hour: number;    // Hora de início (ex: 14.5 para 14:30)
   startTime: Date;
   endTime: Date;
   duration: string;
@@ -79,18 +79,46 @@ export function AccessPatternChart({ filters }: ChartProps) {
   const hasData = sessions && sessions.length > 0;
   const shortDaysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
+  // AcessPatternChart não tem um sumário no header, mas usaremos a mesma estrutura de card e CardHeader
+  // do UsageChart para padronizar a altura. A div com o flex-1 gap-1 garante o padding superior/inferior.
+  const hasRequiredIds = !!(filters.universityId && (filters.studentId || filters.classId || filters.courseId));
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-      <Card className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
-        <CardHeader>
+    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      {/* HEADER PADRONIZADO EM ALTURA */}
+      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+        <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Detalhes de Acesso por Sessão</CardTitle>
-          <CardDescription className="text-white/70">Cada ponto representa uma sessão individual. Passe o mouse para ver os detalhes.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-grow pt-4">
-          {isLoading && <ChartLoader />}
-          {isError && <ChartError message={(error as Error)?.message} onRetry={refetch} />}
-          {!isLoading && !isError && !hasData && <NoData onRetry={refetch} />}
-          {!isLoading && !isError && hasData && (
+          <CardDescription className="text-white/70">
+            Cada ponto representa uma sessão individual. Passe o mouse para ver os detalhes.
+          </CardDescription>
+        </div>
+        {/* Adiciona uma div que simula o espaço do sumário, para manter a altura do header similar ao UsageChart */}
+        <div className="flex">
+          <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true">
+            {/* Elemento invisível para manter a altura do CardHeader consistente */}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="px-2 sm:p-6">
+        {/* Estados: falta seleção */}
+        {!hasRequiredIds && (
+          <NoData onRetry={refetch}>
+            <p>Selecione um aluno, turma ou curso para visualizar os detalhes de acesso.</p>
+          </NoData>
+        )}
+
+        {/* Estados: loading */}
+        {hasRequiredIds && isLoading && <ChartLoader text="Carregando dados..." />}
+
+        {/* Estados: erro */}
+        {hasRequiredIds && isError && <ChartError message={(error as Error)?.message} onRetry={refetch} />}
+
+        {/* Gráfico */}
+        {hasRequiredIds && !isLoading && !isError && hasData && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+            {/* Altura padronizada para h-[250px] */}
             <ResponsiveContainer width="100%" height={250}>
               <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
                 <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" />
@@ -108,9 +136,14 @@ export function AccessPatternChart({ filters }: ChartProps) {
                 <Scatter data={sessions} fill="hsl(262, 83%, 77%)" shape="circle" />
               </ScatterChart>
             </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
+          </motion.div>
+        )}
+
+        {/* Sem dados */}
+        {hasRequiredIds && !isLoading && !isError && !hasData && (
+          <NoData onRetry={refetch}>Nenhum dado de sessão disponível para esta entidade.</NoData>
+        )}
+      </CardContent>
+    </Card>
   );
 }
