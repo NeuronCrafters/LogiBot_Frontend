@@ -40,6 +40,21 @@ function useChartData(filters: ChartProps['filters']) {
   });
 }
 
+// SIMULAÇÃO DE DADOS MÍNIMOS/PREENCHIMENTO
+const placeholderTopics = [
+  'Variáveis',
+  'Tipos',
+  'Funções',
+  'Loops',
+  'Verificações',
+  'Listas'
+];
+const placeholderData: TopicData[] = placeholderTopics.map(topic => ({
+  topic,
+  successPercentage: 0,
+  errorPercentage: 0,
+}));
+
 export function TopicPerformanceChart({ filters }: ChartProps) {
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
@@ -67,6 +82,18 @@ export function TopicPerformanceChart({ filters }: ChartProps) {
   const refetchTyped = refetch as () => void;
   const errorMessage = error instanceof Error ? error.message : "Erro ao carregar dados.";
 
+  // Usar dados reais ou dados de preenchimento se for necessário exibir o gráfico, 
+  // mas ele não tiver dados de performance (ex: se o usuário selecionou uma entidade, mas não há interações).
+  // A prioridade aqui é sempre renderizar o gráfico se a entidade estiver selecionada,
+  // para que os rótulos do eixo Y apareçam.
+  const chartDataToRender = hasData ? data : placeholderData;
+
+  // Renderiza o ChartContainer apenas quando a entidade é selecionada e não está carregando/com erro
+  const shouldRenderChart = hasRequired && !isLoading && !isError;
+
+  // Condicionalmente usa o ChartLoader/ChartError/NoData se os estados de erro/loading/sem dados se aplicarem.
+  const shouldRenderState = !shouldRenderChart || !hasData;
+
   return (
     <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
       {/* HEADER PADRONIZADO EM ALTURA */}
@@ -84,26 +111,24 @@ export function TopicPerformanceChart({ filters }: ChartProps) {
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">
-        {/* Estados: falta seleção */}
+        {/* Estados */}
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
             <p>Selecione uma universidade para visualizar o desempenho por tópico.</p>
           </NoData>
         )}
 
-        {/* Estados: loading */}
         {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
 
-        {/* Estados: erro */}
         {hasRequired && isError && <ChartError message={errorMessage} onRetry={refetchTyped} />}
 
-        {/* Gráfico */}
-        {hasRequired && !isLoading && !isError && hasData && (
+        {/* Renderização do gráfico: renderizamos se for necessário, senão fica no estado NoData/Loading */}
+        {shouldRenderChart && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
             <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
               <BarChart
                 accessibilityLayer
-                data={data}
+                data={chartDataToRender} // Usa dados reais ou placeholder
                 layout="vertical"
                 stackOffset="expand"
                 margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
@@ -140,6 +165,7 @@ export function TopicPerformanceChart({ filters }: ChartProps) {
                     />
                   }
                 />
+                {/* As barras de dados serão 0% se estiver usando placeholderData */}
                 <Bar dataKey="errorPercentage" stackId="a" fill="var(--color-errorPercentage)" radius={[0, 4, 4, 0]} />
                 <Bar dataKey="successPercentage" stackId="a" fill="var(--color-successPercentage)" radius={[4, 0, 0, 4]} />
               </BarChart>
@@ -147,25 +173,24 @@ export function TopicPerformanceChart({ filters }: ChartProps) {
           </motion.div>
         )}
 
-        {/* Sem dados */}
-        {hasRequired && !isLoading && !isError && !hasData && (
+        {/* Sem dados (Estado de fallback) */}
+        {shouldRenderState && !isLoading && !isError && (
+          // Usamos NoData no CardContent, mantendo a altura h-[250px]
           <NoData onRetry={refetchTyped}>
             <p>Nenhum dado de desempenho por tópico disponível.</p>
           </NoData>
         )}
       </CardContent>
 
-      {/* Rodapé CORRIGIDO: Agora usa a mesma estrutura compacta do CorrectWrongChart */}
+      {/* Rodapé condicional */}
       {hasData && (
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
-          {/* Item 1: Maior Acerto */}
           <div className="flex flex-col flex-1 min-w-0 pr-2">
             <p className="text-sm text-white/70 truncate">Maior Índice de Acerto</p>
             <p className="font-bold text-white truncate" title={topicWithHighestSuccess?.topic}>
               {topicWithHighestSuccess?.topic ?? 'N/A'}
             </p>
           </div>
-          {/* Item 2: Maior Erro */}
           <div className="flex flex-col flex-1 min-w-0 pl-2 text-right">
             <p className="text-sm text-white/70 truncate">Maior Índice de Erro</p>
             <p className="font-bold text-white truncate" title={topicWithHighestError?.topic}>
