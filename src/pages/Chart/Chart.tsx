@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 // Importações para o filtro de datas
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
-// import { DateRangePicker } from "@/components/components/Chart/DateRangePicker"; // Certifique-se que o caminho está correto
 
 // Tipos
 import type { ChartFilterState } from "@/@types/ChartsType";
@@ -134,15 +133,15 @@ export function Chart() {
               <div className="grid grid-cols-1 gap-6">
                 <UsageChart filter={legacyFilter} />
                 <AccessPatternChart filters={dashboardFilters} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* A div externa é o item do grid. Ela se esticará para a altura da linha. */}
-                  <div><CorrectWrongChart filter={legacyFilter} /></div>
-                  <div><TopicPerformanceChart filters={dashboardFilters} /></div>
-                  <div><CategoryChart filter={legacyFilter} /></div>
-                  <div><ProficiencyRadarChart filters={dashboardFilters} /></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                  {/* Corrigido: Usando 'items-stretch' no grid pai e 'h-full' nos filhos para garantir altura igual. */}
+                  <div className="h-full"><CorrectWrongChart filter={legacyFilter} /></div>
+                  <div className="h-full"><TopicPerformanceChart filters={dashboardFilters} /></div>
+                  <div className="h-full"><CategoryChart filter={legacyFilter} /></div>
+                  <div className="h-full"><ProficiencyRadarChart filters={dashboardFilters} /></div>
                 </div>
-                <div><EffortMatrixChart filters={dashboardFilters} /></div>
-                <div><LearningJourneyChart filters={dashboardFilters} /></div>
+                <EffortMatrixChart filters={dashboardFilters} />
+                <LearningJourneyChart filters={dashboardFilters} />
               </div>
             </div>
           </motion.div>
