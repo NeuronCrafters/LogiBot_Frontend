@@ -155,23 +155,22 @@ export function TopicPerformanceChart({ filters }: ChartProps) {
         )}
       </CardContent>
 
-      {/* Rodapé condicional, com estrutura padronizada */}
+      {/* Rodapé CORRIGIDO: Agora usa a mesma estrutura compacta do CorrectWrongChart */}
       {hasData && (
-        <CardFooter className="flex-col items-start gap-4 px-6 py-4 border-t border-white/10">
-          <div className="flex w-full items-center gap-2">
-            <div className="flex-1">
-              <p className="text-sm text-white/70">Maior Índice de Acerto</p>
-              <p className="font-bold text-white truncate" title={topicWithHighestSuccess?.topic}>
-                {topicWithHighestSuccess?.topic ?? 'N/A'}
-              </p>
-            </div>
-            <div className="h-10 w-px bg-white/10"></div>
-            <div className="flex-1">
-              <p className="text-sm text-white/70">Maior Índice de Erro</p>
-              <p className="font-bold text-white truncate" title={topicWithHighestError?.topic}>
-                {topicWithHighestError?.topic ?? 'N/A'}
-              </p>
-            </div>
+        <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
+          {/* Item 1: Maior Acerto */}
+          <div className="flex flex-col flex-1 min-w-0 pr-2">
+            <p className="text-sm text-white/70 truncate">Maior Índice de Acerto</p>
+            <p className="font-bold text-white truncate" title={topicWithHighestSuccess?.topic}>
+              {topicWithHighestSuccess?.topic ?? 'N/A'}
+            </p>
+          </div>
+          {/* Item 2: Maior Erro */}
+          <div className="flex flex-col flex-1 min-w-0 pl-2 text-right">
+            <p className="text-sm text-white/70 truncate">Maior Índice de Erro</p>
+            <p className="font-bold text-white truncate" title={topicWithHighestError?.topic}>
+              {topicWithHighestError?.topic ?? 'N/A'}
+            </p>
           </div>
         </CardFooter>
       )}
