@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
+import { ChartLoader, ChartError, NoData } from "../ChartStates"; // Importação para os estados padronizados
 
 const chartConfig = {
   score: {
@@ -22,7 +23,7 @@ interface ChartProps {
   };
 }
 
-// Hook de dados refatorado para seguir o padrão do CategoryChart
+// Hook de dados mantido
 function useProficiencyData(filters: ChartProps['filters']) {
   const hasRequiredFilters = !!filters.universityId;
 
@@ -61,48 +62,53 @@ function useProficiencyData(filters: ChartProps['filters']) {
 
       return { chartData, hasPerformanceData, metrics };
     }
-
   });
 }
 
 export function ProficiencyRadarChart({ filters }: ChartProps) {
-  const { data, isLoading, isError, refetch } = useProficiencyData(filters);
+  const { data, isLoading, isError, refetch, error } = useProficiencyData(filters);
 
   // Lógica de verificação replicada para a UI
   const hasRequired = !!filters.universityId;
   const hasData = data?.hasPerformanceData ?? false;
 
+  const refetchTyped = refetch as () => void;
+  const errorMessage = error instanceof Error ? error.message : "Erro ao carregar dados.";
+
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
-      <CardHeader className="flex flex-col pb-4 space-y-0 border-b border-white/10">
-        <CardTitle className="text-white">Proficiência por Assunto: Quiz</CardTitle>
-        <CardDescription className="text-white/70">Nível de acerto médio em cada assunto principal.</CardDescription>
+    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      {/* HEADER PADRONIZADO EM ALTURA */}
+      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+        <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
+          <CardTitle className="text-white">Proficiência por Assunto: Quiz</CardTitle>
+          <CardDescription className="text-white/70">
+            Nível de acerto médio em cada assunto principal.
+          </CardDescription>
+        </div>
+        {/* Elemento invisível para manter a altura do CardHeader consistente com o UsageChart */}
+        <div className="flex">
+          <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true" />
+        </div>
       </CardHeader>
 
-      <CardContent className="px-2 sm:p-6 h-[299px] flex items-center justify-center">
-        {/* Bloco de renderização condicional unificado, igual ao CategoryChart */}
-        {(!hasRequired || isLoading || isError || !hasData) && (
-          <div className="flex flex-col items-center text-center">
-            {isLoading && <div className="mb-3 w-10 h-10 rounded-full animate-pulse bg-indigo-600/30"></div>}
-            {isError && (
-              <svg className="mb-3 text-indigo-400/60" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-            )}
-            {!isLoading && !isError && !hasRequired && <p className="text-white/70">Selecione uma universidade para visualizar.</p>}
-            {!isLoading && !isError && hasRequired && !hasData && <p className="text-white/70">Nenhum dado de proficiência disponível.</p>}
-            {(isError || (!hasData && hasRequired)) && (
-              <button onClick={() => refetch()} className="mt-3 text-xs text-indigo-400 transition-colors hover:text-indigo-300">Tentar novamente</button>
-            )}
-          </div>
+      <CardContent className="px-2 sm:p-6">
+        {/* Estados: falta seleção */}
+        {!hasRequired && (
+          <NoData onRetry={refetchTyped}>
+            <p>Selecione uma universidade para visualizar o radar de proficiência.</p>
+          </NoData>
         )}
 
+        {/* Estados: loading */}
+        {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
+
+        {/* Estados: erro */}
+        {hasRequired && isError && <ChartError message={errorMessage} onRetry={refetchTyped} />}
+
         {/* Renderização do gráfico quando há dados */}
-        {!isLoading && !isError && hasData && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full h-full">
-            <ChartContainer config={chartConfig} className="w-full h-full text-white aspect-auto">
+        {hasRequired && !isLoading && !isError && hasData && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+            <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full text-white">
               <RadarChart data={data!.chartData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                 <ChartTooltip
                   cursor={false}
@@ -125,9 +131,16 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
             </ChartContainer>
           </motion.div>
         )}
+
+        {/* Sem dados */}
+        {hasRequired && !isLoading && !isError && !hasData && (
+          <NoData onRetry={refetchTyped}>
+            <p>Nenhum dado de proficiência disponível.</p>
+          </NoData>
+        )}
       </CardContent>
 
-      {/* Rodapé condicional, exibindo as métricas calculadas no hook */}
+      {/* Rodapé condicional, com estrutura padronizada */}
       {hasData && (
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex flex-col">

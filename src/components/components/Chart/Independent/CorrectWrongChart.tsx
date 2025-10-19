@@ -13,6 +13,7 @@ import { logApi } from "@/services/apiClient";
 import logApiSmart from "@/services/api/logApiSmart";
 import { useAuth } from "@/hooks/use-Auth";
 import type { ChartFilterState } from "@/@types/ChartsType";
+import { ChartLoader, ChartError, NoData } from "../ChartStates";
 
 const COLORS = ["#3f7d7d", "#7d3f3f"];
 
@@ -59,14 +60,12 @@ function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
 
       const isProfessor = userRoles.includes("professor");
       if (isProfessor && (filter.type === "discipline" || filter.type === "student")) {
-        console.log("🎯 CorrectWrongChart - Usando logApiSmart para professor");
         const response = await logApiSmart.fetchSummary(
           userRoles,
           filter.type,
           studentId,
           { universityId, courseId, classId, disciplineId }
         );
-        console.log("🎯 CorrectWrongChart - Dados do logApiSmart:", response);
         return response;
       }
 
@@ -96,7 +95,6 @@ function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     select: (rawData: any) => {
-      console.log("🎯 CorrectWrongChart - Dados brutos recebidos:", rawData);
       // Extrai acertos e erros
       const totalCorrect = Number(
         rawData.totalCorrect ?? rawData.totalCorrectAnswers ?? 0
@@ -110,7 +108,6 @@ function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
         { name: 'Acertos', value: totalCorrect, fill: COLORS[0] },
         { name: 'Erros', value: totalWrong, fill: COLORS[1] }
       ];
-      console.log("🎯 CorrectWrongChart - Dados processados:", { chartData, totalCorrect, totalWrong, accuracy });
       return { chartData, totalCorrect, totalWrong, accuracy };
     }
   });
@@ -139,49 +136,42 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
     accuracyData.chartData.length > 0 &&
     (accuracyData.totalCorrect > 0 || accuracyData.totalWrong > 0);
 
+  const refetchTyped = refetch as () => void;
+  const errorMessage = error instanceof Error ? error.message : "Erro ao carregar dados.";
+
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-0">
-      <CardHeader className="flex flex-col pb-4 space-y-0 border-b border-white/10">
-        <CardTitle className="text-white">Desempenho por Tópico Geral</CardTitle>
-        <CardDescription className="text-white/70">
-          Acertos e Erros com Base na interação do Quiz
-        </CardDescription>
+    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      {/* HEADER PADRONIZADO EM ALTURA */}
+      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+        <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
+          <CardTitle className="text-white">Desempenho por Tópico Geral</CardTitle>
+          <CardDescription className="text-white/70">
+            Acertos e Erros com Base na interação do Quiz
+          </CardDescription>
+        </div>
+        {/* Elemento invisível para manter a altura do CardHeader consistente com o UsageChart */}
+        <div className="flex">
+          <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true" />
+        </div>
       </CardHeader>
 
-      <CardContent className="px-6 py-6 h-[299px] flex items-center justify-center">
+      <CardContent className="px-2 sm:p-6">
+        {/* Estados: falta seleção */}
         {!hasRequired && (
-          <div className="flex justify-center items-center w-full h-full text-center text-white/70">
+          <NoData onRetry={refetchTyped}>
             <p>Selecione uma entidade para visualizar dados</p>
-          </div>
+          </NoData>
         )}
 
-        {hasRequired && isLoading && (
-          <div className="flex justify-center items-center w-full h-full text-center text-white/70">
-            <div className="flex flex-col items-center">
-              <div className="mb-3 w-10 h-10 rounded-full animate-pulse bg-indigo-600/30" />
-              <p>Carregando dados...</p>
-            </div>
-          </div>
-        )}
+        {/* Estados: loading */}
+        {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
 
-        {hasRequired && isError && (
-          <div className="flex justify-center items-center w-full h-full text-center text-white/70">
-            <div className="flex flex-col items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <p>{error instanceof Error ? error.message : "Erro ao carregar dados."}</p>
-              <button onClick={() => refetch()} className="mt-3 text-xs text-indigo-400 transition-colors hover:text-indigo-300">
-                Tentar novamente
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Estados: erro */}
+        {hasRequired && isError && <ChartError message={errorMessage} onRetry={refetchTyped} />}
+
 
         {hasRequired && !isLoading && !isError && hasData && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="flex justify-center items-center w-full h-full">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="flex justify-center items-center w-full h-[250px]">
             <PieChart width={300} height={250}>
               <Pie data={accuracyData.chartData} cx="50%" cy="50%" labelLine={false} outerRadius={80} dataKey="value" nameKey="name">
                 {accuracyData.chartData.map((entry, index) => (
@@ -194,20 +184,11 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
           </motion.div>
         )}
 
+        {/* Sem dados */}
         {hasRequired && !isLoading && !isError && !hasData && (
-          <div className="flex justify-center items-center w-full h-full text-center text-white/70">
-            <div className="flex flex-col items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-indigo-400/60">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <p>Nenhum dado de acertos/erros disponível para esta entidade.</p>
-              <button onClick={() => refetch()} className="mt-3 text-xs text-indigo-400 transition-colors hover:text-indigo-300">
-                Tentar novamente
-              </button>
-            </div>
-          </div>
+          <NoData onRetry={refetchTyped}>
+            <p>Nenhum dado de acertos/erros disponível para esta entidade.</p>
+          </NoData>
         )}
       </CardContent>
 
