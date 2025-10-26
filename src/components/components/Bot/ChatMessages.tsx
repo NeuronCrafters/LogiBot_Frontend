@@ -1,10 +1,37 @@
+// import { Avatar } from "@/components/components/Avatar/Avatar";
+// import logo from "@/assets/logo.svg";
+// import { Typograph } from "@/components/components/Typograph/Typograph";
+// import Markdown from "react-markdown";
+// import remarkGfm from "remark-gfm";
+// import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+// import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+
+
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import logo from "@/assets/logo.svg";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import java from 'react-syntax-highlighter/dist/esm/languages/prism/java';
+import kotlin from 'react-syntax-highlighter/dist/esm/languages/prism/kotlin';
+import csharp from 'react-syntax-highlighter/dist/esm/languages/prism/csharp';
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
+import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
+import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
+import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
+
+SyntaxHighlighter.registerLanguage('java', java);
+SyntaxHighlighter.registerLanguage('kotlin', kotlin);
+SyntaxHighlighter.registerLanguage('csharp', csharp);
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('sql', sql);
+SyntaxHighlighter.registerLanguage('css', css);
+SyntaxHighlighter.registerLanguage('jsx', jsx);
 
 interface Message {
     role: "user" | "assistant";
