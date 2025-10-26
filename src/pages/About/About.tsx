@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Loader2,
   User as UserIcon,
@@ -17,6 +17,8 @@ import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { DisciplineCode } from "@/components/components/About/DisciplineCode";
 import { ChangePasswordModal } from "@/components/components/Security/ChangePasswordModal";
+import { driver, type DriveStep } from "driver.js";
+import "driver.js/dist/driver.css";
 
 /* ───────── Types ───────── */
 interface DisciplineObject {
@@ -49,6 +51,80 @@ export function About() {
   const { user, isAuthenticated, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+
+    const startAboutTour = () => {
+        // Define os passos base do tour
+        const tourSteps: DriveStep[] = [
+            {
+                element: '#about-card-content',
+                popover: {
+                    title: 'Seu Perfil Pessoal',
+                    description: 'Este é o seu cartão de perfil, onde todas as suas informações acadêmicas e de conta estão reunidas.',
+                    side: 'bottom'
+                }
+            },
+            {
+                element: '#about-user-details',
+                popover: {
+                    title: 'Seus Dados',
+                    description: 'Aqui você pode conferir seu nome, e-mail, curso e outras informações importantes.',
+                    side: 'left'
+                }
+            },
+            {
+                element: '#about-change-password-button',
+                popover: {
+                    title: 'Segurança da Conta',
+                    description: 'Precisa atualizar sua senha? Você pode fazer isso a qualquer momento por aqui.',
+                    side: 'top',
+                    align: 'start'
+                }
+            },
+            {
+                element: '#about-header-menu-button',
+                popover: {
+                    title: 'Navegação Principal',
+                    description: 'Clique no seu avatar para abrir o menu e navegar para outras áreas da plataforma.',
+                    side: 'left'
+                }
+            }
+        ];
+
+        // Adiciona um passo condicional se o usuário for um professor com disciplinas
+        if (isProfessor && disciplineObjects.length > 0) {
+            // Insere o passo na 3ª posição (índice 2)
+            tourSteps.splice(2, 0, {
+                element: '#about-discipline-codes',
+                popover: {
+                    title: 'Códigos das Disciplinas',
+                    description: 'Como professor, você pode clicar aqui para ver e copiar os códigos de convite para suas disciplinas.',
+                    side: 'top',
+                    align: 'start'
+                }
+            });
+        }
+
+        const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            popoverClass: 'logibots-tour-popover',
+            onDestroyed: () => {
+                localStorage.setItem('logibots-tour-about-concluido', 'true');
+            },
+            steps: tourSteps
+        });
+        driverObj.drive();
+    };
+
+    useEffect(() => {
+        const tourConcluido = localStorage.getItem('logibots-tour-about-concluido');
+        // Adicionamos '!loading' para garantir que o tour só inicie após os dados do usuário serem carregados
+        if (!tourConcluido && !loading && user) {
+            setTimeout(() => {
+                startAboutTour();
+            }, 500);
+        }
+    }, [loading, user]);
 
   /* ---------- Loading & Erros ---------- */
   if (loading)
@@ -113,7 +189,7 @@ export function About() {
           fontFamily="poppins"
         />
         {isAuthenticated && (
-          <Button onClick={() => setMenuOpen(true)} className="flex items-center justify-center p-0">
+          <Button onClick={() => setMenuOpen(true)} className="flex items-center justify-center p-0" id="about-header-menu-button">
             <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
               <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
             </div>
@@ -124,7 +200,7 @@ export function About() {
       {/* --- Conteúdo --- */}
       <main className="flex items-center justify-center flex-1 px-4 py-8">
         <div className="w-full max-w-md shadow-2xl rainbow-card sm:max-w-lg md:max-w-xl">
-          <div className="space-y-6 card-content">
+          <div className="space-y-6 card-content" id="about-card-content">
 
             {/* Avatar grande */}
             <div className="flex justify-center -mt-16">
@@ -134,7 +210,7 @@ export function About() {
             </div>
 
             {/* Info */}
-            <div className="space-y-4">
+            <div className="space-y-4" id="about-user-details">
               <Detail icon={<UserIcon size={18} />} label="Nome" value={user.name} />
               <Detail icon={<Mail size={18} />} label="Email" value={user.email} />
               <Detail icon={<Briefcase size={18} />} label="Ocupação" value={occupation} />
@@ -149,7 +225,7 @@ export function About() {
                       <Detail icon={<Users size={18} />} label="Turma(s)" value={profClasses} />
 
                       {/* Disciplinas + modal de códigos */}
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2" id="about-discipline-codes">
                         <Layers size={18} />
                         <Typograph
                           text="Disciplina(s):"
@@ -176,6 +252,7 @@ export function About() {
               <div className="flex items-center gap-2">
                 <KeyRound size={18} />
                 <Button
+                  id="about-change-password-button"
                   variant="outline"
                   className="text-sm text-white border-neutral-600 hover:bg-neutral-800"
                   onClick={() => setShowChangePassword(true)}
