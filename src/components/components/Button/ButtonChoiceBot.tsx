@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
 
 interface ChoiceButtonsProps {
-  options: { label: string; value: string; variant?: "blue" | "green" }[];
-  onSelect: (value: string) => void;
-  layout?: "row" | "grid";
+    options: {
+        label: string;
+        value: string;
+        variant?: "blue" | "green";
+        id?: string;
+    }[];
+    onSelect: (value: string) => void;
+    layout?: "row" | "grid";
 }
-
 export function ButtonChoiceBot({
   options,
   onSelect,
@@ -24,6 +28,7 @@ export function ButtonChoiceBot({
       {options.map((opt, i) => (
         <Button
           key={i}
+          id={opt.id}
           onClick={() => onSelect(opt.value)}
           className={`${baseStyle} ${opt.variant === "green"
             ? "bg-green-600 hover:bg-green-700"

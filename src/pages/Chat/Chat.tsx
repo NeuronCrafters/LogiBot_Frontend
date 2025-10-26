@@ -3,28 +3,38 @@ import ChatLayout from "@/components/components/Chat/ChatLayout";
 import { AdminWelcome, NonStudentWelcome } from "@/components/components/Chat/ChatWelcomePages";
 import StudentChatContent from "@/components/components/Chat/StudentChatContent";
 import { useState } from "react";
+import { useMultiPageTour, UserRole } from "@/hooks/useMultiPageTour";
 
 export function Chat() {
-  const { user, isAuthenticated } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
+    const { user, isAuthenticated } = useAuth();
+    const [menuOpen, setMenuOpen] = useState(false);
 
-  const userRoles = Array.isArray(user?.role) ? user?.role : user?.role ? [user.role] : [];
-  const isStudent = userRoles.includes('student');
-  const isAdmin = userRoles.includes('admin');
+    const userRoles = Array.isArray(user?.role) ? user?.role : user?.role ? [user.role] : [];
+    const isStudent = userRoles.includes('student');
+    const isAdmin = userRoles.includes('admin');
 
-  return (
-    <ChatLayout user={user} menuOpen={menuOpen} setMenuOpen={setMenuOpen} >
-      {isAuthenticated && isStudent && user && (
-        <StudentChatContent user={user} />
-      )}
+    // Pega o primeiro role para o tour
+    const mainRole = (userRoles[0] || 'guest') as UserRole;
 
-      {isAuthenticated && isAdmin && !isStudent && (
-        <AdminWelcome />
-      )}
+    // Hook do tour com actions do menu
+    useMultiPageTour(mainRole, {
+        openMenu: () => setMenuOpen(true),
+        closeMenu: () => setMenuOpen(false),
+    });
 
-      {isAuthenticated && !isStudent && !isAdmin && (
-        <NonStudentWelcome userRoles={userRoles} />
-      )}
-    </ChatLayout>
-  );
+    return (
+        <ChatLayout user={user} menuOpen={menuOpen} setMenuOpen={setMenuOpen}>
+            {isAuthenticated && isStudent && user && (
+                <StudentChatContent user={user} />
+            )}
+
+            {isAuthenticated && isAdmin && !isStudent && (
+                <AdminWelcome />
+            )}
+
+            {isAuthenticated && !isStudent && !isAdmin && (
+                <NonStudentWelcome userRoles={userRoles} />
+            )}
+        </ChatLayout>
+    );
 }

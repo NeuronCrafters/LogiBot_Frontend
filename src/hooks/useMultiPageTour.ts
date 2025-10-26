@@ -27,31 +27,31 @@ interface CustomDriveStep extends Omit<DriveStep, 'popover'> {
 const generatePageTours = (role: UserRole): Record<string, CustomDriveStep[]> => {
     return {
         '/': [
-            { element: '#welcome-title', popover: { title: 'Bem-vindo ao LogiBots.IA!', description: 'Vamos fazer um tour rápido por esta página.', side: 'bottom' }},
-            { element: '#animated-logo', popover: { title: 'Nosso Mascote Lógico', description: 'Ele estará com você durante sua jornada de aprendizado.', side: 'left' }},
-            { element: '#play-button', popover: { title: 'Comece a Aprender', description: 'Clique aqui para ir à tela de login quando estiver pronto!', side: 'bottom' }},
+            { element: '#welcome-title', popover: { title: 'Bem-vindo ao LogiBots.IA!', description: 'Vamos fazer um tour rápido por esta página.', side: 'bottom' as Side }},
+            { element: '#animated-logo', popover: { title: 'Nosso Mascote Lógico', description: 'Ele estará com você durante sua jornada de aprendizado.', side: 'left' as Side }},
+            { element: '#play-button', popover: { title: 'Comece a Aprender', description: 'Clique aqui para ir à tela de login quando estiver pronto!', side: 'bottom' as Side }},
         ],
 
         '/signin': [
-            { element: '#signin-email-input', popover: { title: 'Acesse sua Conta', description: 'Digite aqui o e-mail que você usou para se cadastrar.', side: 'bottom' }},
-            { element: '#signin-password-input', popover: { title: 'Sua Senha', description: 'Agora, digite sua senha secreta para acessar sua conta.', side: 'bottom' }},
-            { element: '#signin-submit-button', popover: { title: 'Acessar a Plataforma', description: 'Clique aqui para entrar na plataforma!', side: 'bottom' }},
-            { element: '#signin-signup-link', popover: { title: 'Novo por aqui?', description: 'Se você ainda não tem uma conta, pode clicar aqui para se cadastrar.', side: 'top' }},
+            { element: '#signin-email-input', popover: { title: 'Acesse sua Conta', description: 'Digite aqui o e-mail que você usou para se cadastrar.', side: 'bottom' as Side }},
+            { element: '#signin-password-input', popover: { title: 'Sua Senha', description: 'Agora, digite sua senha secreta para acessar sua conta.', side: 'bottom' as Side }},
+            { element: '#signin-submit-button', popover: { title: 'Acessar a Plataforma', description: 'Clique aqui para entrar na plataforma!', side: 'bottom' as Side }},
+            { element: '#signin-signup-link', popover: { title: 'Novo por aqui?', description: 'Se você ainda não tem uma conta, pode clicar aqui para se cadastrar.', side: 'top' as Side }},
         ],
 
         '/signup': [
-            { element: '#signup-name-input', popover: { title: 'Seu Nome Completo', description: 'Digite seu nome. Ele será usado para personalizar sua experiência.', side: 'bottom' }},
-            { element: '#signup-email-input', popover: { title: 'Seu Melhor E-mail', description: 'Use um e-mail válido para criar sua conta.', side: 'bottom' }},
-            { element: '#signup-password-input', popover: { title: 'Crie uma Senha Segura', description: 'Escolha uma senha com pelo menos 12 caracteres.', side: 'bottom' }},
-            { element: '#signup-code-input', popover: { title: 'Código da Turma', description: 'Este é o código fornecido pelo seu professor.', side: 'top' }},
-            { element: '#signup-submit-button', popover: { title: 'Finalizar Cadastro', description: 'Clique aqui para criar sua conta e começar a aprender!', side: 'top' }},
+            { element: '#signup-name-input', popover: { title: 'Seu Nome Completo', description: 'Digite seu nome. Ele será usado para personalizar sua experiência.', side: 'bottom' as Side }},
+            { element: '#signup-email-input', popover: { title: 'Seu Melhor E-mail', description: 'Use um e-mail válido para criar sua conta.', side: 'bottom' as Side }},
+            { element: '#signup-password-input', popover: { title: 'Crie uma Senha Segura', description: 'Escolha uma senha com pelo menos 12 caracteres.', side: 'bottom' as Side }},
+            { element: '#signup-code-input', popover: { title: 'Código da Turma', description: 'Este é o código fornecido pelo seu professor.', side: 'top' as Side }},
+            { element: '#signup-submit-button', popover: { title: 'Finalizar Cadastro', description: 'Clique aqui para criar sua conta e começar a aprender!', side: 'top' as Side }},
         ],
 
         '/chat': [
-            { element: '#chat-initial-choice', popover: { title: 'Sua Área de Estudos', description: 'Você chegou! Escolha entre praticar com um Quiz ou conversar com o bot para tirar dúvidas.', side: 'bottom' }},
-            { element: '#chat-header-menu-button', popover: { title: 'Menu Principal', description: 'Clique no seu avatar para ver as opções da plataforma.', side: 'left' }},
-            { element: '#header-menu-options', popover: { title: 'Painel de Navegação', description: 'Aqui você acessa todas as áreas importantes.', side: 'bottom' }, onHighlightStartedAction: 'openMenu' },
-            { element: '#menu-option-detalhes', popover: { title: 'Seu Perfil', description: 'Aqui você vê os detalhes da sua conta.', side: 'bottom' }, onHighlightStartedAction: 'openMenu' },
+            { element: '#chat-container', popover: { title: 'Área de Aprendizado', description: 'Bem-vindo! Aqui você pode escolher entre Quiz (responder 5 perguntas) ou Chat (conversar sobre lógica).', side: 'bottom' as Side }},
+            { element: '#chat-header-menu-button', popover: { title: 'Menu de Navegação', description: 'Clique no seu avatar a qualquer momento para acessar as opções.', side: 'left' as Side }},
+            { element: '#header-menu-options', popover: { title: 'Opções do Menu', description: 'Aqui estão todas as funcionalidades disponíveis.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
+            { element: '#menu-option-detalhes', popover: { title: 'Seu Perfil', description: 'Veja e edite as informações da sua conta.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
 
             ...(role !== 'student' ? [
                 {
@@ -70,15 +70,15 @@ const generatePageTours = (role: UserRole): Record<string, CustomDriveStep[]> =>
         ],
 
         '/about': [
-            { element: '#about-card-content', popover: { title: 'Seu Perfil Pessoal', description: 'Este é o seu cartão de perfil, com suas informações acadêmicas e de conta.', side: 'bottom' }},
-            { element: '#about-user-details', popover: { title: 'Seus Dados', description: 'Aqui você pode conferir seu nome, e-mail, curso e outras informações.', side: 'left' }},
+            { element: '#about-card-content', popover: { title: 'Seu Perfil Pessoal', description: 'Este é o seu cartão de perfil, com suas informações acadêmicas e de conta.', side: 'bottom' as Side }},
+            { element: '#about-user-details', popover: { title: 'Seus Dados', description: 'Aqui você pode conferir seu nome, e-mail, curso e outras informações.', side: 'left' as Side }},
             ...(role === 'teacher' || role === 'course-coordinator' ? [
                 {
                     element: '#about-discipline-codes',
                     popover: { title: 'Códigos das Disciplinas', description: 'Clique aqui para ver e copiar os códigos de convite para suas disciplinas.', side: 'top' as Side }
                 }
             ] : []),
-            { element: '#about-change-password-button', popover: { title: 'Segurança da Conta', description: 'Precisa atualizar sua senha? Você pode fazer isso a qualquer momento aqui.', side: 'top' }},
+            { element: '#about-change-password-button', popover: { title: 'Segurança da Conta', description: 'Precisa atualizar sua senha? Você pode fazer isso a qualquer momento aqui.', side: 'top' as Side }},
         ],
     };
 };
