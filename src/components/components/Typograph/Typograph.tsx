@@ -50,6 +50,7 @@ interface TypographProps {
   weight: keyof typeof WeightType;
   fontFamily: keyof typeof FontFamily;
   className?: string;
+  id?: string;
 }
 
 export function Typograph({
@@ -59,10 +60,11 @@ export function Typograph({
   weight,
   fontFamily,
   className = "",
+  id,
 }: TypographProps) {
   const baseClass = `${WeightType[weight]} ${FontFamily[fontFamily]} ${VariantStyles[variant]} ${colorText} ${className}`;
 
   const Tag = variant.startsWith("title") ? "h1" : "p";
 
-  return <Tag className={baseClass}>{text}</Tag>;
+  return <Tag className={baseClass}>{text} id={id}</Tag>;
 }
