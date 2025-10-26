@@ -45,7 +45,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
 
   return (
     <>
-      <div className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2">
+      <div id="chat-container" className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2">
         <AnimatePresence mode="wait">
           {!greetingDone && (
             <motion.div

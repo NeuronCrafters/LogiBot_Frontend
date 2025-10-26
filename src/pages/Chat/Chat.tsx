@@ -13,7 +13,7 @@ export function Chat() {
   const isAdmin = userRoles.includes('admin');
 
   return (
-    <ChatLayout user={user} menuOpen={menuOpen} setMenuOpen={setMenuOpen}>
+    <ChatLayout user={user} menuOpen={menuOpen} setMenuOpen={setMenuOpen} >
       {isAuthenticated && isStudent && user && (
         <StudentChatContent user={user} />
       )}

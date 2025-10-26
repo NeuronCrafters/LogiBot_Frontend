@@ -22,26 +22,30 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   const menuOpen = externalMenuOpen !== undefined ? externalMenuOpen : internalMenuOpen;
   const setMenuOpen = externalSetMenuOpen || setInternalMenuOpen;
 
-  return (
-    <div className="relative flex min-h-screen bg-[#141414] flex-col items-center w-full">
-      <div className="absolute bg-[#141414] w-full flex items-center gap-4 border-b border-neutral-800 px-8 py-4 z-10">
-        <Typograph text="Chat LogiBot" colorText="text-white" variant="text2" weight="bold" fontFamily="poppins" />
-        {user && (
-          <div className="ml-auto">
-            <button onClick={() => setMenuOpen(true)} className="flex items-center justify-center p-0">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
-                <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
-              </div>
-            </button>
-          </div>
-        )}
-      </div>
+    return (
+        <div className="relative flex min-h-screen bg-[#141414] flex-col items-center w-full">
+            <div className="absolute bg-[#141414] w-full flex items-center gap-4 border-b border-neutral-800 px-8 py-4 z-10">
+                <Typograph text="Chat LogiBot" colorText="text-white" variant="text2" weight="bold" fontFamily="poppins" />
+                {user && (
+                    <div className="ml-auto">
+                        <button
+                            id="chat-header-menu-button"
+                            onClick={() => setMenuOpen(true)}
+                            className="flex items-center justify-center p-0"
+                        >
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
+                                <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
+                            </div>
+                        </button>
+                    </div>
+                )}
+            </div>
 
-      <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
+            <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
-      {children}
-    </div>
-  );
+            {children}
+        </div>
+    );
 };
 
 export default ChatLayout;
