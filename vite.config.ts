@@ -12,7 +12,10 @@ export default defineConfig({
 
     build: {
         rollupOptions: {
-          external: ['refractor/lib/core'],
+            external: [
+                'refractor/lib/core',
+                'refractor/lib/all'
+            ],
         },
     },
 
