@@ -14,28 +14,9 @@ export default defineConfig({
         rollupOptions: {
             external: [
                 'refractor/lib/core',
-                'refractor/lib/all'
+                'refractor/lib/all',
+                /^refractor\/lang\//
             ],
         },
     },
-
-  //comentar isso abaixo antes de subir para produção
-  // server: {
-  //   port: 5173,
-  //   host: '0.0.0.0',
-  //   watch: {
-  //     //garante que a atualização automática funcione bem no Docker
-  //     usePolling: true,
-  //   },
-
-  //   // proxy configurado para ser explícito sobre as rotas da API
-  //   proxy: {
-
-  //     // regra para autenticação
-  //     '/session': {
-  //       target: 'http://app:3000',
-  //       changeOrigin: true,
-  //     },
-  //   }
-  // }
 })
