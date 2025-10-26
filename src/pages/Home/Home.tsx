@@ -24,6 +24,7 @@ export function Home() {
         const driverObj = driver({
             showProgress: true,
             animate: true,
+            popoverClass: 'logibots-tour-popover',
             onDestroyed: () => {
                 localStorage.setItem('logibots-tour-concluido', 'true');
             },

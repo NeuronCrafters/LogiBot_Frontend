@@ -167,3 +167,61 @@
   --text-muted: #444444;
   --border-light: rgba(0, 0, 0, 0.1);
 }
+
+
+/*---------Tema para o Driver.JS para o Tour no Projeto*/
+.logibots-tour-popover {
+    background-color: var(--bg-darker) !important; /* #1f1f1f */
+    color: var(--text-muted) !important; /* #a1a1a1 */
+    border: 1px solid var(--border-light) !important; /* rgba(255, 255, 255, 0.1) */
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+}
+
+/* Estiliza a setinha que aponta para o elemento */
+.logibots-tour-popover .driver-popover-arrow {
+    border-top-color: var(--bg-darker) !important;
+}
+
+/* Estiliza o título do card */
+.logibots-tour-popover .driver-popover-title {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-light) !important; /* #ffffff */
+    font-size: 1.2rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Estiliza a descrição */
+.logibots-tour-popover .driver-popover-description {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem !important;
+}
+
+/* Estiliza os botões de navegação */
+.logibots-tour-popover .driver-popover-navigation-btns button {
+    background-color: #3B82F6 !important; /* Um azul vibrante (Tailwind blue-500) */
+    text-shadow: none !important;
+    color: white !important;
+    border-radius: 6px !important;
+    padding: 6px 14px !important;
+    transition: background-color 0.2s ease !important;
+}
+
+/* Efeito hover nos botões de navegação */
+.logibots-tour-popover .driver-popover-navigation-btns button:hover {
+    background-color: #2563EB !important; /* Azul mais escuro (blue-600) */
+}
+
+/* Estiliza o botão "Fechar" (X) para ser mais sutil */
+.logibots-tour-popover .driver-popover-close-btn {
+    color: var(--text-muted) !important;
+}
+
+.logibots-tour-popover .driver-popover-close-btn:hover {
+    color: var(--text-light) !important;
+}
+
+/* Estiliza a barra de progresso */
+.logibots-tour-popover .driver-popover-progress-text {
+    color: var(--text-muted) !important;
+}
