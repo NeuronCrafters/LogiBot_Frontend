@@ -10,6 +10,12 @@ export default defineConfig({
     },
   },
 
+build: {
+    rollupOptions: {
+      external: ['refractor/lib/core'],
+    },
+  },
+
   //comentar isso abaixo antes de subir para produção
   // server: {
   //   port: 5173,
