@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 // import { Captcha } from "@/components/components/Security/Captcha";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
@@ -8,8 +8,7 @@ import { ButtonLogin } from "@/components/components/Button/ButtonLogin";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { toast } from "react-hot-toast";
-import { driver } from "driver.js";
-import "driver.js/dist/driver.css";
+import { useMultiPageTour } from "@/hooks/useMultiPageTour";
 
 function Signup() {
   /* ── form states ─────────────────────────────────────────────── */
@@ -18,75 +17,13 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  useMultiPageTour('guest');
 
   /* ── ui feedback ─────────────────────────────────────────────── */
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const { login } = useAuth();
-
-    const startSignupTour = () => {
-        const driverObj = driver({
-            showProgress: true,
-            animate: true,
-            popoverClass: 'logibots-tour-popover',
-            onDestroyed: () => {
-                localStorage.setItem('logibots-tour-signup-concluido', 'true');
-            },
-            steps: [
-                {
-                    element: '#signup-name-input',
-                    popover: {
-                        title: 'Seu Nome Completo',
-                        description: 'Digite seu nome. Ele será usado para personalizar sua experiência de aprendizado.',
-                        side: 'bottom'
-                    }
-                },
-                {
-                    element: '#signup-email-input',
-                    popover: {
-                        title: 'Seu Melhor E-mail',
-                        description: 'Use um e-mail válido para que possamos nos comunicar com você se necessário.',
-                        side: 'bottom'
-                    }
-                },
-                {
-                    element: '#signup-password-input',
-                    popover: {
-                        title: 'Crie uma Senha Segura',
-                        description: 'Escolha uma senha com pelo menos 12 caracteres para proteger sua conta.',
-                        side: 'bottom'
-                    }
-                },
-                {
-                    element: '#signup-code-input',
-                    popover: {
-                        title: 'Código da Turma',
-                        description: 'Este é o código de convite ou de turma fornecido pelo seu professor.',
-                        side: 'top'
-                    }
-                },
-                {
-                    element: '#signup-submit-button',
-                    popover: {
-                        title: 'Finalizar Cadastro',
-                        description: 'Tudo pronto! Clique aqui para criar sua conta e começar a aprender.',
-                        side: 'top'
-                    }
-                }
-            ]
-        });
-        driverObj.drive();
-    };
-
-    useEffect(() => {
-        const tourConcluido = localStorage.getItem('logibots-tour-signup-concluido');
-        if (!tourConcluido) {
-            setTimeout(() => {
-                startSignupTour();
-            }, 500);
-        }
-    }, []);
 
   /* ── submit ──────────────────────────────────────────────────── */
   const handleRegister = async (e: React.FormEvent) => {

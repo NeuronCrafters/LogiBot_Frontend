@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState } from "react";
 // import ReCAPTCHA from "react-google-recaptcha";
 // import { Captcha } from "@/components/components/Security/Captcha";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,8 +9,7 @@ import { AnimatedLogo } from "../../components/components/AnimatedLogo/AnimatedL
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { AppModal } from "@/components/components/Modal/AppModal";
 import { toast } from "react-hot-toast";
-import { driver } from "driver.js";
-import "driver.js/dist/driver.css";
+import { useMultiPageTour } from "@/hooks/useMultiPageTour";
 
 function Signin() {
   const [email, setEmail] = useState("");
@@ -23,61 +22,7 @@ function Signin() {
   const navigate = useNavigate();
   const { login } = useAuth();
   // const recaptchaRef = useRef<ReCAPTCHA>(null);
-
-    const startSigninTour = () => {
-        const driverObj = driver({
-            showProgress: true,
-            animate: true,
-            popoverClass: 'logibots-tour-popover',
-            onDestroyed: () => {
-                localStorage.setItem('logibots-tour-signin-concluido', 'true');
-            },
-            steps: [
-                {
-                    element: '#signin-email-input',
-                    popover: {
-                        title: 'Seu E-mail',
-                        description: 'Digite aqui o e-mail que você usou para se cadastrar na plataforma.',
-                        side: 'bottom'
-                    }
-                },
-                {
-                    element: '#signin-password-input',
-                    popover: {
-                        title: 'Sua Senha',
-                        description: 'Agora, digite sua senha secreta para acessar sua conta.',
-                        side: 'bottom'
-                    }
-                },
-                {
-                    element: '#signin-submit-button',
-                    popover: {
-                        title: 'Acessar a Plataforma',
-                        description: 'Quando terminar de preencher, clique aqui para entrar!',
-                        side: 'bottom'
-                    }
-                },
-                {
-                    element: '#signin-signup-link',
-                    popover: {
-                        title: 'Novo por aqui?',
-                        description: 'Se você ainda não tem uma conta, clique neste link para se cadastrar gratuitamente.',
-                        side: 'top'
-                    }
-                }
-            ]
-        });
-        driverObj.drive();
-    };
-
-    useEffect(() => {
-        const tourConcluido = localStorage.getItem('logibots-tour-signin-concluido');
-        if (!tourConcluido) {
-            setTimeout(() => {
-                startSigninTour();
-            }, 500);
-        }
-    }, []);
+  useMultiPageTour('guest');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

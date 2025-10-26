@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Loader2,
   User as UserIcon,
@@ -17,8 +17,7 @@ import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { DisciplineCode } from "@/components/components/About/DisciplineCode";
 import { ChangePasswordModal } from "@/components/components/Security/ChangePasswordModal";
-import { driver, type DriveStep } from "driver.js";
-import "driver.js/dist/driver.css";
+import { useMultiPageTour, UserRole } from "@/hooks/useMultiPageTour";
 
 /* ───────── Types ───────── */
 interface DisciplineObject {
@@ -52,79 +51,11 @@ export function About() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
-    const startAboutTour = () => {
-        // Define os passos base do tour
-        const tourSteps: DriveStep[] = [
-            {
-                element: '#about-card-content',
-                popover: {
-                    title: 'Seu Perfil Pessoal',
-                    description: 'Este é o seu cartão de perfil, onde todas as suas informações acadêmicas e de conta estão reunidas.',
-                    side: 'bottom'
-                }
-            },
-            {
-                element: '#about-user-details',
-                popover: {
-                    title: 'Seus Dados',
-                    description: 'Aqui você pode conferir seu nome, e-mail, curso e outras informações importantes.',
-                    side: 'left'
-                }
-            },
-            {
-                element: '#about-change-password-button',
-                popover: {
-                    title: 'Segurança da Conta',
-                    description: 'Precisa atualizar sua senha? Você pode fazer isso a qualquer momento por aqui.',
-                    side: 'top',
-                    align: 'start'
-                }
-            },
-            {
-                element: '#about-header-menu-button',
-                popover: {
-                    title: 'Navegação Principal',
-                    description: 'Clique no seu avatar para abrir o menu e navegar para outras áreas da plataforma.',
-                    side: 'left'
-                }
-            }
-        ];
-
-        // Adiciona um passo condicional se o usuário for um professor com disciplinas
-        if (isProfessor && disciplineObjects.length > 0) {
-            // Insere o passo na 3ª posição (índice 2)
-            tourSteps.splice(2, 0, {
-                element: '#about-discipline-codes',
-                popover: {
-                    title: 'Códigos das Disciplinas',
-                    description: 'Como professor, você pode clicar aqui para ver e copiar os códigos de convite para suas disciplinas.',
-                    side: 'top',
-                    align: 'start'
-                }
-            });
-        }
-
-        const driverObj = driver({
-            showProgress: true,
-            animate: true,
-            popoverClass: 'logibots-tour-popover',
-            onDestroyed: () => {
-                localStorage.setItem('logibots-tour-about-concluido', 'true');
-            },
-            steps: tourSteps
-        });
-        driverObj.drive();
-    };
-
-    useEffect(() => {
-        const tourConcluido = localStorage.getItem('logibots-tour-about-concluido');
-        // Adicionamos '!loading' para garantir que o tour só inicie após os dados do usuário serem carregados
-        if (!tourConcluido && !loading && user) {
-            setTimeout(() => {
-                startAboutTour();
-            }, 500);
-        }
-    }, [loading, user]);
+  const mainRole = (user && (Array.isArray(user.role) ? user.role[0] : user.role)) as UserRole || 'guest';
+  useMultiPageTour(mainRole, {
+      openMenu: () => setMenuOpen(true),
+      closeMenu: () => setMenuOpen(false),
+  });
 
   /* ---------- Loading & Erros ---------- */
   if (loading)
