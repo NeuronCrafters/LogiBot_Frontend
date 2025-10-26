@@ -99,13 +99,13 @@ export function Home() {
       <main className="flex flex-col items-center justify-center flex-1 gap-10 p-6 text-center md:flex-row">
         <div className="flex flex-col items-center w-full md:w-1/2">
           <Typograph
-            id="welcome-title"
             text="Bem-vindo ao LogiBots.IA"
             colorText="text-white"
             variant="title10"
             weight="bold"
             fontFamily="poppins"
             className="mb-4"
+            id="welcome-title"
           />
           <Typograph
             text="LogiBots.IA é um sistema de apoio acadêmico. Com nosso suporte, você irá aprender assuntos de lógica de programação, além de reforçar sua base com atividades."

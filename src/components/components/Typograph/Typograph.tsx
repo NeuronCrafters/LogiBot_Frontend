@@ -66,5 +66,5 @@ export function Typograph({
 
   const Tag = variant.startsWith("title") ? "h1" : "p";
 
-  return <Tag className={baseClass}>{text} id={id}</Tag>;
+  return <Tag className={baseClass} id={id}>{text}</Tag>;
 }
