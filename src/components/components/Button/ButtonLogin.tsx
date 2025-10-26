@@ -12,6 +12,7 @@ interface UnifiedButtonProps {
   className?: string;
   disabled?: boolean;
   children?: React.ReactNode;
+  id?: string;
 }
 
 export function ButtonLogin({
@@ -20,6 +21,7 @@ export function ButtonLogin({
   className = "",
   disabled = false,
   children,
+  id,
 }: UnifiedButtonProps) {
   const handleClick = () => {
     if (onClick) onClick();
@@ -62,6 +64,7 @@ export function ButtonLogin({
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
       <Button
+        id={id}
         onClick={type === "submit" ? onClick : handleClick}
         type={type === "submit" ? "submit" : "button"}
         disabled={disabled}
