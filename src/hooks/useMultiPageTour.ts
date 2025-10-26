@@ -25,6 +25,42 @@ interface CustomDriveStep extends Omit<DriveStep, 'popover'> {
 
 // Tours por página - cada página é independente
 const generatePageTours = (role: UserRole): Record<string, CustomDriveStep[]> => {
+
+    // Lógica para construir o tour da página /chat dinamicamente
+    let chatTourSteps: CustomDriveStep[] = [];
+
+    switch (role) {
+        case 'student':
+            chatTourSteps = [
+                { element: '#chat-container', popover: { title: 'Área de Aprendizado', description: 'Bem-vindo! Aqui você pode escolher entre Quiz (responder 5 perguntas) ou Chat (conversar sobre lógica).', side: 'bottom' as Side }},
+                { element: '#chat-header-menu-button', popover: { title: 'Menu de Navegação', description: 'Clique no seu avatar a qualquer momento para acessar as opções.', side: 'left' as Side }},
+                { element: '#header-menu-options', popover: { title: 'Opções do Menu', description: 'Neste menu você pode navegar entre as funcionalidades da sua conta.', side: 'left' as Side }, onHighlightStartedAction: 'openMenu' },
+                { element: '#menu-option-detalhes', popover: { title: 'Seu Perfil', description: 'Veja e edite as informações da sua conta.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
+                { element: '#menu-option-chat', popover: { title: 'Voltar ao Chat', description: 'Clique aqui para retornar à tela de conversa ou quiz a qualquer momento.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
+                { element: '#header-logout-button', popover: { title: 'Encerrar Sessão', description: 'Quando terminar, é só clicar aqui para sair. Bom aprendizado!', side: 'top' as Side }, onHighlightStartedAction: 'openMenu' },
+            ];
+            break;
+
+        case 'teacher':
+        case 'course-coordinator':
+        case 'admin':
+            chatTourSteps = [
+                { element: '#chat-header-menu-button', popover: { title: 'Bem-vindo à Gestão', description: 'Esta é sua área principal. Clique no seu avatar para abrir o menu e acessar as funcionalidades.', side: 'left' as Side }},
+                { element: '#header-menu-options', popover: { title: 'Menu de Opções', description: 'Neste menu você pode navegar entre as funcionalidades de gestão disponíveis para o seu perfil.', side: 'left' as Side }, onHighlightStartedAction: 'openMenu' },
+                { element: '#menu-option-detalhes', popover: { title: 'Seu Perfil', description: 'Veja e edite as informações da sua conta.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
+                { element: '#menu-option-resultados', popover: { title: 'Resultados e Dashboards', description: 'Acesse os dashboards com o desempenho dos alunos e outras métricas.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
+                { element: '#menu-option-criar', popover: { title: 'Criar Conteúdo', description: 'Nesta área você pode criar e gerenciar novas turmas, disciplinas e questões.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
+                { element: '#header-logout-button', popover: { title: 'Encerrar Sessão', description: 'Quando terminar, é só clicar aqui para sair. Boas atividades!', side: 'top' as Side }, onHighlightStartedAction: 'openMenu' },
+            ];
+            break;
+
+        default:
+            // Tour para 'guest' ou caso o role não seja reconhecido (não mostra nada)
+            chatTourSteps = [];
+            break;
+    }
+
+
     return {
         '/': [
             { element: '#welcome-title', popover: { title: 'Bem-vindo ao LogiBots.IA!', description: 'Vamos fazer um tour rápido por esta página.', side: 'bottom' as Side }},
@@ -47,27 +83,7 @@ const generatePageTours = (role: UserRole): Record<string, CustomDriveStep[]> =>
             { element: '#signup-submit-button', popover: { title: 'Finalizar Cadastro', description: 'Clique aqui para criar sua conta e começar a aprender!', side: 'top' as Side }},
         ],
 
-        '/chat': [
-            { element: '#chat-container', popover: { title: 'Área de Aprendizado', description: 'Bem-vindo! Aqui você pode escolher entre Quiz (responder 5 perguntas) ou Chat (conversar sobre lógica).', side: 'bottom' as Side }},
-            { element: '#chat-header-menu-button', popover: { title: 'Menu de Navegação', description: 'Clique no seu avatar a qualquer momento para acessar as opções.', side: 'left' as Side }},
-            { element: '#header-menu-options', popover: { title: 'Opções do Menu', description: 'Aqui estão todas as funcionalidades disponíveis.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
-            { element: '#menu-option-detalhes', popover: { title: 'Seu Perfil', description: 'Veja e edite as informações da sua conta.', side: 'bottom' as Side }, onHighlightStartedAction: 'openMenu' },
-
-            ...(role !== 'student' ? [
-                {
-                    element: '#menu-option-resultados',
-                    popover: { title: 'Resultados', description: 'Acesse os dashboards com o desempenho dos alunos.', side: 'bottom' as Side },
-                    onHighlightStartedAction: 'openMenu' as const
-                },
-                {
-                    element: '#menu-option-criar',
-                    popover: { title: 'Criar Conteúdo', description: 'Nesta área você pode criar novas turmas, disciplinas e questões.', side: 'bottom' as Side },
-                    onHighlightStartedAction: 'openMenu' as const
-                },
-            ] : []),
-
-            { element: '#header-logout-button', popover: { title: 'Encerrar Sessão', description: 'Quando terminar, é só clicar aqui para sair. Bom aprendizado!', side: 'top' as Side }, onHighlightStartedAction: 'openMenu' },
-        ],
+        '/chat': chatTourSteps, // Utiliza a lista de passos criada dinamicamente
 
         '/about': [
             { element: '#about-card-content', popover: { title: 'Seu Perfil Pessoal', description: 'Este é o seu cartão de perfil, com suas informações acadêmicas e de conta.', side: 'bottom' as Side }},
