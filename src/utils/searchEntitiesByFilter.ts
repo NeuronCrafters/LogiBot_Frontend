@@ -271,15 +271,76 @@ export async function searchEntitiesByFilter(
       }
     }
 
-    if (role === "professor" && filterData.filterType === "students-discipline") {
-      const raw = (await professorApi.listMyStudents()) as RawStudent[];
-      fetched = raw.map((s) => ({
-        id: s._id,
-        name: s.name,
-        code: s.email,
-        roles: ["Estudante"],
-      }));
-      selectedEntity = "student";
+    // if (role === "professor" && filterData.filterType === "students-discipline") {
+    //   const raw = (await professorApi.listMyStudents()) as RawStudent[];
+    //   fetched = raw.map((s) => ({
+    //     id: s._id,
+    //     name: s.name,
+    //     code: s.email,
+    //     roles: ["Estudante"],
+    //   }));
+    //   selectedEntity = "student";
+    // }
+
+    // return { items: fetched, entity: selectedEntity };
+
+    if (role === "professor") {
+      switch (filterData.filterType) {
+
+        // Caso 1: Meus Alunos (Geral ou por Disciplina)
+        case "students-discipline": {
+          const raw = (await professorApi.listMyStudents()) as RawStudent[];
+
+          let filtered = raw;
+
+          if (filterData.disciplineId) {
+            filtered = raw.filter((s) =>
+              s.disciplines?.some((d: any) => {
+                // CORREÇÃO CRÍTICA:
+                // Se 'd' for Objeto (Admin style), pega ._id
+                // Se 'd' for String (Professor style), pega o próprio 'd'
+                const idToCheck = d._id || d;
+
+                return String(idToCheck) === String(filterData.disciplineId);
+              })
+            );
+          }
+
+          fetched = filtered.map((s) => ({
+            id: s._id,
+            name: s.name,
+            code: s.email,
+            roles: ["Estudante"],
+          }));
+          selectedEntity = "student";
+          break;
+        }
+
+        // Caso 2: Alunos por Turma (Intersecção Turma + Disciplina)
+        case "students-class": {
+          if (!filterData.classId) {
+            toast.error("Selecione uma turma");
+            return { items: [], entity: "student" };
+          }
+
+          // Nota: Não passamos courseId pois o backend ignora para professor.
+          // O disciplineId é passado SÓ SE foi selecionado (opcional).
+          const rawByClass = (await adminApi.listStudentsByClass(
+            filterData.classId,
+            undefined, // CourseID vai undefined mesmo
+            filterData.disciplineId // Se tiver selecionado, filtra. Se não, traz todos do prof.
+          )) as RawStudent[];
+
+          fetched = rawByClass.map((s) => ({
+            id: s._id,
+            name: s.name,
+            code: s.email,
+            roles: ["Estudante"],
+          }));
+          selectedEntity = "student";
+          break;
+        }
+      }
     }
 
     return { items: fetched, entity: selectedEntity };

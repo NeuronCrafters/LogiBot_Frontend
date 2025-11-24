@@ -95,15 +95,36 @@ export const adminApi = {
 
   listStudents: <T>() => getRequest<T>(ADMIN_ROUTES.listStudents),
 
+  // listStudentsByClass: (
+  //   classId: string,
+  //   courseId?: string,
+  // ): Promise<Array<{
+  //   id: any;
+  //   code: any; _id: string; name: string; email: string
+  // }>> => {
+  //   const base = ADMIN_ROUTES.listStudentsByClass.replace(":classId", classId);
+  //   const url = courseId ? `${base}?courseId=${courseId}` : base;
+  //   return getRequest(url);
+  // },
+
   listStudentsByClass: (
     classId: string,
-    courseId?: string
+    courseId?: string,
+    disciplineId?: string
   ): Promise<Array<{
     id: any;
     code: any; _id: string; name: string; email: string
   }>> => {
     const base = ADMIN_ROUTES.listStudentsByClass.replace(":classId", classId);
-    const url = courseId ? `${base}?courseId=${courseId}` : base;
+
+    const params = new URLSearchParams();
+
+    if (courseId) params.append("courseId", courseId);
+    if (disciplineId) params.append("disciplineId", disciplineId);
+
+    const queryString = params.toString();
+    const url = queryString ? `${base}?${queryString}` : base;
+
     return getRequest(url);
   },
 

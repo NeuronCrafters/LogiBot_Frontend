@@ -37,13 +37,13 @@ function Signup() {
     const finalCode = code.replace(/\s/g, '');
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]{3,}$/;
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ0-9\s]{3,}$/;
 
     if (!finalName) {
       toast.error("Nome é obrigatório.");
       return;
     } else if (!nameRegex.test(finalName)) {
-      toast.error("Use ao menos 3 letras e evite símbolos.");
+      toast.error("Nome inválido! Use ao menos 3 caracteres e evite símbolos especiais.");
       return;
     }
 
@@ -58,15 +58,11 @@ function Signup() {
     if (!finalPassword) {
       toast.error("Senha é obrigatória.");
       return;
-    } else if (finalPassword.length < 13) {
-      toast.error("A senha deve ter pelo menos 12 caracteres!.");
+    } else if (finalPassword.length < 12) {
+      toast.error("A senha deve ter pelo menos 12 caracteres!");
       return;
     }
 
-    if (!finalCode) {
-      toast.error("Código é obrigatório.");
-      return;
-    }
 
     // Validação do reCAPTCHA desabilitada temporariamente
     /*

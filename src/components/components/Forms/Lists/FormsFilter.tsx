@@ -52,11 +52,11 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   };
 
   const fixedUniversity = getFirstId(user.schoolId) || String(user.school || "");
-//   const userCourseId = getFirstId(user.courseId) || (
-//     Array.isArray(user.courses) && user.courses.length > 0
-//       ? user.courses[0]
-//       : ""
-//   );
+  //   const userCourseId = getFirstId(user.courseId) || (
+  //     Array.isArray(user.courses) && user.courses.length > 0
+  //       ? user.courses[0]
+  //       : ""
+  //   );
 
   const allowedFilters: FilterType[] = isAdmin
     ? [
@@ -69,7 +69,8 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
         "students-course", "students-discipline", "students-class",
       ]
       : isProfessor
-        ? ["students-discipline"]
+        ? ["students-discipline", "students-class"]
+        //? ["students-class"]
         : [];
 
   // Estados do formulário
@@ -113,12 +114,12 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     ].includes(filterType as FilterType);
 
   const showStudentDisciplineSelect =
-    filterType === "students-discipline" &&
+    (filterType === "students-discipline" || filterType === "students-class") &&
     (isAdmin || isCoordinator || isProfessor);
 
   const showStudentClassSelect =
     filterType === "students-class" &&
-    (isAdmin || isCoordinator);
+    (isAdmin || isCoordinator || isProfessor);
 
   const coordinatorNoSelect =
     isCoordinator &&
@@ -155,33 +156,57 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     return [];
   }, [universities, selectedUniversity, fixedUniversity, isAdmin, isCoordinator, isProfessor]);
 
-  const disciplines: Discipline[] = useMemo(() => {
-    if (!selectedCourse || !universities.length) return [];
+  // const disciplines: Discipline[] = useMemo(() => {
+  //   if (!selectedCourse || !universities.length) return [];
 
-    // Buscar em todas as universidades pelo curso selecionado
-    for (const university of universities) {
-      const course = university.courses.find(c => c._id === selectedCourse);
-      if (course) {
-        return course.disciplines || [];
-      }
+  //   // Buscar em todas as universidades pelo curso selecionado
+  //   for (const university of universities) {
+  //     const course = university.courses.find(c => c._id === selectedCourse);
+  //     if (course) {
+  //       return course.disciplines || [];
+  //     }
+  //   }
+
+  //   return [];
+  // }, [universities, selectedCourse]);
+
+  // const classes = useMemo(() => {
+  //   if (!selectedCourse || !universities.length) return [];
+
+  //   // Buscar em todas as universidades pelo curso selecionado
+  //   for (const university of universities) {
+  //     const course = university.courses.find(c => c._id === selectedCourse);
+  //     if (course) {
+  //       return course.classes || [];
+  //     }
+  //   }
+
+  //   return [];
+  // }, [universities, selectedCourse]);
+
+  const disciplines: Discipline[] = useMemo(() => {
+    // 1. Se um curso específico foi selecionado (Comum para Admin/Coordenador)
+    if (selectedCourse) {
+      const found = courses.find((c) => c._id === selectedCourse);
+      return found?.disciplines || [];
     }
 
-    return [];
-  }, [universities, selectedCourse]);
+    // 2. Se NÃO tem curso selecionado (Caso do Professor ou listagem geral)
+    // Agrupa todas as disciplinas de todos os cursos disponíveis na lista 'courses'
+    return courses.flatMap((c) => c.disciplines || []);
+  }, [courses, selectedCourse]);
 
   const classes = useMemo(() => {
-    if (!selectedCourse || !universities.length) return [];
-
-    // Buscar em todas as universidades pelo curso selecionado
-    for (const university of universities) {
-      const course = university.courses.find(c => c._id === selectedCourse);
-      if (course) {
-        return course.classes || [];
-      }
+    // 1. Se um curso específico foi selecionado
+    if (selectedCourse) {
+      const found = courses.find((c) => c._id === selectedCourse);
+      return found?.classes || [];
     }
 
-    return [];
-  }, [universities, selectedCourse]);
+    // 2. Se NÃO tem curso selecionado (Caso do Professor)
+    // Agrupa todas as turmas de todos os cursos disponíveis
+    return courses.flatMap((c) => c.classes || []);
+  }, [courses, selectedCourse]);
 
   // Effects para reset de campos
   useEffect(() => {
@@ -231,7 +256,11 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     // 3) dispara a busca
     onSearch({
       filterType,
-      universityId,
+      // universityId,
+      // courseId: showCourseSelect ? selectedCourse : undefined,
+      // disciplineId: showStudentDisciplineSelect ? selectedDiscipline : undefined,
+      // classId: showStudentClassSelect ? selectedClass : undefined,
+      universityId: showUniversitySelect ? selectedUniversity : undefined,
       courseId: showCourseSelect ? selectedCourse : undefined,
       disciplineId: showStudentDisciplineSelect ? selectedDiscipline : undefined,
       classId: showStudentClassSelect ? selectedClass : undefined,
