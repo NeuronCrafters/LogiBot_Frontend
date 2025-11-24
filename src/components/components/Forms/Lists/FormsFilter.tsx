@@ -64,9 +64,12 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       "professors", "students", "students-course", "students-discipline", "students-class",
     ]
     : isCoordinator
+      // ? [
+      //   "professors", "disciplines", "classes",
+      //   "students-course", "students-discipline", "students-class",
+      // ]
       ? [
-        "professors", "disciplines", "classes",
-        "students-course", "students-discipline", "students-class",
+        "professors", "disciplines", "classes", "students-discipline", "students-class",
       ]
       : isProfessor
         ? ["students-discipline", "students-class"]
