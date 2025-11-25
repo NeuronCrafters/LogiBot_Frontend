@@ -11,6 +11,7 @@ import {
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
+import { ChartExportMenu } from "../ChartExportMenu";
 
 interface ChartProps {
   filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };
@@ -76,10 +77,9 @@ export function GeneralScoreChart({ filters }: ChartProps) {
   ];
 
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+    <Card id="general-score-card" className="bg-[#1f1f1f] border-white/10 w-full mb-6">
 
-      {/* HEADER PADRÃO IGUAL AO CORRECTWRONGCHART */}
-      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+      <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
         <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Avaliação Geral de Desempenho</CardTitle>
           <CardDescription className="text-white/70">
@@ -93,7 +93,12 @@ export function GeneralScoreChart({ filters }: ChartProps) {
             border-t border-white/10 px-6 py-4 text-left invisible h-0"
           />
         </div>
+
+        <div className="absolute top-1/2 transform -translate-y-1/2 right-4">
+          <ChartExportMenu containerId="general-score-card" fileName="nota_geral" />
+        </div>
       </CardHeader>
+
 
       <CardContent className="px-2 sm:p-6 h-[305px] flex items-center justify-center">
 
