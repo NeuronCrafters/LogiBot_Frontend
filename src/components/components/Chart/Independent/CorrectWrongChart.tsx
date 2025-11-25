@@ -14,6 +14,7 @@ import logApiSmart from "@/services/api/logApiSmart";
 import { useAuth } from "@/hooks/use-Auth";
 import type { ChartFilterState } from "@/@types/ChartsType";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
+import { ChartExportMenu } from "../ChartExportMenu";
 
 const COLORS = ["#3f7d7d", "#7d3f3f"];
 
@@ -140,19 +141,25 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
   const errorMessage = error instanceof Error ? error.message : "Erro ao carregar dados.";
 
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
-      {/* HEADER PADRONIZADO EM ALTURA */}
-      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+    <Card id="correct-wrong-chart" className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+
         <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Desempenho por Tópico Geral</CardTitle>
           <CardDescription className="text-white/70">
             Acertos e Erros com Base na interação do Quiz
           </CardDescription>
         </div>
-        {/* Elemento invisível para manter a altura do CardHeader consistente com o UsageChart */}
+
         <div className="flex">
           <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true" />
         </div>
+
+
+        <div className="absolute top-5 right-4 z-40">
+          <ChartExportMenu containerId="correct-wrong-chart" fileName="acertos_erros" />
+        </div>
+
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">

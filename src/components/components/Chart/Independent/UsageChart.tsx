@@ -14,6 +14,7 @@ import { api } from "@/services/api/api";
 import type { ChartFilterState } from "@/@types/ChartsType";
 import logApiSmart from "@/services/api/logApiSmart";
 import { useAuth } from "@/hooks/use-Auth";
+import { ChartExportMenu } from "../ChartExportMenu";
 
 export function formatTimeWithDays(seconds: number): string {
   const totalSeconds = Math.floor(seconds);
@@ -190,14 +191,16 @@ export function UsageChart({ filter }: UsageChartProps) {
   }, [usageData]);
 
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
-      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+    <Card id="usage-chart" className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+
         <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Tempo de Uso Diário</CardTitle>
           <CardDescription className="text-white/70">
             Minutos de utilização nos últimos dias
           </CardDescription>
         </div>
+
         <div className="flex">
           <button
             data-active
@@ -209,6 +212,10 @@ export function UsageChart({ filter }: UsageChartProps) {
             </span>
           </button>
         </div>
+        <div className="absolute top-5 right-4 z-40">
+          <ChartExportMenu containerId="usage-chart" fileName="tempo_de_uso" />
+        </div>
+
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">

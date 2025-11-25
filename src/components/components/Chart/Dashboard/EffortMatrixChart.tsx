@@ -4,17 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
+import { ChartExportMenu } from "../ChartExportMenu";
 
 interface ChartProps {
   filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };
 }
 
-// ======================================================================
-// ## ONDE MUDAR AS CORES ##
-// Altere os códigos hexadecimais abaixo.
-// ======================================================================
-const COLOR_PRIMARY = "#8884d8";   // Roxo para pontos de alunos/entidades
-const COLOR_AVERAGE = "#ff7300";   // Laranja para o ponto de "Média"
+const COLOR_PRIMARY = "#8884d8";
+const COLOR_AVERAGE = "#ff7300";
 
 function useChartData(filters: ChartProps['filters']) {
   return useQuery({
@@ -29,26 +26,24 @@ export function EffortMatrixChart({ filters }: ChartProps) {
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.points.length > 0;
 
-  // NOVO: Verifica se há mais de um ponto para decidir se renderiza as linhas de referência
   const showReferenceLines = data && data.points.length > 1;
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-      <Card className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
-        <CardHeader>
+      <Card id="effort-matrix-chart" className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
+        <CardHeader className="relative">
           <CardTitle className="text-white">Matriz Desempenho vs. Esforço</CardTitle>
           <CardDescription className="text-white/70">Perfil dos alunos: tempo de uso e taxa de acertos.</CardDescription>
+
+          <div className="absolute top-5 right-4 z-40">
+            <ChartExportMenu containerId="effort-matrix-chart" fileName="matriz_esforco" />
+          </div>
         </CardHeader>
         <CardContent className="flex-grow">
           {isLoading && <ChartLoader />}
           {isError && <ChartError message={error.message} onRetry={refetch} />}
           {!isLoading && !isError && !hasData && <NoData onRetry={refetch} />}
           {!isLoading && !isError && hasData && (
-            // ======================================================================
-            // ## ONDE MUDAR ALTURA E LARGURA ##
-            // A LARGURA é 100% para ser responsiva.
-            // A ALTURA é controlada aqui. Altere o valor `height={300}`.
-            // ======================================================================
             <ResponsiveContainer width="100%" height={300}>
               <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
@@ -76,7 +71,6 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                     if (active && payload && payload.length) {
                       const pointData = payload[0].payload;
 
-                      // Usa o valor ORIGINAL (sem jittering) para o Tooltip, se disponível
                       const displayPerformance = pointData.originalPerformance !== undefined
                         ? pointData.originalPerformance
                         : pointData.performance;
@@ -96,7 +90,6 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                     return null;
                   }}
                 />
-                {/* CORREÇÃO: Renderiza ReferenceLine apenas se houver mais de um ponto (múltiplos alunos) */}
                 {showReferenceLines && (
                   <>
                     <ReferenceLine y={data.averages.avgPerformance} stroke="#ffffff50" strokeDasharray="4 4" />
@@ -107,7 +100,6 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                   {data.points.map((point, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      // O ponto da média é desenhado como um Cell, garantindo que ele seja plotado
                       fill={point.isAverage ? COLOR_AVERAGE : COLOR_PRIMARY}
                     />
                   ))}

@@ -5,6 +5,7 @@ import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
+import { ChartExportMenu } from "../ChartExportMenu";
 
 const chartConfig = {
   score: {
@@ -23,7 +24,6 @@ interface ChartProps {
   };
 }
 
-// Hook de dados mantido
 function useProficiencyData(filters: ChartProps['filters']) {
   const hasRequiredFilters = !!filters.universityId;
 
@@ -31,7 +31,7 @@ function useProficiencyData(filters: ChartProps['filters']) {
     queryKey: ['proficiencyRadar', filters],
     queryFn: () => dashboardApi.getProficiencyRadar(filters),
     enabled: hasRequiredFilters,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5,
     select: (response) => {
       const apiData = response.data;
 
@@ -47,7 +47,6 @@ function useProficiencyData(filters: ChartProps['filters']) {
 
       const hasPerformanceData = chartData.some(item => item.score > 0);
 
-      // Métricas opcionais
       const interactedData = chartData.filter(item => item.score > 0);
       const totalScore = interactedData.reduce((sum, item) => sum + item.score, 0);
       const averageScore = interactedData.length > 0 ? totalScore / interactedData.length : 0;
@@ -68,7 +67,6 @@ function useProficiencyData(filters: ChartProps['filters']) {
 export function ProficiencyRadarChart({ filters }: ChartProps) {
   const { data, isLoading, isError, refetch, error } = useProficiencyData(filters);
 
-  // Lógica de verificação replicada para a UI
   const hasRequired = !!filters.universityId;
   const hasData = data?.hasPerformanceData ?? false;
 
@@ -76,36 +74,35 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
   const errorMessage = error instanceof Error ? error.message : "Erro ao carregar dados.";
 
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
-      {/* HEADER PADRONIZADO EM ALTURA */}
-      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+    <Card id="proficiency-radar-chart" className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
         <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Proficiência por Assunto: Quiz</CardTitle>
           <CardDescription className="text-white/70">
             Nível de acerto médio em cada assunto principal.
           </CardDescription>
         </div>
-        {/* Elemento invisível para manter a altura do CardHeader consistente com o UsageChart */}
+
         <div className="flex">
           <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true" />
+        </div>
+
+        <div className="absolute top-5 right-4 z-40">
+          <ChartExportMenu containerId="proficiency-radar-chart" fileName="proficiencia_radar" />
         </div>
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">
-        {/* Estados: falta seleção */}
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
             <p>Selecione uma universidade para visualizar o radar de proficiência.</p>
           </NoData>
         )}
 
-        {/* Estados: loading */}
         {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
 
-        {/* Estados: erro */}
         {hasRequired && isError && <ChartError message={errorMessage} onRetry={refetchTyped} />}
 
-        {/* Renderização do gráfico quando há dados */}
         {hasRequired && !isLoading && !isError && hasData && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
             <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full text-white">
@@ -132,7 +129,6 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
           </motion.div>
         )}
 
-        {/* Sem dados */}
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>
             <p>Nenhum dado de proficiência disponível.</p>
@@ -140,7 +136,6 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         )}
       </CardContent>
 
-      {/* Rodapé condicional, com estrutura padronizada */}
       {hasData && (
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex flex-col">

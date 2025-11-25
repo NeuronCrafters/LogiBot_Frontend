@@ -6,6 +6,7 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
+import { ChartExportMenu } from "../ChartExportMenu";
 
 interface ApiData {
   labels: string[];
@@ -49,7 +50,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
   const hasDataForFooter = data && data.length > 1;
   const hasData = data && data.length > 0;
 
-  const hasRequiredIds = !!filters.universityId; // Condição de enable do hook
+  const hasRequiredIds = !!filters.universityId;
 
   const performanceSummary = useMemo(() => {
     if (!hasDataForFooter || !data) return null;
@@ -61,41 +62,38 @@ export function LearningJourneyChart({ filters }: ChartProps) {
   }, [data, hasDataForFooter]);
 
   return (
-    <Card className="bg-[#1f1f1f] border-white/10 w-full mb-6">
-      {/* HEADER PADRONIZADO EM ALTURA */}
-      <CardHeader className="flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
+    <Card id="learning-journey-chart" className="bg-[#1f1f1f] border-white/10 w-full mb-6">
+      <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
         <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Jornada de Aprendizagem</CardTitle>
           <CardDescription className="text-white/70">
             Evolução do desempenho ao longo das questões.
           </CardDescription>
         </div>
-        {/* Adiciona uma div que simula o espaço do sumário, para manter a altura do header similar ao UsageChart */}
+
         <div className="flex">
           <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true">
-            {/* Elemento invisível para manter a altura do CardHeader consistente */}
           </div>
+        </div>
+
+        <div className="absolute top-5 right-4 z-40">
+          <ChartExportMenu containerId="learning-journey-chart" fileName="jornada_aprendizagem" />
         </div>
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">
-        {/* Estados: falta seleção */}
         {!hasRequiredIds && (
           <NoData onRetry={refetch}>
             <p>Selecione uma universidade para visualizar a Jornada de Aprendizagem.</p>
           </NoData>
         )}
 
-        {/* Estados: loading */}
         {hasRequiredIds && isLoading && <ChartLoader text="Carregando dados..." />}
 
-        {/* Estados: erro */}
         {hasRequiredIds && isError && <ChartError message={(error as Error)?.message} onRetry={refetch} />}
 
-        {/* Gráfico */}
         {hasRequiredIds && !isLoading && !isError && hasData && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-            {/* Altura padronizada para h-[250px] */}
             <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
               <AreaChart accessibilityLayer data={data} margin={{ left: 12, right: 12, top: 10, bottom: 5 }}>
                 <CartesianGrid vertical={false} stroke="rgba(255, 255, 255, 0.1)" />
@@ -132,13 +130,11 @@ export function LearningJourneyChart({ filters }: ChartProps) {
           </motion.div>
         )}
 
-        {/* Sem dados */}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>Nenhum dado de jornada disponível para esta entidade.</NoData>
         )}
       </CardContent>
 
-      {/* Footer mantido para dados de resumo */}
       {hasDataForFooter && performanceSummary && (
         <CardFooter className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4 border-t border-white/10">
           <div className="flex items-center gap-3">

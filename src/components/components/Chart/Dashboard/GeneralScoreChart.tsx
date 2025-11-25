@@ -114,10 +114,10 @@ export function GeneralScoreChart({ filters }: ChartProps) {
             className="flex flex-col items-center justify-center w-[800px] gap-4"
           >
 
-            {/* Nota e status — altura controlada */}
+            {/* Nota e status — AQUI FOI APLICADO O .toFixed(2) */}
             <div className="flex flex-col items-center">
               <span className="text-6xl font-bold" style={{ color: data.color }}>
-                {data.score.toString().replace('.', ',')}
+                {data.score.toFixed(2).replace('.', ',')}
               </span>
 
               <span
@@ -188,18 +188,14 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                 Nota Final
               </span>
               <span className="text-lg font-bold text-white">
-                {data.score.toString().replace('.', ',')}
+                {/* AQUI TAMBÉM FOI APLICADO O .toFixed(2) */}
+                {data.score.toFixed(2).replace('.', ',')}
                 <span className="text-xs text-gray-500 font-normal"> / 10</span>
               </span>
             </div>
           </div>
-
-
-
         </CardFooter>
-
       )}
-
     </Card>
   );
 }
