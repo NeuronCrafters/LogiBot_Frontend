@@ -46,7 +46,8 @@ export function AcademicFilter({
   const { data, isLoading, error } = useQuery<AcademicDataResponse>({
     queryKey: ["academicData", user?._id],
     queryFn: academicFiltersApi.getAcademicData,
-    staleTime: 1000 * 60 * 60 * 4,
+    //staleTime: 1000 * 60 * 60 * 4,
+    staleTime: 0,
   });
 
   if (!user) return null;
