@@ -61,7 +61,7 @@ export function CoordinatorRoleSection({
         Remover o cargo de: Coordenador de Curso
       </label>
 
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {removeCoord && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
@@ -87,7 +87,7 @@ export function CoordinatorRoleSection({
             </select>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </div>
   );
 }

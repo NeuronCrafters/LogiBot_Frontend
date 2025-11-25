@@ -169,7 +169,14 @@ export async function searchEntitiesByFilter(
           }
 
           const profs = await adminApi.listProfessorsByUniversity<
-            { _id: string; name: string; email: string; role: string | string[]; course?: string; courseId?: string }[]
+            {
+              _id: string;
+              name: string;
+              email: string;
+              role: string | string[];
+              course?: string;
+              courseId?: string;
+            }[]
           >(filterData.universityId);
 
           // mapeia para ListItem
@@ -271,19 +278,6 @@ export async function searchEntitiesByFilter(
       }
     }
 
-    // if (role === "professor" && filterData.filterType === "students-discipline") {
-    //   const raw = (await professorApi.listMyStudents()) as RawStudent[];
-    //   fetched = raw.map((s) => ({
-    //     id: s._id,
-    //     name: s.name,
-    //     code: s.email,
-    //     roles: ["Estudante"],
-    //   }));
-    //   selectedEntity = "student";
-    // }
-
-    // return { items: fetched, entity: selectedEntity };
-
     if (role === "professor") {
       switch (filterData.filterType) {
 
@@ -296,9 +290,6 @@ export async function searchEntitiesByFilter(
           if (filterData.disciplineId) {
             filtered = raw.filter((s) =>
               s.disciplines?.some((d: any) => {
-                // CORREÇÃO CRÍTICA:
-                // Se 'd' for Objeto (Admin style), pega ._id
-                // Se 'd' for String (Professor style), pega o próprio 'd'
                 const idToCheck = d._id || d;
 
                 return String(idToCheck) === String(filterData.disciplineId);

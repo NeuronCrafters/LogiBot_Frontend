@@ -52,49 +52,63 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
   const [newCoordinator, setNewCoordinator] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
-  // Query para buscar candidatos a coordenador
+  // =========================================================================
+  // Query de Candidatos Simplificada (Confiando na correção do searchEntitiesByFilter)
+  // =========================================================================
   const {
     data: candidates = [],
     isLoading: loadingCandidates,
     error: candidatesError,
     refetch: refetchCandidates
   } = useQuery({
+    // A chave depende do courseId do item sendo editado
     queryKey: ['professors', 'candidates', editItem?.courseId],
+
     queryFn: async () => {
+      // Se por algum motivo o courseId não vier, aborta (retorna vazio)
       if (!editItem?.courseId) return [];
 
       try {
+        // Busca professores daquele curso
         const result = await adminApi.listProfessorsByCourse<any[]>(editItem.courseId);
+
+        // Filtra para não mostrar a si mesmo e nem quem já é coordenador
         const filtered = result.filter(
           (prof) => prof._id !== editItem.id && !prof.role?.includes("course-coordinator")
         );
-        return filtered.map((p) => ({ id: p._id, name: p.name }));
+
+        return filtered.map((p) => ({
+          id: p._id,
+          name: p.name,
+          courseId: editItem.courseId // Mantém o contexto do curso atual
+        }));
       } catch (error) {
         console.error("Erro ao carregar candidatos:", error);
         throw new Error("Falha ao carregar candidatos a coordenador");
       }
     },
-    enabled: !!editItem?.courseId && removeCoord, // Só executa quando necessário
-    staleTime: 2 * 60 * 1000, // 2 minutos
-    gcTime: 5 * 60 * 1000,    // 5 minutos
-    retry: 2,
-    retryDelay: 1000,
+    // Só executa se estiver editando, se for remover cargo E se tivermos um ID de curso válido
+    enabled: !!editItem?.courseId && removeCoord,
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
   });
 
   // Mutation para deletar registros
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Aqui você pode implementar a lógica de delete específica por entidade
+      if (entity === "student") {
+        await adminApi.deleteStudent(id);
+      } else if (entity === "professor") {
+        await adminApi.deleteProfessor(id);
+      }
       return { id };
     },
     onSuccess: (data) => {
       onDelete(data.id);
-      // toast.success("Registro deletado com sucesso!");
       setDeleteId(null);
-
-      // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['recentItems'] });
       queryClient.invalidateQueries({ queryKey: ['academicData'] });
+      queryClient.invalidateQueries({ queryKey: ['searchEntities'] });
     },
     onError: (error) => {
       console.error("Erro ao deletar:", error);
@@ -102,41 +116,59 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
     }
   });
 
-  // Mutation para atualizar coordenador
+  // Mutation para atualizar coordenador (Lógica de Swap)
   const updateCoordinatorMutation = useMutation({
-    mutationFn: async ({ action, coordinatorId }: { action: 'add' | 'remove', coordinatorId?: string }) => {
-      if (!editItem) throw new Error("Item não selecionado");
+    mutationFn: async ({
+      action,
+      currentId,
+      newCoordinatorId
+    }: {
+      action: 'add' | 'remove' | 'swap',
+      currentId: string,
+      newCoordinatorId?: string
+    }) => {
 
-      // Implementar lógica de adicionar/remover coordenador
-      // Esta seria a chamada real para sua API
-      return { action, coordinatorId, itemId: editItem.id };
+      if (action === 'add') {
+        return await adminApi.updateProfessorRole(currentId, 'add');
+      }
+
+      if (action === 'remove' && !newCoordinatorId) {
+        return await adminApi.updateProfessorRole(currentId, 'remove');
+      }
+
+      if (action === 'swap' && newCoordinatorId) {
+        await adminApi.updateProfessorRole(currentId, 'remove');
+        return await adminApi.updateProfessorRole(newCoordinatorId, 'add');
+      }
+
+      throw new Error("Ação inválida ou dados incompletos.");
     },
     onSuccess: () => {
       toast.success("Cargo atualizado com sucesso!");
       setEditItem(null);
       resetCoordinatorForm();
-
-      // Invalidar cache de candidatos e dados acadêmicos
       queryClient.invalidateQueries({ queryKey: ['professors'] });
       queryClient.invalidateQueries({ queryKey: ['academicData'] });
+      queryClient.invalidateQueries({ queryKey: ['searchEntities'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Erro ao atualizar coordenador:", error);
-      toast.error("Erro ao atualizar cargo.");
+      const msg = error?.response?.data?.message || "Erro ao atualizar cargo.";
+      toast.error(msg);
     }
   });
 
-  // Efeito para simular loading inicial
+  // Efeito loading
   useEffect(() => {
     setLoading(true);
-    const delay = setTimeout(() => setLoading(false), 1000);
+    const delay = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(delay);
   }, [items]);
 
   // Tratar erro de candidatos
   useEffect(() => {
     if (candidatesError) {
-      toast.error("Erro ao carregar candidatos a coordenador");
+      toast.error("Erro ao carregar lista de professores");
     }
   }, [candidatesError]);
 
@@ -154,9 +186,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
 
   // Handlers
   const handleConfirmDelete = () => {
-    if (deleteId) {
-      deleteMutation.mutate(deleteId);
-    }
+    if (deleteId) deleteMutation.mutate(deleteId);
   };
 
   const handleCancelDelete = () => {
@@ -177,18 +207,33 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
   };
 
   const handleConfirmCoordinator = () => {
+    if (!editItem) return;
+
     if (addCoord) {
-      updateCoordinatorMutation.mutate({ action: 'add' });
+      updateCoordinatorMutation.mutate({
+        action: 'add',
+        currentId: editItem.id
+      });
     } else if (removeCoord && newCoordinator) {
-      updateCoordinatorMutation.mutate({ action: 'remove', coordinatorId: newCoordinator });
+      updateCoordinatorMutation.mutate({
+        action: 'swap',
+        currentId: editItem.id,
+        newCoordinatorId: newCoordinator
+      });
+    } else if (removeCoord && !newCoordinator) {
+      updateCoordinatorMutation.mutate({
+        action: 'remove',
+        currentId: editItem.id
+      });
     }
   };
 
   // Validações
-  const alreadyIsCoordinator = !!editItem?.roles?.includes("Coordenador de Curso");
+  const alreadyIsCoordinator = !!editItem?.roles?.some(r => r === "Coordenador de Curso" || r === "course-coordinator");
+
   const confirmDisabled = (!addCoord && !removeCoord) ||
     (addCoord && alreadyIsCoordinator) ||
-    (removeCoord && (!alreadyIsCoordinator || newCoordinator.trim() === "")) ||
+    (removeCoord && (!alreadyIsCoordinator || (removeCoord && newCoordinator === "" && false))) || // mude o false para true se obrigar a ter novo coord
     updateCoordinatorMutation.isPending;
 
   return (
@@ -235,7 +280,9 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
                   <TableCell>{item.name}</TableCell>
                   <TableCell>{item.code ?? item.id}</TableCell>
                   {(entity === "professor" || entity === "student") && (
-                    <TableCell>{item.roles?.join(", ") ?? "—"}</TableCell>
+                    <TableCell>
+                      {item.roles?.map(r => r === 'course-coordinator' ? 'Coordenador' : r).join(", ") ?? "—"}
+                    </TableCell>
                   )}
                   <TableCell className="text-center">
                     <div className="inline-flex justify-center gap-2">
@@ -273,7 +320,6 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         </TableBody>
       </Table>
 
-      {/* Modal de confirmação de delete */}
       <AppModal
         isOpen={!!deleteId}
         type="delete"
@@ -284,7 +330,6 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         onConfirm={handleConfirmDelete}
       />
 
-      {/* Modal de edição de coordenador */}
       <AppModal
         isOpen={!!editItem}
         type="update"
@@ -300,23 +345,16 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         disabled={confirmDisabled}
       >
         <div className="space-y-4">
-          {/* Loading de candidatos */}
           {loadingCandidates && removeCoord && (
             <div className="p-3 border rounded-lg bg-blue-600/20 border-blue-600/50">
               <p className="text-sm text-blue-300">Carregando candidatos...</p>
             </div>
           )}
 
-          {/* Erro ao carregar candidatos */}
           {candidatesError && removeCoord && (
             <div className="p-3 border rounded-lg bg-red-600/20 border-red-600/50">
               <p className="text-sm text-red-300">Erro ao carregar candidatos.</p>
-              <button
-                onClick={() => refetchCandidates()}
-                className="mt-1 text-xs text-red-200 underline hover:text-red-100"
-              >
-                Tentar novamente
-              </button>
+              <button onClick={() => refetchCandidates()} className="text-red-200 underline">Tentar novamente</button>
             </div>
           )}
 
@@ -326,7 +364,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
             removeCoord={removeCoord}
             newCoordinator={newCoordinator}
             candidates={candidates}
-            currentCourseId={editItem?.courseId ?? ""}
+            currentCourseId={editItem?.courseId || (candidates[0] ? candidates[0].courseId : "")}
             onAddChange={setAddCoord}
             onRemoveChange={setRemoveCoord}
             onCoordinatorChange={setNewCoordinator}
