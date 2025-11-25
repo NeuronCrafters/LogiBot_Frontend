@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { AcademicFilter } from "./AcademicFilter";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
 // Importações necessárias para o filtro de datas
