@@ -108,7 +108,7 @@ export async function searchEntitiesByFilter(
             toast.error("Curso não encontrado");
             return { items: [], entity: "student" };
           }
-          fetched = course.classes.map((c) => ({ id: c._id, name: c.name }));
+          fetched = course.classes.map((c) => ({ id: c._id, name: c.name, classId: c._id }));
           selectedEntity = "class";
           break;
         }
@@ -215,15 +215,54 @@ export async function searchEntitiesByFilter(
         }
 
         case "classes": {
-          const res = await coordinatorApi.listClasses<ListItem[]>();
-          fetched = res.map((c) => ({ id: c.id, name: c.name }));
+          type RawClass = {
+            _id: string;
+            name: string;
+          };
+
+          const res = await coordinatorApi.listClasses<RawClass[]>();
+
+          fetched = res.map((c) => ({
+            id: c._id,
+            name: c.name,
+            classId: c._id
+          }));
+
           selectedEntity = "class";
           break;
         }
 
         case "professors": {
-          const res = await coordinatorApi.listMyProfessors<ListItem[]>();
-          fetched = res.map((p) => p);
+          type RawCoordinatorProfessor = {
+            _id: string;
+            name: string;
+            email: string;
+            role: string | string[];
+            course?: string;
+            courses?: string[];
+          };
+
+          const res = await coordinatorApi.listMyProfessors<RawCoordinatorProfessor[]>();
+
+          fetched = res.map((p) => {
+            const rawRoles = Array.isArray(p.role) ? p.role : [p.role];
+
+            return {
+              id: p._id,
+              name: p.name,
+              code: p.email,
+              courseId: p.course || (p.courses && p.courses[0] ? String(p.courses[0]) : ""),
+              roles: rawRoles.map((r) => {
+                switch (r) {
+                  case "admin": return "Administrador";
+                  case "professor": return "Professor";
+                  case "course-coordinator": return "Coordenador de Curso";
+                  default: return r;
+                }
+              }),
+            };
+          });
+
           selectedEntity = "professor";
           break;
         }
@@ -266,11 +305,13 @@ export async function searchEntitiesByFilter(
           const rawByClass = (await adminApi.listStudentsByClass(
             filterData.classId
           )) as RawStudent[];
+
           fetched = rawByClass.map((s) => ({
             id: s._id,
             name: s.name,
             code: s.email,
             roles: ["Estudante"],
+            classId: filterData.classId
           }));
           selectedEntity = "student";
           break;
@@ -281,7 +322,6 @@ export async function searchEntitiesByFilter(
     if (role === "professor") {
       switch (filterData.filterType) {
 
-        // Caso 1: Meus Alunos (Geral ou por Disciplina)
         case "students-discipline": {
           const raw = (await professorApi.listMyStudents()) as RawStudent[];
 
@@ -307,19 +347,15 @@ export async function searchEntitiesByFilter(
           break;
         }
 
-        // Caso 2: Alunos por Turma (Intersecção Turma + Disciplina)
         case "students-class": {
           if (!filterData.classId) {
             toast.error("Selecione uma turma");
             return { items: [], entity: "student" };
           }
-
-          // Nota: Não passamos courseId pois o backend ignora para professor.
-          // O disciplineId é passado SÓ SE foi selecionado (opcional).
           const rawByClass = (await adminApi.listStudentsByClass(
             filterData.classId,
-            undefined, // CourseID vai undefined mesmo
-            filterData.disciplineId // Se tiver selecionado, filtra. Se não, traz todos do prof.
+            undefined,
+            filterData.disciplineId
           )) as RawStudent[];
 
           fetched = rawByClass.map((s) => ({

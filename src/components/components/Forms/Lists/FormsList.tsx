@@ -23,6 +23,7 @@ export interface ListItem {
   code?: string;
   roles?: string[];
   courseId?: string;
+  classId?: string;
 }
 
 export type EntityType =
@@ -44,7 +45,6 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Estados locais
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<ListItem | null>(null);
   const [addCoord, setAddCoord] = useState(false);
@@ -52,27 +52,22 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
   const [newCoordinator, setNewCoordinator] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
-  // =========================================================================
-  // Query de Candidatos Simplificada (Confiando na correção do searchEntitiesByFilter)
-  // =========================================================================
   const {
     data: candidates = [],
     isLoading: loadingCandidates,
     error: candidatesError,
     refetch: refetchCandidates
   } = useQuery({
-    // A chave depende do courseId do item sendo editado
     queryKey: ['professors', 'candidates', editItem?.courseId],
 
     queryFn: async () => {
-      // Se por algum motivo o courseId não vier, aborta (retorna vazio)
+
       if (!editItem?.courseId) return [];
 
       try {
-        // Busca professores daquele curso
+
         const result = await adminApi.listProfessorsByCourse<any[]>(editItem.courseId);
 
-        // Filtra para não mostrar a si mesmo e nem quem já é coordenador
         const filtered = result.filter(
           (prof) => prof._id !== editItem.id && !prof.role?.includes("course-coordinator")
         );
@@ -80,20 +75,19 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         return filtered.map((p) => ({
           id: p._id,
           name: p.name,
-          courseId: editItem.courseId // Mantém o contexto do curso atual
+          courseId: editItem.courseId
         }));
       } catch (error) {
         console.error("Erro ao carregar candidatos:", error);
         throw new Error("Falha ao carregar candidatos a coordenador");
       }
     },
-    // Só executa se estiver editando, se for remover cargo E se tivermos um ID de curso válido
+
     enabled: !!editItem?.courseId && removeCoord,
     staleTime: 2 * 60 * 1000,
     retry: 1,
   });
 
-  // Mutation para deletar registros
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (entity === "student") {
@@ -116,7 +110,6 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
     }
   });
 
-  // Mutation para atualizar coordenador (Lógica de Swap)
   const updateCoordinatorMutation = useMutation({
     mutationFn: async ({
       action,
@@ -158,14 +151,12 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
     }
   });
 
-  // Efeito loading
   useEffect(() => {
     setLoading(true);
     const delay = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(delay);
   }, [items]);
 
-  // Tratar erro de candidatos
   useEffect(() => {
     if (candidatesError) {
       toast.error("Erro ao carregar lista de professores");
@@ -184,7 +175,6 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
         ? "Email"
         : "ID";
 
-  // Handlers
   const handleConfirmDelete = () => {
     if (deleteId) deleteMutation.mutate(deleteId);
   };
@@ -195,6 +185,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
   };
 
   const handleEdit = (item: ListItem) => {
+    console.log("ID da Turma:", item.classId);
     resetCoordinatorForm();
     setEditItem(item);
     onEdit(item);
@@ -228,7 +219,6 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
     }
   };
 
-  // Validações
   const alreadyIsCoordinator = !!editItem?.roles?.some(r => r === "Coordenador de Curso" || r === "course-coordinator");
 
   const confirmDisabled = (!addCoord && !removeCoord) ||

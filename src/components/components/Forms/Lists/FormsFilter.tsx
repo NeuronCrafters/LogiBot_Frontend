@@ -429,17 +429,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
         )}
       </div>
 
-      {/* Aviso para coordenadores */}
-      {(isCoordinator || isProfessor) && filterType && showCourseSelect && (
-        <div className="p-3 mb-4 border rounded-lg bg-yellow-600/20 border-yellow-600/50">
-          <p className="text-sm text-yellow-300">
-            {isCoordinator
-              ? "Você pode visualizar dados de todos os cursos da sua universidade"
-              : "Você está limitado às disciplinas dos cursos da sua universidade"}
-          </p>
-        </div>
-      )}
-
       {/* Botões de ação */}
       <div className="flex gap-2">
         <ButtonCRUD
