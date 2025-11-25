@@ -159,34 +159,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     return [];
   }, [universities, selectedUniversity, fixedUniversity, isAdmin, isCoordinator, isProfessor]);
 
-  // const disciplines: Discipline[] = useMemo(() => {
-  //   if (!selectedCourse || !universities.length) return [];
-
-  //   // Buscar em todas as universidades pelo curso selecionado
-  //   for (const university of universities) {
-  //     const course = university.courses.find(c => c._id === selectedCourse);
-  //     if (course) {
-  //       return course.disciplines || [];
-  //     }
-  //   }
-
-  //   return [];
-  // }, [universities, selectedCourse]);
-
-  // const classes = useMemo(() => {
-  //   if (!selectedCourse || !universities.length) return [];
-
-  //   // Buscar em todas as universidades pelo curso selecionado
-  //   for (const university of universities) {
-  //     const course = university.courses.find(c => c._id === selectedCourse);
-  //     if (course) {
-  //       return course.classes || [];
-  //     }
-  //   }
-
-  //   return [];
-  // }, [universities, selectedCourse]);
-
   const disciplines: Discipline[] = useMemo(() => {
     // 1. Se um curso específico foi selecionado (Comum para Admin/Coordenador)
     if (selectedCourse) {

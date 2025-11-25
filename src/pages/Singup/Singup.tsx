@@ -113,7 +113,7 @@ function Signup() {
 
       {/* --- Formulário ----------------------------------------- */}
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
-        <div className="w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
+        <div className="w-[90%] md:w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
           <Typograph
             text="Cadastro"
             colorText="text-white"
@@ -146,7 +146,7 @@ function Signup() {
             <Input
               type="text"
               placeholder="Nome completo"
-              className="mb-4 bg-neutral-800"
+              className="w-full mb-4 bg-neutral-800"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -156,7 +156,7 @@ function Signup() {
             <Input
               type="email"
               placeholder="Email"
-              className="mb-4 bg-neutral-800"
+              className="w-full mb-4 bg-neutral-800"
               value={email}
               onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
               required
@@ -166,7 +166,7 @@ function Signup() {
             <Input
               type="password"
               placeholder="Senha"
-              className="mb-4 bg-neutral-800"
+              className="w-full mb-4 bg-neutral-800"
               value={password}
               onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
               required
@@ -176,7 +176,7 @@ function Signup() {
             <Input
               type="text"
               placeholder="Código"
-              className="mb-4 bg-neutral-800"
+              className="w-full mb-4 bg-neutral-800"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\s/g, ''))}
               required
@@ -187,7 +187,7 @@ function Signup() {
               id="signup-submit-button"
               type="submit"
               disabled={loading}
-              className="bg-blue-700 hover:bg-blue-800 text-slate-100 hover:text-slate-300"
+              className="w-full bg-blue-700 hover:bg-blue-800 text-slate-100 hover:text-slate-300"
             >
               {loading ? "Cadastrando..." : "Cadastrar"}
             </ButtonLogin>
@@ -212,8 +212,8 @@ function Signup() {
           {/* captcha centralizado */}
           {/* <Captcha onChange={setCaptchaToken} /> */}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 

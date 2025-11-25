@@ -69,7 +69,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   ) => {
     const validIds = currentIds.filter((i) => i && i.trim() !== "");
 
-    // Combina os filtros acadêmicos com os de data em um único objeto
     const allParams: DashboardFilterParams = {
       ...currentHierarchy,
       startDate: currentDateRange?.from ? format(currentDateRange.from, 'yyyy-MM-dd') : undefined,
@@ -79,34 +78,26 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     onChange(currentType, validIds, currentMode, allParams);
   }, [onChange]);
 
-  // Efeito para atualizar os gráficos se APENAS a data for alterada
-  // Isso garante reatividade total
   useEffect(() => {
-    // Só dispara a atualização se já houver uma entidade selecionada
     if (selectedIds.length > 0) {
       notifyParent(entityType, selectedIds, mode, hierarchyParams, dateRange);
     }
-  }, [dateRange]); // A única dependência é o dateRange
+  }, [dateRange]);
 
-  // Handler para quando o tipo de entidade (aluno, turma) muda
   const handleEntityTypeChange = useCallback((value: string) => {
     const newType = value as LogEntityType;
     setEntityType(newType);
-    setSelectedIds([]); // Limpa a seleção anterior
+    setSelectedIds([]);
     setHierarchyParams({});
-    // Notifica o pai para limpar os gráficos, mas mantém o período selecionado
     notifyParent(newType, [], mode, {}, dateRange);
   }, [mode, notifyParent, dateRange]);
 
-  // Handler para quando uma entidade é selecionada no AcademicFilter
   const handleEntitySelection = useCallback((ids: string[], params?: typeof hierarchyParams) => {
     setSelectedIds(ids);
     if (params) setHierarchyParams(params);
-    // Notifica o pai com a nova seleção e o período atual
     notifyParent(entityType, ids, mode, params, dateRange);
   }, [entityType, mode, notifyParent, dateRange]);
 
-  // --- FUNÇÕES AUXILIARES (completas) ---
   const getEntityTypeTitle = (t: LogEntityType) => {
     switch (t) {
       case "student": return "Aluno";
@@ -118,12 +109,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     }
   };
 
-  const getSelectionStatus = () => {
-    if (mode !== "comparison") return null;
-    if (selectedIds.length === 0) return "Selecione duas entidades para comparação";
-    if (selectedIds.length === 1) return "Selecione mais uma entidade para completar a comparação";
-    return "Entidades selecionadas para comparação";
-  };
 
   return (
     <motion.div
@@ -136,27 +121,28 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     >
       <h3 className="text-xl font-semibold text-white">Filtros</h3>
 
-      <div className="space-y-6">
-        {/* Primeira linha: Select e DatePicker lado a lado no desktop */}
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="space-y-3 flex-1">
+      <div className="space-y-6 w-full">
+        <div className="flex flex-col md:flex-row gap-6 w-full">
+          <div className="space-y-3 flex-1 w-full">
             <Label htmlFor="entity-type" className="font-medium text-white">
               Analisar por
             </Label>
-            <Select value={entityType} onValueChange={handleEntityTypeChange}>
-              <SelectTrigger className="bg-[#141414] text-white border-white/10 h-12">
-                <SelectValue placeholder="Selecione um tipo de entidade" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#1f1f1f] text-white border-white/10">
-                {allowedEntityTypes.map(type => (
-                  <SelectItem key={type} value={type}>{getEntityTypeTitle(type)}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+            <select
+              id="entity-type"
+              value={entityType}
+              onChange={(e) => handleEntityTypeChange(e.target.value)}
+              className="w-full h-12 px-3 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
+            >
+              {allowedEntityTypes.map(type => (
+                <option key={type} value={type} className="bg-[#1f1f1f] py-2">
+                  {getEntityTypeTitle(type)}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Segunda linha: AcademicFilter */}
         <AcademicFilter
           key={entityType}
           entityType={entityType}
@@ -164,16 +150,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
           onSelect={handleEntitySelection}
         />
       </div>
-
-      {/* Status da seleção para comparação (lógica mantida) */}
-      {mode === "comparison" && (
-        <div className={`text-sm p-3 rounded-md border ${selectedIds.length < 2
-          ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
-          : "text-green-400 bg-green-400/10 border-green-400/20"
-          }`}>
-          {getSelectionStatus()}
-        </div>
-      )}
     </motion.div>
   );
 }

@@ -199,10 +199,6 @@ export function AcademicFilter({
     e.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  /* ---------- Helpers de seleção ---------- */
-  // const selectionLimit = multiple ? 2 : 1;
-  // const hasReachedLimit = selectedIds.length >= selectionLimit;
-
   const toggleItem = useCallback(
     (id: string) => {
       const updated = multiple
@@ -292,18 +288,22 @@ export function AcademicFilter({
     turmas: classes,
   });
 
-
   /* ---------- Render ---------- */
   if (error) return <div className="text-red-500">Erro ao carregar dados</div>;
 
   return (
-    <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <div className="grid gap-4 md:grid-cols-4">
+    <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
+      {/* AJUSTE 1: O container grid precisa de w-full 
+          No mobile (padrão) vira 1 coluna. No desktop (md) vira 4 colunas.
+      */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+
         {/* Select de Universidade */}
         {showUniversitySelect && (
           <select
+            /* AJUSTE 2: Adicionado w-full, h-12 e estilos padrão para igualar ao Dashboard */
             className={cn(
-              "p-3 rounded-md bg-[#141414] text-white border border-white/10",
+              "w-full h-12 px-3 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none",
               !isUniversityEnabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={!isUniversityEnabled || isLoading}
@@ -316,11 +316,11 @@ export function AcademicFilter({
               onSelect([], { universityId: e.target.value });
             }}
           >
-            <option value="">
+            <option value="" className="bg-[#1f1f1f]">
               {isAdmin ? "Selecione a Universidade" : universities[0]?.name || "Universidade"}
             </option>
             {universities.map((u) => (
-              <option key={u._id} value={u._id}>
+              <option key={u._id} value={u._id} className="bg-[#1f1f1f]">
                 {u.name}
               </option>
             ))}
@@ -331,7 +331,7 @@ export function AcademicFilter({
         {showCourseSelect && (
           <select
             className={cn(
-              "p-3 rounded-md bg-[#141414] text-white border border-white/10",
+              "w-full h-12 px-3 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none",
               !isCourseEnabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={!isCourseEnabled || isLoading}
@@ -346,15 +346,15 @@ export function AcademicFilter({
               });
             }}
           >
-            <option value="">
+            <option value="" className="bg-[#1f1f1f]">
               {!selectedUniversity
-                ? "Selecione a Universidade primeiro"
+                ? "Selecione a Universidade..."
                 : courses.length === 0
                   ? "Nenhum curso disponível"
                   : "Selecione o Curso"}
             </option>
             {courses.map((c) => (
-              <option key={c._id} value={c._id}>
+              <option key={c._id} value={c._id} className="bg-[#1f1f1f]">
                 {c.name}
               </option>
             ))}
@@ -365,27 +365,27 @@ export function AcademicFilter({
         {isProfessor && entityType === "student" && (
           <select
             className={cn(
-              "p-3 rounded-md bg-[#141414] text-white border border-white/10",
+              "w-full h-12 px-3 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none",
               !isCourseEnabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={!isCourseEnabled || isLoading}
             value={selectedDiscipline}
             onChange={(e) => handleDisciplineChange(e.target.value)}
           >
-            <option value="">Selecione a Disciplina</option>
+            <option value="" className="bg-[#1f1f1f]">Selecione a Disciplina</option>
             {disciplines.map((d) => (
-              <option key={d._id} value={d._id}>
+              <option key={d._id} value={d._id} className="bg-[#1f1f1f]">
                 {d.name}
               </option>
             ))}
           </select>
         )}
 
-        {/* Select de Turma (não mostrado para professores) */}
+        {/* Select de Turma */}
         {showClassSelect && (
           <select
             className={cn(
-              "p-3 rounded-md bg-[#141414] text-white border border-white/10",
+              "w-full h-12 px-3 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none",
               !isClassEnabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={!isClassEnabled || isLoading}
@@ -400,26 +400,26 @@ export function AcademicFilter({
               });
             }}
           >
-            <option value="">
+            <option value="" className="bg-[#1f1f1f]">
               {!selectedCourse
-                ? "Selecione o Curso primeiro"
+                ? "Selecione o Curso..."
                 : classes.length === 0
                   ? "Nenhuma turma disponível"
                   : "Selecione a Turma"}
             </option>
             {classes.map((c) => (
-              <option key={c._id} value={c._id}>
+              <option key={c._id} value={c._id} className="bg-[#1f1f1f]">
                 {c.name}
               </option>
             ))}
           </select>
         )}
 
-        {/* Select final de entidade (ajustado para seguir padrão) */}
+        {/* Select final de entidade */}
         {canShowEntitySelector() && (
           <select
             className={cn(
-              "p-3 rounded-md bg-[#141414] text-white border border-white/10",
+              "w-full h-12 px-3 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none",
               (!canShowEntitySelector() || isLoading) && "opacity-50 cursor-not-allowed"
             )}
             disabled={!canShowEntitySelector() || isLoading}
@@ -429,7 +429,7 @@ export function AcademicFilter({
               toggleItem(newId);
             }}
           >
-            <option value="">
+            <option value="" className="bg-[#1f1f1f]">
               {isLoading
                 ? "Carregando..."
                 : `Selecione ${entityType === "student"
@@ -444,7 +444,7 @@ export function AcademicFilter({
                 }`}
             </option>
             {filteredEntities.map((item) => (
-              <option key={item._id} value={item._id}>
+              <option key={item._id} value={item._id} className="bg-[#1f1f1f]">
                 {item.name}
               </option>
             ))}
@@ -454,15 +454,15 @@ export function AcademicFilter({
 
       {/* Tags quando múltiplo */}
       {multiple && selectedIds.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="flex flex-wrap gap-2 mt-3 w-full">
           {selectedNames.map((name, idx) => (
             <div
               key={selectedIds[idx]}
-              className="flex items-center px-3 py-1 text-sm text-white rounded-full border bg-indigo-500/20 border-indigo-500/30"
+              className="flex items-center px-3 py-1 text-sm text-white rounded-full border bg-indigo-500/20 border-indigo-500/30 max-w-full"
             >
-              {name}
+              <span className="truncate max-w-[200px]">{name}</span>
               <button
-                className="ml-2 hover:text-white/90"
+                className="ml-2 hover:text-white/90 shrink-0"
                 onClick={() => toggleItem(selectedIds[idx])}
               >
                 ×
@@ -473,5 +473,4 @@ export function AcademicFilter({
       )}
     </motion.div>
   );
-
 }

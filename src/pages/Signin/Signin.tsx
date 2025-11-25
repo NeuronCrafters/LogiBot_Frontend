@@ -93,7 +93,7 @@ function Signin() {
       </Link>
 
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
-        <div className="w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
+        <div className="w-[90%] md:w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
           <Typograph
             text="Entrar"
             colorText="text-white"
