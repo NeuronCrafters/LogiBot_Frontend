@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
-import { ChartLoader, ChartError, NoData } from "../ChartStates"; // Importação para os estados padronizados
+import { ChartLoader, ChartError, NoData } from "../ChartStates";
 
 const chartConfig = {
   score: {

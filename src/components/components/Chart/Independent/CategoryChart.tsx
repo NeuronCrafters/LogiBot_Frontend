@@ -19,7 +19,7 @@ import { logApi } from "@/services/apiClient";
 import logApiSmart from "@/services/api/logApiSmart";
 import { useAuth } from "@/hooks/use-Auth";
 import type { ChartFilterState } from "@/@types/ChartsType";
-import { ChartLoader, ChartError, NoData } from "../ChartStates"; // Importação para os estados padronizados
+import { ChartLoader, ChartError, NoData } from "../ChartStates";
 
 const chartConfig = {
   acessos: { label: "Acessos", color: "hsl(215, 100%, 50%)" },

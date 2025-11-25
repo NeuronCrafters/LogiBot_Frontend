@@ -21,18 +21,16 @@ import { UsageChart } from "@/components/components/Chart/Independent/UsageChart
 import { CorrectWrongChart } from "@/components/components/Chart/Independent/CorrectWrongChart";
 import { CategoryChart } from "@/components/components/Chart/Independent/CategoryChart";
 
-// Novos Gráficos do Dashboard
-import { TopicPerformanceChart } from "@/components/components/Chart/Dashboard/TopicPerformanceChart";
 import { EffortMatrixChart } from "@/components/components/Chart/Dashboard/EffortMatrixChart";
 import { ProficiencyRadarChart } from "@/components/components/Chart/Dashboard/ProficiencyRadarChart";
 import { LearningJourneyChart } from "@/components/components/Chart/Dashboard/LearningJourneyChart";
 import { AccessPatternChart } from "@/components/components/Chart/Dashboard/AccessPatternChart";
+import { GeneralScoreChart } from "@/components/components/Chart/Dashboard/GeneralScoreChart";
 
 export function Chart() {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // --- ESTADO CENTRALIZADO ---
   const [dashboardFilters, setDashboardFilters] = useState<DashboardFilterParams>({});
   const [legacyFilter, setLegacyFilter] = useState<ChartFilterState & {
     hierarchyParams: Omit<DashboardFilterParams, 'startDate' | 'endDate'>;
@@ -134,9 +132,8 @@ export function Chart() {
                 <UsageChart filter={legacyFilter} />
                 <AccessPatternChart filters={dashboardFilters} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-                  {/* Corrigido: Usando 'items-stretch' no grid pai e 'h-full' nos filhos para garantir altura igual. */}
                   <div className="h-full"><CorrectWrongChart filter={legacyFilter} /></div>
-                  <div className="h-full"><TopicPerformanceChart filters={dashboardFilters} /></div>
+                  <div className="h-full"><GeneralScoreChart filters={dashboardFilters} /></div>
                   <div className="h-full"><CategoryChart filter={legacyFilter} /></div>
                   <div className="h-full"><ProficiencyRadarChart filters={dashboardFilters} /></div>
                 </div>

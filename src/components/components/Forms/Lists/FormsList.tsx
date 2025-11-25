@@ -239,7 +239,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
           <TableRow>
             <TableHead className="text-white">Nº</TableHead>
             <TableHead className="text-white">Nome</TableHead>
-            <TableHead className="text-white">{headerLabel}</TableHead>
+            <TableHead className="text-white text-ce">{headerLabel}</TableHead>
             {(entity === "professor" || entity === "student") && (
               <TableHead className="text-white">Ocupação</TableHead>
             )}
