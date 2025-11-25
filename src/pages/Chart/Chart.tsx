@@ -130,7 +130,10 @@ export function Chart() {
             <div>
               <div className="grid grid-cols-1 gap-6">
                 <UsageChart filter={legacyFilter} />
-                <AccessPatternChart filters={dashboardFilters} />
+                {legacyFilter.type === 'student' && (
+                  <AccessPatternChart filters={dashboardFilters} />
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                   <div className="h-full"><CorrectWrongChart filter={legacyFilter} /></div>
                   <div className="h-full"><GeneralScoreChart filters={dashboardFilters} /></div>
