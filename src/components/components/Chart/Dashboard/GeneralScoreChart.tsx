@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { dashboardApi } from "@/services/api/api_dashboard";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartExportMenu } from "../ChartExportMenu";
+import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface ChartProps {
   filters: { universityId?: string; courseId?: string; classId?: string; studentId?: string; disciplineId?: string; };
@@ -100,7 +101,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
       </CardHeader>
 
 
-      <CardContent className="px-2 sm:p-6 h-[305px] flex items-center justify-center">
+      <CardContent className="px-2 sm:p-6 h-[298px] flex items-center justify-center">
 
         {!hasRequired && <NoData onRetry={refetchTyped}><p>Selecione uma universidade.</p></NoData>}
         {hasRequired && isLoading && <ChartLoader text="Calculando nota..." />}
@@ -114,7 +115,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
             className="flex flex-col items-center justify-center w-[800px] gap-4"
           >
 
-            {/* Nota e status — AQUI FOI APLICADO O .toFixed(2) */}
+            {/* Nota e status com 2 casas decimais */}
             <div className="flex flex-col items-center">
               <span className="text-6xl font-bold" style={{ color: data.color }}>
                 {data.score.toFixed(2).replace('.', ',')}
@@ -148,17 +149,35 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="w-full text-center text-xs text-gray-400 mt-2">
-              <span>0–4.99: </span><span className="text-red-400">Insuficiente</span>
-              <span className="text-gray-500 mx-2">|</span>
 
-              <span>5–6.99: </span><span className="text-yellow-400">Regular</span>
-              <span className="text-gray-500 mx-2">|</span>
+            <div className="w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-2">
 
-              <span>7–8.99: </span><span className="text-blue-400">Bom</span>
-              <span className="text-gray-500 mx-2">|</span>
+              <div className="flex items-center gap-1">
+                <Typograph variant="text9" weight="regular" fontFamily="poppins" colorText="text-gray-400" text="0 – 4,99:" />
+                <Typograph variant="text9" weight="bold" fontFamily="poppins" colorText="text-red-400" text="Insuficiente" />
+              </div>
 
-              <span>9–10: </span><span className="text-green-400">Excelente</span>
+              <Typograph variant="text9" weight="regular" fontFamily="poppins" colorText="text-gray-500" text="|" />
+
+              <div className="flex items-center gap-1">
+                <Typograph variant="text9" weight="regular" fontFamily="poppins" colorText="text-gray-400" text="5 – 6,99:" />
+                <Typograph variant="text9" weight="bold" fontFamily="poppins" colorText="text-yellow-400" text="Regular" />
+              </div>
+
+              <Typograph variant="text9" weight="regular" fontFamily="poppins" colorText="text-gray-500" text="|" />
+
+              <div className="flex items-center gap-1">
+                <Typograph variant="text9" weight="regular" fontFamily="poppins" colorText="text-gray-400" text="7 – 8,99:" />
+                <Typograph variant="text9" weight="bold" fontFamily="poppins" colorText="text-blue-400" text="Bom" />
+              </div>
+
+              <Typograph variant="text9" weight="regular" fontFamily="poppins" colorText="text-gray-500" text="|" />
+
+              <div className="flex items-center gap-1">
+                <Typograph variant="text9" weight="regular" fontFamily="poppins" colorText="text-gray-400" text="9 – 10:" />
+                <Typograph variant="text9" weight="bold" fontFamily="poppins" colorText="text-green-400" text="Excelente" />
+              </div>
+
             </div>
 
           </motion.div>
@@ -171,7 +190,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
       </CardContent>
 
       {hasData && (
-        <CardFooter className="flex flex-col gap-3 px-6 py-4 border-t border-white/10">
+        <CardFooter className="flex flex-col gap-3 px-6 py-5 border-t border-white/10">
           <div className="flex w-full justify-between items-center">
 
             <div className="flex flex-col w-1/2 border-r border-white/10 pr-4 text-right">
@@ -188,7 +207,6 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                 Nota Final
               </span>
               <span className="text-lg font-bold text-white">
-                {/* AQUI TAMBÉM FOI APLICADO O .toFixed(2) */}
                 {data.score.toFixed(2).replace('.', ',')}
                 <span className="text-xs text-gray-500 font-normal"> / 10</span>
               </span>
@@ -196,6 +214,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
           </div>
         </CardFooter>
       )}
+
     </Card>
   );
 }
