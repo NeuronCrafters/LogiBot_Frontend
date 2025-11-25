@@ -1,5 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
-
 interface Candidate {
   id: string;
   name: string;
@@ -22,16 +20,9 @@ export function CoordinatorRoleSection({
   alreadyIsCoordinator,
   addCoord,
   removeCoord,
-  newCoordinator,
-  candidates,
-  currentCourseId,
   onAddChange,
   onRemoveChange,
-  onCoordinatorChange,
 }: CoordinatorRoleSectionProps) {
-  const filteredCandidates = candidates.filter(
-    (c) => c.courseId === currentCourseId
-  );
 
   return (
     <div className="text-left space-y-4 bg-[#1f1f1f] p-4 rounded-xl border border-white/10">
