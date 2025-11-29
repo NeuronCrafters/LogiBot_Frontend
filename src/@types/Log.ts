@@ -1,13 +1,12 @@
 export interface UsageTime {
-  totalSeconds: number;       // total de segundos utilizados
-  formatted: string;          // string no formato "HH:MM:SS"
-  humanized: string;          // string humanizada, ex: "2h 30m"
+  totalSeconds: number;
+  formatted: string;
+  humanized: string;
   hours: number;
   minutes: number;
   seconds: number;
 }
 
-// Interface para cada sessão individual
 export interface Session {
   date: string;               // data da sessão, formato "YYYY-MM-DD"
   sessionStart: Date;         // início da sessão
@@ -22,7 +21,6 @@ export interface Session {
   className?: string;
 }
 
-// Interface para uso diário agregado
 export interface DailyUsage {
   date: string;               // data, formato "YYYY-MM-DD"
   usage: number;              // total de minutos usados no dia
@@ -30,7 +28,6 @@ export interface DailyUsage {
   sessions: Session[];        // lista de sessões desse dia
 }
 
-// Interface principal representando o log de análise de um usuário
 export interface UserAnalysisLog {
   totalCorrectAnswers: number;      // total de acertos
   totalWrongAnswers: number;        // total de erros

@@ -15,15 +15,15 @@ export const rasaService = {
   },
 
   async listarNiveis() {
-    console.log("Fazendo requisição para listar níveis...");
+    ("Fazendo requisição para listar níveis...");
     try {
       const response = await api.get("/sael/action/listar_niveis", {
         withCredentials: true,
       });
-      console.log("Resposta da API:", response.data);
+      ("Resposta da API:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Erro na requisição listarNiveis:", error);
+      ("Erro na requisição listarNiveis:", error);
       throw error;
     }
   },

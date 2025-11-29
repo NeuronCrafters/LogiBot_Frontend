@@ -116,16 +116,13 @@ export async function searchEntitiesByFilter(
         case "students":
         case "students-course":
         case "students-discipline": {
-          // busca usuários cru
           let students: RawStudent[] =
             await adminApi.listStudents<RawStudent[]>();
-          // filtra por curso
           if (filterData.courseId) {
             students = students.filter(
               (s) => s.course === filterData.courseId
             );
           }
-          // filtra por disciplina
           if (filterData.disciplineId) {
             students = students.filter(
               (s) =>
@@ -133,7 +130,6 @@ export async function searchEntitiesByFilter(
                 s.disciplines.some((d) => d._id === filterData.disciplineId)
             );
           }
-          // projeta para ListItem
           fetched = students.map((s) => ({
             id: s._id,
             name: s.name,
@@ -179,7 +175,6 @@ export async function searchEntitiesByFilter(
             }[]
           >(filterData.universityId);
 
-          // mapeia para ListItem
           fetched = profs.map((p) => {
             const rawRoles = Array.isArray(p.role) ? p.role : [p.role];
             return {
@@ -372,7 +367,7 @@ export async function searchEntitiesByFilter(
 
     return { items: fetched, entity: selectedEntity };
   } catch (err) {
-    console.error("Erro ao buscar dados:", err);
+    console.error("erro ao buscar dados:", err);
     toast.error("Erro ao buscar dados");
     return { items: [], entity: "student" };
   }

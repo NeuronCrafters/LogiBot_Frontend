@@ -105,7 +105,6 @@ export interface UserPermissions {
   canViewProfessors: boolean;
   canViewAnalytics: boolean;
   canExportData: boolean;
-  // Permissões de gestão
   canCreateCourse: boolean;
   canEditCourse: boolean;
   canCreateClass: boolean;
@@ -116,11 +115,9 @@ export interface UserPermissions {
   canManageProfessors: boolean;
   canAssignProfessors: boolean;
   canManageEnrollments: boolean;
-  // Permissões de relatórios
   canGenerateReports: boolean;
   canViewDetailedAnalytics: boolean;
   canExportStudentData: boolean;
-  // Permissões específicas de professor
   canViewOwnDisciplines: boolean;
   canManageOwnDisciplineStudents: boolean;
   canViewStudentProgress: boolean;
@@ -132,42 +129,26 @@ export interface ResponseMeta {
   source: string;
 }
 
-// ============================================
-// HELPER DE REQUISIÇÃO
-// ============================================
-
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
   return response.data;
 };
 
-// ============================================
-// API CLIENT PRINCIPAL
-// ============================================
-
 export const academicFiltersApi = {
-  // Função principal - busca todos os dados de uma vez
   getAcademicData: (): Promise<AcademicDataResponse> =>
     getRequest<AcademicDataResponse>(ACADEMICFILTER_ROUTES.academicData),
 
-  // ============================================
-  // HELPERS PARA FILTRAR DADOS LOCALMENTE
-  // ============================================
-
-  // Universidades (direto dos dados carregados)
   getUniversities: async (): Promise<University[]> => {
     const response = await academicFiltersApi.getAcademicData();
     return response.data.universities;
   },
 
-  // Cursos por universidade (filtro local)
   getCourses: async (universityId: string): Promise<Course[]> => {
     const response = await academicFiltersApi.getAcademicData();
     const university = response.data.universities.find(u => u._id === universityId);
     return university?.courses || [];
   },
 
-  // Turmas por curso (filtro local)
   getClasses: async (universityId: string, courseId: string): Promise<Class[]> => {
     const response = await academicFiltersApi.getAcademicData();
     const university = response.data.universities.find(u => u._id === universityId);
@@ -175,7 +156,6 @@ export const academicFiltersApi = {
     return course?.classes || [];
   },
 
-  // Disciplinas por curso (filtro local)
   getDisciplines: async (universityId: string, courseId: string): Promise<Discipline[]> => {
     const response = await academicFiltersApi.getAcademicData();
     const university = response.data.universities.find(u => u._id === universityId);
@@ -183,7 +163,6 @@ export const academicFiltersApi = {
     return course?.disciplines || [];
   },
 
-  // Professores por universidade/curso (filtro local)
   getProfessors: async (universityId: string, courseId?: string): Promise<Professor[]> => {
     const response = await academicFiltersApi.getAcademicData();
     const university = response.data.universities.find(u => u._id === universityId);
@@ -193,19 +172,16 @@ export const academicFiltersApi = {
       return course?.professors || [];
     }
 
-    // Todos os professores da universidade
     const allProfessors: Professor[] = [];
     university?.courses.forEach(course => {
       allProfessors.push(...course.professors);
     });
 
-    // Remove duplicatas
     return allProfessors.filter((prof, index, self) =>
       self.findIndex(p => p._id === prof._id) === index
     );
   },
 
-  // Estudantes por turma (filtro local)
   getStudentsByClass: async (universityId: string, courseId: string, classId: string): Promise<Student[]> => {
     const response = await academicFiltersApi.getAcademicData();
     const university = response.data.universities.find(u => u._id === universityId);
@@ -214,7 +190,6 @@ export const academicFiltersApi = {
     return classData?.students || [];
   },
 
-  // Estudantes por disciplina (filtro local)
   getStudentsByDiscipline: async (universityId: string, courseId: string, disciplineId: string): Promise<StudentWithClass[]> => {
     const response = await academicFiltersApi.getAcademicData();
     const university = response.data.universities.find(u => u._id === universityId);
@@ -223,17 +198,12 @@ export const academicFiltersApi = {
     return discipline?.students || [];
   },
 
-  // Estudantes por curso (filtro local)
   getStudentsByCourse: async (universityId: string, courseId: string): Promise<Student[]> => {
     const response = await academicFiltersApi.getAcademicData();
     const university = response.data.universities.find(u => u._id === universityId);
     const course = university?.courses.find(c => c._id === courseId);
     return course?.students || [];
   },
-
-  // ============================================
-  // BUSCA POR ID (FILTROS LOCAIS)
-  // ============================================
 
   findUniversityById: async (id: string): Promise<University | null> => {
     const response = await academicFiltersApi.getAcademicData();
@@ -291,17 +261,14 @@ export const academicFiltersApi = {
 
     for (const university of response.data.universities) {
       for (const course of university.courses) {
-        // Busca em estudantes do curso
         const student = course.students.find(s => s._id === id);
         if (student) return student;
 
-        // Busca em estudantes das turmas
         for (const classData of course.classes) {
           const classStudent = classData.students.find(s => s._id === id);
           if (classStudent) return classStudent;
         }
 
-        // Busca em estudantes das disciplinas
         for (const discipline of course.disciplines) {
           const disciplineStudent = discipline.students.find(s => s._id === id);
           if (disciplineStudent) return disciplineStudent;
@@ -311,26 +278,21 @@ export const academicFiltersApi = {
     return null;
   },
 
-
-  // Obter resumo dos dados
   getSummary: async (): Promise<DataSummary> => {
     const response = await academicFiltersApi.getAcademicData();
     return response.summary;
   },
 
-  // Obter permissões do usuário
   getUserPermissions: async (): Promise<UserPermissions> => {
     const response = await academicFiltersApi.getAcademicData();
     return response.user.permissions;
   },
 
-  // Obter contexto do usuário
   getUserContext: async (): Promise<UserInfo> => {
     const response = await academicFiltersApi.getAcademicData();
     return response.user;
   },
 
-  // Verificar se usuário pode ver determinado recurso
   canUserView: async (resource: keyof UserPermissions): Promise<boolean> => {
     const response = await academicFiltersApi.getAcademicData();
     return response.user.permissions[resource];

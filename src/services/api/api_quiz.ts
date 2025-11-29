@@ -1,8 +1,5 @@
-// ARQUIVO DO FRONTEND: src/services/api/api_quiz.ts
 import { api } from "./api";
 import { Question } from "@/@types/QuestionType";
-
-// --- Tipos de Resposta da API ---
 
 interface Button {
   title: string;
@@ -18,7 +15,6 @@ interface GenerateQuizResponse {
   questions: Question[];
 }
 
-// MUDANÇA: Definição do tipo de detalhe do resultado, agora espelhando o backend
 interface ResultDetail {
   question: string;
   selected: string;
@@ -34,10 +30,8 @@ export interface VerifyQuizResponse {
   message: string;
   totalCorrectAnswers: number;
   totalWrongAnswers: number;
-  detalhes: ResultDetail[]; // <-- Agora usa a interface correta e completa
+  detalhes: ResultDetail[];
 }
-
-// --- Funções do Serviço ---
 
 export const quizService = {
   async listLevels(): Promise<LevelResponse> {

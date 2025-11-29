@@ -7,9 +7,7 @@ import {
   COORDINATOR_ROUTES,
   LOG_ROUTES,
   AcademicEntityType,
-  // LogEntityType,
-  // LogMetricType,
-  // LogModeType
+
 } from "./api/api_routes";
 import { academicFiltersApi } from "./api/api_academicFilters";
 
@@ -33,9 +31,6 @@ const patchRequest = async <T>(url: string, data: object): Promise<T> => {
   return response.data;
 };
 
-// -------------------------------------
-// Academic (publicly managed entities)
-// -------------------------------------
 export const academicApi = {
   async post<T>(entity: AcademicEntityType, data: object): Promise<T> {
     const url = ACADEMIC_ROUTES[entity].post;
@@ -53,16 +48,8 @@ export const academicApi = {
   },
 };
 
-
-// --------------
-// AcademicFilter routes
-// --------------
 export { academicFiltersApi };
 
-
-// --------------
-// Admin routes
-// --------------
 export const adminApi = {
   createProfessor: <T>(data: object) =>
     postRequest<T>(ADMIN_ROUTES.createProfessor, data),
@@ -95,18 +82,6 @@ export const adminApi = {
 
   listStudents: <T>() => getRequest<T>(ADMIN_ROUTES.listStudents),
 
-  // listStudentsByClass: (
-  //   classId: string,
-  //   courseId?: string,
-  // ): Promise<Array<{
-  //   id: any;
-  //   code: any; _id: string; name: string; email: string
-  // }>> => {
-  //   const base = ADMIN_ROUTES.listStudentsByClass.replace(":classId", classId);
-  //   const url = courseId ? `${base}?courseId=${courseId}` : base;
-  //   return getRequest(url);
-  // },
-
   listStudentsByClass: (
     classId: string,
     courseId?: string,
@@ -132,16 +107,10 @@ export const adminApi = {
     deleteRequest<T>(`${ADMIN_ROUTES.deleteStudent}?studentId=${studentId}`),
 };
 
-// --------------------
-// Professor‐specific
-// --------------------
 export const professorApi = {
   listMyStudents: <T>() => getRequest<T>(PROFESSOR_ROUTES.listMyStudents),
 };
 
-// ---------------------------
-// Course-Coordinator routes
-// ---------------------------
 export const coordinatorApi = {
   listMyProfessors: <T>() =>
     getRequest<T>(COORDINATOR_ROUTES.listMyProfessors),
@@ -162,9 +131,6 @@ export const coordinatorApi = {
     getRequest<T>(COORDINATOR_ROUTES.listClasses),
 };
 
-// --------------
-// Rasa chatbot
-// --------------
 export const rasaApi = {
   sendMessage: <T>(message: string) =>
     postRequest<T>(RASA_ROUTES.talk, { message }),
@@ -185,11 +151,6 @@ export const rasaApi = {
     postRequest<T>(RASA_ROUTES.actionPerguntar, { message }),
 };
 
-// --------------------------------------
-// Interfaces para os parâmetros de logs
-// --------------------------------------
-
-// Interface para filtro de resumo
 interface FilteredStudentSummaryParams {
   universityId: string;
   courseId?: string;
@@ -197,9 +158,6 @@ interface FilteredStudentSummaryParams {
   studentId?: string;
 }
 
-// --------------
-// Logs
-// --------------
 export const logApi = {
   getUniversitySummary: <T>(id: string) =>
     getRequest<T>(LOG_ROUTES.summary.university(id)),
@@ -261,8 +219,6 @@ export const logApi = {
   getUniversitySubjects: <T>(id: string) =>
     getRequest<T>(LOG_ROUTES.university.subjects(id)),
 };
-
-
 
 export default {
   academicApi,

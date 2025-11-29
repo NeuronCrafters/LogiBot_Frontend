@@ -21,7 +21,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             console.warn("Usuário não autenticado");
         } else if (error.response?.status >= 500) {
-            console.error("Erro interno do servidor:", error.response.data);
+            ("Erro interno do servidor:", error.response.data);
         }
         return Promise.reject(error);
     }
@@ -33,7 +33,7 @@ publicApi.interceptors.response.use(
         if (error.response?.status === 401) {
             console.warn("Erro público de autenticação");
         } else if (error.response?.status >= 500) {
-            console.error("Erro interno público:", error.response.data);
+            ("Erro interno público:", error.response.data);
         }
         return Promise.reject(error);
     }

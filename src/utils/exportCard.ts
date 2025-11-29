@@ -1,7 +1,7 @@
 import html2canvas from 'html2canvas-pro';
 
 const triggerDownload = (uri: string, filename: string) => {
-  console.log("Iniciando download do arquivo:", filename);
+  console.log("iniciando download do arquivo:", filename);
   const link = document.createElement("a");
   link.href = uri;
   link.download = filename;
@@ -17,7 +17,7 @@ export const exportHighQualityCard = async (
 ) => {
   const container = document.getElementById(containerId);
   if (!container) {
-    throw new Error(`Elemento com ID '${containerId}' não encontrado.`);
+    throw new Error(`elemento com ID '${containerId}' não encontrado.`);
   }
 
   try {
@@ -32,7 +32,7 @@ export const exportHighQualityCard = async (
     const pngUrl = canvas.toDataURL("image/png");
     triggerDownload(pngUrl, `${fileName}.png`);
   } catch (error) {
-    console.error("Erro ao gerar o PNG:", error);
-    throw new Error("Erro ao gerar a imagem PNG.");
+    console.log("erro ao gerar o PNG:", error);
+    throw new Error("erro ao gerar a imagem PNG.");
   }
 };

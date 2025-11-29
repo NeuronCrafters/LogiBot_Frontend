@@ -2,7 +2,6 @@ import { api } from "@/services/api/api";
 import { LOG_ROUTES, PROFESSOR_LOG_ROUTES } from "./api_routes";
 import { LogApiResponse, UserAnalysisLog, LogFilterParams } from "../../@types/Log";
 
-// Funções HTTP genéricas
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
   return response.data;
@@ -13,13 +12,10 @@ const postRequest = async <T>(url: string, data: object): Promise<T> => {
   return response.data;
 };
 
-// Tipos de entidade e métrica (removemos o modo comparison completamente)
 export type LogEntityType = "university" | "course" | "class" | "student" | "discipline";
 export type LogMetricType = "accuracy" | "usage" | "subjects";
 
 export const logApi = {
-
-  // Resumos diretos
   getUniversitySummary: async (id: string) =>
     getRequest<LogApiResponse<UserAnalysisLog>>(LOG_ROUTES.summary.university(id)),
 
@@ -40,7 +36,6 @@ export const logApi = {
     return response.data;
   },
 
-  // Funções adaptadas para gráficos
   getAccuracyData: async (entity: LogEntityType, id: string, filters?: LogFilterParams) => {
     const summary = await logApi.fetchSummary(entity, id, filters);
     const totalCorrect = summary.totalCorrectAnswers;
@@ -77,7 +72,6 @@ export const logApi = {
     return getRequest<LogApiResponse<UserAnalysisLog>>(PROFESSOR_LOG_ROUTES.getStudentDetails(studentId, disciplineId));
   },
 
-  // Única função genérica central de resumo
   fetchSummary: async (entity: LogEntityType, id: string, filters?: LogFilterParams): Promise<UserAnalysisLog> => {
     switch (entity) {
       case "university":
@@ -100,7 +94,6 @@ export const logApi = {
     }
   },
 
-  // API centralizada e unificada
   get: async (
     entity: LogEntityType,
     metric: LogMetricType,
