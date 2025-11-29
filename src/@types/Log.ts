@@ -1,4 +1,3 @@
-// Interface para representar o tempo total de uso
 export interface UsageTime {
   totalSeconds: number;       // total de segundos utilizados
   formatted: string;          // string no formato "HH:MM:SS"
