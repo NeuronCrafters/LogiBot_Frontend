@@ -52,7 +52,7 @@ export const logApiSmart = {
 
         try {
           const response = await getRequest<any>(url);
-          ("resposta da API para aluno:", response);
+          console.log("resposta da API para aluno:", response);
           const result = response.data || response;
           return result;
         } catch (error) {

@@ -12,12 +12,9 @@ export function ChartExportMenu({ containerId, fileName, className }: ChartExpor
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleExportClick = async () => {
-    console.log("Exportando o card...");
     try {
       await exportHighQualityCard(containerId, fileName);
-      console.log("Download iniciado.");
     } catch (error) {
-      console.error("Erro ao tentar exportar o card:", error);
     }
   };
 
