@@ -183,7 +183,7 @@ export const useMultiPageTour = (role: UserRole = 'guest', actions: TourActions 
         const pageHasTour = pageTours[pathname] && pageTours[pathname].length > 0;
         const alreadyCompleted = isPageCompleted(pathname);
 
-        ('[Tour Debug]', {
+        console.log('[Tour Debug]', {
             pathname,
             hasTour: pageHasTour,
             toursAvailable: Object.keys(pageTours),
@@ -217,7 +217,7 @@ export const useMultiPageTour = (role: UserRole = 'guest', actions: TourActions 
                 : '#unknown';
             const firstElement = document.querySelector(firstElementSelector);
 
-            (`[Tour] Procurando ${firstElementSelector}:`, firstElement);
+            console.log(`[Tour] Procurando ${firstElementSelector}:`, firstElement);
 
             if (firstElement) {
                 (`[Tour] Elemento encontrado! Iniciando tour de ${pathname}...`);
