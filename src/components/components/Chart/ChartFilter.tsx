@@ -3,17 +3,11 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { AcademicFilter } from "./AcademicFilter";
 import { Label } from "@/components/ui/label";
-
-// Importações necessárias para o filtro de datas
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
-// import { DateRangePicker } from "./DateRangePicker"; // Assegure-se que este caminho está correto
-
-// Tipos
 import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
 import { DashboardFilterParams } from "@/services/api/api_dashboard";
 
-// A interface é atualizada para refletir que o objeto de parâmetros é o mesmo da API
 interface ChartFilterProps {
   onChange: (
     type: LogEntityType,
@@ -27,7 +21,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   const { user } = useAuth();
   if (!user) return null;
 
-  // --- LÓGICA DE PERMISSÕES DE USUÁRIO (inalterada) ---
   const userRoles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = userRoles.includes("admin");
   const isCoordinator = userRoles.includes("course-coordinator");
@@ -46,19 +39,16 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     return "student";
   };
 
-  // --- ESTADOS LOCAIS CENTRALIZADOS ---
   const [entityType, setEntityType] = useState<LogEntityType>(getInitialEntityType());
   const [mode] = useState<LogModeType>("individual");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [hierarchyParams, setHierarchyParams] = useState<Omit<DashboardFilterParams, 'startDate' | 'endDate'>>({});
 
-  // Estado para o filtro de datas, agora vivendo aqui
   const [dateRange, _setDateRange] = useState<DateRange | undefined>({
     from: addDays(new Date(), -30),
     to: new Date(),
   });
 
-  // Função centralizada que combina TODOS os filtros e notifica o componente pai
   const notifyParent = useCallback((
     currentType: LogEntityType,
     currentIds: string[],

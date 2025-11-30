@@ -219,7 +219,6 @@ export function UsageChart({ filter }: UsageChartProps) {
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">
-        {/* Estados: falta seleção */}
         {!hasRequiredIds && (
           <EmptyState>
             {isStudent ? (
@@ -230,15 +229,12 @@ export function UsageChart({ filter }: UsageChartProps) {
           </EmptyState>
         )}
 
-        {/* Estados: loading */}
         {hasRequiredIds && isLoading && <LoaderState text="Carregando dados..." />}
 
-        {/* Estados: erro */}
         {hasRequiredIds && isError && (
           <ErrorState message={error instanceof Error ? error.message : undefined} onRetry={refetch} />
         )}
 
-        {/* Gráfico */}
         {hasRequiredIds && !isLoading && !isError && hasData && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
             <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full text-white">
@@ -302,7 +298,6 @@ export function UsageChart({ filter }: UsageChartProps) {
           </motion.div>
         )}
 
-        {/* Sem dados */}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <EmptyState>Nenhum dado de uso disponível para esta entidade.</EmptyState>
         )}

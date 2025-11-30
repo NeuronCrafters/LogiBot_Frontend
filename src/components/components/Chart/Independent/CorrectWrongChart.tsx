@@ -41,7 +41,6 @@ function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
   const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
   const isStudent = filter.type === 'student';
 
-  // Para estudantes, precisa de universidadeId, courseId, classId/disciplineId e studentId
   const hasRequired = isStudent
     ? Boolean(universityId && courseId && (classId || disciplineId) && studentId)
     : Boolean(studentId);
@@ -96,7 +95,6 @@ function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     select: (rawData: any) => {
-      // Extrai acertos e erros
       const totalCorrect = Number(
         rawData.totalCorrect ?? rawData.totalCorrectAnswers ?? 0
       );
@@ -163,17 +161,13 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">
-        {/* Estados: falta seleção */}
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
             <p>Selecione uma entidade para visualizar dados</p>
           </NoData>
         )}
 
-        {/* Estados: loading */}
         {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
-
-        {/* Estados: erro */}
         {hasRequired && isError && <ChartError message={errorMessage} onRetry={refetchTyped} />}
 
 
@@ -191,7 +185,6 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
           </motion.div>
         )}
 
-        {/* Sem dados */}
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>
             <p>Nenhum dado de acertos/erros disponível para esta entidade.</p>

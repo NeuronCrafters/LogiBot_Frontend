@@ -115,7 +115,6 @@ export function GeneralScoreChart({ filters }: ChartProps) {
             className="flex flex-col items-center justify-center w-[800px] gap-4"
           >
 
-            {/* Nota e status com 2 casas decimais */}
             <div className="flex flex-col items-center">
               <span className="text-6xl font-bold" style={{ color: data.color }}>
                 {data.score.toFixed(2).replace('.', ',')}
