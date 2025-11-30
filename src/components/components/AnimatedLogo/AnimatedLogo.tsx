@@ -5,7 +5,6 @@ export const AnimatedLogo = ({ className = "" }: { className?: string }) => {
   return (
     <div className={`relative ${className}`}>
       <img src={boneco} alt="Ícone LogiBot" className="w-48 h-48 mt-14" />
-      {/* Orelha esquerda */}
       <img
         src={parte}
         alt="Orelha animada esquerda"
@@ -15,7 +14,6 @@ export const AnimatedLogo = ({ className = "" }: { className?: string }) => {
           animation: 'moveEarLeft 1.5s 30'
         }}
       />
-      {/* Orelha direita */}
       <img
         src={parte}
         alt="Orelha direita"

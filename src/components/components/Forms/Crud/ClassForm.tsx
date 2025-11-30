@@ -19,49 +19,40 @@ export interface ClassFormProps {
 function ClassForm({ onSubmit, initialData }: ClassFormProps) {
   const { user } = useAuth();
 
-  // Verificar permissões do usuário
   const roles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isAdmin = roles.includes("admin");
   const isCoordinator = roles.includes("course-coordinator");
 
-  // Query para buscar dados acadêmicos com cache
   const { data: academicData, isLoading: loadingAcademicData } = useQuery({
     queryKey: ['academicData'],
     queryFn: async () => {
       const response = await academicFiltersApi.getAcademicData();
       return response.data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Estados do formulário
   const [name, setName] = useState<string>(initialData ? initialData.name : "");
   const [selectedUniversity, setSelectedUniversity] = useState<string>("");
   const [selectedCourse, setSelectedCourse] = useState<string>(initialData ? initialData.courseId : "");
-
-  // Helper para extrair IDs que podem ser string ou array  
   const getFirstId = (value: string | string[] | undefined): string => {
     if (!value) return "";
     return Array.isArray(value) ? (value[0] || "") : value;
   };
 
-  // Helper para pegar o primeiro curso do coordenador do array courses
   const getCoordinatorCourseId = (user: any): string => {
     if (!user?.courses || !Array.isArray(user.courses)) return "";
 
     const firstCourse = user.courses[0];
 
-    // Se é ObjectId do MongoDB
     if (firstCourse?.id) return firstCourse.id;
 
-    // Se já é string
     if (typeof firstCourse === 'string') return firstCourse;
 
     return "";
   };
 
-  // Para coordenadores, filtrar apenas dados do seu curso/universidade
   const filteredUniversities = useMemo(() => {
     if (!academicData?.universities) return [];
 
@@ -70,7 +61,6 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
     }
 
     if (isCoordinator && user?.schoolId) {
-      // Coordenador só vê sua universidade
       const universityId = getFirstId(user.schoolId);
       return academicData.universities.filter(u => u._id === universityId);
     }
@@ -78,7 +68,6 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
     return [];
   }, [academicData, isAdmin, isCoordinator, user]);
 
-  // Filtrar cursos baseado na universidade selecionada e permissões
   const availableCourses = useMemo(() => {
     if (!academicData || !selectedUniversity) return [];
 
@@ -90,7 +79,6 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
     }
 
     if (isCoordinator && user?.courses) {
-      // Coordenador só vê seu curso (primeiro do array courses)
       const courseId = getCoordinatorCourseId(user);
       const filteredCourses = courses.filter(c => c._id === courseId);
 
@@ -100,7 +88,6 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
     return [];
   }, [academicData, selectedUniversity, isAdmin, isCoordinator, user]);
 
-  // Inicializar seleções para coordenador automaticamente
   React.useEffect(() => {
     if (isCoordinator && user?.schoolId && user?.courses && filteredUniversities.length > 0) {
       const universityId = getFirstId(user.schoolId);
@@ -124,13 +111,11 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
       courseId: selectedCourse
     });
 
-    // Reset dos campos
     setName("");
     if (isAdmin) {
       setSelectedUniversity("");
       setSelectedCourse("");
     }
-    // Para coordenador, manter os selects com seus valores
   }, [name, selectedCourse, onSubmit, isAdmin]);
 
   if (loadingAcademicData) {
@@ -153,15 +138,13 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
           className="w-full rounded-md bg-[#141414] text-white px-3 py-2 outline-none border border-white/10 focus:ring-2 focus:ring-white"
         />
       </div>
-
-      {/* Select de Universidade - Admin vê todas, Coordenador vê só a sua */}
       <div>
         <label className="block mb-1 text-sm font-medium text-white">Universidade:</label>
         <select
           value={selectedUniversity}
           onChange={(e) => {
             setSelectedUniversity(e.target.value);
-            setSelectedCourse(""); // Reset curso quando universidade muda
+            setSelectedCourse("");
           }}
           required
           className="w-full rounded-md bg-[#141414] text-white px-3 py-2 outline-none border border-white/10"
@@ -173,7 +156,6 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
         </select>
       </div>
 
-      {/* Select de Curso - Admin vê todos da universidade, Coordenador vê só o seu */}
       {selectedUniversity && (
         <div>
           <label className="block mb-1 text-sm font-medium text-white">Curso:</label>

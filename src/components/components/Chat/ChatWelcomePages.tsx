@@ -89,24 +89,11 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
         transition={{ delay: 0.5, duration: 0.5 }}
         className="text-center"
       >
-        {/* <Button
-          onClick={() => window.location.href = '/'}
-          className="px-6 py-3 text-white transition-all duration-300 rounded-md shadow-md bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 hover:shadow-lg"
-        >
-          <Typograph
-            text="Voltar para a Home"
-            colorText="text-white"
-            variant="text4"
-            weight="regular"
-            fontFamily="poppins"
-          />
-        </Button> */}
       </motion.div>
     </div>
   );
 };
 
-// Componente para a página de boas-vindas de administradores
 export const AdminWelcome: React.FC = () => {
   return (
     <div className="flex-1 w-full max-w-2xl px-4 pt-32 pb-40 mx-auto">
@@ -194,30 +181,6 @@ export const AdminWelcome: React.FC = () => {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="text-center"
       >
-        {/* <Button
-          onClick={() => window.location.href = '/crud'}
-          className="px-6 py-3 mr-4 text-white transition-all duration-300 rounded-md shadow-md bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 hover:shadow-lg"
-        >
-          <Typograph
-            text="Ir para o CRUD"
-            colorText="text-white"
-            variant="text7"
-            weight="regular"
-            fontFamily="poppins"
-          />
-        </Button>
-        <Button
-          onClick={() => window.location.href = '/'}
-          className="bg-[#2a2a2a] hover:bg-[#333333] text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-lg"
-        >
-          <Typograph
-            text="Voltar para a Home"
-            colorText="text-white"
-            variant="text7"
-            weight="regular"
-            fontFamily="poppins"
-          />
-        </Button> */}
       </motion.div>
     </div>
   );

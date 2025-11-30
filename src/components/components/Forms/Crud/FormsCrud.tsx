@@ -154,7 +154,6 @@ export const FormsCrud: React.FC<FormsCrudProps> = ({
             />
           </motion.div>
         )}
-        {/* CORREÇÃO: Agora coordenadores também podem acessar o formulário de disciplina */}
         {selectedEntity === "discipline" && (isAdmin || isCoordinator) && animateForm && (
           <motion.div
             key="discipline"

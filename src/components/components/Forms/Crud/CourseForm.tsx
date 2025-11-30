@@ -24,7 +24,6 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
     initialData?.universityId || ""
   );
 
-  // Carregar dados acadêmicos uma única vez
   useMemo(() => {
     const fetchAcademicData = async () => {
       try {

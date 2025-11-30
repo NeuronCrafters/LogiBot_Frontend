@@ -97,7 +97,6 @@ export function LastCreatedList({ items, onEdit, loading = false }: LastCreatedL
                 </div>
                 <div className="flex flex-shrink-0 gap-2">
                   <ButtonCRUD action="update" onClick={() => handleEditClick(item)} compact />
-                  {/* <ButtonCRUD action="delete" onClick={() => onDelete(item)} compact /> */}
                 </div>
               </li>
             ))}

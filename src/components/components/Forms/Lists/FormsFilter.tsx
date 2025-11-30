@@ -45,18 +45,12 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   const isCoordinator = roles.includes("course-coordinator");
   const isProfessor = roles.includes("professor");
 
-  // Helper para extrair IDs do usuário
   const getFirstId = (value: string | string[] | undefined): string => {
     if (!value) return "";
     return Array.isArray(value) ? (value[0] || "") : value;
   };
 
   const fixedUniversity = getFirstId(user.schoolId) || String(user.school || "");
-  //   const userCourseId = getFirstId(user.courseId) || (
-  //     Array.isArray(user.courses) && user.courses.length > 0
-  //       ? user.courses[0]
-  //       : ""
-  //   );
 
   const allowedFilters: FilterType[] = isAdmin
     ? [
@@ -64,10 +58,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       "professors", "students", "students-course", "students-discipline", "students-class",
     ]
     : isCoordinator
-      // ? [
-      //   "professors", "disciplines", "classes",
-      //   "students-course", "students-discipline", "students-class",
-      // ]
       ? [
         "professors", "disciplines", "classes", "students-discipline", "students-class",
       ]
@@ -76,14 +66,12 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
         //? ["students-class"]
         : [];
 
-  // Estados do formulário
   const [filterType, setFilterType] = useState<FilterType | "">("");
   const [selectedUniversity, setSelectedUniversity] = useState<string>("");
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
 
-  // Query para buscar dados acadêmicos com cache
   const {
     data: academicData,
     isLoading: loading,
@@ -95,13 +83,12 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       const response = await academicFiltersApi.getAcademicData();
       return response.data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000,   // 10 minutos
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 2,
     retryDelay: 1000,
   });
 
-  // Lógica de exibição dos selects
   const showUniversitySelect =
     isAdmin &&
     [
@@ -128,7 +115,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     isCoordinator &&
     ["professors"].includes(filterType as FilterType);
 
-  // Validação para habilitar busca
   let canSearch =
     !!filterType &&
     (!showUniversitySelect || !!selectedUniversity) &&
@@ -138,19 +124,16 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
 
   if (coordinatorNoSelect) canSearch = true;
 
-  // Filtros computados com useMemo
   const universities: Institution[] = useMemo(() => {
     return academicData?.universities || [];
   }, [academicData]);
 
   const courses: Course[] = useMemo(() => {
-    // Para admin, filtrar pela universidade selecionada
     if (isAdmin && selectedUniversity && universities.length) {
       const university = universities.find(u => u._id === selectedUniversity);
       return university?.courses || [];
     }
 
-    // Para coordenador, mostrar todos os cursos da sua universidade
     if ((isCoordinator || isProfessor) && fixedUniversity && universities.length) {
       const university = universities.find(u => u._id === fixedUniversity);
       return university?.courses || [];
@@ -160,30 +143,23 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   }, [universities, selectedUniversity, fixedUniversity, isAdmin, isCoordinator, isProfessor]);
 
   const disciplines: Discipline[] = useMemo(() => {
-    // 1. Se um curso específico foi selecionado (Comum para Admin/Coordenador)
     if (selectedCourse) {
       const found = courses.find((c) => c._id === selectedCourse);
       return found?.disciplines || [];
     }
 
-    // 2. Se NÃO tem curso selecionado (Caso do Professor ou listagem geral)
-    // Agrupa todas as disciplinas de todos os cursos disponíveis na lista 'courses'
     return courses.flatMap((c) => c.disciplines || []);
   }, [courses, selectedCourse]);
 
   const classes = useMemo(() => {
-    // 1. Se um curso específico foi selecionado
     if (selectedCourse) {
       const found = courses.find((c) => c._id === selectedCourse);
       return found?.classes || [];
     }
 
-    // 2. Se NÃO tem curso selecionado (Caso do Professor)
-    // Agrupa todas as turmas de todos os cursos disponíveis
     return courses.flatMap((c) => c.classes || []);
   }, [courses, selectedCourse]);
 
-  // Effects para reset de campos
   useEffect(() => {
     if (!showCourseSelect) {
       setSelectedCourse("");
@@ -204,7 +180,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     }
   }, [showStudentClassSelect]);
 
-  // Effect para inicializar universidade para coordenador/professor
   useEffect(() => {
     if ((isCoordinator || isProfessor) && fixedUniversity && !selectedUniversity) {
       setSelectedUniversity(fixedUniversity);
@@ -214,12 +189,10 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
   function handleSearchClick() {
     if (!canSearch) return;
 
-    // 1) calcula o universityId do mesmo jeito que vai no onSearch
     const universityId = (isCoordinator || isProfessor)
       ? fixedUniversity
       : (showUniversitySelect ? selectedUniversity : undefined);
 
-    // 2) loga exatamente o que vai pro back
     console.log("vai buscar:", {
       filterType,
       universityId,
@@ -228,13 +201,8 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       classId: showStudentClassSelect ? selectedClass : undefined,
     });
 
-    // 3) dispara a busca
     onSearch({
       filterType,
-      // universityId,
-      // courseId: showCourseSelect ? selectedCourse : undefined,
-      // disciplineId: showStudentDisciplineSelect ? selectedDiscipline : undefined,
-      // classId: showStudentClassSelect ? selectedClass : undefined,
       universityId: showUniversitySelect ? selectedUniversity : undefined,
       courseId: showCourseSelect ? selectedCourse : undefined,
       disciplineId: showStudentDisciplineSelect ? selectedDiscipline : undefined,
@@ -254,7 +222,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
     onReset();
   }
 
-  // Estados de loading e erro
   if (error) {
     return (
       <motion.div
@@ -289,7 +256,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       )}
 
       <div className="flex flex-wrap gap-4 mb-4">
-        {/* Tipo de Filtro */}
         <div className="flex-1 min-w-[200px]">
           <label className="block mb-1 text-sm font-medium text-white">Tipo de Filtro:</label>
           <select
@@ -317,7 +283,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
           </select>
         </div>
 
-        {/* Select de Universidade - Apenas para Admin */}
         {showUniversitySelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-sm font-medium text-white">Universidade:</label>
@@ -325,9 +290,9 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
               value={selectedUniversity}
               onChange={(e) => {
                 setSelectedUniversity(e.target.value);
-                setSelectedCourse(""); // Reset curso
-                setSelectedDiscipline(""); // Reset disciplina
-                setSelectedClass(""); // Reset turma
+                setSelectedCourse("");
+                setSelectedDiscipline("");
+                setSelectedClass("");
               }}
               className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
               disabled={loading}
@@ -340,7 +305,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
           </div>
         )}
 
-        {/* Select de Curso - Para Admin e Coordenador */}
         {showCourseSelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-sm font-medium text-white">Curso:</label>
@@ -348,8 +312,8 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
               value={selectedCourse}
               onChange={(e) => {
                 setSelectedCourse(e.target.value);
-                setSelectedDiscipline(""); // Reset disciplina
-                setSelectedClass(""); // Reset turma
+                setSelectedDiscipline("");
+                setSelectedClass("");
               }}
               className="w-full p-2 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
               disabled={loading || courses.length === 0}
@@ -362,7 +326,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
           </div>
         )}
 
-        {/* Select de Disciplina */}
         {showStudentDisciplineSelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-sm font-medium text-white">Disciplina:</label>
@@ -382,7 +345,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
           </div>
         )}
 
-        {/* Select de Turma */}
         {showStudentClassSelect && (
           <div className="flex-1 min-w-[200px]">
             <label className="block mb-1 text-sm font-medium text-white">Turma:</label>
@@ -401,7 +363,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
         )}
       </div>
 
-      {/* Botões de ação */}
       <div className="flex gap-2">
         <ButtonCRUD
           action="search"

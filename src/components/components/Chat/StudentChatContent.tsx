@@ -92,34 +92,32 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
           </motion.div>
         )}
 
-        {/* MODO CHAT */}
         {greetingDone && mode === "chat" && (
           <ChatMessages messages={messages} userName={userName} userId={userId} />
         )}
 
-        {/* MODO QUIZ */}
         {greetingDone && mode === "quiz" && (
           <AnimatePresence mode="wait">
             {step === "levels" && (
-              <motion.div key="levels" /* ...animacões... */ className="mt-4">
+              <motion.div key="levels" className="mt-4">
                 <LevelStep onNext={handleLevelNext} />
               </motion.div>
             )}
 
             {step === "categories" && (
-              <motion.div key="categories" /* ...animacões... */ className="mt-4">
+              <motion.div key="categories" className="mt-4">
                 <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />
               </motion.div>
             )}
 
             {step === "subsubjects" && (
-              <motion.div key="subsubjects" /* ...animacões... */ className="mt-4">
+              <motion.div key="subsubjects" className="mt-4">
                 <SubsubjectStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />
               </motion.div>
             )}
 
             {step === "questions" && (
-              <motion.div key="questions" /* ...animacões... */ className="mt-4">
+              <motion.div key="questions" className="mt-4">
                 <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />
               </motion.div>
             )}
@@ -133,7 +131,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                 transition={{ duration: 0.5 }}
                 className="mt-6 space-y-6"
               >
-                {/* MUDANÇA AQUI 👇: Passando todas as props necessárias */}
                 <ResultDisplay
                   totalCorrectAnswers={resultData.totalCorrectAnswers}
                   totalWrongAnswers={resultData.totalWrongAnswers}
@@ -153,7 +150,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         )}
       </div>
 
-      {/* Input de chat apenas no modo chat */}
       <AnimatePresence mode="wait">
         {greetingDone && mode === "chat" && (
           <motion.div

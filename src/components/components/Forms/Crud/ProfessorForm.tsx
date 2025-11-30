@@ -37,7 +37,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     return university?.courses || [];
   }, [academicData, school]);
 
-  // Handler para submit do formulário
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim() || !school || courses.length === 0) return;
@@ -50,7 +49,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       courses,
     });
 
-    // Reset dos campos após submit
     setName("");
     setEmail("");
     setPassword("");
@@ -58,19 +56,16 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     setCourses([]);
   }, [name, email, password, school, courses, onSubmit]);
 
-  // Handler para mudança de universidade
   const handleUniversityChange = useCallback((universityId: string) => {
     setSchool(universityId);
-    setCourses([]); // Reset courses quando universidade muda
+    setCourses([]);
   }, []);
 
-  // Estados de loading e erro
   if (loadingAcademicData) {
     return (
       <div className="mt-4 space-y-4">
         <div className="text-white">Carregando dados acadêmicos...</div>
         <div className="space-y-4">
-          {/* Skeleton loading */}
           {[...Array(5)].map((_, i) => (
             <div key={i} className="h-12 rounded bg-white/10 animate-pulse" />
           ))}
@@ -94,7 +89,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-      {/* Nome do Professor */}
       <div>
         <label className="block mb-2 text-white">Nome do Professor:</label>
         <input
@@ -106,7 +100,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         />
       </div>
 
-      {/* Email */}
       <div>
         <label className="block mb-2 text-white">Email:</label>
         <input
@@ -118,7 +111,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         />
       </div>
 
-      {/* Senha com toggle de visibilidade */}
       <div>
         <label className="block mb-2 text-white">Senha:</label>
         <div className="relative">
@@ -139,7 +131,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </div>
       </div>
 
-      {/* Universidade */}
       <div>
         <label className="block mb-2 text-white">Universidade:</label>
         <select
@@ -157,7 +148,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </select>
       </div>
 
-      {/* Curso (aparece apenas quando universidade selecionada) */}
       {school && availableCourses.length > 0 && (
         <div>
           <label className="block mb-2 text-white">Curso:</label>
@@ -177,7 +167,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </div>
       )}
 
-      {/* Aviso quando não há cursos disponíveis */}
       {school && availableCourses.length === 0 && (
         <div className="p-3 border rounded-lg bg-yellow-600/20 border-yellow-600/50">
           <p className="text-sm text-yellow-300">
@@ -186,7 +175,6 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </div>
       )}
 
-      {/* Botão de submit */}
       <div className="pt-2">
         <ButtonCRUD
           action={initialData ? "update" : "create"}

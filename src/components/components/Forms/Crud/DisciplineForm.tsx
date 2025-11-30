@@ -19,32 +19,22 @@ export interface DisciplineFormProps {
 }
 
 function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
-//   const { user } = useAuth();
-
-  // Verificar permissões do usuário
-//   const roles = Array.isArray(user?.role) ? user.role : [user?.role];
-//   const isAdmin = roles.includes("admin");
-//   const isCoordinator = roles.includes("course-coordinator");
-
-  // Query para buscar dados acadêmicos com cache
   const { data: academicData, isLoading: loadingAcademicData } = useQuery({
     queryKey: ['academicData'],
     queryFn: async () => {
       const response = await academicFiltersApi.getAcademicData();
       return response.data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Estados do formulário
   const [name, setName] = useState<string>(initialData ? initialData.name : "");
   const [selectedUniversity, setSelectedUniversity] = useState<string>("");
   const [selectedCourse, setSelectedCourse] = useState<string>(initialData ? initialData.courseId : "");
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>(initialData ? initialData.classIds : []);
   const [selectedProfessorIds, setSelectedProfessorIds] = useState<string[]>(initialData ? initialData.professorIds : []);
 
-  // Filtrar cursos baseado na universidade selecionada
   const availableCourses = useMemo(() => {
     if (!academicData || !selectedUniversity) return [];
 
@@ -52,7 +42,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     return university?.courses || [];
   }, [academicData, selectedUniversity]);
 
-  // Filtrar classes baseado no curso selecionado
   const availableClasses = useMemo(() => {
     if (!academicData || !selectedCourse) return [];
 
@@ -64,7 +53,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     return course?.classes || [];
   }, [academicData, selectedCourse]);
 
-  // Filtrar professores baseado no curso selecionado
   const availableProfessors = useMemo(() => {
     if (!academicData || !selectedCourse) return [];
 
@@ -76,7 +64,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     return course?.professors || [];
   }, [academicData, selectedCourse]);
 
-  // Callback para submit do formulário
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !selectedCourse) return;
@@ -88,7 +75,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
       professorIds: selectedProfessorIds
     });
 
-    // Reset dos campos
     setName("");
     setSelectedUniversity("");
     setSelectedCourse("");
@@ -102,13 +88,11 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     onSubmit
   ]);
 
-  // Handler para seleção de classes
   const handleClassesChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const options = Array.from(e.target.options).filter(option => option.selected);
     setSelectedClassIds(options.map(option => option.value));
   }, []);
 
-  // Handler para seleção de professores
   const handleProfessorsChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const options = Array.from(e.target.options).filter(option => option.selected);
     setSelectedProfessorIds(options.map(option => option.value));
@@ -122,10 +106,8 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     );
   }
 
-  // Renderização do formulário
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-      {/* Campo de nome da disciplina */}
       <div>
         <label className="block mb-2 text-white">Nome da Disciplina:</label>
         <input
@@ -137,14 +119,13 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
         />
       </div>
 
-      {/* Seleção de universidade */}
       <div>
         <label className="block mb-2 text-white">Universidade:</label>
         <select
           value={selectedUniversity}
           onChange={(e) => {
             setSelectedUniversity(e.target.value);
-            setSelectedCourse(""); // Reset curso quando universidade muda
+            setSelectedCourse("");
           }}
           required
           className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 outline-none"
@@ -156,7 +137,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
         </select>
       </div>
 
-      {/* Seleção de curso */}
       {selectedUniversity && (
         <div>
           <label className="block mb-2 text-white">Curso:</label>
@@ -174,7 +154,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
         </div>
       )}
 
-      {/* Seleção de classes */}
       {selectedCourse && (
         <div>
           <label className="block mb-2 text-white">Turmas (Selecione uma ou mais):</label>
@@ -194,7 +173,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
         </div>
       )}
 
-      {/* Seleção de professores */}
       {selectedCourse && (
         <div>
           <label className="block mt-4 mb-2 text-white">Professores (Selecione um ou mais):</label>
@@ -214,7 +192,6 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
         </div>
       )}
 
-      {/* Botão de submit */}
       <div className="pt-2">
         <ButtonCRUD
           action={initialData ? "update" : "create"}

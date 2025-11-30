@@ -51,34 +51,6 @@ export function CoordinatorRoleSection({
         />
         Remover o cargo de: Coordenador de Curso
       </label>
-
-      {/* <AnimatePresence>
-        {removeCoord && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <label className="block mb-1 text-white mt-4">
-              Indique o novo coordenador:
-            </label>
-            <select
-              value={newCoordinator}
-              onChange={(e) => onCoordinatorChange(e.target.value)}
-              className="w-full p-2 rounded-md bg-[#141414] text-white"
-            >
-              <option value="">Selecione um professor</option>
-              {filteredCandidates.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </motion.div>
-        )}
-      </AnimatePresence> */}
     </div>
   );
 }
