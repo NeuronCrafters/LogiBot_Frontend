@@ -32,9 +32,9 @@ jobs:
           REPO_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
 
           docker build \
-            --build-arg VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }} \
-            --build-arg VITE_API_KEY=${{ secrets.VITE_API_KEY }} \
-            --build-arg VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }} \
+            --build-arg "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" \
+            --build-arg "VITE_API_KEY=${{ secrets.VITE_API_KEY }}" \
+            --build-arg "VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" \
             -t ghcr.io/$REPO_LOWERCASE:latest .
 
           docker push ghcr.io/$REPO_LOWERCASE:latest
