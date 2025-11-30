@@ -4,33 +4,77 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  deploy:
+  build_and_push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     environment: production
 
     steps:
-      - name: Deploy Production
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          REPO_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+
+          docker build \
+            --build-arg VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }} \
+            --build-arg VITE_API_KEY=${{ secrets.VITE_API_KEY }} \
+            --build-arg VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }} \
+            -t ghcr.io/$REPO_LOWERCASE:latest .
+
+          docker push ghcr.io/$REPO_LOWERCASE:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_push
+    environment: production
+    permissions:
+      packages: read
+
+    steps:
+      - name: Deploy to Hetzner VPS
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          port: 22
           script: |
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
             cd ../logibot/LogiBot_Frontend
 
             git pull origin main
 
-            cat <<EOF > .env
-            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
-            VITE_API_KEY=${{ secrets.VITE_API_KEY }}
-            VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
-            EOF
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            npm install
-            npm run build
+            REPO_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+            IMAGE="ghcr.io/$REPO_LOWERCASE:latest"
+
+            docker pull $IMAGE
+
+            docker stop logibot_frontend || true
+            docker rm logibot_frontend || true
+
+            docker network inspect logibot-network >/dev/null 2>&1 || docker network create logibot-network
+
+            docker run -d \
+              --name logibot_frontend \
+              --restart unless-stopped \
+              --network logibot-network \
+              -p 3001:80 \
+              $IMAGE
+
+            docker image prune -f
