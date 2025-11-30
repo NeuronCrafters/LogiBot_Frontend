@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder  # <--- Nome definido aqui
+FROM node:22-alpine AS builder 
 
 WORKDIR /app
 
