@@ -71,8 +71,6 @@ export function LevelStep({ onNext }: LevelStepProps) {
             value: l.payload,
           }))}
           onSelect={handleSelect}
-        // MUDANÇA: A propriedade 'disabled' foi removida para corrigir o erro de tipo.
-        // A lógica de desabilitar já pode ser controlada pelo estado 'isSubmitting' abaixo.
         />
         {isSubmitting && <Loader2 className="animate-spin text-white mx-auto mt-4" />}
       </div>

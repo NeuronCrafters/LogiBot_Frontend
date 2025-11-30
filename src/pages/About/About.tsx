@@ -184,7 +184,6 @@ export function About() {
 
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
-      {/* --- Modal alterar senha --- */}
       <ChangePasswordModal
         isOpen={showChangePassword}
         onClose={() => setShowChangePassword(false)}

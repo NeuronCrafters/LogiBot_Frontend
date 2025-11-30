@@ -19,7 +19,7 @@ import { ChartExportMenu } from "../ChartExportMenu";
 export function formatTimeWithDays(seconds: number): string {
   const totalSeconds = Math.floor(seconds);
 
-  const days = Math.floor(totalSeconds / 86_400); // 60 * 60 * 24
+  const days = Math.floor(totalSeconds / 86_400);
   const hours = Math.floor((totalSeconds % 86_400) / 3_600);
   const minutes = Math.floor((totalSeconds % 3_600) / 60);
   const remainingSeconds = totalSeconds % 60;

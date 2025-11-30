@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ButtonChoiceBot } from "@/components/components/Button/ButtonChoiceBot";
 import { formatTitle } from "@/utils/formatText";
-import { quizService } from "@/services/api/api_quiz"; // MUDANÇA: Novo import
+import { quizService } from "@/services/api/api_quiz";
 
 export interface ButtonData {
   title: string;

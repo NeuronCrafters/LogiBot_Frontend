@@ -1,10 +1,8 @@
-// ARQUIVO DO FRONTEND: src/components/components/Bot/Quiz/ResultDisplay.tsx
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 
-// MUDANÇA: A interface local agora corresponde à da API
 interface ResultDetail {
   question: string;
   selected: string;
@@ -42,7 +40,6 @@ export function ResultDisplay({ totalCorrectAnswers, totalWrongAnswers, detalhes
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {/* ... (código do resumo e celebração sem alterações) ... */}
       <div className="bg-[#2a2a2a] rounded-xl p-4 shadow-sm space-y-2">
         <div className="flex items-center gap-2 text-green-400 text-sm">
           <CheckCircle2 className="w-4 h-4" />
@@ -53,8 +50,6 @@ export function ResultDisplay({ totalCorrectAnswers, totalWrongAnswers, detalhes
           <Typograph text={`Erros: ${totalWrongAnswers}`} variant="text8" weight="medium" fontFamily="poppins" colorText="text-red-400" />
         </div>
       </div>
-
-      {/* Detalhes das Perguntas */}
       <div className="space-y-3">
         {questions.map((q, i) => {
           const { isCorrect, isOpen } = { isCorrect: q.isCorrect, isOpen: openIndex === i };

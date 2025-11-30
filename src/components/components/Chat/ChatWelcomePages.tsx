@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { MessageSquare, Lock, Info } from 'lucide-react';
-// import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Typograph } from '@/components/components/Typograph/Typograph';
 

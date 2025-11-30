@@ -3,10 +3,9 @@ import { Question } from "@/@types/QuestionType";
 import { formatTitle } from "@/utils/formatText";
 import { ButtonData } from "@/components/components/Bot/Quiz/CategoryStep";
 import { quizService, VerifyQuizResponse } from "@/services/api/api_quiz";
-import { rasaService } from "@/services/api/api_rasa"; // Mantido para o modo "chat"
+import { rasaService } from "@/services/api/api_rasa";
 import { usePersistedArray } from "@/hooks/use-PersistedArray";
 
-// Tipos para clareza
 type QuizStep = "initial" | "levels" | "categories" | "subsubjects" | "questions" | "results";
 type AppMode = "none" | "quiz" | "chat";
 
@@ -20,7 +19,6 @@ interface useQuizFlowProps {
 }
 
 export function useQuizFlow({ userId }: useQuizFlowProps) {
-  // --- Estados do Hook ---
 
   const {
     state: messages,
@@ -28,45 +26,33 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     clear: clearMessages,
   } = usePersistedArray<ChatMsg>("LOGIBOT_MESSAGES", []);
 
-  // Estados de fluxo e modo
   const [step, setStep] = useState<QuizStep>("initial");
   const [mode, setMode] = useState<AppMode>("none");
 
-  // Estados de dados para os componentes do quiz
   const [categoryButtons, setCategoryButtons] = useState<ButtonData[]>([]);
   const [subsubjectButtons, setSubsubjectButtons] = useState<ButtonData[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [resultData, setResultData] = useState<VerifyQuizResponse | null>(null);
 
-  // Estados para controle da UI
   const [typing, setTyping] = useState(false);
   const [greetingDone, setGreetingDone] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
   const [inputText, setInputText] = useState("");
-  const [fakeTypingDelay, setFakeTypingDelay] = useState(false); // Mantido para o chat
+  const [fakeTypingDelay, setFakeTypingDelay] = useState(false);
 
-  // Estados para histórico (se aplicável)
   const [previousQuestions, setPreviousQuestions] = useState<Question[][]>([]);
   const [previousResults, setPreviousResults] = useState<VerifyQuizResponse[]>([]);
 
-  // --- Funções de Controle de Fluxo ---
-
-  /**
-   * Reseta o estado para a tela de escolha inicial (Quiz ou Chat).
-   */
   function resetToInitial() {
     clearMessages();
     setPreviousQuestions([]);
     setPreviousResults([]);
-    setGreetingDone(true); // Mantém a saudação como concluída
+    setGreetingDone(true);
     setMode("none");
     setStep("initial");
     setShowLevels(false);
   }
 
-  /**
-   * Inicia o fluxo de Quiz ou de Chat com base na escolha do usuário.
-   */
   function handleInitialChoice(choice: AppMode) {
     clearMessages();
     setPreviousQuestions([]);
@@ -75,9 +61,8 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
 
     if (choice === "quiz") {
       setStep("levels");
-      setShowLevels(true); // Mostra a seleção de nível
+      setShowLevels(true);
     } else {
-      // Lógica para iniciar o modo chat
       pushMessage({
         role: "assistant",
         content: "Vamos conversar, sobre o que quer falar?",
@@ -86,22 +71,14 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setGreetingDone(true);
   }
 
-  /**
-   * Chamado pelo LevelStep após o usuário selecionar um nível.
-   * Recebe a lista de categorias da API e avança para o próximo passo.
-   */
   function handleLevelNext(btns: ButtonData[], nivel: string) {
     pushMessage({ role: "user", content: formatTitle(nivel) });
     pushMessage({ role: "assistant", content: "Agora escolha um assunto para praticar:" });
     setCategoryButtons(btns);
     setStep("categories");
-    setShowLevels(false); // Esconde a seleção de nível
+    setShowLevels(false);
   }
 
-  /**
-   * Chamado pelo CategoryStep após o usuário selecionar uma categoria.
-   * Recebe a lista de subtópicos e avança para o próximo passo.
-   */
   function handleCategoryNext(btns: ButtonData[], categoria: string) {
     pushMessage({ role: "user", content: formatTitle(categoria) });
     pushMessage({ role: "assistant", content: `Escolha um tópico dentro de ${formatTitle(categoria)}:` });
@@ -109,14 +86,9 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setStep("subsubjects");
   }
 
-  /**
-   * Chamado pelo SubsubjectStep após o usuário selecionar um subtópico.
-   * Recebe as perguntas do quiz e avança para a tela de questões.
-   */
   function handleSubsubjectNext(qs: Question[], subtopico: string) {
     pushMessage({ role: "user", content: formatTitle(subtopico) });
     setTyping(true);
-    // Simula um delay para a mensagem "Gerando suas perguntas..." aparecer
     setTimeout(() => {
       setTyping(false);
       pushMessage({ role: "assistant", content: "Suas perguntas estão prontas:" });
@@ -125,22 +97,16 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     }, 1200);
   }
 
-  /**
-   * Chamado pelo QuestionsDisplay quando o usuário envia suas respostas.
-   * Envia para a API de verificação e exibe os resultados.
-   */
   async function handleSubmitAnswers(answers: string[]) {
     pushMessage({ role: "user", content: `Respostas enviadas: ${answers.join(", ")}` });
     setTyping(true);
 
     try {
-      // MUDANÇA PRINCIPAL: Chama o novo quizService em vez do rasaService
       const result = await quizService.verifyQuiz(answers);
       setResultData(result);
 
       if (questions.length > 0) {
         setPreviousQuestions((prev) => [...prev, questions]);
-        // A interface do 'result' é diferente da antiga, mas podemos adaptar
         setPreviousResults((prev) => [...prev, result as any]);
       }
 
@@ -153,9 +119,6 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     }
   }
 
-  /**
-   * Lógica para o modo CHAT. Permanece usando o rasaService.
-   */
   async function sendMessage(message: string) {
     if (!message.trim()) return;
     pushMessage({ role: "user", content: message });
@@ -163,7 +126,6 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setFakeTypingDelay(true);
 
     try {
-      // Mantém a chamada ao serviço antigo para o modo chat
       const res = await rasaService.perguntar(message, userId);
       setTimeout(() => {
         pushMessage({
@@ -182,7 +144,6 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   }
 
   return {
-    // Estados para a UI
     messages,
     step,
     mode,
@@ -191,16 +152,12 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     showLevels,
     inputText,
     fakeTypingDelay,
-
-    // Dados para os componentes
     categoryButtons,
     subsubjectButtons,
     questions,
     resultData,
     previousQuestions,
     previousResults,
-
-    // Funções de controle
     setInputText,
     setGreetingDone,
     setShowLevels,

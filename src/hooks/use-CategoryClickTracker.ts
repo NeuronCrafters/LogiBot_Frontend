@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { api } from "@/services/api/api";
 
 const STORAGE_KEY = "category_clicks";
-const FLUSH_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12h
+const FLUSH_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
 type ClickCounts = Record<string, number>;
 

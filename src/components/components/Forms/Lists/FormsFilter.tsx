@@ -63,7 +63,6 @@ export function FormsFilter({ onSearch, onReset }: FormsFilterProps) {
       ]
       : isProfessor
         ? ["students-discipline", "students-class"]
-        //? ["students-class"]
         : [];
 
   const [filterType, setFilterType] = useState<FilterType | "">("");

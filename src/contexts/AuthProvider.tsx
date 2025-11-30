@@ -58,19 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // async function logout() {
-  //   try {
-  //     await flushClicks();
-  //     await api.post("/logout", {}, { withCredentials: true });
-  //   } catch (error) {
-  //     console.error("Erro ao fazer logout:", error);
-  //   } finally {
-  //     queryClient.clear();
-  //     setUser(null);
-  //     navigate("/signin");
-  //   }
-  // }
-
   const logout = useCallback(async () => {
     try {
       await flushClicks();

@@ -8,13 +8,13 @@ export interface UsageTime {
 }
 
 export interface Session {
-  date: string;               // data da sessão, formato "YYYY-MM-DD"
-  sessionStart: Date;         // início da sessão
-  sessionEnd: Date;           // fim da sessão
-  sessionDuration: number;    // duração em segundos
-  durationInMinutes: number;  // duração convertida para minutos
-  usage: number;              // uso em minutos
-  formatted: string;          // duração formatada "HH:MM:SS"
+  date: string;
+  sessionStart: Date;
+  sessionEnd: Date;
+  sessionDuration: number;
+  durationInMinutes: number;
+  usage: number;
+  formatted: string;
   userId: string;
   userName: string;
   courseName?: string;
@@ -22,29 +22,28 @@ export interface Session {
 }
 
 export interface DailyUsage {
-  date: string;               // data, formato "YYYY-MM-DD"
-  usage: number;              // total de minutos usados no dia
-  formatted: string;          // total formatado "HH:MM:SS"
-  sessions: Session[];        // lista de sessões desse dia
+  date: string;
+  usage: number;
+  formatted: string;
+  sessions: Session[];
 }
 
 export interface UserAnalysisLog {
-  totalCorrectAnswers: number;      // total de acertos
-  totalWrongAnswers: number;        // total de erros
-  usageTimeInSeconds: number;       // uso total em segundos
-  usageTime: UsageTime;             // objeto detalhado de tempo
-  subjectCounts: {                  // contagem por assunto
+  totalCorrectAnswers: number;
+  totalWrongAnswers: number;
+  usageTimeInSeconds: number;
+  usageTime: UsageTime;
+  subjectCounts: {
     variaveis: number;
     tipos: number;
     funcoes: number;
     loops: number;
     verificacoes: number;
   };
-  sessions: Session[];              // todas as sessões do usuário
-  dailyUsage: DailyUsage[];         // uso agregado por dia
+  sessions: Session[];
+  dailyUsage: DailyUsage[];
 }
 
-// Interface de resposta genérica da API de logs
 export interface LogApiResponse<T> {
   success: boolean;
   data: T;
@@ -52,7 +51,6 @@ export interface LogApiResponse<T> {
   error?: string;
 }
 
-// Parâmetros de filtro para chamadas à API
 export interface LogFilterParams {
   startDate?: string;
   endDate?: string;

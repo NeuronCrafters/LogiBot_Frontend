@@ -223,8 +223,7 @@ export function FormsList({ entity, items, onEdit, onDelete }: FormsListProps) {
 
   const confirmDisabled = (!addCoord && !removeCoord) ||
     (addCoord && alreadyIsCoordinator) ||
-    (removeCoord && (!alreadyIsCoordinator || (removeCoord && newCoordinator === "" && false))) || // mude o false para true se obrigar a ter novo coord
-    updateCoordinatorMutation.isPending;
+    (removeCoord && (!alreadyIsCoordinator || (removeCoord && newCoordinator === "" && false))) || updateCoordinatorMutation.isPending;
 
   return (
     <motion.div
