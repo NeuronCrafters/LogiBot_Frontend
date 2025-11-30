@@ -28,9 +28,11 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          echo "URL=${{ secrets.VITE_API_BASE_URL }}"
-          echo "KEY=${{ secrets.VITE_API_KEY }}"
-          echo "RECAPTCHA=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}"
+          echo "=== Build Arguments ==="
+          echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}"
+          echo "VITE_API_KEY=${{ secrets.VITE_API_KEY }}"
+          echo "VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}"
+          echo ""
 
           REPO_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
 
@@ -81,3 +83,5 @@ jobs:
               $IMAGE
 
             docker image prune -f
+
+            echo "=== Frontend deployed successfully ==="
