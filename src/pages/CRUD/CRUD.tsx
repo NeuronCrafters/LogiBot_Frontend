@@ -66,7 +66,6 @@ export function CRUD() {
 
       setRecentItems((prev) => [newItem, ...prev.slice(0, 19)]);
 
-      // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['recentItems'] });
       queryClient.invalidateQueries({ queryKey: ['academicData'] });
 
@@ -78,7 +77,6 @@ export function CRUD() {
     }
   });
 
-  // Mutation para deletar entidades
   const deleteMutation = useMutation({
     mutationFn: async (item: RecentItem) => {
       if (item.type === "professor") {
@@ -93,7 +91,6 @@ export function CRUD() {
     onSuccess: (deletedItem) => {
       setRecentItems((prev) => prev.filter((item) => item.id !== deletedItem.id));
 
-      // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['recentItems'] });
       queryClient.invalidateQueries({ queryKey: ['academicData'] });
 

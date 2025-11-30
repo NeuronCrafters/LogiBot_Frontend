@@ -6,17 +6,11 @@ import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { ChartFilter } from "@/components/components/Chart/ChartFilter";
 import { Button } from "@/components/ui/button";
-
-// Importações para o filtro de datas
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
-
-// Tipos
 import type { ChartFilterState } from "@/@types/ChartsType";
 import { LogEntityType, LogModeType } from "@/services/api/api_routes";
 import { DashboardFilterParams } from "@/services/api/api_dashboard";
-
-// Gráficos Legados
 import { UsageChart } from "@/components/components/Chart/Independent/UsageChart";
 import { CorrectWrongChart } from "@/components/components/Chart/Independent/CorrectWrongChart";
 import { CategoryChart } from "@/components/components/Chart/Independent/CategoryChart";
@@ -37,14 +31,13 @@ export function Chart() {
   }>({ type: "student", ids: [], mode: "individual", hierarchyParams: {} });
 
   const [dateRange] = useState<DateRange | undefined>({
-    from: addDays(new Date(), -30), // Padrão: últimos 30 dias
+    from: addDays(new Date(), -30),
     to: new Date(),
   });
 
   const [hasSelection, setHasSelection] = useState(false);
   const [key, setKey] = useState(0);
 
-  // Função central que atualiza todos os filtros quando algo muda
   const updateAllFilters = useCallback((
     currentLegacyFilter: typeof legacyFilter,
     currentDateRange: typeof dateRange
@@ -69,7 +62,6 @@ export function Chart() {
     setKey(k => k + 1);
   }, []);
 
-  // Handler para quando o filtro de entidade (aluno, turma, etc.) muda
   const handleEntityFilterChange = useCallback((
     type: LogEntityType,
     ids: string[],
@@ -86,7 +78,6 @@ export function Chart() {
     updateAllFilters(newLegacyFilter, dateRange);
   }, [dateRange, updateAllFilters]);
 
-  // Efeito para atualizar os filtros quando APENAS a data muda
   useEffect(() => {
     if (hasSelection) {
       updateAllFilters(legacyFilter, dateRange);

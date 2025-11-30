@@ -13,10 +13,8 @@ export function Chat() {
     const isStudent = userRoles.includes('student');
     const isAdmin = userRoles.includes('admin');
 
-    // Pega o primeiro role para o tour
     const mainRole = (userRoles[0] || 'guest') as UserRole;
 
-    // Hook do tour com actions do menu
     useMultiPageTour(mainRole, {
         openMenu: () => setMenuOpen(true),
         closeMenu: () => setMenuOpen(false),

@@ -27,7 +27,6 @@ function Signin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Remove espaços antes do envio
     const finalEmail = email.replace(/\s/g, '');
     const finalPassword = password.replace(/\s/g, '');
 
@@ -41,13 +40,8 @@ function Signin() {
 
     try {
       setLoading(true);
-      // Passa um valor substituto para o captchaToken para não quebrar a função login
       await login(finalEmail, finalPassword, "captcha-disabled");
-      // recaptchaRef.current?.reset();
-      // setCaptchaToken(null);
     } catch (error: any) {
-      // recaptchaRef.current?.reset();
-      // setCaptchaToken(null);
       const msg = error?.response?.data?.message ?? "Erro ao fazer login.";
       toast.error(msg);
     } finally {

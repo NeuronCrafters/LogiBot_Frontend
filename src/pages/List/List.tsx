@@ -20,22 +20,15 @@ type EntityType = "university" | "course" | "discipline" | "class" | "professor"
 export function List() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  // Estados locais
   const [menuOpen, setMenuOpen] = useState(false);
   const [currentFilter, setCurrentFilter] = useState<FilterData | null>(null);
   const [entity, setEntity] = useState<EntityType>("university");
-
-  // Determinar role do usuário
   const userRoles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isAdmin = userRoles.includes("admin");
   const isCoordinator = userRoles.includes("course-coordinator");
-  //   const isProfessor = userRoles.includes("professor");
-
   const userRole: "admin" | "course-coordinator" | "professor" =
     isAdmin ? "admin" : isCoordinator ? "course-coordinator" : "professor";
 
-  // Query para buscar entidades com cache
   const {
     data: searchResults,
     isLoading: isSearching,
@@ -54,24 +47,22 @@ export function List() {
         throw new Error("Falha ao buscar entidades");
       }
     },
-    enabled: !!currentFilter, // Só executa quando há filtro
-    staleTime: 3 * 60 * 1000,  // 3 minutos
-    gcTime: 10 * 60 * 1000,    // 10 minutos
+    enabled: !!currentFilter,
+    staleTime: 3 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // Mutation para busca (para ter controle sobre loading)
   const searchMutation = useMutation({
     mutationFn: async (filterData: FilterData) => {
       return await searchEntitiesByFilter(userRole, filterData);
     },
     onSuccess: (data) => {
       setEntity(data.entity);
-      setCurrentFilter(currentFilter); // Atualizar filtro atual para trigger da query
+      setCurrentFilter(currentFilter);
       toast.success(`${data.items.length} registros encontrados`);
 
-      // Atualizar cache da query
       queryClient.setQueryData(['searchEntities', userRole, currentFilter], data);
     },
     onError: (error) => {
@@ -80,7 +71,6 @@ export function List() {
     }
   });
 
-  // Mutation para deletar itens
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (displayEntity === "professor") {
@@ -97,16 +87,13 @@ export function List() {
     onSuccess: () => {
       toast.success("Registro deletado com sucesso!");
 
-      // Invalidar cache de busca para atualizar a lista
       queryClient.invalidateQueries({
         queryKey: ['searchEntities', userRole, currentFilter]
       });
 
-      // Invalidar outros caches relacionados
       queryClient.invalidateQueries({ queryKey: ['academicData'] });
       queryClient.invalidateQueries({ queryKey: ['recentItems'] });
 
-      // Refetch da busca atual para atualizar a lista
       if (currentFilter) {
         refetchSearch();
       }
@@ -117,7 +104,6 @@ export function List() {
     }
   });
 
-  // Handlers
   const handleSearch = async (filterData: FilterData) => {
     setCurrentFilter(filterData);
     searchMutation.mutate(filterData);
@@ -127,7 +113,6 @@ export function List() {
     setCurrentFilter(null);
     setEntity("university");
 
-    // Limpar cache de busca
     queryClient.removeQueries({
       queryKey: ['searchEntities', userRole]
     });
@@ -137,27 +122,23 @@ export function List() {
 
   const handleEdit = (item: ListItem) => {
     toast(`Editando: ${item.name}`);
-    // Implementar lógica de edição
   };
 
   const handleDelete = (id: string) => {
     deleteMutation.mutate(id);
   };
 
-  // Retry manual da busca
   const handleRetrySearch = () => {
     if (currentFilter) {
       refetchSearch();
     }
   };
 
-  // Dados para exibir
   const items = searchResults?.items || [];
   const displayEntity = searchResults?.entity || entity;
 
   return (
     <main className="min-h-screen bg-[#141414] text-white">
-      {/* Topbar */}
       <div className="absolute bg-[#141414] w-full flex items-center gap-4 border-b border-neutral-800 px-8 py-4 z-10">
         <Typograph
           text="Listagem"
@@ -185,10 +166,8 @@ export function List() {
         )}
       </div>
 
-      {/* Menu Lateral */}
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
-      {/* Conteúdo Central */}
       <div className="flex justify-center w-full px-4 pt-24 sm:px-6 lg:px-8">
         <div className="w-full max-w-screen-md">
           <div className="flex items-center gap-3 mb-6">
@@ -202,13 +181,11 @@ export function List() {
             />
           </div>
 
-          {/* Filtros de Busca */}
           <FormsFilter
             onSearch={handleSearch}
             onReset={handleResetList}
           />
 
-          {/* Estados de Loading e Error */}
           {searchMutation.isPending && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -236,7 +213,6 @@ export function List() {
             </motion.div>
           )}
 
-          {/* Lista de Resultados */}
           <AnimatePresence>
             {items.length > 0 && (
               <motion.div
@@ -267,7 +243,6 @@ export function List() {
             )}
           </AnimatePresence>
 
-          {/* Estado vazio após busca */}
           {currentFilter && !searchMutation.isPending && !searchError && items.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -281,7 +256,6 @@ export function List() {
             </motion.div>
           )}
 
-          {/* Estado inicial - sem busca */}
           {!currentFilter && !searchMutation.isPending && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}

@@ -19,14 +19,12 @@ import { DisciplineCode } from "@/components/components/About/DisciplineCode";
 import { ChangePasswordModal } from "@/components/components/Security/ChangePasswordModal";
 import { useMultiPageTour, UserRole } from "@/hooks/useMultiPageTour";
 
-/* ───────── Types ───────── */
 interface DisciplineObject {
   id: string;
   name: string;
   code: string;
 }
 
-/* ───────── Utils ───────── */
 const translateRole = (r: string) =>
 ({
   student: "Estudante",
@@ -53,11 +51,10 @@ export function About() {
 
   const mainRole = (user && (Array.isArray(user.role) ? user.role[0] : user.role)) as UserRole || 'guest';
   useMultiPageTour(mainRole, {
-      openMenu: () => setMenuOpen(true),
-      closeMenu: () => setMenuOpen(false),
+    openMenu: () => setMenuOpen(true),
+    closeMenu: () => setMenuOpen(false),
   });
 
-  /* ---------- Loading & Erros ---------- */
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#141414]">
@@ -78,7 +75,6 @@ export function About() {
       </div>
     );
 
-  /* ---------- Derivações ---------- */
   const roles = Array.isArray(user.role) ? user.role : [user.role];
   const occupation = roles.map(translateRole).join(", ");
 
@@ -90,8 +86,6 @@ export function About() {
   const className = Array.isArray(user.className) ? user.className.join(", ") : user.className ?? "-";
   const profCourses = Array.isArray(user.courses) ? user.courses.map((c: any) => c.name).join(", ") : "-";
   const profClasses = Array.isArray(user.classes) ? user.classes.map((c: any) => c.name).join(", ") : "-";
-
-  /* ---------- Disciplinas ---------- */
   const disciplineObjects: DisciplineObject[] = Array.isArray(user.disciplines)
     ? user.disciplines.reduce<DisciplineObject[]>((acc, d) => {
       if (isDisciplineObj(d)) {
@@ -110,7 +104,6 @@ export function About() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#141414] text-white">
-      {/* --- Header --- */}
       <header className="flex items-center justify-between px-4 py-4 border-b sm:px-6 border-neutral-800">
         <Typograph
           text="Sobre Mim"
@@ -127,20 +120,16 @@ export function About() {
           </Button>
         )}
       </header>
-
-      {/* --- Conteúdo --- */}
       <main className="flex items-center justify-center flex-1 px-4 py-8">
         <div className="w-full max-w-md shadow-2xl rainbow-card sm:max-w-lg md:max-w-xl">
           <div className="space-y-6 card-content" id="about-card-content">
 
-            {/* Avatar grande */}
             <div className="flex justify-center -mt-16">
               <div className={`rainbow-avatar ${isAdmin ? "w-32 h-32 sm:w-36 sm:h-36" : "w-40 h-40 sm:w-44 sm:h-44"}`}>
                 <Avatar seed={user._id} backgroundColor="#2a2a2a" className="w-full h-full rounded-full" />
               </div>
             </div>
 
-            {/* Info */}
             <div className="space-y-4" id="about-user-details">
               <Detail icon={<UserIcon size={18} />} label="Nome" value={user.name} />
               <Detail icon={<Mail size={18} />} label="Email" value={user.email} />
@@ -155,7 +144,6 @@ export function About() {
                       <Detail icon={<BookOpen size={18} />} label="Curso(s)" value={profCourses} />
                       <Detail icon={<Users size={18} />} label="Turma(s)" value={profClasses} />
 
-                      {/* Disciplinas + modal de códigos */}
                       <div className="flex flex-wrap items-center gap-2" id="about-discipline-codes">
                         <Layers size={18} />
                         <Typograph
@@ -178,8 +166,6 @@ export function About() {
                   )}
                 </>
               )}
-
-              {/* Alterar senha */}
               <div className="flex items-center gap-2">
                 <KeyRound size={18} />
                 <Button
@@ -196,7 +182,6 @@ export function About() {
         </div>
       </main>
 
-      {/* --- Drawer menu --- */}
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />
 
       {/* --- Modal alterar senha --- */}
@@ -208,7 +193,6 @@ export function About() {
   );
 }
 
-/* --- Sub-componente reutilizável --- */
 interface DetailProps {
   label: string;
   value: string;

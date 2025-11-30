@@ -11,7 +11,6 @@ import { toast } from "react-hot-toast";
 import { useMultiPageTour } from "@/hooks/useMultiPageTour";
 
 function Signup() {
-  /* ── form states ─────────────────────────────────────────────── */
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,18 +18,14 @@ function Signup() {
   // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   useMultiPageTour('guest');
 
-  /* ── ui feedback ─────────────────────────────────────────────── */
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const { login } = useAuth();
 
-  /* ── submit ──────────────────────────────────────────────────── */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Remove espaços antes da validação e do envio
     const finalName = name.trim();
     const finalEmail = email.replace(/\s/g, '');
     const finalPassword = password.replace(/\s/g, '');
@@ -82,7 +77,6 @@ function Signup() {
         // recaptchaToken: captchaToken, // Desabilitado
       });
 
-      // Passa um valor substituto para o captchaToken para não quebrar a função login
       await login(finalEmail, finalPassword, "captcha-disabled");
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? "Erro ao realizar o cadastro.";
@@ -93,10 +87,8 @@ function Signup() {
   };
 
 
-  /* ── render ──────────────────────────────────────────────────── */
   return (
     <div className="flex min-h-screen">
-      {/* --- Lado esquerdo (logo) -------------------------------- */}
       <Link to="/" className="flex-1 hidden md:flex" style={{ flex: 2 }}>
         <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900">
           <AnimatedLogo />
@@ -111,7 +103,6 @@ function Signup() {
         </div>
       </Link>
 
-      {/* --- Formulário ----------------------------------------- */}
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-[90%] md:w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
           <Typograph
