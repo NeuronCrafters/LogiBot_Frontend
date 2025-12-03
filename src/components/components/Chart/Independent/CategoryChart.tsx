@@ -93,16 +93,37 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     select: (raw: any) => {
-      const subjectCounts: Record<string, number> = raw.subjectCounts ?? {};
+      const counts = raw.subjectCounts ?? {};
+
       const chartData = [
-        { category: 'Variáveis', acessos: subjectCounts.variaveis ?? 0 },
-        { category: 'Tipos', acessos: subjectCounts.tipos ?? 0 },
-        { category: 'Funções', acessos: subjectCounts.funcoes ?? 0 },
-        { category: 'Loops', acessos: subjectCounts.loops ?? 0 },
-        { category: 'Verificações', acessos: subjectCounts.verificacoes ?? 0 },
+        {
+          category: 'Variáveis',
+          acessos: (counts.variaveis ?? 0)
+        },
+        {
+          category: 'Listas',
+          acessos: (counts.listas ?? 0)
+        },
+        {
+          category: 'Condicionais',
+          acessos: (counts.condicionais ?? 0) + (counts.verificacoes ?? 0)
+        },
+        {
+          category: 'Operadores Lógicos',
+          acessos: (counts.operadores_logicos ?? 0)
+        },
+        {
+          category: 'Funções',
+          acessos: (counts.funcoes ?? 0)
+        },
+        {
+          category: 'Repetição',
+          acessos: (counts.repeticao ?? 0)
+        },
       ];
+
       const totalAccesses = chartData.reduce((sum, d) => sum + d.acessos, 0);
-      return { chartData, subjectCounts, totalAccesses };
+      return { chartData, subjectCounts: counts, totalAccesses };
     }
   });
 }
@@ -120,20 +141,19 @@ export function CategoryChart({ filter }: CategoryChartProps) {
   const hasData = useMemo(() => (data?.totalAccesses ?? 0) > 0, [data]);
 
   const topCategory = useMemo(() => {
-    if (!data) return null;
-    let max = 0, key = '';
-    Object.entries(data.subjectCounts).forEach(([k, v]: any) => {
-      if (v > max) { max = v; key = k; }
-    });
-    if (max <= 0) return null;
-    const labels: Record<string, string> = {
-      variaveis: 'Variáveis',
-      tipos: 'Tipos',
-      funcoes: 'Funções',
-      loops: 'Loops',
-      verificacoes: 'Verificações'
+    if (!data || !data.chartData) return null;
+
+    const top = data.chartData.reduce((prev, current) => {
+      return (prev.acessos > current.acessos) ? prev : current;
+    }, { category: '', acessos: 0 });
+
+    if (top.acessos <= 0) return null;
+
+    return {
+      name: top.category,
+      value: top.acessos,
+      percentage: Math.round((top.acessos / data.totalAccesses) * 100)
     };
-    return { name: labels[key] ?? key, value: max, percentage: Math.round((max / data.totalAccesses) * 100) };
   }, [data]);
 
   const refetchTyped = refetch as () => void;
@@ -185,7 +205,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                 }} />
                 <PolarGrid gridType="polygon" radialLines stroke="#d4d0d0" strokeOpacity={0.6} strokeDasharray="2 2" />
                 <PolarAngleAxis dataKey="category" tick={{ fill: '#FFF', fontSize: 11 }} />
-                <PolarRadiusAxis angle={90} domain={[0, 'dataMax']} tick={false} axisLine={false} />
+                <PolarRadiusAxis angle={90} domain={[0, 'auto']} tick={false} axisLine={false} />
                 <Radar dataKey="acessos" fill="#274a96" fillOpacity={0.3} stroke="#274a96" strokeWidth={2} dot={{ fill: '#274a96', strokeWidth: 0, r: 4 }} />
               </RadarChart>
             </ChartContainer>

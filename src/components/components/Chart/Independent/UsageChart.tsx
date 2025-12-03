@@ -177,6 +177,7 @@ export function UsageChart({ filter }: UsageChartProps) {
 
   const chartData = useMemo(() => {
     if (!usageData) return [];
+
     if (Array.isArray(usageData.dailyUsage) && usageData.dailyUsage.length > 0) {
       return [...usageData.dailyUsage].sort((a, b) => a.date.localeCompare(b.date));
     }
@@ -255,7 +256,12 @@ export function UsageChart({ filter }: UsageChartProps) {
                   stroke="#999"
                   tickFormatter={(value: string) => {
                     const date = new Date(value);
-                    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+
+                    return date.toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      timeZone: 'UTC'
+                    });
                   }}
                 />
                 <ChartTooltip
@@ -265,10 +271,12 @@ export function UsageChart({ filter }: UsageChartProps) {
 
                     const data = props.payload[0].payload as any;
                     const date = new Date(data.date);
+
                     const formattedDate = date.toLocaleDateString("pt-BR", {
                       day: "2-digit",
                       month: "2-digit",
-                      year: "numeric"
+                      year: "numeric",
+                      timeZone: 'UTC'
                     });
 
                     const usageInMinutes = data.usage ?? 0;

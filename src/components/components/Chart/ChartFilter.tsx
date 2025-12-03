@@ -1,16 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
-import { AcademicFilter } from "./AcademicFilter";
 import { Label } from "@/components/ui/label";
 import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
 import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
 import { DashboardFilterParams } from "@/services/api/api_dashboard";
+import { AcademicFilter } from "./AcademicFilter";
 
 interface ChartFilterProps {
   onChange: (
-    type: LogEntityType,
+    type: LogEntityType | "",
     ids: string[],
     mode: LogModeType,
     allParams?: DashboardFilterParams
@@ -32,14 +32,11 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
     if (userLevel === "professor") return ["discipline", "class", "student"];
     return ["student"];
   };
+
   const allowedEntityTypes = getAllowedEntityTypes();
 
-  const getInitialEntityType = (): LogEntityType => {
-    if (userLevel === "professor") return "discipline";
-    return "student";
-  };
+  const [entityType, setEntityType] = useState<LogEntityType | "">("");
 
-  const [entityType, setEntityType] = useState<LogEntityType>(getInitialEntityType());
   const [mode] = useState<LogModeType>("individual");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [hierarchyParams, setHierarchyParams] = useState<Omit<DashboardFilterParams, 'startDate' | 'endDate'>>({});
@@ -50,42 +47,61 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
   });
 
   const notifyParent = useCallback((
-    currentType: LogEntityType,
+    currentType: LogEntityType | "",
     currentIds: string[],
     currentMode: LogModeType,
     currentHierarchy?: typeof hierarchyParams,
     currentDateRange?: DateRange
   ) => {
+
     const validIds = currentIds.filter((i) => i && i.trim() !== "");
 
     const allParams: DashboardFilterParams = {
       ...currentHierarchy,
-      startDate: currentDateRange?.from ? format(currentDateRange.from, 'yyyy-MM-dd') : undefined,
-      endDate: currentDateRange?.to ? format(currentDateRange.to, 'yyyy-MM-dd') : undefined,
+      startDate: currentDateRange?.from
+        ? format(currentDateRange.from, 'yyyy-MM-dd')
+        : undefined,
+      endDate: currentDateRange?.to
+        ? format(currentDateRange.to, 'yyyy-MM-dd')
+        : undefined,
     };
 
     onChange(currentType, validIds, currentMode, allParams);
+
   }, [onChange]);
 
   useEffect(() => {
-    if (selectedIds.length > 0) {
-      notifyParent(entityType, selectedIds, mode, hierarchyParams, dateRange);
-    }
+    notifyParent(entityType, selectedIds, mode, hierarchyParams, dateRange);
   }, [dateRange]);
 
   const handleEntityTypeChange = useCallback((value: string) => {
+    if (value === "") {
+      setEntityType("");
+      setSelectedIds([]);
+      setHierarchyParams({});
+      notifyParent("", [], mode, {}, dateRange);
+      return;
+    }
+
     const newType = value as LogEntityType;
+
     setEntityType(newType);
     setSelectedIds([]);
     setHierarchyParams({});
+
     notifyParent(newType, [], mode, {}, dateRange);
+
   }, [mode, notifyParent, dateRange]);
 
-  const handleEntitySelection = useCallback((ids: string[], params?: typeof hierarchyParams) => {
-    setSelectedIds(ids);
-    if (params) setHierarchyParams(params);
-    notifyParent(entityType, ids, mode, params, dateRange);
-  }, [entityType, mode, notifyParent, dateRange]);
+  const handleEntitySelection = useCallback(
+    (ids: string[], params?: typeof hierarchyParams) => {
+      setSelectedIds(ids);
+      if (params) setHierarchyParams(params);
+
+      notifyParent(entityType, ids, mode, params, dateRange);
+    },
+    [entityType, mode, notifyParent, dateRange]
+  );
 
   const getEntityTypeTitle = (t: LogEntityType) => {
     switch (t) {
@@ -97,7 +113,6 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       default: return "Entidade";
     }
   };
-
 
   return (
     <motion.div
@@ -111,6 +126,7 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
       <h3 className="text-xl font-semibold text-white">Filtros</h3>
 
       <div className="space-y-6 w-full">
+
         <div className="flex flex-col md:flex-row gap-6 w-full">
           <div className="space-y-3 flex-1 w-full">
             <Label htmlFor="entity-type" className="font-medium text-white">
@@ -123,6 +139,8 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
               onChange={(e) => handleEntityTypeChange(e.target.value)}
               className="w-full h-12 px-3 rounded-md bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
             >
+              <option value="">Selecione uma Entidade</option>
+
               {allowedEntityTypes.map(type => (
                 <option key={type} value={type} className="bg-[#1f1f1f] py-2">
                   {getEntityTypeTitle(type)}
@@ -132,12 +150,15 @@ export function ChartFilter({ onChange }: ChartFilterProps) {
           </div>
         </div>
 
-        <AcademicFilter
-          key={entityType}
-          entityType={entityType}
-          multiple={mode === "comparison"}
-          onSelect={handleEntitySelection}
-        />
+        {entityType !== "" && (
+          <AcademicFilter
+            key={entityType}
+            entityType={entityType as LogEntityType}
+            multiple={mode === "comparison"}
+            onSelect={handleEntitySelection}
+          />
+        )}
+
       </div>
     </motion.div>
   );

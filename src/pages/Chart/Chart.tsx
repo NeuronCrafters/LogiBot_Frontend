@@ -59,6 +59,7 @@ export function Chart() {
 
     setDashboardFilters(newDashboardFilters);
     setHasSelection(!!mainId);
+    //setHasSelection(true);
     setKey(k => k + 1);
   }, []);
 

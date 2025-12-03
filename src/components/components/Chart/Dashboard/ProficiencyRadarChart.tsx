@@ -35,12 +35,21 @@ function useProficiencyData(filters: ChartProps['filters']) {
     select: (response) => {
       const apiData = response.data;
 
-      const fixedSubjects = ['Variáveis', 'Tipos', 'Funções', 'Loops', 'Verificações', 'listas'];
+      const subjectMap: Record<string, string[]> = {
+        'Variáveis': ['variáveis', 'variaveis'],
+        'Listas': ['listas'],
+        'Condicionais': ['condicionais', 'o_que_são_condicionais', 'verificacoes'],
+        'Funções': ['funções', 'funcoes'],
+        'Operadores Lógicos': ['operadores_lógicos', 'operadores_logicos']
+      };
 
-      const chartData = fixedSubjects.map(subject => {
-        const index = apiData.labels?.findIndex(l => l.toLowerCase() === subject.toLowerCase());
+      const chartData = Object.entries(subjectMap).map(([displayLabel, possibleKeys]) => {
+        const index = apiData.labels?.findIndex(apiLabel =>
+          possibleKeys.some(key => apiLabel.toLowerCase() === key.toLowerCase())
+        );
+
         return {
-          subject,
+          subject: displayLabel,
           score: index !== -1 ? apiData.data?.[index] ?? 0 : 0
         };
       });
@@ -50,8 +59,14 @@ function useProficiencyData(filters: ChartProps['filters']) {
       const interactedData = chartData.filter(item => item.score > 0);
       const totalScore = interactedData.reduce((sum, item) => sum + item.score, 0);
       const averageScore = interactedData.length > 0 ? totalScore / interactedData.length : 0;
-      const bestSubject = interactedData.reduce((max, item) => item.score > max.score ? item : max, interactedData[0]);
-      const worstSubject = interactedData.reduce((min, item) => item.score < min.score ? item : min, interactedData[0]);
+
+      const bestSubject = interactedData.length > 0
+        ? interactedData.reduce((max, item) => item.score > max.score ? item : max, interactedData[0])
+        : { subject: '-', score: 0 };
+
+      const worstSubject = interactedData.length > 0
+        ? interactedData.reduce((min, item) => item.score < min.score ? item : min, interactedData[0])
+        : { subject: '-', score: 0 };
 
       const metrics = hasPerformanceData ? {
         average: averageScore,
