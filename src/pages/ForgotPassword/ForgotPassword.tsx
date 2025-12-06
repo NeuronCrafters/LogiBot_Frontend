@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { publicApi } from "@/services/api/api";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";

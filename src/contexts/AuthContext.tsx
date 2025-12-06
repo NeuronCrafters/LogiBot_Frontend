@@ -25,7 +25,7 @@ export interface AuthContextData {
     user: User | null;
     isAuthenticated: boolean;
     loading: boolean;
-    login: (email: string, password: string, recaptchaToken?: string) => Promise<void>;
+    login: (email: string, password: string, recaptchaToken: string) => Promise<void>;
     logout: () => Promise<void>;
     getUser: () => Promise<void>;
 }

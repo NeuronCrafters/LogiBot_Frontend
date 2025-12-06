@@ -14,14 +14,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = !!user;
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string, recaptchaToken: string) {
     if (!recaptchaToken) throw new Error("Token do reCAPTCHA ausente.");
 
     try {
       await api.post(
         "/session",
         { email, password, recaptchaToken },
-        { email, password },
         { withCredentials: true }
       );
 
