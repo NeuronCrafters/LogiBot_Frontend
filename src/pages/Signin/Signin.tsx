@@ -1,6 +1,6 @@
 import { useState } from "react";
-// import ReCAPTCHA from "react-google-recaptcha";
-// import { Captcha } from "@/components/components/Security/Captcha";
+import ReCAPTCHA from "react-google-recaptcha";
+import { Captcha } from "@/components/components/Security/Captcha";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { Input } from "@/components/components/Input/Input";
@@ -17,11 +17,11 @@ function Signin() {
   const [loading, setLoading] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
   const [redirectTo, setRedirectTo] = useState<"/signup" | "/forgot-password" | null>(null);
-  // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { login } = useAuth();
-  // const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   useMultiPageTour('guest');
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -30,13 +30,11 @@ function Signin() {
     const finalEmail = email.replace(/\s/g, '');
     const finalPassword = password.replace(/\s/g, '');
 
-    // Validação do reCAPTCHA desabilitada temporariamente
-    /*
     if (!captchaToken) {
       toast.error("Por favor, confirme o captcha.");
       return;
     }
-    */
+
 
     try {
       setLoading(true);
@@ -178,7 +176,7 @@ function Signin() {
             className="mt-2 text-center"
           />
 
-          {/* <Captcha ref={recaptchaRef} onChange={setCaptchaToken} /> */}
+          <Captcha ref={recaptchaRef} onChange={setCaptchaToken} />
         </div>
       </div>
     </div>

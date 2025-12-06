@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import { Captcha } from "@/components/components/Security/Captcha";
+import { Captcha } from "@/components/components/Security/Captcha";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { api } from "@/services/api/api";
@@ -15,7 +15,7 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
-  // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   useMultiPageTour('guest');
 
   const [loading, setLoading] = useState(false);
@@ -58,14 +58,10 @@ function Signup() {
       return;
     }
 
-
-    // Validação do reCAPTCHA desabilitada temporariamente
-    /*
     if (!captchaToken) {
       toast.error("Por favor, confirme o captcha.");
       return;
     }
-    */
 
     setLoading(true);
     try {
@@ -74,7 +70,7 @@ function Signup() {
         email: finalEmail,
         password: finalPassword,
         code: finalCode,
-        // recaptchaToken: captchaToken, // Desabilitado
+        recaptchaToken: captchaToken,
       });
 
       await login(finalEmail, finalPassword, "captcha-disabled");
@@ -200,8 +196,7 @@ function Signup() {
             className="mt-4 text-center"
           />
 
-          {/* captcha centralizado */}
-          {/* <Captcha onChange={setCaptchaToken} /> */}
+          <Captcha onChange={setCaptchaToken} />
         </div>
       </div >
     </div >
