@@ -35,10 +35,9 @@ function Signin() {
       return;
     }
 
-
     try {
       setLoading(true);
-      await login(finalEmail, finalPassword, "captcha-disabled");
+      await login(finalEmail, finalPassword, captchaToken);
     } catch (error: any) {
       const msg = error?.response?.data?.message ?? "Erro ao fazer login.";
       toast.error(msg);
