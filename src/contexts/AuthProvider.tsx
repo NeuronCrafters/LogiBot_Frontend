@@ -15,20 +15,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!user;
 
   async function login(email: string, password: string, recaptchaToken: string) {
-    if (!recaptchaToken) throw new Error("Token do reCAPTCHA ausente.");
-
     try {
-      await api.post(
+      const response = await api.post(
         "/session",
         { email, password, recaptchaToken },
         { withCredentials: true }
       );
 
-      await getUser();
-      navigate("/chat");
+      if (response.data.success) {
+        await getUser();
+        navigate("/chat");
+      }
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Erro ao autenticar.";
-      throw new Error(`Login inválido. ${message}`);
+      const message = error?.response?.data?.message || "erro ao autenticar";
+      throw new Error(message);
     } finally {
       queryClient.clear();
     }
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(safeUser);
     } catch (error) {
-      console.error("Erro ao obter usuário:", error);
+      console.error("erro ao obter usuário:", error);
       setUser(null);
     }
   }
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await flushClicks();
       await api.post("/logout", {}, { withCredentials: true });
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
+      console.error("erro ao fazer logout:", error);
     } finally {
       queryClient.clear();
       setUser(null);
@@ -80,12 +80,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     inactivityTimer.current = setTimeout(() => {
       if (isAuthenticated) {
-        console.log("Usuário inativo por 2 horas. Desconectando...");
+        console.log("usuário inativo por 2 horas, desconectando");
         logout();
       }
     }, INACTIVITY_TIMEOUT);
   }, [isAuthenticated, logout]);
-
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -107,7 +106,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, resetInactivityTimer]);
 
   useEffect(() => {
-    getUser().finally(() => setLoading(false));
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('login') === 'success') {
+      getUser().then(() => {
+        navigate('/chat');
+      }).finally(() => setLoading(false));
+    } else if (params.get('error')) {
+      console.error('erro no login:', params.get('error'));
+      setLoading(false);
+    } else {
+      getUser().finally(() => setLoading(false));
+    }
   }, []);
 
   const contextValue: AuthContextData = {

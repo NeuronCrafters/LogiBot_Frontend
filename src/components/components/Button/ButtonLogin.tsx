@@ -31,20 +31,20 @@ export function ButtonLogin({
     } else if (type === "cadastrar") {
       window.location.href = "/signin";
     } else if (type === "google") {
-      const apiBase = import.meta.env.VITE_API_BASE_URL;
-      window.location.href = `${apiBase}/auth/google/login`;
+      const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+      window.location.href = `${apiBase}/auth/google`;
     }
   };
 
   const buttonText = children
     ? children
     : type === "entrar"
-      ? "Entrar"
+      ? "entrar"
       : type === "cadastrar"
-        ? "Cadastrar-se"
+        ? "cadastrar-se"
         : type === "submit"
-          ? "Enviar"
-          : "Entrar com o Google";
+          ? "enviar"
+          : "entrar com o google";
 
   const baseStyles =
     "w-[341px] h-[64px] px-6 py-3 rounded-lg transition-colors duration-300 text-base font-medium";
@@ -74,7 +74,7 @@ export function ButtonLogin({
         {type === "google" && (
           <img
             src={googleLogo}
-            alt="Google Logo"
+            alt="google logo"
             className="w-6 h-6"
           />
         )}

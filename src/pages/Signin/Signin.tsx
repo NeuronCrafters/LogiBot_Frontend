@@ -31,16 +31,16 @@ function Signin() {
     const finalPassword = password.replace(/\s/g, '');
 
     if (!captchaToken) {
-      toast.error("Por favor, confirme o captcha.");
+      toast.error("por favor, confirme o captcha");
       return;
     }
 
-
     try {
       setLoading(true);
-      await login(finalEmail, finalPassword, "captcha-disabled");
+      await login(finalEmail, finalPassword, captchaToken);
+      toast.success("login realizado com sucesso");
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Erro ao fazer login.";
+      const msg = error?.message || "erro ao fazer login";
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -58,14 +58,13 @@ function Signin() {
     if (redirectTo) navigate(redirectTo);
   };
 
-
   return (
     <div className="relative flex min-h-screen">
       <AppModal
         isOpen={showConsent}
         type="consent"
-        title="Consentimento para Coleta de Dados"
-        description="O LogiBot coleta dados de uso com finalidade educacional e para melhorar a sua experiência. Tudo em conformidade com a LGPD."
+        title="consentimento para coleta de dados"
+        description="o logibot coleta dados de uso com finalidade educacional e para melhorar a sua experiência, tudo em conformidade com a lgpd"
         onConfirm={handleAcceptConsent}
         onClose={() => setShowConsent(false)}
       />
@@ -74,7 +73,7 @@ function Signin() {
         <div className="items-center justify-center flex-1 flex bg-gradient-to-b from-blue-700 to-blue-900">
           <AnimatedLogo />
           <Typograph
-            text="LogiBots.AI"
+            text="logibots.ai"
             colorText="text-slate-100"
             variant="title10"
             weight="bold"
@@ -87,7 +86,7 @@ function Signin() {
       <div className="flex-1 flex items-center justify-center bg-[#141414]">
         <div className="w-[90%] md:w-full max-w-sm p-6 bg-[#1F1F1F] rounded-lg shadow-lg">
           <Typograph
-            text="Entrar"
+            text="entrar"
             colorText="text-white"
             variant="text2"
             weight="bold"
@@ -95,7 +94,7 @@ function Signin() {
             className="text-start"
           />
           <Typograph
-            text="Preencha os dados e acesse sua conta"
+            text="preencha os dados e acesse sua conta"
             colorText="text-neutral-300"
             variant="text7"
             weight="regular"
@@ -107,7 +106,7 @@ function Signin() {
             <Input
               type="email"
               className="w-full bg-neutral-800"
-              placeholder="E-mail"
+              placeholder="e-mail"
               value={email}
               onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
               required
@@ -117,7 +116,7 @@ function Signin() {
             <Input
               type="password"
               className="w-full bg-neutral-800"
-              placeholder="Senha"
+              placeholder="senha"
               value={password}
               onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
               required
@@ -130,7 +129,7 @@ function Signin() {
               disabled={loading}
               className="w-full bg-blue-700 hover:bg-blue-800 text-slate-100 hover:text-slate-300"
             >
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? "entrando..." : "entrar"}
             </ButtonLogin>
 
             <ButtonLogin
@@ -143,13 +142,13 @@ function Signin() {
             id="signin-signup-link"
             text={
               <>
-                Não possui conta?{" "}
+                não possui conta?{" "}
                 <a
                   href="#"
                   onClick={handleOpenConsent("/signup")}
                   className="text-blue-500 no-underline hover:underline"
                 >
-                  Faça seu cadastro
+                  faça seu cadastro
                 </a>
               </>
             }
@@ -166,7 +165,7 @@ function Signin() {
                 to="/forgot-password"
                 className="text-blue-400 no-underline hover:underline"
               >
-                Esqueci minha senha
+                esqueci minha senha
               </Link>
             }
             colorText="text-gray-400"
