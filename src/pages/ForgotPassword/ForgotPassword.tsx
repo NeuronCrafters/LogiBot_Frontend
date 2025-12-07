@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { publicApi } from "@/services/api/api";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 
@@ -43,7 +43,6 @@ export default function ForgotPassword() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-900 text-white">
-      <Toaster />
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 p-6 bg-zinc-800 rounded-xl">
         <h1 className="text-2xl font-bold text-center">Esqueci minha senha</h1>
         <input
