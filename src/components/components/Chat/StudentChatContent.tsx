@@ -1,4 +1,4 @@
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, ArrowDown } from 'lucide-react';
 import { User } from '@/contexts/AuthContext';
 import { BotGreetingMessage } from '@/components/components/Bot/Chat/BotGreetingMessage';
 import { InitialChoiceStep } from '@/components/components/Bot/InitialChoiceStep';
@@ -12,7 +12,7 @@ import { ChatInput } from '@/components/components/Input/ChatInput';
 import { ButtonBotAnswer } from '@/components/components/Button/ButtonBotAnswer';
 import { useQuizFlow } from '@/hooks/use-QuizFlow';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface StudentChatContentProps {
   user: User;
@@ -42,10 +42,54 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   } = useQuizFlow({ userId });
 
   const [greetingDone, setGreetingDone] = useState(false);
+  const [isWaitingResponse, setIsWaitingResponse] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = (smooth = true) => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: smooth ? "smooth" : "auto",
+        block: "end",
+      });
+    }
+  };
+
+  const checkScrollPosition = useCallback(() => {
+    if (containerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShowScrollButton(!isNearBottom);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkScrollPosition();
+  }, [messages, step, greetingDone, checkScrollPosition]);
+
+  const handleSendWrapper = async (text: string) => {
+    scrollToBottom();
+    setIsWaitingResponse(true);
+
+    try {
+      await sendMessage(text);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsWaitingResponse(false);
+    }
+  };
 
   return (
     <>
-      <div id="chat-container" className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2">
+      <div
+        id="chat-container"
+        ref={containerRef}
+        onScroll={checkScrollPosition}
+        className="flex-1 w-full max-w-2xl mx-auto pt-24 pb-40 px-2 overflow-y-auto scroll-smooth h-screen"
+      >
         <AnimatePresence mode="wait">
           {!greetingDone && (
             <motion.div
@@ -93,7 +137,10 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         )}
 
         {greetingDone && mode === "chat" && (
-          <ChatMessages messages={messages} userName={userName} userId={userId} />
+          <>
+            <ChatMessages messages={messages} userName={userName} userId={userId} />
+            <div ref={messagesEndRef} />
+          </>
         )}
 
         {greetingDone && mode === "quiz" && (
@@ -150,6 +197,23 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         )}
       </div>
 
+      <AnimatePresence>
+        {showScrollButton && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: 10 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => scrollToBottom(true)}
+            className="fixed bottom-32 right-6 z-30 p-3 bg-blue-600 text-white rounded-full shadow-xl hover:bg-blue-500 transition-colors cursor-pointer"
+            title="Novas mensagens abaixo"
+          >
+            <ArrowDown size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         {greetingDone && mode === "chat" && (
           <motion.div
@@ -160,7 +224,12 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className="w-full max-w-2xl fixed bottom-0 left-0 right-0 px-4 pb-6 z-10 mx-auto"
           >
-            <ChatInput inputText={inputText} setInputText={setInputText} sendMessage={sendMessage} />
+            <ChatInput
+              inputText={inputText}
+              setInputText={setInputText}
+              sendMessage={handleSendWrapper}
+              isWaitingResponse={isWaitingResponse}
+            />
           </motion.div>
         )}
       </AnimatePresence>
