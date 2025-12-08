@@ -1,19 +1,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, PolarRadiusAxis } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-} from "@/components/ui/chart";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { logApi } from "@/services/apiClient";
 import logApiSmart from "@/services/api/logApiSmart";
@@ -46,18 +35,21 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
     : [];
   const targetId = validIds[0] || "";
   const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
-  const isStudent = filter.type === 'student';
-  const hasRequired = isStudent
-    ? Boolean(universityId && courseId && (filter.type === 'discipline' ? disciplineId : classId) && targetId)
-    : Boolean(targetId);
+
+  const hasRequired = !!universityId;
 
   return useQuery({
-    queryKey: ['subjects', filter.type, targetId, universityId, courseId, classId, disciplineId],
+    queryKey: ['subjects', filter.type, targetId, universityId, courseId, classId, disciplineId, userRoles],
     queryFn: async () => {
-      if (!hasRequired) throw new Error('Selecione todos os filtros para visualizar');
+      if (!targetId) throw new Error('Selecione todos os filtros para visualizar');
 
       const isProfessor = userRoles.includes("professor");
-      if (isProfessor && (filter.type === "discipline" || filter.type === "student")) {
+      const isCoordinator = userRoles.includes("course-coordinator");
+      const isAdmin = userRoles.includes("admin");
+
+      const useSmartApi = !isCoordinator && !isAdmin && isProfessor && (filter.type === "discipline" || (filter.type === "student" && !!disciplineId));
+
+      if (useSmartApi) {
         const response = await logApiSmart.fetchSummary(
           userRoles,
           filter.type,
@@ -67,13 +59,14 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
         return response;
       }
 
-      if (isStudent) {
+      if (filter.type === 'student') {
         return await logApi.getFilteredStudentSummary({
           universityId: universityId!,
           courseId,
           classId,
-          studentId: targetId
-        });
+          studentId: targetId,
+          disciplineId
+        } as any);
       }
 
       switch (filter.type) {
@@ -96,30 +89,12 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
       const counts = raw.subjectCounts ?? {};
 
       const chartData = [
-        {
-          category: 'Variáveis',
-          acessos: (counts.variaveis ?? 0)
-        },
-        {
-          category: 'Listas',
-          acessos: (counts.listas ?? 0)
-        },
-        {
-          category: 'Condicionais',
-          acessos: (counts.condicionais ?? 0) + (counts.verificacoes ?? 0)
-        },
-        {
-          category: 'Operadores Lógicos',
-          acessos: (counts.operadores_logicos ?? 0)
-        },
-        {
-          category: 'Funções',
-          acessos: (counts.funcoes ?? 0)
-        },
-        {
-          category: 'Repetição',
-          acessos: (counts.repeticao ?? 0)
-        },
+        { category: 'Variáveis', acessos: (counts.variaveis ?? 0) },
+        { category: 'Listas', acessos: (counts.listas ?? 0) },
+        { category: 'Condicionais', acessos: (counts.condicionais ?? 0) + (counts.verificacoes ?? 0) },
+        { category: 'Operadores Lógicos', acessos: (counts.operadores_logicos ?? 0) },
+        { category: 'Funções', acessos: (counts.funcoes ?? 0) },
+        { category: 'Repetição', acessos: (counts.repeticao ?? 0) },
       ];
 
       const totalAccesses = chartData.reduce((sum, d) => sum + d.acessos, 0);
@@ -131,13 +106,7 @@ function useSubjectsData(filter: CategoryChartProps['filter']) {
 export function CategoryChart({ filter }: CategoryChartProps) {
   const { data, isLoading, isError, refetch, error } = useSubjectsData(filter);
 
-  const validIds = Array.isArray(filter.ids) ? filter.ids.filter(id => id && id.trim()) : [];
-  const id = validIds[0] || '';
-  const isStudent = filter.type === 'student';
-  const hasRequired = isStudent
-    ? Boolean(filter.hierarchyParams.universityId && filter.hierarchyParams.courseId && (filter.type === 'discipline' ? filter.hierarchyParams.disciplineId : filter.hierarchyParams.classId) && id)
-    : Boolean(id);
-
+  const hasRequired = !!filter.hierarchyParams.universityId;
   const hasData = useMemo(() => (data?.totalAccesses ?? 0) > 0, [data]);
 
   const topCategory = useMemo(() => {
@@ -168,11 +137,9 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             Acessos por categoria de conteúdo
           </CardDescription>
         </div>
-
         <div className="flex">
           <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true" />
         </div>
-
         <div className="absolute top-5 right-4 z-40">
           <ChartExportMenu containerId="category-chart" fileName="assuntos_acessados" />
         </div>
@@ -184,11 +151,8 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             <p>Selecione uma entidade para visualizar dados</p>
           </NoData>
         )}
-
         {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
-
         {hasRequired && isError && <ChartError message={errorMessage} onRetry={refetchTyped} />}
-
         {hasRequired && !isLoading && !isError && hasData && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
             <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full text-white">
@@ -211,7 +175,6 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             </ChartContainer>
           </motion.div>
         )}
-
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>
             <p>Nenhum dado de categorias disponível.</p>

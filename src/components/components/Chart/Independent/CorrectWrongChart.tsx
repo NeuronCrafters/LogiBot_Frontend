@@ -1,13 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Pie, PieChart, Cell, Tooltip, Legend } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { logApi } from "@/services/apiClient";
 import logApiSmart from "@/services/api/logApiSmart";
@@ -17,7 +10,6 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartExportMenu } from "../ChartExportMenu";
 
 const COLORS = ["#3f7d7d", "#7d3f3f"];
-
 
 interface CorrectWrongChartProps {
   filter: ChartFilterState & {
@@ -33,37 +25,30 @@ interface CorrectWrongChartProps {
 function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
   const { user } = useAuth();
   const userRoles: string[] = Array.isArray(user?.role) ? user.role : user?.role ? [user.role] : [];
-
   const validIds = Array.isArray(filter.ids)
     ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
     : [];
-  const studentId = validIds[0] || "";
+  const targetId = validIds[0] || "";
   const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
   const isStudent = filter.type === 'student';
-
-  const hasRequired = isStudent
-    ? Boolean(universityId && courseId && (classId || disciplineId) && studentId)
-    : Boolean(studentId);
+  const hasRequired = !!universityId;
 
   return useQuery({
-    queryKey: [
-      'accuracy',
-      filter.type,
-      studentId,
-      universityId,
-      courseId,
-      classId,
-      disciplineId
-    ],
+    queryKey: ['accuracy', filter.type, targetId, universityId, courseId, classId, disciplineId, userRoles],
     queryFn: async () => {
-      if (!hasRequired) throw new Error('Filtros incompletos.');
+      if (!targetId) throw new Error('Filtros incompletos.');
 
       const isProfessor = userRoles.includes("professor");
-      if (isProfessor && (filter.type === "discipline" || filter.type === "student")) {
+      const isCoordinator = userRoles.includes("course-coordinator");
+      const isAdmin = userRoles.includes("admin");
+
+      const useSmartApi = !isCoordinator && !isAdmin && isProfessor && (filter.type === "discipline" || (filter.type === "student" && !!disciplineId));
+
+      if (useSmartApi) {
         const response = await logApiSmart.fetchSummary(
           userRoles,
           filter.type,
-          studentId,
+          targetId,
           { universityId, courseId, classId, disciplineId }
         );
         return response;
@@ -74,19 +59,20 @@ function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
           universityId: universityId!,
           courseId,
           classId,
-          studentId
-        });
+          studentId: targetId,
+          disciplineId
+        } as any);
       }
 
       switch (filter.type) {
         case 'university':
-          return await logApi.getUniversitySummary(studentId);
+          return await logApi.getUniversitySummary(targetId);
         case 'course':
-          return await logApi.getCourseSummary(studentId);
+          return await logApi.getCourseSummary(targetId);
         case 'class':
-          return await logApi.getClassSummary(studentId);
+          return await logApi.getClassSummary(targetId);
         case 'discipline':
-          return await logApi.getDisciplineSummary(studentId);
+          return await logApi.getDisciplineSummary(targetId);
         default:
           throw new Error(`Tipo inválido: ${filter.type}`);
       }
@@ -95,12 +81,8 @@ function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     select: (rawData: any) => {
-      const totalCorrect = Number(
-        rawData.totalCorrect ?? rawData.totalCorrectAnswers ?? 0
-      );
-      const totalWrong = Number(
-        rawData.totalWrong ?? rawData.totalWrongAnswers ?? 0
-      );
+      const totalCorrect = Number(rawData.totalCorrect ?? rawData.totalCorrectAnswers ?? 0);
+      const totalWrong = Number(rawData.totalWrong ?? rawData.totalWrongAnswers ?? 0);
       const total = totalCorrect + totalWrong;
       const accuracy = total > 0 ? (totalCorrect / total) * 100 : 0;
       const chartData = [
@@ -113,23 +95,8 @@ function useAccuracyData(filter: CorrectWrongChartProps['filter']) {
 }
 
 export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
-  const {
-    data: accuracyData,
-    isLoading,
-    isError,
-    error,
-    refetch
-  } = useAccuracyData(filter);
-
-  const validIds = Array.isArray(filter.ids)
-    ? filter.ids.filter(id => typeof id === 'string' && id.trim() !== '')
-    : [];
-  const studentId = validIds[0] || "";
-  const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
-  const isStudent = filter.type === 'student';
-  const hasRequired = isStudent
-    ? Boolean(universityId && courseId && (classId || disciplineId) && studentId)
-    : Boolean(studentId);
+  const { data: accuracyData, isLoading, isError, error, refetch } = useAccuracyData(filter);
+  const hasRequired = !!filter.hierarchyParams.universityId;
 
   const hasData = accuracyData &&
     accuracyData.chartData.length > 0 &&
@@ -141,36 +108,27 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
   return (
     <Card id="correct-wrong-chart" className="bg-[#1f1f1f] border-white/10 w-full mb-6">
       <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
-
         <div className="flex flex-col flex-1 gap-1 justify-center px-6 py-5">
           <CardTitle className="text-white">Desempenho por Tópico Geral</CardTitle>
           <CardDescription className="text-white/70">
             Acertos e Erros com Base na interação do Quiz
           </CardDescription>
         </div>
-
         <div className="flex">
           <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t border-white/10 px-6 py-4 text-left invisible h-0" aria-hidden="true" />
         </div>
-
-
         <div className="absolute top-5 right-4 z-40">
           <ChartExportMenu containerId="correct-wrong-chart" fileName="acertos_erros" />
         </div>
-
       </CardHeader>
-
       <CardContent className="px-2 sm:p-6">
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
             <p>Selecione uma entidade para visualizar dados</p>
           </NoData>
         )}
-
         {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
         {hasRequired && isError && <ChartError message={errorMessage} onRetry={refetchTyped} />}
-
-
         {hasRequired && !isLoading && !isError && hasData && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="flex justify-center items-center w-full h-[250px]">
             <PieChart width={300} height={250}>
@@ -184,14 +142,12 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
             </PieChart>
           </motion.div>
         )}
-
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>
             <p>Nenhum dado de acertos/erros disponível para esta entidade.</p>
           </NoData>
         )}
       </CardContent>
-
       {hasData && (
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex flex-col">
