@@ -15,6 +15,10 @@ export function QuestionsDisplay({
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const cleanOptionText = (text: string) => {
+    return text.replace(/^[A-E][).]\s*/, "");
+  };
+
   const handleSelect = (questionIndex: number, option: string) => {
     if (isSubmitting) return;
     setSelectedAnswers((prev) => ({ ...prev, [questionIndex]: option }));
@@ -65,7 +69,7 @@ export function QuestionsDisplay({
                   text={
                     <span className="flex items-start gap-2">
                       <span className="font-bold text-blue-400">{letter}</span>
-                      <span className="text-white">{opt}</span>
+                      <span className="text-white">{cleanOptionText(opt)}</span>
                     </span>
                   }
                 />
