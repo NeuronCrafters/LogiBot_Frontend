@@ -25,10 +25,14 @@ export function Feedbacks() {
   const [loading, setLoading] = useState(false);
 
   const [message, setMessage] = useState("");
-  const [type, setType] = useState("GERAL");
+  const [type, setType] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!type) {
+      return toast.error("Por favor, selecione uma categoria.");
+    }
 
     if (!message.trim()) {
       return toast.error("A mensagem não pode estar vazia.");
@@ -40,7 +44,7 @@ export function Feedbacks() {
 
       toast.success("Feedback enviado com sucesso!");
       setMessage("");
-      setType("GERAL");
+      setType("");
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || "Erro ao enviar feedback.";
       toast.error(errorMsg);
@@ -110,7 +114,7 @@ export function Feedbacks() {
               <Label htmlFor="type" className="text-zinc-300 ml-1">Tipo de Mensagem</Label>
               <Select value={type} onValueChange={setType} disabled={loading}>
                 <SelectTrigger id="type" className="bg-zinc-900 border-zinc-700 text-zinc-200 h-12 focus:ring-offset-0 focus:ring-blue-600">
-                  <SelectValue placeholder="Selecione o tipo" />
+                  <SelectValue placeholder="Selecione uma Categoria" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-200">
                   <SelectItem value="GERAL">Geral</SelectItem>
@@ -151,7 +155,8 @@ export function Feedbacks() {
             >
               {loading ? "Enviando..." : (
                 <span className="flex items-center gap-2">
-                  Enviar Feedback <Send size={18} />
+                  <span className="hidden sm:inline">Enviar Feedback</span>
+                  <Send size={18} />
                 </span>
               )}
             </Button>
