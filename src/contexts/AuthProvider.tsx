@@ -89,7 +89,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isAuthenticated) {
       const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
-
       const reset = () => resetInactivityTimer();
 
       resetInactivityTimer();
@@ -121,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const contextValue: AuthContextData = {
     user,
+    setUser,
     isAuthenticated,
     loading,
     login,

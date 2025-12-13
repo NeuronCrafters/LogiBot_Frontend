@@ -121,13 +121,12 @@ export function EditPasswordModal({ isOpen, onClose, onSave }: EditPasswordModal
               </button>
             </div>
 
-            {/* Footer */}
             <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-[#1a1a1a]">
               <Button
                 variant="ghost"
                 onClick={onClose}
                 disabled={isLoading}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+                className="text-zinc-400 hover:bg-red-600 hover:text-white transition-colors"
               >
                 Cancelar
               </Button>

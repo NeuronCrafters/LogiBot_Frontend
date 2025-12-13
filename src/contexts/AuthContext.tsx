@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, Dispatch, SetStateAction } from "react";
 
 export interface User {
     _id: string;
@@ -23,6 +23,7 @@ export interface User {
 
 export interface AuthContextData {
     user: User | null;
+    setUser: Dispatch<SetStateAction<User | null>>;
     isAuthenticated: boolean;
     loading: boolean;
     login: (email: string, password: string, recaptchaToken: string) => Promise<void>;

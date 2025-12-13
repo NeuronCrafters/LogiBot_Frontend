@@ -2,8 +2,6 @@ import { useState } from "react";
 import {
   Loader2,
   User as UserIcon,
-  Mail,
-  Briefcase,
   School as SchoolIcon,
   BookOpen,
   Users,
@@ -12,9 +10,11 @@ import {
   ShieldCheck,
   GraduationCap
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-Auth";
+import { api } from "@/services/api/api";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
@@ -51,7 +51,7 @@ function isDisciplineObj(d: unknown): d is DisciplineObject {
 }
 
 export function About() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, setUser, isAuthenticated, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [showEditName, setShowEditName] = useState(false);
@@ -95,10 +95,58 @@ export function About() {
     : [];
   const profDisciplines = disciplineObjects.length > 0 ? disciplineObjects.map((d) => d.name).join(", ") : "-";
 
-  const handleUpdateName = (newName: string) => { console.log("Salvar nome:", newName); };
-  const handleUpdateEmail = (newEmail: string) => { console.log("Salvar email:", newEmail); };
+  const handleUpdateName = async (newName: string) => {
+    try {
+      const response = await api.patch(`/users/${user._id}/name`, {
+        name: newName,
+      });
+
+      if (setUser && response.data.user) {
+        setUser({ ...user, ...response.data.user });
+      }
+
+      toast.success("Nome atualizado com sucesso!");
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.message || "Erro ao atualizar nome.";
+      toast.error(message);
+      throw error;
+    }
+  };
+
+  const handleUpdateEmail = async (newEmail: string) => {
+    try {
+      const response = await api.patch(`/users/${user._id}/email`, {
+        email: newEmail,
+      });
+
+      if (setUser && response.data.user) {
+        setUser({ ...user, ...response.data.user });
+      }
+
+      toast.success("E-mail atualizado com sucesso!");
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.message || "Erro ao atualizar e-mail.";
+      toast.error(message);
+      throw error;
+    }
+  };
+
   const handleUpdatePassword = async (currentPass: string, newPass: string) => {
-    return new Promise<void>((resolve) => setTimeout(resolve, 1500));
+    try {
+      await api.patch(`/users/password`, {
+        currentPassword: currentPass,
+        newPassword: newPass,
+      });
+
+      toast.success("Senha alterada com sucesso!");
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.error || "Erro ao alterar senha.";
+      toast.error(message);
+      throw error;
+    }
   };
 
   return (
@@ -207,7 +255,7 @@ export function About() {
 
                 <Button
                   variant="outline"
-                  className="text-sm text-white bg-neutral-800 text-white transition-colors"
+                  className="text-sm bg-neutral-800 text-white transition-colors"
                   onClick={() => setShowEditPassword(true)}
                 >
                   Alterar Senha

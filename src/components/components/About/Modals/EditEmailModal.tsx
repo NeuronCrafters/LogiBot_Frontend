@@ -61,7 +61,7 @@ export function EditEmailModal({ isOpen, onClose, currentEmail, onSave }: EditEm
             </div>
 
             <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-[#1a1a1a]">
-              <Button variant="ghost" onClick={onClose} className="text-zinc-400 hover:text-white">Cancelar</Button>
+              <Button variant="ghost" onClick={onClose} className="text-zinc-400 hover:bg-red-600 hover:text-white">Cancelar</Button>
               <Button
                 onClick={handleSave}
                 disabled={!email.trim()}
