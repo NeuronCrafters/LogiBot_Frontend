@@ -27,7 +27,7 @@ export default function AppRoutes() {
         <Route path="/chart" element={<Chart />} />
         <Route path="/crud" element={<CRUD />} />
         <Route path="/list" element={<List />} />
-        <Route path="/feedbacks" element={<Feedbacks />} />
+        <Route path="/feedbacks/send" element={<Feedbacks />} />
       </Route>
     </Routes>
   );
