@@ -24,7 +24,6 @@ export function Feedbacks() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // State do Formulário
   const [message, setMessage] = useState("");
   const [type, setType] = useState("GERAL");
 
@@ -37,7 +36,7 @@ export function Feedbacks() {
 
     try {
       setLoading(true);
-      await api.post("/feedbacks", { message, type });
+      await api.post("/feedbacks/send", { message, type });
 
       toast.success("Feedback enviado com sucesso!");
       setMessage("");
