@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Menu as MenuIcon, History as HistoryIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-Auth";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Separator } from "@/components/ui/separator";
 import { MenuOptions } from "@/components/components/Header/HeaderOptions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StudySessionHistory } from "../UserAnalysis/UserAnalysis";
 
 interface HeaderProps {
     isOpen: boolean;
@@ -13,6 +16,8 @@ interface HeaderProps {
 
 export function Header({ isOpen, closeMenu }: HeaderProps) {
     const { user, logout } = useAuth();
+    const [activeTab, setActiveTab] = useState("menu");
+
     if (!user) return null;
 
     const rawRoles = Array.isArray(user.role) ? user.role : [user.role];
@@ -26,6 +31,14 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
             : isProfessor
                 ? "teacher"
                 : "student";
+
+    const analysisData = {
+        userId: user._id,
+        name: user.name,
+        className: "Turma A",
+        totalUsageTime: 0,
+        sessions: (user as any).sessions || []
+    };
 
     return (
         <AnimatePresence>
@@ -55,8 +68,9 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                             </button>
                         </div>
 
-                        <div className="p-6 pt-16 flex-1 overflow-y-auto">
-                            <div className="flex flex-col items-center space-y-3 mb-6">
+                        <div className="flex flex-col h-full pt-16">
+
+                            <div className="px-6 flex flex-col items-center space-y-3 mb-6 shrink-0">
                                 <div className="rainbow-avatar w-32 h-32 rounded-full">
                                     <Avatar
                                         seed={user._id}
@@ -92,21 +106,49 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                                 />
                             </div>
 
-                            <Separator className="bg-[#2a2a2a] mb-4" />
+                            <Tabs
+                                defaultValue="menu"
+                                value={activeTab}
+                                onValueChange={setActiveTab}
+                                className="flex-1 flex flex-col overflow-hidden"
+                            >
+                                <div className="px-6 mb-4">
+                                    <TabsList className="grid w-full grid-cols-2 bg-[#2a2a2a] text-gray-400">
+                                        <TabsTrigger
+                                            value="menu"
+                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white"
+                                        >
+                                            <MenuIcon size={16} className="mr-2" /> Menu
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="history"
+                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white"
+                                        >
+                                            <HistoryIcon size={16} className="mr-2" /> Histórico
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </div>
 
-                            <div id="header-menu-options">
-                                <MenuOptions
-                                    role={menuRole as
-                                        | "student"
-                                        | "teacher"
-                                        | "course-coordinator"
-                                        | "admin"}
-                                    logout={() => {
-                                        logout();
-                                        closeMenu();
-                                    }}
-                                />
-                            </div>
+                                <Separator className="bg-[#2a2a2a]" />
+
+                                <TabsContent value="menu" className="flex-1 overflow-y-auto px-6 py-4 mt-0">
+                                    <div id="header-menu-options">
+                                        <MenuOptions
+                                            role={menuRole as any}
+                                            logout={() => {
+                                                logout();
+                                                closeMenu();
+                                            }}
+                                        />
+                                    </div>
+                                </TabsContent>
+
+                                <TabsContent value="history" className="flex-1 overflow-hidden mt-0 h-full">
+                                    <div className="h-full w-full pb-4">
+                                        <StudySessionHistory data={analysisData} />
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
                         </div>
                     </motion.div>
                 </>
