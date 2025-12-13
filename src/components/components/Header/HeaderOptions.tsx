@@ -46,7 +46,7 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
                         <div
                             key={path}
                             id={id}
-                            className="flex items-center w-full gap-2 px-4 py-2 text-gray-500 rounded-md opacity-50 cursor-not-allowed"
+                            className="flex items-center w-full gap-2 px-4 py-2 text-gray-500 bg-[#1f1f1f]/50 rounded-md cursor-not-allowed border border-transparent"
                         >
                             {icon}
                             <Typograph
@@ -61,12 +61,12 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
                         <Link key={path} to={path} id={id}>
                             <Button
                                 variant="ghost"
-                                className="flex items-center justify-start w-full gap-2 text-gray-300 hover:text-white"
+                                className="flex items-center justify-start w-full gap-2 text-gray-300 hover:bg-[#2a2a2a] hover:text-white transition-all duration-200"
                             >
                                 {icon}
                                 <Typograph
                                     text={label}
-                                    colorText="text-[#E4E4E4]"
+                                    colorText="text-[#E4E4E4] group-hover:text-white"
                                     variant="text4"
                                     weight="regular"
                                     fontFamily="poppins"
@@ -80,12 +80,12 @@ export function MenuOptions({ role, logout }: MenuOptionsProps) {
                 id="header-logout-button"
                 variant="ghost"
                 onClick={logout}
-                className="flex items-center justify-start w-full gap-2 mt-4 text-red-500 hover:text-red-300"
+                className="flex items-center justify-start w-full gap-2 mt-4 text-red-500 hover:bg-[#2a2a2a] hover:text-red-400 transition-all duration-200"
             >
-                <LogOut className="w-5 h-5 text-red-500" />
+                <LogOut className="w-5 h-5" />
                 <Typograph
                     text="Sair"
-                    colorText="text-[#E4E4E4]"
+                    colorText="text-current"
                     variant="text4"
                     weight="regular"
                     fontFamily="poppins"

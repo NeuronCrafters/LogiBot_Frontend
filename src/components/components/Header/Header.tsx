@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-Auth";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Separator } from "@/components/ui/separator";
-import { MenuOptions } from "@/components/components/Header/HeaderOptions";
+import { MenuOptions } from "./HeaderOptions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudySessionHistory } from "../UserAnalysis/UserAnalysis";
 
@@ -110,26 +110,26 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                                 defaultValue="menu"
                                 value={activeTab}
                                 onValueChange={setActiveTab}
-                                className="flex-1 flex flex-col overflow-hidden"
+                                className="flex-1 flex flex-col overflow-hidden min-h-0"
                             >
-                                <div className="px-6 mb-4">
+                                <div className="px-6 mb-4 shrink-0">
                                     <TabsList className="grid w-full grid-cols-2 bg-[#2a2a2a] text-gray-400">
                                         <TabsTrigger
                                             value="menu"
-                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white"
+                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:bg-[#3a3a3a] hover:text-white transition-colors"
                                         >
                                             <MenuIcon size={16} className="mr-2" /> Menu
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="history"
-                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white"
+                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:bg-[#3a3a3a] hover:text-white transition-colors"
                                         >
                                             <HistoryIcon size={16} className="mr-2" /> Histórico
                                         </TabsTrigger>
                                     </TabsList>
                                 </div>
 
-                                <Separator className="bg-[#2a2a2a]" />
+                                <Separator className="bg-[#2a2a2a] shrink-0" />
 
                                 <TabsContent value="menu" className="flex-1 overflow-y-auto px-6 py-4 mt-0">
                                     <div id="header-menu-options">
@@ -143,8 +143,8 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                                     </div>
                                 </TabsContent>
 
-                                <TabsContent value="history" className="flex-1 overflow-hidden mt-0 h-full">
-                                    <div className="h-full w-full pb-4">
+                                <TabsContent value="history" className="flex-1 mt-0 h-full overflow-hidden flex flex-col">
+                                    <div className="flex-1 w-full overflow-y-auto px-1 pb-4">
                                         <StudySessionHistory data={analysisData} />
                                     </div>
                                 </TabsContent>
