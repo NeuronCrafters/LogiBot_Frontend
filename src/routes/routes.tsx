@@ -8,6 +8,7 @@ import { Chart } from "@/pages/Chart/Chart";
 import { CRUD } from "@/pages/CRUD/CRUD";
 import { About } from "@/pages/About/About";
 import { List } from "@/pages/List/List";
+import { Feedbacks } from "@/pages/feedbacks/feedbacks";
 import ForgotPassword from "@/pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "@/pages/ForgotPassword/ResetPassword";
 
@@ -26,6 +27,7 @@ export default function AppRoutes() {
         <Route path="/chart" element={<Chart />} />
         <Route path="/crud" element={<CRUD />} />
         <Route path="/list" element={<List />} />
+        <Route path="/feedbacks" element={<Feedbacks />} />
       </Route>
     </Routes>
   );
