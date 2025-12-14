@@ -16,7 +16,7 @@ interface ChatHistoryProps {
 function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
   const navigate = useNavigate();
 
-  const { sessions, isLoading, isError } = useChatHistory({
+  const { sessions = [], isLoading, isError } = useChatHistory({
     userId,
     enabled: !!userId
   });
@@ -50,6 +50,8 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
     );
   }
 
+  const hasNoSessions = !Array.isArray(sessions) || sessions.length === 0;
+
   return (
     <div className="flex flex-col h-full w-full pr-3">
       <div className="pb-4 px-1">
@@ -77,7 +79,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
             fontFamily="poppins"
           />
         </div>
-      ) : sessions.length === 0 ? (
+      ) : hasNoSessions ? (
         <div className="flex flex-col items-center justify-center h-40 gap-3 px-6 text-center">
           <MessageSquare className="w-8 h-8 text-zinc-700" />
           <Typograph
@@ -89,7 +91,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
           />
         </div>
       ) : (
-        <ScrollArea className="flex-1 -mr-3 pr-3"> {/* Ajuste fino para a scrollbar não sobrepor */}
+        <ScrollArea className="flex-1 -mr-3 pr-3">
           <div className="flex flex-col gap-3 pb-4 px-1">
             {sessions.map((session, index) => (
               <motion.div
@@ -120,10 +122,10 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
                   <div className="flex items-center gap-1.5 text-zinc-500">
                     <Clock size={12} />
                     <span className="text-[10px] font-medium font-poppins uppercase tracking-wider">
-                      {formatDistanceToNow(new Date(session.lastActivityAt), {
+                      {session.lastActivityAt ? formatDistanceToNow(new Date(session.lastActivityAt), {
                         addSuffix: true,
                         locale: ptBR
-                      })}
+                      }) : ''}
                     </span>
                   </div>
                 </div>
