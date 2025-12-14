@@ -75,6 +75,8 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
     );
   }
 
+  const hasNoQuizzes = !Array.isArray(quizzes) || quizzes.length === 0;
+
   return (
     <div className="flex flex-col h-full w-full pr-3">
       <div className="pb-4 px-1">
@@ -86,7 +88,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
             <div className="p-1 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
               <Plus size={14} className="text-white" />
             </div>
-            <span>Novo Quiz</span>
+            <span>Nova Interação</span>
           </div>
         </Button>
       </div>
@@ -96,7 +98,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
           <AlertCircle className="w-8 h-8 text-red-500" />
           <Typograph text="Erro ao carregar histórico." colorText="text-zinc-500" variant="text6" weight="regular" fontFamily="poppins" />
         </div>
-      ) : quizzes.length === 0 ? (
+      ) : hasNoQuizzes ? (
         <div className="flex flex-col items-center justify-center h-40 gap-3 px-6 text-center">
           <GraduationCap className="w-8 h-8 text-zinc-700" />
           <Typograph text="Nenhum quiz realizado." colorText="text-zinc-500" variant="text6" weight="regular" fontFamily="poppins" />

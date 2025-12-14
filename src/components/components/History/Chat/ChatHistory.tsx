@@ -63,7 +63,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
             <div className="p-1 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
               <Plus size={14} className="text-white" />
             </div>
-            <span>Nova Conversa</span>
+            <span>Nova Interação</span>
           </div>
         </Button>
       </div>
@@ -108,7 +108,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
                       <MessageSquare size={16} />
                     </div>
                     <Typograph
-                      text={session.title || "Nova Conversa"}
+                      text={session.title || "Nova Interação"}
                       colorText="text-zinc-200 group-hover:text-white"
                       variant="text5"
                       weight="medium"
