@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { AnimatedLogo } from "@/components/components/AnimatedLogo/AnimatedLogo";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Footer } from "@/components/components/Footer/Footer";
@@ -42,13 +43,13 @@ export function Home() {
                     weight="bold"
                     fontFamily="poppins"
                 />
-                <button
+                <Button
                     id="play-button"
                     onClick={handlePlayClick}
-                    className="px-4 py-2 transition bg-blue-500 rounded hover:bg-blue-600"
+                    className="bg-blue-500 hover:bg-blue-600 text-white transition-colors"
                 >
                     Jogar
-                </button>
+                </Button>
             </header>
 
             <main className="flex flex-col items-center justify-center flex-1 gap-10 p-6 text-center md:flex-row">

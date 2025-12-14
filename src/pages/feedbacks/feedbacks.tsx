@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
-import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Button } from "@/components/ui/button";
 import { api } from "@/services/api/api";
 import toast, { Toaster } from "react-hot-toast";
-import { Send, MessageSquare, AlertCircle } from "lucide-react";
+import { Send, MessageSquare, AlertCircle, Menu } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -67,11 +66,12 @@ export function Feedbacks() {
         {user && (
           <Button
             onClick={() => setMenuOpen(true)}
-            className="flex items-center justify-center p-0 bg-transparent hover:bg-transparent"
+            variant="ghost"
+            size="icon"
+            className="text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            id="feedbacks-header-menu-button"
           >
-            <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
-              <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
-            </div>
+            <Menu size={32} strokeWidth={3} />
           </Button>
         )}
       </div>
@@ -141,7 +141,7 @@ export function Feedbacks() {
               <AlertCircle size={16} className="mt-0.5 text-blue-400 shrink-0" />
               <Typograph
                 text="Seu feedback é fundamental para nossa evolução. A mensagem será enviada diretamente para a equipe de administração."
-                variant="text6"
+                variant="text8"
                 colorText="text-blue-200/80"
                 weight="regular"
                 fontFamily="poppins"

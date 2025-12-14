@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { TableProperties } from "lucide-react";
+import { TableProperties, Menu } from "lucide-react";
 import { FormsFilter } from "@/components/components/Forms/Lists/FormsFilter";
 import { FormsList } from "@/components/components/Forms/Lists/FormsList";
 import { useAuth } from "@/hooks/use-Auth";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Header } from "@/components/components/Header/Header";
-import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Button } from "@/components/ui/button";
 import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
 import type { FilterData } from "@/@types/ChartsType";
@@ -152,15 +151,12 @@ export function List() {
           <div className="ml-auto">
             <Button
               onClick={() => setMenuOpen(true)}
-              className="flex items-center justify-center p-0"
+              variant="ghost"
+              size="icon"
+              className="text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              id="list-header-menu-button"
             >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
-                <Avatar
-                  seed={user._id}
-                  backgroundColor="#141414"
-                  className="w-full h-full rounded-full"
-                />
-              </div>
+              <Menu size={32} strokeWidth={3} />
             </Button>
           </div>
         )}

@@ -19,11 +19,11 @@ export function MenuOptions({ role }: MenuOptionsProps) {
     const location = useLocation();
 
     const menuItems = [
-        { show: true, path: "/about", icon: <User className="w-5 h-5" />, label: "Detalhes", id: "menu-option-detalhes" },
+        { show: true, path: "/about", icon: <User className="w-5 h-5" />, label: "Perfil", id: "menu-option-detalhes" },
         { show: ["teacher", "course-coordinator", "admin"].includes(role), path: "/chart", icon: <PieChart className="w-5 h-5" />, label: "Resultados", id: "menu-option-resultados" },
-        { show: ["admin", "course-coordinator"].includes(role), path: "/crud", icon: <Settings className="w-5 h-5" />, label: "Criar", id: "menu-option-criar" },
-        { show: ["admin", "teacher", "course-coordinator"].includes(role), path: "/list", icon: <TableProperties className="w-5 h-5" />, label: "Listar", id: "menu-option-listar" },
-        { show: true, path: "/chat", icon: <MessageSquare className="w-5 h-5" />, label: "Chat", id: "menu-option-chat" },
+        { show: ["admin", "course-coordinator"].includes(role), path: "/crud", icon: <Settings className="w-5 h-5" />, label: "Criar Entidades", id: "menu-option-criar" },
+        { show: ["admin", "teacher", "course-coordinator"].includes(role), path: "/list", icon: <TableProperties className="w-5 h-5" />, label: "Listar Entidades", id: "menu-option-listar" },
+        { show: true, path: "/chat", icon: <MessageSquare className="w-5 h-5" />, label: "Chat e Quiz", id: "menu-option-chat" },
         { show: true, path: "/feedbacks/send", icon: <Send className="w-5 h-5" />, label: "Feedback", id: "menu-option-feedback" },
     ];
 

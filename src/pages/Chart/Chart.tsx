@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
-import { Avatar } from "@/components/components/Avatar/Avatar";
+import { Menu } from "lucide-react";
 import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { ChartFilter } from "@/components/components/Chart/ChartFilter";
@@ -59,7 +59,6 @@ export function Chart() {
 
     setDashboardFilters(newDashboardFilters);
     setHasSelection(!!mainId);
-    //setHasSelection(true);
     setKey(k => k + 1);
   }, []);
 
@@ -90,10 +89,14 @@ export function Chart() {
       <div className="absolute bg-[#141414] w-full flex items-center justify-between border-b border-neutral-800 px-8 py-4 z-10">
         <Typograph text="Dashboard" variant="text2" weight="bold" colorText="text-white" fontFamily="poppins" />
         {user && (
-          <Button onClick={() => setMenuOpen(true)} className="flex items-center justify-center p-0 bg-transparent hover:bg-transparent">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
-              <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
-            </div>
+          <Button
+            onClick={() => setMenuOpen(true)}
+            variant="ghost"
+            size="icon"
+            className="text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            id="chart-header-menu-button"
+          >
+            <Menu size={32} strokeWidth={3} />
           </Button>
         )}
       </div>

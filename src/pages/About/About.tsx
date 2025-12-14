@@ -8,9 +8,11 @@ import {
   KeyRound,
   Pencil,
   ShieldCheck,
-  GraduationCap
+  GraduationCap,
+  Menu
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-Auth";
@@ -153,17 +155,26 @@ export function About() {
       <header className="flex items-center justify-between px-4 py-4 border-b sm:px-6 border-zinc-800 bg-[#141414]">
         <Typograph text="Meu Perfil" colorText="text-white" variant="text2" weight="bold" fontFamily="poppins" />
         {isAuthenticated && (
-          <Button onClick={() => setMenuOpen(true)} className="p-0 rounded-full hover:opacity-80 transition-opacity" id="about-header-menu-button">
-            <div className="w-10 h-10 rounded-full rainbow-avatar">
-              <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
-            </div>
+          <Button
+            onClick={() => setMenuOpen(true)}
+            variant="ghost"
+            size="icon"
+            className="text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors scale-125"
+            id="about-header-menu-button"
+          >
+            <Menu size={28} strokeWidth={3} />
           </Button>
         )}
       </header>
 
       <main className="flex flex-col items-center flex-1 px-4 py-8 overflow-y-auto">
 
-        <div className="w-full max-w-2xl bg-[#1f1f1f] border border-zinc-800 rounded-2xl shadow-xl overflow-hidden relative">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-2xl bg-[#1f1f1f] border border-zinc-800 rounded-2xl shadow-xl overflow-hidden relative"
+        >
 
           <div className="h-32 bg-gradient-to-r from-zinc-900 to-[#141414] border-b border-zinc-800 relative">
             <div className="absolute top-4 right-4">
@@ -185,8 +196,6 @@ export function About() {
                 </button>
               </div>
               <p className="text-zinc-400 font-medium flex items-center gap-2">
-                {/* {occupation}
-                <span className="w-1 h-1 bg-zinc-600 rounded-full"></span> */}
                 <span className="text-zinc-500 text-sm">{user.email}</span>
                 <button onClick={() => setShowEditEmail(true)} className="p-1 text-zinc-600 hover:text-purple-400 hover:bg-zinc-800 rounded-md transition-colors" title="Editar email">
                   <Pencil size={12} />
@@ -245,9 +254,8 @@ export function About() {
               <SectionHeader icon={<ShieldCheck size={18} className="text-orange-500" />} title="Segurança & Acesso" />
 
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#141414] border border-zinc-800 rounded-lg">
-
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-zinc-800 rounded-full shrink-0"> {/* shrink-0 evita que o ícone amasse */}
+                  <div className="p-2 bg-zinc-800 rounded-full shrink-0">
                     <KeyRound size={18} className="text-zinc-400" />
                   </div>
                   <div>
@@ -267,7 +275,7 @@ export function About() {
             </section>
 
           </div>
-        </div>
+        </motion.div>
       </main>
 
       <Header isOpen={menuOpen} closeMenu={() => setMenuOpen(false)} />

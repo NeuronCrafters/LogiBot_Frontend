@@ -3,11 +3,10 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormsCrud } from "@/components/components/Forms/Crud/FormsCrud";
 import { Header } from "@/components/components/Header/Header";
-import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Menu } from "lucide-react";
 import { AppModal } from "@/components/components/Modal/AppModal";
 import { LastCreatedList, RecentItem } from "@/components/components/Forms/Crud/LastCreatedList";
 import { academicApi, adminApi } from "@/services/apiClient";
@@ -157,10 +156,14 @@ export function CRUD() {
         <Typograph text="Cadastro" colorText="text-white" variant="text2" weight="bold" fontFamily="poppins" />
         {user && (
           <div className="ml-auto">
-            <Button onClick={() => setMenuOpen(true)} className="flex items-center justify-center p-0">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
-                <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
-              </div>
+            <Button
+              onClick={() => setMenuOpen(true)}
+              variant="ghost"
+              size="icon"
+              className="text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              id="crud-header-menu-button"
+            >
+              <Menu size={32} strokeWidth={3} />
             </Button>
           </div>
         )}

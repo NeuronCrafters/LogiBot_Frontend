@@ -1,26 +1,27 @@
-import { Avatar } from '@/components/components/Avatar/Avatar';
 import { User } from '@/contexts/AuthContext';
 import { Typograph } from '../Typograph/Typograph';
 import { ReactNode, useState } from 'react';
 import { Header } from '../Header/Header';
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 interface ChatLayoutProps {
-  user: User | null;
-  children: ReactNode;
-  menuOpen?: boolean;
-  setMenuOpen?: (isOpen: boolean) => void;
+    user: User | null;
+    children: ReactNode;
+    menuOpen?: boolean;
+    setMenuOpen?: (isOpen: boolean) => void;
 }
 
 const ChatLayout: React.FC<ChatLayoutProps> = ({
-  user,
-  children,
-  menuOpen: externalMenuOpen,
-  setMenuOpen: externalSetMenuOpen
+    user,
+    children,
+    menuOpen: externalMenuOpen,
+    setMenuOpen: externalSetMenuOpen
 }) => {
-  const [internalMenuOpen, setInternalMenuOpen] = useState(false);
+    const [internalMenuOpen, setInternalMenuOpen] = useState(false);
 
-  const menuOpen = externalMenuOpen !== undefined ? externalMenuOpen : internalMenuOpen;
-  const setMenuOpen = externalSetMenuOpen || setInternalMenuOpen;
+    const menuOpen = externalMenuOpen !== undefined ? externalMenuOpen : internalMenuOpen;
+    const setMenuOpen = externalSetMenuOpen || setInternalMenuOpen;
 
     return (
         <div className="relative flex min-h-screen bg-[#141414] flex-col items-center w-full">
@@ -28,15 +29,15 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                 <Typograph text="Chat LogiBot" colorText="text-white" variant="text2" weight="bold" fontFamily="poppins" />
                 {user && (
                     <div className="ml-auto">
-                        <button
+                        <Button
                             id="chat-header-menu-button"
                             onClick={() => setMenuOpen(true)}
-                            className="flex items-center justify-center p-0"
+                            variant="ghost"
+                            size="icon"
+                            className="text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
                         >
-                            <div className="flex items-center justify-center w-10 h-10 rounded-full rainbow-avatar sm:w-12 sm:h-12 md:w-14 md:h-14">
-                                <Avatar seed={user._id} backgroundColor="#141414" className="w-full h-full rounded-full" />
-                            </div>
-                        </button>
+                            <Menu size={32} strokeWidth={3} />
+                        </Button>
                     </div>
                 )}
             </div>
