@@ -10,7 +10,6 @@ import { About } from "@/pages/About/About";
 import { List } from "@/pages/List/List";
 import { Feedbacks } from "@/pages/feedbacks/feedbacks";
 import ForgotPassword from "@/pages/ForgotPassword/ForgotPassword";
-import ResetPassword from "@/pages/ForgotPassword/ResetPassword";
 
 export default function AppRoutes() {
   return (
@@ -19,7 +18,6 @@ export default function AppRoutes() {
       <Route path="/signin" element={<Signin />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/about" element={<About />} />

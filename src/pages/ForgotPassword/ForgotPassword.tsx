@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import toast from "react-hot-toast";
 import { publicApi } from "@/services/api/api";
+import { motion } from "framer-motion";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -46,7 +47,13 @@ export default function ForgotPassword() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-900 text-white">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 p-6 bg-zinc-800 rounded-xl">
+      <motion.form
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm space-y-4 p-6 bg-zinc-800 rounded-xl shadow-xl"
+      >
         <h1 className="text-2xl font-bold text-center">Esqueci minha senha</h1>
 
         <input
@@ -54,29 +61,31 @@ export default function ForgotPassword() {
           placeholder="Seu e-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 bg-zinc-700 rounded"
+          className="w-full p-2 bg-zinc-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
 
-        <ReCAPTCHA
-          ref={recaptchaRef}
-          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-          onChange={setCaptchaToken}
-          theme="dark"
-        />
+        <div className="flex justify-center">
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+            onChange={setCaptchaToken}
+            theme="dark"
+          />
+        </div>
 
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold disabled:opacity-50"
+          className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold disabled:opacity-50 transition-colors"
         >
           {mutation.isPending ? "Enviando..." : "Enviar link de redefinição"}
         </button>
 
-        <Link to="/signin" className="block text-center text-sm text-blue-400 hover:underline">
+        <Link to="/signin" className="block text-center text-sm text-blue-400 hover:underline transition-colors">
           Voltar ao login
         </Link>
-      </form>
+      </motion.form>
     </div>
   );
 }
