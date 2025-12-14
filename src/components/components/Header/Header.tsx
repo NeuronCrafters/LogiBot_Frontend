@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Menu as MenuIcon, History as HistoryIcon } from "lucide-react";
+import { X, Menu as MenuIcon, History as HistoryIcon, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-Auth";
-import { Typograph } from "@/components/components/Typograph/Typograph";
-import { Avatar } from "@/components/components/Avatar/Avatar";
 import { Separator } from "@/components/ui/separator";
 import { MenuOptions } from "./HeaderOptions";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudySessionHistory } from "../UserAnalysis/UserAnalysis";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
     isOpen: boolean;
@@ -32,12 +31,21 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                 ? "teacher"
                 : "student";
 
+    const displayCourseName = Array.isArray(user.courseName)
+        ? user.courseName.join(", ")
+        : user.courseName ?? "-";
+
     const analysisData = {
         userId: user._id,
         name: user.name,
-        className: "Turma A",
+        className: displayCourseName,
         totalUsageTime: 0,
         sessions: (user as any).sessions || []
+    };
+
+    const handleLogout = () => {
+        logout();
+        closeMenu();
     };
 
     return (
@@ -45,7 +53,7 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
             {isOpen && (
                 <>
                     <motion.div
-                        className="fixed inset-0 bg-black/50 z-40"
+                        className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -53,103 +61,78 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                     />
 
                     <motion.div
-                        className="fixed inset-y-0 right-0 w-[350px] bg-[#1f1f1f] z-50 shadow-xl flex flex-col"
+                        className="fixed inset-y-0 right-0 w-[320px] sm:w-[350px] bg-[#1f1f1f] z-50 shadow-2xl flex flex-col border-l border-zinc-800"
                         initial={{ x: "100%" }}
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     >
-                        <div className="absolute top-4 right-4 z-10">
-                            <button
-                                onClick={closeMenu}
-                                className="text-white hover:text-gray-300 transition-colors"
-                            >
-                                <X size={28} />
-                            </button>
-                        </div>
-
-                        <div className="flex flex-col h-full pt-16">
-
-                            <div className="px-6 flex flex-col items-center space-y-3 mb-6 shrink-0">
-                                <div className="rainbow-avatar w-32 h-32 rounded-full">
-                                    <Avatar
-                                        seed={user._id}
-                                        backgroundColor="#2a2a2a"
-                                        className="w-full h-full rounded-full"
-                                    />
-                                </div>
-
-                                <Typograph
-                                    text={user.name}
-                                    colorText="text-[#E4E4E4]"
-                                    variant="text2"
-                                    weight="bold"
-                                    fontFamily="poppins"
-                                />
-
-                                <Typograph
-                                    text={rawRoles
-                                        .map((r) =>
-                                            r === "admin"
-                                                ? "Administrador"
-                                                : r === "professor"
-                                                    ? "Professor"
-                                                    : r === "course-coordinator"
-                                                        ? "Coordenador de Curso"
-                                                        : "Estudante"
-                                        )
-                                        .join(", ")}
-                                    colorText="text-gray-400"
-                                    variant="text4"
-                                    weight="regular"
-                                    fontFamily="poppins"
-                                />
+                        <div className="pt-4 px-4 pb-2 shrink-0 bg-[#1f1f1f] z-20">
+                            <div className="flex justify-end mb-4">
+                                <button
+                                    onClick={closeMenu}
+                                    className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full transition-colors"
+                                >
+                                    <X size={24} />
+                                </button>
                             </div>
 
                             <Tabs
                                 defaultValue="menu"
                                 value={activeTab}
                                 onValueChange={setActiveTab}
-                                className="flex-1 flex flex-col overflow-hidden min-h-0"
+                                className="w-full"
                             >
-                                <div className="px-6 mb-4 shrink-0">
-                                    <TabsList className="grid w-full grid-cols-2 bg-[#2a2a2a] text-gray-400">
-                                        <TabsTrigger
-                                            value="menu"
-                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:bg-[#3a3a3a] hover:text-white transition-colors"
-                                        >
-                                            <MenuIcon size={16} className="mr-2" /> Menu
-                                        </TabsTrigger>
-                                        <TabsTrigger
-                                            value="history"
-                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:bg-[#3a3a3a] hover:text-white transition-colors"
-                                        >
-                                            <HistoryIcon size={16} className="mr-2" /> Histórico
-                                        </TabsTrigger>
-                                    </TabsList>
-                                </div>
-
-                                <Separator className="bg-[#2a2a2a] shrink-0" />
-
-                                <TabsContent value="menu" className="flex-1 overflow-y-auto px-6 py-4 mt-0">
-                                    <div id="header-menu-options">
-                                        <MenuOptions
-                                            role={menuRole as any}
-                                            logout={() => {
-                                                logout();
-                                                closeMenu();
-                                            }}
-                                        />
-                                    </div>
-                                </TabsContent>
-
-                                <TabsContent value="history" className="flex-1 mt-0 h-full overflow-hidden flex flex-col">
-                                    <div className="flex-1 w-full overflow-y-auto px-1 pb-4">
-                                        <StudySessionHistory data={analysisData} />
-                                    </div>
-                                </TabsContent>
+                                <TabsList className="grid w-full grid-cols-2 bg-[#2a2a2a] text-zinc-400">
+                                    <TabsTrigger
+                                        value="menu"
+                                        className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:text-white transition-colors"
+                                    >
+                                        <MenuIcon size={16} className="mr-2" /> Menu
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="history"
+                                        className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:text-white transition-colors"
+                                    >
+                                        <HistoryIcon size={16} className="mr-2" /> Histórico
+                                    </TabsTrigger>
+                                </TabsList>
                             </Tabs>
                         </div>
+
+                        <Separator className="bg-zinc-800 shrink-0" />
+
+                        <div className="flex-1 flex flex-col overflow-hidden min-h-0 relative">
+                            <div
+                                className={`flex-1 overflow-y-auto px-6 py-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none] ${activeTab === "menu" ? "block" : "hidden"}`}
+                            >
+                                <MenuOptions
+                                    role={menuRole as any}
+                                />
+                            </div>
+
+                            <div
+                                className={`flex-1 h-full overflow-hidden flex flex-col ${activeTab === "history" ? "flex" : "hidden"}`}
+                            >
+                                <div className="flex-1 w-full overflow-y-auto px-1 pb-4">
+                                    <StudySessionHistory data={analysisData} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {activeTab === "menu" && (
+                            <div className="p-4 border-t border-zinc-800 bg-[#1a1a1a] shrink-0">
+                                <Button
+                                    id="header-logout-button"
+                                    variant="ghost"
+                                    onClick={handleLogout}
+                                    className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-950/30 gap-3 h-12 transition-all duration-200"
+                                >
+                                    <LogOut size={18} />
+                                    <span className="font-medium font-poppins">Sair da Conta</span>
+                                </Button>
+                            </div>
+                        )}
                     </motion.div>
                 </>
             )}

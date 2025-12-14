@@ -20,7 +20,6 @@ import { Header } from "@/components/components/Header/Header";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import { DisciplineCode } from "@/components/components/About/DisciplineCode";
 import { useMultiPageTour, UserRole } from "@/hooks/useMultiPageTour";
-
 import { EditNameModal } from "@/components/components/About/Modals/EditNameModal";
 import { EditEmailModal } from "@/components/components/About/Modals/EditEmailModal";
 import { EditPasswordModal } from "@/components/components/About/Modals/EditPasswordModal";
@@ -169,7 +168,7 @@ export function About() {
           <div className="h-32 bg-gradient-to-r from-zinc-900 to-[#141414] border-b border-zinc-800 relative">
             <div className="absolute top-4 right-4">
               <span className="px-3 py-1 bg-zinc-800/80 rounded-full text-xs text-zinc-400 font-mono border border-zinc-700">
-                ID: {user._id.slice(-6).toUpperCase()}
+                ID: {user._id.toUpperCase()}
               </span>
             </div>
           </div>
@@ -186,8 +185,8 @@ export function About() {
                 </button>
               </div>
               <p className="text-zinc-400 font-medium flex items-center gap-2">
-                {occupation}
-                <span className="w-1 h-1 bg-zinc-600 rounded-full"></span>
+                {/* {occupation}
+                <span className="w-1 h-1 bg-zinc-600 rounded-full"></span> */}
                 <span className="text-zinc-500 text-sm">{user.email}</span>
                 <button onClick={() => setShowEditEmail(true)} className="p-1 text-zinc-600 hover:text-purple-400 hover:bg-zinc-800 rounded-md transition-colors" title="Editar email">
                   <Pencil size={12} />
@@ -208,6 +207,8 @@ export function About() {
                 <InfoItem label="Ocupação Principal" value={occupation} />
               </div>
             </section>
+
+            <Separator className="bg-zinc-800" />
 
             {!isAdmin && (
               <section className="space-y-4">
@@ -242,9 +243,11 @@ export function About() {
 
             <section className="space-y-4">
               <SectionHeader icon={<ShieldCheck size={18} className="text-orange-500" />} title="Segurança & Acesso" />
-              <div className="flex items-center justify-between p-4 bg-[#141414] border border-zinc-800 rounded-lg">
+
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-[#141414] border border-zinc-800 rounded-lg">
+
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-zinc-800 rounded-full">
+                  <div className="p-2 bg-zinc-800 rounded-full shrink-0"> {/* shrink-0 evita que o ícone amasse */}
                     <KeyRound size={18} className="text-zinc-400" />
                   </div>
                   <div>
@@ -255,7 +258,7 @@ export function About() {
 
                 <Button
                   variant="outline"
-                  className="text-sm bg-neutral-800 text-white transition-colors"
+                  className="w-full md:w-auto text-sm bg-neutral-800 text-white border-neutral-600 hover:bg-neutral-700 transition-colors"
                   onClick={() => setShowEditPassword(true)}
                 >
                   Alterar Senha
