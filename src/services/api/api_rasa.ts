@@ -2,6 +2,7 @@ import { api } from "@/services/api/api";
 
 interface RasaActionResponse {
   responses: { text: string }[];
+  sessionId?: string;
 }
 
 export const rasaService = {
@@ -15,15 +16,13 @@ export const rasaService = {
   },
 
   async listarNiveis() {
-    ("fazendo requisição para listar níveis...");
     try {
       const response = await api.get("/sael/action/listar_niveis", {
         withCredentials: true,
       });
-      console.log("resposta da API:", response.data);
       return response.data;
     } catch (error) {
-      console.log("erro na requisição listarNiveis:", error);
+      console.error("erro na requisição listarNiveis:", error);
       throw error;
     }
   },
@@ -78,10 +77,10 @@ export const rasaService = {
     return response.data;
   },
 
-  async perguntar(message: string, senderId: string): Promise<RasaActionResponse> {
+  async perguntar(message: string, senderId: string, sessionId?: string): Promise<RasaActionResponse> {
     const response = await api.post(
       "/sael/action/perguntar",
-      { message, senderId },
+      { message, senderId, sessionId },
       { withCredentials: true }
     );
     return response.data;

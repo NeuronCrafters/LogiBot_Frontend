@@ -4,6 +4,7 @@ import { api } from "@/services/api/api";
 import { AuthContext, AuthContextData, User } from "./AuthContext";
 import { useCategoryClickTracker } from "@/hooks/use-CategoryClickTracker";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePrefetchChatHistory } from "@/hooks/use-ChatHistory";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -11,6 +12,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { flushClicks } = useCategoryClickTracker(user?._id || null);
+  const prefetchChatHistory = usePrefetchChatHistory();
 
   const isAuthenticated = !!user;
 
@@ -24,13 +26,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.data.success) {
         await getUser();
+
+        if (user?._id) {
+          prefetchChatHistory(user._id);
+        }
+
         navigate("/chat");
       }
     } catch (error: any) {
       const message = error?.response?.data?.message || "erro ao autenticar";
       throw new Error(message);
-    } finally {
-      queryClient.clear();
     }
   }
 
@@ -52,6 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       setUser(safeUser);
+
+      if (safeUser._id) {
+        prefetchChatHistory(safeUser._id);
+      }
     } catch (error) {
       console.error("erro ao obter usuário:", error);
       setUser(null);

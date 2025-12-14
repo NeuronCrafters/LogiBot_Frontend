@@ -50,13 +50,13 @@
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.5.1",
-    "react-syntax-highlighter": "^16.0.0",
     "react-use": "^17.6.0",
     "recharts": "^2.15.3",
     "refractor": "^5.0.0",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^13.0.0",
     "vaul": "^1.1.2"
   },
   "devDependencies": {
@@ -71,6 +71,7 @@
     "@types/react": "^18.3.21",
     "@types/react-dom": "^18.2.17",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",

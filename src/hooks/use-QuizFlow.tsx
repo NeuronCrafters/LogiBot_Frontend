@@ -1,17 +1,19 @@
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { Question } from "@/@types/QuestionType";
 import { formatTitle } from "@/utils/formatText";
 import { ButtonData } from "@/components/components/Bot/Quiz/CategoryStep";
 import { quizService, VerifyQuizResponse } from "@/services/api/api_quiz";
 import { rasaService } from "@/services/api/api_rasa";
-import { usePersistedArray } from "@/hooks/use-PersistedArray";
 
 type QuizStep = "initial" | "levels" | "categories" | "subsubjects" | "questions" | "results";
 type AppMode = "none" | "quiz" | "chat";
 
-interface ChatMsg {
-  role: "user" | "assistant";
-  content: string;
+export interface ChatMsg {
+  id: string;
+  text: string;
+  sender: "user" | "bot";
+  type: "text" | "typing";
 }
 
 interface useQuizFlowProps {
@@ -19,12 +21,8 @@ interface useQuizFlowProps {
 }
 
 export function useQuizFlow({ userId }: useQuizFlowProps) {
-
-  const {
-    state: messages,
-    push: pushMessage,
-    clear: clearMessages,
-  } = usePersistedArray<ChatMsg>("LOGIBOT_MESSAGES", []);
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const [step, setStep] = useState<QuizStep>("initial");
   const [mode, setMode] = useState<AppMode>("none");
@@ -43,18 +41,31 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [previousQuestions, setPreviousQuestions] = useState<Question[][]>([]);
   const [previousResults, setPreviousResults] = useState<VerifyQuizResponse[]>([]);
 
+  function addMessage(text: string, sender: "user" | "bot", type: "text" | "typing" = "text") {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: uuidv4(),
+        text,
+        sender,
+        type,
+      },
+    ]);
+  }
+
   function resetToInitial() {
-    clearMessages();
+    setMessages([]);
     setPreviousQuestions([]);
     setPreviousResults([]);
     setGreetingDone(true);
     setMode("none");
     setStep("initial");
     setShowLevels(false);
+    setSessionId(null);
   }
 
   function handleInitialChoice(choice: AppMode) {
-    clearMessages();
+    setMessages([]);
     setPreviousQuestions([]);
     setPreviousResults([]);
     setMode(choice);
@@ -63,42 +74,39 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
       setStep("levels");
       setShowLevels(true);
     } else {
-      pushMessage({
-        role: "assistant",
-        content: "Vamos conversar, sobre o que quer falar?",
-      });
+      addMessage("Vamos conversar, sobre o que quer falar?", "bot");
     }
     setGreetingDone(true);
   }
 
   function handleLevelNext(btns: ButtonData[], nivel: string) {
-    pushMessage({ role: "user", content: formatTitle(nivel) });
-    pushMessage({ role: "assistant", content: "Agora escolha um assunto para praticar:" });
+    addMessage(formatTitle(nivel), "user");
+    addMessage("Agora escolha um assunto para praticar:", "bot");
     setCategoryButtons(btns);
     setStep("categories");
     setShowLevels(false);
   }
 
   function handleCategoryNext(btns: ButtonData[], categoria: string) {
-    pushMessage({ role: "user", content: formatTitle(categoria) });
-    pushMessage({ role: "assistant", content: `Escolha um tópico dentro de ${formatTitle(categoria)}:` });
+    addMessage(formatTitle(categoria), "user");
+    addMessage(`Escolha um tópico dentro de ${formatTitle(categoria)}:`, "bot");
     setSubsubjectButtons(btns);
     setStep("subsubjects");
   }
 
   function handleSubsubjectNext(qs: Question[], subtopico: string) {
-    pushMessage({ role: "user", content: formatTitle(subtopico) });
+    addMessage(formatTitle(subtopico), "user");
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
-      pushMessage({ role: "assistant", content: "Suas perguntas estão prontas:" });
+      addMessage("Suas perguntas estão prontas:", "bot");
       setQuestions(qs);
       setStep("questions");
     }, 1200);
   }
 
   async function handleSubmitAnswers(answers: string[]) {
-    pushMessage({ role: "user", content: `Respostas enviadas: ${answers.join(", ")}` });
+    addMessage(`Respostas enviadas: ${answers.join(", ")}`, "user");
     setTyping(true);
 
     try {
@@ -113,7 +121,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
       setStep("results");
     } catch (err: any) {
       const errorMsg = err.response?.data?.message ?? "Erro ao verificar respostas.";
-      pushMessage({ role: "assistant", content: errorMsg });
+      addMessage(errorMsg, "bot");
     } finally {
       setTyping(false);
     }
@@ -121,23 +129,27 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
 
   async function sendMessage(message: string) {
     if (!message.trim()) return;
-    pushMessage({ role: "user", content: message });
+
+    addMessage(message, "user");
+
     setTyping(true);
     setFakeTypingDelay(true);
 
     try {
-      const res = await rasaService.perguntar(message, userId);
+      const res = await rasaService.perguntar(message, userId, sessionId || undefined);
+
+      if (res.sessionId) {
+        setSessionId(res.sessionId);
+      }
+
       setTimeout(() => {
-        pushMessage({
-          role: "assistant",
-          content: res.responses[0]?.text || "Desculpe, não entendi.",
-        });
+        addMessage(res.responses[0]?.text || "Desculpe, não entendi.", "bot");
         setTyping(false);
         setFakeTypingDelay(false);
       }, 1200);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || "Erro no chat.";
-      pushMessage({ role: "assistant", content: errorMsg });
+      addMessage(errorMsg, "bot");
       setTyping(false);
       setFakeTypingDelay(false);
     }
@@ -145,8 +157,12 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
 
   return {
     messages,
+    setMessages,
     step,
     mode,
+    setMode,
+    sessionId,
+    setSessionId,
     typing,
     greetingDone,
     showLevels,

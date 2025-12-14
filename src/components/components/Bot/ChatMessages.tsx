@@ -3,31 +3,18 @@ import logo from "@/assets/logo.svg";
 import { Typograph } from "@/components/components/Typograph/Typograph";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import java from 'react-syntax-highlighter/dist/esm/languages/prism/java';
-import kotlin from 'react-syntax-highlighter/dist/esm/languages/prism/kotlin';
-import csharp from 'react-syntax-highlighter/dist/esm/languages/prism/csharp';
-import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
-import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
-import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
-import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
-import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
-
-SyntaxHighlighter.registerLanguage('java', java);
-SyntaxHighlighter.registerLanguage('kotlin', kotlin);
-SyntaxHighlighter.registerLanguage('csharp', csharp);
-SyntaxHighlighter.registerLanguage('javascript', javascript);
-SyntaxHighlighter.registerLanguage('python', python);
-SyntaxHighlighter.registerLanguage('sql', sql);
-SyntaxHighlighter.registerLanguage('css', css);
-SyntaxHighlighter.registerLanguage('jsx', jsx);
+import { useState } from "react";
+import { Copy, Check } from "lucide-react";
 
 interface Message {
-    role: "user" | "assistant";
-    content: string;
+    role?: "user" | "assistant";
+    content?: string;
     context?: "quiz" | "chat";
+    // Formato alternativo que você está usando
+    id?: string;
+    text?: string;
+    sender?: "user" | "bot";
+    type?: string;
 }
 
 interface ChatMessagesProps {
@@ -36,32 +23,71 @@ interface ChatMessagesProps {
     userId: string;
 }
 
+const CodeBlock = ({ language, children }: { language: string; children: string }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(children);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const languageColors: Record<string, string> = {
+        java: "text-orange-400",
+        kotlin: "text-purple-400",
+        csharp: "text-green-400",
+        javascript: "text-yellow-400",
+        python: "text-blue-400",
+        sql: "text-pink-400",
+        css: "text-cyan-400",
+        jsx: "text-yellow-400",
+    };
+
+    const colorClass = languageColors[language.toLowerCase()] || "text-gray-300";
+
+    return (
+        <div className="relative my-4 border border-neutral-700 rounded-xl overflow-hidden">
+            <div className="flex justify-between items-center px-4 py-2 bg-neutral-800 border-b border-neutral-700 text-xs text-white font-mono">
+                <span className={`font-semibold ${colorClass}`}>
+                    {language.toUpperCase()}
+                </span>
+                <button
+                    className="flex items-center gap-1.5 text-white bg-neutral-700 hover:bg-neutral-600 px-2 py-1 rounded text-xs transition-colors"
+                    onClick={handleCopy}
+                >
+                    {copied ? (
+                        <>
+                            <Check size={12} />
+                            Copiado
+                        </>
+                    ) : (
+                        <>
+                            <Copy size={12} />
+                            Copiar
+                        </>
+                    )}
+                </button>
+            </div>
+            <pre className="m-0 p-4 bg-[#282c34] overflow-x-auto">
+                <code className="text-sm font-mono text-gray-200 leading-relaxed block whitespace-pre">
+                    {children}
+                </code>
+            </pre>
+        </div>
+    );
+};
+
 const markdownComponents = {
     code: ({ node, inline, className, children, ...props }: any) => {
         const match = /language-(\w+)/.exec(className || "");
+        const codeContent = String(children).replace(/\n$/, "");
+
         return !inline && match ? (
-            <div className="relative my-4 border border-neutral-700 rounded-xl overflow-hidden">
-                <div className="flex justify-between items-center px-4 py-2 bg-neutral-800 border-b border-neutral-700 text-xs text-white font-mono">
-                    <span className="text-neutral-400">{match[1]}</span>
-                    <button
-                        className="text-white bg-neutral-700 hover:bg-neutral-600 px-2 py-0.5 rounded text-xs"
-                        onClick={() => navigator.clipboard.writeText(String(children))}
-                    >
-                        Copiar
-                    </button>
-                </div>
-                <SyntaxHighlighter
-                    style={oneDark}
-                    language={match[1]}
-                    PreTag="div"
-                    customStyle={{ margin: 0, padding: "1rem", fontSize: "0.875rem" }}
-                    {...props}
-                >
-                    {String(children).replace(/\n$/, "")}
-                </SyntaxHighlighter>
-            </div>
+            <CodeBlock language={match[1]}>
+                {codeContent}
+            </CodeBlock>
         ) : (
-            <code className="bg-muted rounded-md px-1.5 py-0.5 text-sm" {...props}>
+            <code className="bg-muted rounded-md px-1.5 py-0.5 text-sm font-mono text-orange-300" {...props}>
                 {children}
             </code>
         );
@@ -108,18 +134,26 @@ const markdownComponents = {
 
 function ChatMessages({ messages, userId }: ChatMessagesProps) {
     const formatMessage = (message: Message) => {
-        const { content } = message;
+        // Suporta tanto o formato 'content' quanto 'text'
+        const content = message.content || message.text;
 
+        // Validação crítica: verifica se content existe e é string
+        if (!content || typeof content !== 'string') {
+            console.warn('Mensagem com content inválido:', message);
+            return null;
+        }
+
+        const contentLower = content.toLowerCase();
         const isInstruction =
-            content.toLowerCase().includes("escolha seu nível") ||
-            content.toLowerCase().includes("escolha um assunto") ||
-            content.toLowerCase().includes("escolha um tópico") ||
-            content.toLowerCase().includes("tópico selecionado") ||
-            content.toLowerCase().includes("suas perguntas estão prontas") ||
-            content.toLowerCase().includes("respostas:") ||
-            content.toLowerCase().includes("⚠️") ||
-            content.toLowerCase().includes("praticar") ||
-            content.toLowerCase().includes("gerando suas perguntas");
+            contentLower.includes("escolha seu nível") ||
+            contentLower.includes("escolha um assunto") ||
+            contentLower.includes("escolha um tópico") ||
+            contentLower.includes("tópico selecionado") ||
+            contentLower.includes("suas perguntas estão prontas") ||
+            contentLower.includes("respostas:") ||
+            contentLower.includes("⚠️") ||
+            contentLower.includes("praticar") ||
+            contentLower.includes("gerando suas perguntas");
 
         if (isInstruction) {
             return (
@@ -139,13 +173,16 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
     return (
         <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
             {messages.map((message, index) => {
-                const isUser = message.role === "user";
+                // Suporta tanto 'role' quanto 'sender'
+                const isUser = message.role === "user" || message.sender === "user";
                 const content = formatMessage(message);
+
+                // Se content for null, pula esta mensagem
                 if (!content) return null;
 
                 return (
                     <div
-                        key={index}
+                        key={message.id || index}
                         className={`flex items-end w-full mb-3 ${isUser ? "justify-end" : "justify-start"
                             } animate-fade-in`}
                     >
@@ -157,8 +194,8 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
 
                         <div
                             className={`px-4 py-2 rounded-xl max-w-[80%] text-sm leading-relaxed ${isUser
-                                ? "bg-blue-600 text-white ml-auto rounded-br-none"
-                                : "bg-[#2a2a2a] text-white mr-auto rounded-bl-none"
+                                    ? "bg-blue-600 text-white ml-auto rounded-br-none"
+                                    : "bg-[#2a2a2a] text-white mr-auto rounded-bl-none"
                                 }`}
                         >
                             {content}

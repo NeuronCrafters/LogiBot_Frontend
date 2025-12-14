@@ -5,8 +5,10 @@ import { useAuth } from "@/hooks/use-Auth";
 import { Separator } from "@/components/ui/separator";
 import { MenuOptions } from "./HeaderOptions";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StudySessionHistory } from "../UserAnalysis/UserAnalysis";
 import { Button } from "@/components/ui/button";
+import { ChatHistory } from "@/components/components/History/Chat/ChatHistory";
+import { StudySessionHistory } from "../UserAnalysis/UserAnalysis";
+import { Typograph } from "@/components/components/Typograph/Typograph";
 
 interface HeaderProps {
     isOpen: boolean;
@@ -16,6 +18,7 @@ interface HeaderProps {
 export function Header({ isOpen, closeMenu }: HeaderProps) {
     const { user, logout } = useAuth();
     const [activeTab, setActiveTab] = useState("menu");
+    const [historyFilter, setHistoryFilter] = useState<"chat" | "quiz">("chat");
 
     if (!user) return null;
 
@@ -71,6 +74,7 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                             <div className="flex justify-end mb-4">
                                 <button
                                     onClick={closeMenu}
+                                    aria-label="Fechar menu"
                                     className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full transition-colors"
                                 >
                                     <X size={24} />
@@ -114,8 +118,54 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                             <div
                                 className={`flex-1 h-full overflow-hidden flex flex-col ${activeTab === "history" ? "flex" : "hidden"}`}
                             >
-                                <div className="flex-1 w-full overflow-y-auto px-1 pb-4">
-                                    <StudySessionHistory data={analysisData} />
+                                <div className="px-6 pt-6 pb-2 shrink-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <HistoryIcon className="text-blue-500" size={20} />
+                                        <Typograph
+                                            text="Histórico de Sessões"
+                                            colorText="text-white"
+                                            variant="text5"
+                                            weight="bold"
+                                            fontFamily="poppins"
+                                        />
+                                    </div>
+                                    <Typograph
+                                        text={`${user.name} • ${displayCourseName}`}
+                                        colorText="text-zinc-500"
+                                        variant="text7"
+                                        weight="medium"
+                                        fontFamily="poppins"
+                                    />
+                                </div>
+
+                                <div className="px-6 py-2 shrink-0">
+                                    <div className="flex p-1 bg-[#2a2a2a] rounded-lg">
+                                        {(["chat", "quiz"] as const).map((filter) => (
+                                            <button
+                                                key={filter}
+                                                onClick={() => setHistoryFilter(filter)}
+                                                className={`flex-1 py-1.5 text-xs font-medium font-poppins rounded-md transition-all duration-200 ${historyFilter === filter
+                                                    ? "bg-[#3a3a3a] text-white shadow-sm"
+                                                    : "text-zinc-500 hover:text-zinc-300"
+                                                    }`}
+                                            >
+                                                {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <Separator className="bg-zinc-800 mt-2 shrink-0" />
+
+                                <div className="flex-1 w-full overflow-y-auto px-1 pb-4 pt-4">
+                                    {historyFilter === "chat" ? (
+                                        <ChatHistory
+                                            userId={user._id}
+                                            closeMenu={closeMenu}
+                                        />
+                                    ) : (
+                                        <StudySessionHistory data={analysisData} />
+                                    )}
                                 </div>
                             </div>
                         </div>
