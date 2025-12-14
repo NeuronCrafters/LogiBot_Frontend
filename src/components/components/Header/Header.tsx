@@ -26,6 +26,7 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
     const isAdmin = rawRoles.includes("admin");
     const isCoordinator = rawRoles.includes("course-coordinator");
     const isProfessor = rawRoles.includes("professor");
+
     const menuRole = isAdmin
         ? "admin"
         : isCoordinator
@@ -33,6 +34,8 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
             : isProfessor
                 ? "teacher"
                 : "student";
+
+    const isStudent = menuRole === "student";
 
     const displayCourseName = Array.isArray(user.courseName)
         ? user.courseName.join(", ")
@@ -79,19 +82,22 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                                 onValueChange={setActiveTab}
                                 className="w-full"
                             >
-                                <TabsList className="grid w-full grid-cols-2 bg-[#2a2a2a] text-zinc-400">
+                                <TabsList className={`grid w-full bg-[#2a2a2a] text-zinc-400 ${isStudent ? "grid-cols-2" : "grid-cols-1"}`}>
                                     <TabsTrigger
                                         value="menu"
                                         className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:text-white transition-colors"
                                     >
                                         <MenuIcon size={16} className="mr-2" /> Menu
                                     </TabsTrigger>
-                                    <TabsTrigger
-                                        value="history"
-                                        className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:text-white transition-colors"
-                                    >
-                                        <HistoryIcon size={16} className="mr-2" /> Histórico
-                                    </TabsTrigger>
+
+                                    {isStudent && (
+                                        <TabsTrigger
+                                            value="history"
+                                            className="data-[state=active]:bg-[#3a3a3a] data-[state=active]:text-white hover:text-white transition-colors"
+                                        >
+                                            <HistoryIcon size={16} className="mr-2" /> Histórico
+                                        </TabsTrigger>
+                                    )}
                                 </TabsList>
                             </Tabs>
                         </div>
@@ -105,70 +111,72 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                                 <MenuOptions role={menuRole as any} />
                             </div>
 
-                            <div
-                                className={`flex-1 h-full overflow-hidden flex flex-col ${activeTab === "history" ? "flex" : "hidden"}`}
-                            >
-                                <div className="px-6 pt-6 pb-2 shrink-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <HistoryIcon className="text-blue-500" size={20} />
+                            {isStudent && (
+                                <div
+                                    className={`flex-1 h-full overflow-hidden flex flex-col ${activeTab === "history" ? "flex" : "hidden"}`}
+                                >
+                                    <div className="px-6 pt-6 pb-2 shrink-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <HistoryIcon className="text-blue-500" size={20} />
+                                            <Typograph
+                                                text="Histórico de Sessões"
+                                                colorText="text-white"
+                                                variant="text5"
+                                                weight="bold"
+                                                fontFamily="poppins"
+                                            />
+                                        </div>
                                         <Typograph
-                                            text="Histórico de Sessões"
-                                            colorText="text-white"
-                                            variant="text5"
-                                            weight="bold"
+                                            text={`${user.name} • ${displayCourseName}`}
+                                            colorText="text-zinc-500"
+                                            variant="text7"
+                                            weight="medium"
                                             fontFamily="poppins"
                                         />
                                     </div>
-                                    <Typograph
-                                        text={`${user.name} • ${displayCourseName}`}
-                                        colorText="text-zinc-500"
-                                        variant="text7"
-                                        weight="medium"
-                                        fontFamily="poppins"
-                                    />
-                                </div>
 
-                                <div className="px-6 py-2 shrink-0">
-                                    <div className="flex p-1 bg-[#2a2a2a] rounded-lg">
-                                        <button
-                                            onClick={() => setHistoryFilter("chat")}
-                                            className={`flex-1 py-1.5 text-xs font-medium font-poppins rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${historyFilter === "chat"
-                                                ? "bg-[#3a3a3a] text-white shadow-sm"
-                                                : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
-                                                }`}
-                                        >
-                                            <MessageSquare size={14} className={historyFilter === "chat" ? "text-blue-400" : ""} />
-                                            Chat
-                                        </button>
-                                        <button
-                                            onClick={() => setHistoryFilter("quiz")}
-                                            className={`flex-1 py-1.5 text-xs font-medium font-poppins rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${historyFilter === "quiz"
-                                                ? "bg-[#3a3a3a] text-white shadow-sm"
-                                                : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
-                                                }`}
-                                        >
-                                            <GraduationCap size={14} className={historyFilter === "quiz" ? "text-purple-400" : ""} />
-                                            Quiz
-                                        </button>
+                                    <div className="px-6 py-2 shrink-0">
+                                        <div className="flex p-1 bg-[#2a2a2a] rounded-lg">
+                                            <button
+                                                onClick={() => setHistoryFilter("chat")}
+                                                className={`flex-1 py-1.5 text-xs font-medium font-poppins rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${historyFilter === "chat"
+                                                    ? "bg-[#3a3a3a] text-white shadow-sm"
+                                                    : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                    }`}
+                                            >
+                                                <MessageSquare size={14} className={historyFilter === "chat" ? "text-blue-400" : ""} />
+                                                Chat
+                                            </button>
+                                            <button
+                                                onClick={() => setHistoryFilter("quiz")}
+                                                className={`flex-1 py-1.5 text-xs font-medium font-poppins rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${historyFilter === "quiz"
+                                                    ? "bg-[#3a3a3a] text-white shadow-sm"
+                                                    : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                    }`}
+                                            >
+                                                <GraduationCap size={14} className={historyFilter === "quiz" ? "text-purple-400" : ""} />
+                                                Quiz
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <Separator className="bg-zinc-800 mt-2 shrink-0" />
+
+                                    <div className="flex-1 w-full overflow-y-auto px-1 pb-4 pt-4">
+                                        {historyFilter === "chat" ? (
+                                            <ChatHistory
+                                                userId={user._id}
+                                                closeMenu={closeMenu}
+                                            />
+                                        ) : (
+                                            <QuizHistory
+                                                userId={user._id}
+                                                closeMenu={closeMenu}
+                                            />
+                                        )}
                                     </div>
                                 </div>
-
-                                <Separator className="bg-zinc-800 mt-2 shrink-0" />
-
-                                <div className="flex-1 w-full overflow-y-auto px-1 pb-4 pt-4">
-                                    {historyFilter === "chat" ? (
-                                        <ChatHistory
-                                            userId={user._id}
-                                            closeMenu={closeMenu}
-                                        />
-                                    ) : (
-                                        <QuizHistory
-                                            userId={user._id}
-                                            closeMenu={closeMenu}
-                                        />
-                                    )}
-                                </div>
-                            </div>
+                            )}
                         </div>
 
                         {activeTab === "menu" && (
