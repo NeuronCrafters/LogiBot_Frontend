@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Menu as MenuIcon, History as HistoryIcon, LogOut } from "lucide-react";
+import { X, Menu as MenuIcon, History as HistoryIcon, LogOut, MessageSquare, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/use-Auth";
 import { Separator } from "@/components/ui/separator";
 import { MenuOptions } from "./HeaderOptions";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ChatHistory } from "@/components/components/History/Chat/ChatHistory";
-import { StudySessionHistory } from "../UserAnalysis/UserAnalysis";
 import { Typograph } from "@/components/components/Typograph/Typograph";
+import { ChatHistory } from "@/components/components/History/Chat/ChatHistory";
+import { QuizHistory } from "@/components/components/History/Quiz/QuizHistory";
 
 interface HeaderProps {
     isOpen: boolean;
@@ -37,14 +37,6 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
     const displayCourseName = Array.isArray(user.courseName)
         ? user.courseName.join(", ")
         : user.courseName ?? "-";
-
-    const analysisData = {
-        userId: user._id,
-        name: user.name,
-        className: displayCourseName,
-        totalUsageTime: 0,
-        sessions: (user as any).sessions || []
-    };
 
     const handleLogout = () => {
         logout();
@@ -110,9 +102,7 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                             <div
                                 className={`flex-1 overflow-y-auto px-6 py-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none] ${activeTab === "menu" ? "block" : "hidden"}`}
                             >
-                                <MenuOptions
-                                    role={menuRole as any}
-                                />
+                                <MenuOptions role={menuRole as any} />
                             </div>
 
                             <div
@@ -140,18 +130,26 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
 
                                 <div className="px-6 py-2 shrink-0">
                                     <div className="flex p-1 bg-[#2a2a2a] rounded-lg">
-                                        {(["chat", "quiz"] as const).map((filter) => (
-                                            <button
-                                                key={filter}
-                                                onClick={() => setHistoryFilter(filter)}
-                                                className={`flex-1 py-1.5 text-xs font-medium font-poppins rounded-md transition-all duration-200 ${historyFilter === filter
-                                                    ? "bg-[#3a3a3a] text-white shadow-sm"
-                                                    : "text-zinc-500 hover:text-zinc-300"
-                                                    }`}
-                                            >
-                                                {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                                            </button>
-                                        ))}
+                                        <button
+                                            onClick={() => setHistoryFilter("chat")}
+                                            className={`flex-1 py-1.5 text-xs font-medium font-poppins rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${historyFilter === "chat"
+                                                ? "bg-[#3a3a3a] text-white shadow-sm"
+                                                : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                }`}
+                                        >
+                                            <MessageSquare size={14} className={historyFilter === "chat" ? "text-blue-400" : ""} />
+                                            Chat
+                                        </button>
+                                        <button
+                                            onClick={() => setHistoryFilter("quiz")}
+                                            className={`flex-1 py-1.5 text-xs font-medium font-poppins rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${historyFilter === "quiz"
+                                                ? "bg-[#3a3a3a] text-white shadow-sm"
+                                                : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                }`}
+                                        >
+                                            <GraduationCap size={14} className={historyFilter === "quiz" ? "text-purple-400" : ""} />
+                                            Quiz
+                                        </button>
                                     </div>
                                 </div>
 
@@ -164,7 +162,10 @@ export function Header({ isOpen, closeMenu }: HeaderProps) {
                                             closeMenu={closeMenu}
                                         />
                                     ) : (
-                                        <StudySessionHistory data={analysisData} />
+                                        <QuizHistory
+                                            userId={user._id}
+                                            closeMenu={closeMenu}
+                                        />
                                     )}
                                 </div>
                             </div>
