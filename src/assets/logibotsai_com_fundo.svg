@@ -1,0 +1,25 @@
+<svg viewBox="0 0 320 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo preto -->
+  <rect width="320" height="100" fill="black"/>
+
+  <!-- Mascote (deslocado para a direita) -->
+  <g transform="translate(10, 5)">
+    <path d="M0 56.6646C0 42.2207 11.709 30.5117 26.1528 30.5117H54.8472C69.291 30.5117 81 42.2207 81 56.6646C81 71.1084 69.291 82.8174 54.8472 82.8174H26.1528C11.709 82.8174 0 71.1084 0 56.6646Z" fill="#E4E4E4"/>
+    <path d="M0 56.6646C0 42.2207 11.709 30.5117 26.1528 30.5117H54.8472C69.291 30.5117 81 42.2207 81 56.6646C81 71.1084 69.291 82.8174 54.8472 82.8174H26.1528C11.709 82.8174 0 71.1084 0 56.6646Z" fill="#E4E4E4"/>
+    <rect x="24.3003" y="43.5881" width="8.1" height="26.1528" rx="4.05" fill="black"/>
+    <rect x="48.6001" y="43.5881" width="8.1" height="26.1528" rx="4.05" fill="black"/>
+    <rect width="8.25874" height="25.7022" rx="4.12937" transform="matrix(0.84938 0.527781 -0.472723 0.881211 58.7236 0)" fill="#E4E4E4"/>
+    <rect width="8.25874" height="25.7022" rx="4.12937" transform="matrix(0.84938 -0.527781 0.472723 0.881211 14.1733 4.35889)" fill="#E4E4E4"/>
+  </g>
+
+  <!-- Texto -->
+  <text
+    x="120"
+    y="62"
+    fill="#E4E4E4"
+    font-size="26"
+    font-weight="700"
+    font-family="Arial, Helvetica, sans-serif">
+    LogiBots.AI
+  </text>
+</svg>
