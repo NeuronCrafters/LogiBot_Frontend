@@ -1,12 +1,18 @@
 services:
   frontend:
     container_name: logibot_frontend
-    image: ghcr.io/ramoncbarbosa/logibot_frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+
     ports:
       - "3001:80"
     restart: unless-stopped
     networks:
       - logibot-network
+
+    env_file:
+      - .env
 
 networks:
   logibot-network:
