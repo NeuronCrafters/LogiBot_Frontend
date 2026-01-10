@@ -16,4 +16,4 @@ services:
 
 networks:
   logibot-network:
-    driver: bridge
+    external: true
