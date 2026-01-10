@@ -20,32 +20,9 @@ jobs:
           script: |
             cd /root/apps/logibots/LogiBot_Frontend
 
-            echo "=== INVESTIGAÇÃO COMPLETA ==="
+            rm -f docker-compose.override.yml docker-compose.override.yaml
+            rm -f .env.local .env.production .env.development
 
-            # Lista TODOS os arquivos relacionados
-            echo "--- Arquivos docker-compose* ---"
-            ls -la docker-compose* 2>/dev/null || echo "Nenhum encontrado"
-
-            echo "--- Arquivos .env* ---"
-            ls -la .env* 2>/dev/null || echo "Nenhum encontrado"
-
-            # Procura a variável misteriosa
-            echo "--- Procurando h4tSU8etv ---"
-            grep -r "h4tSU8etv" . 2>/dev/null || echo "Não encontrado em arquivos"
-
-            # Mostra o que o Docker Compose está lendo
-            echo "--- Config que o Docker Compose vê ---"
-            docker compose config 2>&1 || echo "Erro ao ler config"
-
-            # Remove TUDO que pode estar interferindo
-            echo "=== LIMPANDO TUDO ==="
-            rm -f docker-compose.override.yml
-            rm -f docker-compose.override.yaml
-            rm -f .env.local
-            rm -f .env.production
-            rm -f .env.development
-
-            # Cria o docker-compose.yml limpo
             cat > docker-compose.yml << 'COMPOSEEOF'
             services:
               frontend:
@@ -65,35 +42,22 @@ jobs:
 
             networks:
               logibot-network:
-                driver: bridge
+                external: true
             COMPOSEEOF
 
-            # Cria o .env limpo
             cat > .env << 'ENVEOF'
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             VITE_API_KEY=${{ secrets.VITE_API_KEY }}
             VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
             ENVEOF
 
-            echo "--- Verificando arquivos criados ---"
-            echo "docker-compose.yml:"
-            cat docker-compose.yml
-            echo ""
-            echo ".env:"
-            cat .env
+            git fetch origin main 2>/dev/null || true
+            git reset --hard origin/main 2>/dev/null || true
 
-            # Testa a configuração ANTES de executar
-            echo "--- Testando configuração ---"
-            docker compose config
-
-            # Se passou, continua
-            echo "=== EXECUTANDO DEPLOY ==="
-            docker compose down -v 2>/dev/null || true
-            docker network create logibot-network 2>/dev/null || true
+            docker compose down 2>/dev/null || true
             docker compose build --no-cache --pull
             docker compose up -d --force-recreate
 
             sleep 5
-
             docker compose ps
-            docker compose logs --tail=50 frontend
+            docker network inspect logibot-network | grep -A 5 logibot_frontend || echo "Frontend não está na rede!"
