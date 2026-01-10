@@ -20,22 +20,50 @@ jobs:
           script: |
             cd /root/apps/logibots/LogiBot_Frontend
 
-            cat > .env << 'EOF'
+            # Para qualquer merge em andamento
+            git merge --abort 2>/dev/null || true
+
+            # Limpa TUDO - força o uso dos arquivos do Git
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fdx
+
+            # Cria o .env com os secrets
+            cat > .env << 'ENVEOF'
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             VITE_API_KEY=${{ secrets.VITE_API_KEY }}
             VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
-            EOF
+            ENVEOF
 
-            git merge --abort || true
-            git fetch origin main
-            git reset --hard origin/main
-            git clean -fd
+            # Verifica se o .env foi criado corretamente
+            echo "=== Verificando .env ==="
+            cat .env
 
-            docker compose down
+            # Verifica o docker-compose.yml
+            echo "=== Verificando docker-compose.yml ==="
+            cat docker-compose.yml
+
+            # Para e remove tudo
+            docker compose down -v 2>/dev/null || true
+
+            # Cria a rede manualmente se não existir
+            docker network create logibot-network 2>/dev/null || true
+
+            # Build completo sem cache
             docker compose build --no-cache --pull
+
+            # Sobe os containers
             docker compose up -d --force-recreate
 
+            # Aguarda 5 segundos
+            sleep 5
+
+            # Limpa imagens antigas
             docker image prune -af
 
+            # Mostra status
+            echo "=== Status dos containers ==="
             docker compose ps
-            docker compose logs --tail=50 frontend
+
+            echo "=== Logs do frontend ==="
+            docker compose logs --tail=100 frontend

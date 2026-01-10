@@ -16,5 +16,4 @@ services:
 
 networks:
   logibot-network:
-    name: logibot-network
     driver: bridge
