@@ -27,6 +27,7 @@ function Signin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+
     const finalEmail = email.replace(/\s/g, '');
     const finalPassword = password.replace(/\s/g, '');
 
