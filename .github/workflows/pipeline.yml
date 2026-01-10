@@ -20,7 +20,13 @@ jobs:
           script: |
             cd /root/apps/logibots/LogiBot_Frontend
 
-            git pull origin main
+            git merge --abort || true
+
+            git fetch origin main
+
+            git reset --hard origin/main
+
+            git clean -fd
 
             docker compose up -d --build --force-recreate
 
