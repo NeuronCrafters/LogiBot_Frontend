@@ -20,50 +20,55 @@ jobs:
           script: |
             cd /root/apps/logibots/LogiBot_Frontend
 
-            # Para qualquer merge em andamento
-            git merge --abort 2>/dev/null || true
+            # FORÇA a sobrescrita do docker-compose.yml
+            cat > docker-compose.yml << 'COMPOSEEOF'
+            services:
+              frontend:
+                container_name: logibot_frontend
+                build:
+                  context: .
+                  dockerfile: Dockerfile
+                  args:
+                    VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+                    VITE_API_KEY: ${VITE_API_KEY}
+                    VITE_RECAPTCHA_SITE_KEY: ${VITE_RECAPTCHA_SITE_KEY}
+                ports:
+                  - "3001:80"
+                restart: unless-stopped
+                networks:
+                  - logibot-network
 
-            # Limpa TUDO - força o uso dos arquivos do Git
-            git fetch origin main
-            git reset --hard origin/main
-            git clean -fdx
+            networks:
+              logibot-network:
+                driver: bridge
+            COMPOSEEOF
 
-            # Cria o .env com os secrets
+            # Cria o .env
             cat > .env << 'ENVEOF'
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             VITE_API_KEY=${{ secrets.VITE_API_KEY }}
             VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
             ENVEOF
 
-            # Verifica se o .env foi criado corretamente
-            echo "=== Verificando .env ==="
-            cat .env
+            # Atualiza o código
+            git fetch origin main 2>/dev/null || true
+            git reset --hard origin/main 2>/dev/null || true
 
-            # Verifica o docker-compose.yml
-            echo "=== Verificando docker-compose.yml ==="
-            cat docker-compose.yml
+            # Remove qualquer cache do Docker Compose
+            rm -rf .docker-compose-cache 2>/dev/null || true
 
-            # Para e remove tudo
+            # Para tudo
             docker compose down -v 2>/dev/null || true
 
-            # Cria a rede manualmente se não existir
+            # Cria a rede
             docker network create logibot-network 2>/dev/null || true
 
-            # Build completo sem cache
+            # Build e sobe
             docker compose build --no-cache --pull
-
-            # Sobe os containers
             docker compose up -d --force-recreate
 
-            # Aguarda 5 segundos
             sleep 5
 
-            # Limpa imagens antigas
-            docker image prune -af
-
-            # Mostra status
-            echo "=== Status dos containers ==="
+            # Status
             docker compose ps
-
-            echo "=== Logs do frontend ==="
-            docker compose logs --tail=100 frontend
+            docker compose logs --tail=50 frontend
