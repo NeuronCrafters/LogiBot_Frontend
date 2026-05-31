@@ -1,6 +1,4 @@
-import { useState, useRef } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
-import { Captcha } from "@/components/components/Security/Captcha";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { Input } from "@/components/components/Input/Input";
@@ -16,12 +14,10 @@ function Signin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
-  const [redirectTo, setRedirectTo] = useState<"/signup" | "/forgot-password" | null>(null);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [redirectTo, setRedirectTo] = useState<"/signup" | null>(null);
 
   const navigate = useNavigate();
   const { login } = useAuth();
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
   useMultiPageTour('guest');
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -31,14 +27,9 @@ function Signin() {
     const finalEmail = email.replace(/\s/g, '');
     const finalPassword = password.replace(/\s/g, '');
 
-    if (!captchaToken) {
-      toast.error("por favor, confirme o captcha");
-      return;
-    }
-
     try {
       setLoading(true);
-      await login(finalEmail, finalPassword, captchaToken);
+      await login(finalEmail, finalPassword);
       toast.success("login realizado com sucesso");
     } catch (error: any) {
       const msg = error?.message || "erro ao fazer login";
@@ -48,7 +39,7 @@ function Signin() {
     }
   };
 
-  const handleOpenConsent = (route: "/signup" | "/forgot-password") => (e: React.MouseEvent) => {
+  const handleOpenConsent = (route: "/signup") => (e: React.MouseEvent) => {
     e.preventDefault();
     setRedirectTo(route);
     setShowConsent(true);
@@ -132,11 +123,6 @@ function Signin() {
             >
               {loading ? "entrando..." : "entrar"}
             </ButtonLogin>
-
-            <ButtonLogin
-              type="google"
-              className="w-full mt-2"
-            />
           </form>
 
           <Typograph
@@ -160,23 +146,6 @@ function Signin() {
             className="mt-4 text-center"
           />
 
-          <Typograph
-            text={
-              <Link
-                to="/forgot-password"
-                className="text-blue-400 no-underline hover:underline"
-              >
-                esqueci minha senha
-              </Link>
-            }
-            colorText="text-gray-400"
-            variant="text9"
-            weight="regular"
-            fontFamily="poppins"
-            className="mt-2 text-center"
-          />
-
-          <Captcha ref={recaptchaRef} onChange={setCaptchaToken} />
         </div>
       </div>
     </div>

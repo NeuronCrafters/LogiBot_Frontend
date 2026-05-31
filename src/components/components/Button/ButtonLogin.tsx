@@ -1,10 +1,9 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Typograph } from "@/components/components/Typograph/Typograph";
-import googleLogo from "@/assets/googleLogo.svg";
 import React from "react";
 
-type UnifiedButtonType = "entrar" | "cadastrar" | "submit" | "google";
+type UnifiedButtonType = "entrar" | "cadastrar" | "submit";
 
 interface UnifiedButtonProps {
   type: UnifiedButtonType;
@@ -30,9 +29,6 @@ export function ButtonLogin({
       window.location.href = "/chat";
     } else if (type === "cadastrar") {
       window.location.href = "/signin";
-    } else if (type === "google") {
-      const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-      window.location.href = `${apiBase}/auth/google`;
     }
   };
 
@@ -42,9 +38,7 @@ export function ButtonLogin({
       ? "entrar"
       : type === "cadastrar"
         ? "cadastrar-se"
-        : type === "submit"
-          ? "enviar"
-          : "entrar com o google";
+        : "enviar";
 
   const baseStyles =
     "w-[341px] h-[64px] px-6 py-3 rounded-lg transition-colors duration-300 text-base font-medium";
@@ -53,9 +47,7 @@ export function ButtonLogin({
       ? "bg-blue-500 hover:bg-blue-600 text-white"
       : type === "cadastrar"
         ? "bg-transparent border border-white text-white hover:bg-white hover:text-black"
-        : type === "submit"
-          ? "bg-green-500 hover:bg-green-600 text-white"
-          : "bg-white text-black border border-gray-300 hover:bg-gray-100";
+        : "bg-green-500 hover:bg-green-600 text-white";
 
   return (
     <motion.div
@@ -68,16 +60,8 @@ export function ButtonLogin({
         onClick={type === "submit" ? onClick : handleClick}
         type={type === "submit" ? "submit" : "button"}
         disabled={disabled}
-        className={`${baseStyles} ${variantStyles} ${className} ${type === "google" ? "flex items-center justify-center gap-3" : ""
-          }`}
+        className={`${baseStyles} ${variantStyles} ${className}`}
       >
-        {type === "google" && (
-          <img
-            src={googleLogo}
-            alt="google logo"
-            className="w-6 h-6"
-          />
-        )}
         <Typograph
           text={buttonText}
           colorText="text-inherit"

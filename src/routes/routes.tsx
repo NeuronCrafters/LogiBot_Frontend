@@ -9,7 +9,6 @@ import { CRUD } from "@/pages/CRUD/CRUD";
 import { About } from "@/pages/About/About";
 import { List } from "@/pages/List/List";
 import { Feedbacks } from "@/pages/feedbacks/feedbacks";
-import ForgotPassword from "@/pages/ForgotPassword/ForgotPassword";
 
 export default function AppRoutes() {
   return (
@@ -17,7 +16,6 @@ export default function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/signin" element={<Signin />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/about" element={<About />} />

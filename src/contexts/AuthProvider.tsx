@@ -16,11 +16,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = !!user;
 
-  async function login(email: string, password: string, recaptchaToken: string) {
+  async function login(email: string, password: string) {
     try {
       const response = await api.post(
         "/session",
-        { email, password, recaptchaToken },
+        { email, password },
         { withCredentials: true }
       );
 
@@ -114,17 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, resetInactivityTimer]);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('login') === 'success') {
-      getUser().then(() => {
-        navigate('/chat');
-      }).finally(() => setLoading(false));
-    } else if (params.get('error')) {
-      console.error('erro no login:', params.get('error'));
-      setLoading(false);
-    } else {
-      getUser().finally(() => setLoading(false));
-    }
+    getUser().finally(() => setLoading(false));
   }, []);
 
   const contextValue: AuthContextData = {

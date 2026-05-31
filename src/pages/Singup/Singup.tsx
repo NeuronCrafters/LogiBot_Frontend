@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Captcha } from "@/components/components/Security/Captcha";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-Auth";
 import { api } from "@/services/api/api";
@@ -15,7 +14,6 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   useMultiPageTour('guest');
 
   const [loading, setLoading] = useState(false);
@@ -58,11 +56,6 @@ function Signup() {
       return;
     }
 
-    if (!captchaToken) {
-      toast.error("Por favor, confirme o captcha.");
-      return;
-    }
-
     setLoading(true);
     try {
       await api.post("/users", {
@@ -70,10 +63,9 @@ function Signup() {
         email: finalEmail,
         password: finalPassword,
         code: finalCode,
-        recaptchaToken: captchaToken,
       });
 
-      await login(finalEmail, finalPassword, "captcha-disabled");
+      await login(finalEmail, finalPassword);
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? "Erro ao realizar o cadastro.";
       toast.error(msg);
@@ -195,8 +187,6 @@ function Signup() {
             fontFamily="poppins"
             className="mt-4 text-center"
           />
-
-          <Captcha onChange={setCaptchaToken} />
         </div>
       </div >
     </div >
