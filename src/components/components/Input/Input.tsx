@@ -34,7 +34,7 @@ export function Input({ type, placeholder, className, value, onChange, required,
   };
 
   return (
-    <div className={`relative flex items-center bg-gray-800 rounded-lg px-4 py-3 w-[341px] h-[64px] ${className}`}>
+    <div className={`relative flex items-center bg-[#1f1f1f] border border-white/10 rounded-lg px-4 py-3 w-[341px] h-[64px] ${className}`}>
       <div className="mr-3">{InputIcons[type]}</div>
 
       <ShadcnInput
@@ -44,7 +44,7 @@ export function Input({ type, placeholder, className, value, onChange, required,
         onFocus={handleFocus}
         onBlur={handleBlur}
         required={required}
-        className="bg-transparent text-white w-full placeholder-transparent focus:outline-none"
+        className="bg-transparent text-white w-full placeholder-transparent focus:outline-none focus:ring-0 focus:border-transparent"
         {...props}
       />
 

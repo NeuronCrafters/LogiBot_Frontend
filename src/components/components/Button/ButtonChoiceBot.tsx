@@ -16,7 +16,7 @@ export function ButtonChoiceBot({
   layout = "grid",
 }: ChoiceButtonsProps) {
   const baseStyle =
-    "rounded-2xl px-5 py-2.5 shadow transition-all text-white min-w-[140px] text-center";
+    "rounded-2xl px-5 py-2.5 shadow-md transition-all text-white font-semibold min-w-[140px] text-center border border-white/10";
 
   const containerClass =
     layout === "row"

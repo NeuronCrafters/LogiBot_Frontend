@@ -185,7 +185,7 @@ export function About() {
           </div>
 
           <div className="px-8 pb-6 -mt-16 flex flex-col md:flex-row md:items-end gap-6 relative">
-            <div className="rainbow-avatar w-32 h-32 rounded-full border-4 border-[#1f1f1f] shadow-lg">
+            <div className="w-32 h-32 rounded-full border-4 border-white/10 shadow-lg">
               <Avatar seed={user._id} backgroundColor="#2a2a2a" className="w-full h-full rounded-full" />
             </div>
             <div className="flex-1 pb-2">

@@ -67,9 +67,9 @@ export function ButtonCRUD({
       onClick={onClick}
       disabled={disabled}
       className={`
-        ${color} text-white 
-        ${disabled ? "opacity-50 cursor-not-allowed" : "hover:brightness-90"} 
-        px-4 py-2 flex items-center gap-2 rounded 
+        ${color} text-white border border-white/10 shadow-sm
+        ${disabled ? "opacity-50 cursor-not-allowed" : "hover:brightness-90"}
+        px-4 py-2 flex items-center gap-2 rounded-md font-semibold
         ${compact ? "w-10 h-10 justify-center" : "w-[128px]"}
       `}
     >

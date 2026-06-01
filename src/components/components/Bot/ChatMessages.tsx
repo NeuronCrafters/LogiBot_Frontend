@@ -202,7 +202,7 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
                         </div>
 
                         {isUser && (
-                            <div className="flex items-center justify-center w-10 h-10 ml-2 rounded-full rainbow-avatar">
+                            <div className="flex items-center justify-center w-10 h-10 ml-2 rounded-full border border-white/10">
                                 <Avatar
                                     seed={userId}
                                     backgroundColor="#2a2a2a"
