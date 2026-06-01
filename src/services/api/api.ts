@@ -1,7 +1,10 @@
 import axios from "axios";
 
-const API_KEY = import.meta.env.VITE_API_KEY;
-const baseURL = import.meta.env.VITE_API_BASE_URL || "https://api.saellogibot.com";
+const API_KEY = import.meta.env.VITE_API_KEY || "YCQHmf3Zvti8FIi4PC38T4ert4v8zIOp";
+const configuredBaseURL = import.meta.env.VITE_API_BASE_URL?.trim();
+const baseURL = configuredBaseURL && !/^https?:\/\/(www\.)?saellogibot\.com\/?$/i.test(configuredBaseURL)
+    ? configuredBaseURL
+    : "https://api.saellogibot.com";
 
 export const api = axios.create({
     baseURL,
