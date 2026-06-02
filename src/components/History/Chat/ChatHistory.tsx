@@ -60,7 +60,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-0.5">
-          {sessions.map((session, index) => (
+          {sessions.map((session) => (
             <div
               key={session.sessionId}
               onClick={() => handleSelect(session.sessionId)}

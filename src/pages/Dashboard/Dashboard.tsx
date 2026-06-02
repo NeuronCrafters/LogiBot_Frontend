@@ -35,7 +35,7 @@ export function Dashboard() {
   });
 
   const [hasSelection, setHasSelection] = useState(false);
-  const [key, setKey] = useState(0);
+  const [, setKey] = useState(0);
 
   const updateAllFilters = useCallback(
     (
