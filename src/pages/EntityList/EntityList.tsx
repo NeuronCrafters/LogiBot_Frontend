@@ -1,25 +1,40 @@
 import { useState } from "react";
 import { logger } from "@/utils/logger";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, TableProperties } from "lucide-react";
+import {
+  AlertCircle,
+  FolderSearch,
+  RefreshCw,
+  SearchX,
+  SlidersHorizontal,
+  TableProperties,
+} from "lucide-react";
 import { EntityListFilter } from "@/components/Entities/List/EntityListFilter";
 import { EntityTable } from "@/components/Entities/List/EntityTable";
 import { useAuth } from "@/hooks/use-Auth";
-import { Typograph } from "@/components/Typograph/Typograph";
 import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
 import type { FilterData } from "@/@types/ChartsType";
 import type { ListItem } from "@/components/Entities/List/EntityTable";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/utils/toast";
 import { academicApi, adminApi } from "@/services/apiClient";
 
 type EntityType = "university" | "course" | "discipline" | "class" | "professor" | "student";
+
+const ENTITY_LABEL: Record<string, string> = {
+  university: "universidade",
+  course: "curso",
+  discipline: "disciplina",
+  class: "turma",
+  professor: "professor",
+  student: "aluno",
+};
 
 export function EntityList() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [currentFilter, setCurrentFilter] = useState<FilterData | null>(null);
   const [entity, setEntity] = useState<EntityType>("university");
+
   const userRoles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isAdmin = userRoles.includes("admin");
   const isCoordinator = userRoles.includes("course-coordinator");
@@ -30,15 +45,13 @@ export function EntityList() {
     data: searchResults,
     isLoading: isSearching,
     error: searchError,
-    refetch: refetchSearch
+    refetch: refetchSearch,
   } = useQuery({
-    queryKey: ['searchEntities', userRole, currentFilter],
+    queryKey: ["searchEntities", userRole, currentFilter],
     queryFn: async () => {
       if (!currentFilter) return { items: [], entity: "university" as EntityType };
-
       try {
-        const result = await searchEntitiesByFilter(userRole, currentFilter);
-        return result;
+        return await searchEntitiesByFilter(userRole, currentFilter);
       } catch (error) {
         logger.error("Admin", "Erro na busca.", error);
         throw new Error("Falha ao buscar entidades");
@@ -48,60 +61,52 @@ export function EntityList() {
     staleTime: 3 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (i) => Math.min(1000 * 2 ** i, 30000),
   });
 
   const searchMutation = useMutation({
-    mutationFn: async (filterData: FilterData) => {
-      return await searchEntitiesByFilter(userRole, filterData);
-    },
+    mutationFn: (filterData: FilterData) =>
+      searchEntitiesByFilter(userRole, filterData),
     onSuccess: (data) => {
       setEntity(data.entity);
-      setCurrentFilter(currentFilter);
-      toast.success(`${data.items.length} registros encontrados`);
-
-      queryClient.setQueryData(['searchEntities', userRole, currentFilter], data);
+      queryClient.setQueryData(["searchEntities", userRole, currentFilter], data);
+      if (data.items.length === 0) {
+        toast("Nenhum resultado encontrado para os filtros selecionados.");
+      } else {
+        toast.success(
+          `${data.items.length} ${ENTITY_LABEL[data.entity] ?? "registro"}(s) encontrado(s).`
+        );
+      }
     },
     onError: (error) => {
       logger.error("Admin", "Erro na busca.", error);
       toast.error("Erro ao buscar registros. Tente novamente.");
-    }
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      if (displayEntity === "professor") {
-        await adminApi.deleteProfessor(id);
-      } else if (displayEntity === "student") {
-        await adminApi.deleteStudent(id);
-      } else if (["university", "course", "class", "discipline"].includes(displayEntity)) {
+      if (displayEntity === "professor") await adminApi.deleteProfessor(id);
+      else if (displayEntity === "student") await adminApi.deleteStudent(id);
+      else if (["university", "course", "class", "discipline"].includes(displayEntity))
         await academicApi.delete(displayEntity as any, id);
-      } else {
-        throw new Error(`Não é possível deletar entidade do tipo: ${displayEntity}`);
-      }
+      else throw new Error(`Não é possível deletar: ${displayEntity}`);
       return id;
     },
     onSuccess: () => {
-      toast.success("Registro deletado com sucesso!");
-
-      queryClient.invalidateQueries({
-        queryKey: ['searchEntities', userRole, currentFilter]
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['academicData'] });
-      queryClient.invalidateQueries({ queryKey: ['recentItems'] });
-
-      if (currentFilter) {
-        refetchSearch();
-      }
+      toast.success("Registro excluído com sucesso.");
+      queryClient.invalidateQueries({ queryKey: ["searchEntities", userRole, currentFilter] });
+      queryClient.invalidateQueries({ queryKey: ["academicData"] });
+      queryClient.invalidateQueries({ queryKey: ["recentItems"] });
+      if (currentFilter) refetchSearch();
     },
     onError: (error) => {
       logger.error("Admin", "Erro ao deletar.", error);
-      toast.error("Erro ao deletar registro.");
-    }
+      toast.error("Erro ao excluir registro.");
+    },
   });
 
-  const handleSearch = async (filterData: FilterData) => {
+  const handleSearch = (filterData: FilterData) => {
     setCurrentFilter(filterData);
     searchMutation.mutate(filterData);
   };
@@ -109,12 +114,7 @@ export function EntityList() {
   const handleResetList = () => {
     setCurrentFilter(null);
     setEntity("university");
-
-    queryClient.removeQueries({
-      queryKey: ['searchEntities', userRole]
-    });
-
-    toast("Lista resetada");
+    queryClient.removeQueries({ queryKey: ["searchEntities", userRole] });
   };
 
   const handleEdit = (item: ListItem) => {
@@ -125,24 +125,17 @@ export function EntityList() {
     deleteMutation.mutate(id);
   };
 
-  const handleRetrySearch = () => {
-    if (currentFilter) {
-      refetchSearch();
-    }
-  };
-
-  const items = searchResults?.items || [];
-  const displayEntity = searchResults?.entity || entity;
+  const items = searchResults?.items ?? [];
+  const displayEntity = searchResults?.entity ?? entity;
+  const isLoading = searchMutation.isPending || isSearching;
 
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 text-white md:px-8 md:py-8">
-      <div className="mx-auto w-full max-w-6xl space-y-5">
-          <motion.section
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-            className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6"
-          >
+      <div className="mx-auto w-full max-w-7xl space-y-5">
+
+        {/* ── Page header ── */}
+        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
                 <TableProperties className="h-5 w-5" />
@@ -151,101 +144,128 @@ export function EntityList() {
                 <h1 className="font-[Poppins] text-2xl font-semibold text-white">
                   Listar entidades
                 </h1>
-                <p className="mt-2 font-[Poppins] text-sm leading-relaxed text-zinc-400">
+                <p className="mt-1 font-[Poppins] text-sm text-zinc-400">
                   Pesquise, visualize e gerencie registros acadêmicos do sistema.
                 </p>
               </div>
             </div>
-          </motion.section>
 
-          <EntityListFilter
-            onSearch={handleSearch}
-            onReset={handleResetList}
-          />
-
-          {searchMutation.isPending && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4"
-            >
-              <p className="font-[Poppins] text-sm text-blue-300">Buscando registros...</p>
-            </motion.div>
-          )}
-
-          {searchError && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4"
-            >
-              <p className="mb-2 text-red-300">Erro ao buscar registros.</p>
-              <button
-                onClick={handleRetrySearch}
-                className="text-sm text-red-200 underline transition-colors hover:text-red-100"
-                disabled={isSearching}
-              >
-                {isSearching ? "Tentando novamente..." : "Tentar novamente"}
-              </button>
-            </motion.div>
-          )}
-
-          <AnimatePresence>
-            {items.length > 0 && (
-              <motion.div
-                key="list"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <Typograph
-                    text={`${items.length} ${displayEntity}(s) encontrado(s)`}
-                    colorText="text-gray-300"
-                    variant="text6"
-                    weight="regular"
-                    fontFamily="poppins"
-                  />
-                </div>
-
-                <EntityTable
-                  items={items}
-                  entity={displayEntity}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              </motion.div>
+            {/* Results badge */}
+            {items.length > 0 && !isLoading && (
+              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-2 font-[Poppins] text-sm text-zinc-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                {items.length}{" "}
+                {ENTITY_LABEL[displayEntity] ?? "registro"}
+                {items.length !== 1 ? "s" : ""} encontrado
+                {items.length !== 1 ? "s" : ""}
+              </div>
             )}
-          </AnimatePresence>
+          </div>
+        </section>
 
-          {currentFilter && !searchMutation.isPending && !searchError && items.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] p-8 text-center"
-            >
-              <p className="mb-2 text-gray-400">Nenhum registro encontrado</p>
-              <p className="text-sm text-gray-500">
-                Tente ajustar os filtros de busca
-              </p>
-            </motion.div>
-          )}
+        {/* ── Filters ── */}
+        <EntityListFilter onSearch={handleSearch} onReset={handleResetList} />
 
-          {!currentFilter && !searchMutation.isPending && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] p-8 text-center"
-            >
-              <Search className="mx-auto mb-4 h-10 w-10 text-zinc-500" />
-              <p className="mb-2 text-gray-400">Use os filtros acima para buscar registros</p>
-              <p className="text-sm text-gray-500">
-                Selecione os critérios de busca e clique em "Buscar"
+        {/* ── Loading ── */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-[#1f1f1f] py-16">
+            <div className="relative">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/5 border-t-blue-500" />
+            </div>
+            <div className="text-center">
+              <p className="font-[Poppins] text-sm font-medium text-white">
+                Buscando registros...
               </p>
-            </motion.div>
-          )}
+              <p className="mt-1 font-[Poppins] text-xs text-zinc-600">
+                Isso pode levar alguns segundos
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Error ── */}
+        {searchError && !isLoading && (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-red-500/20 bg-red-500/5 py-14">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 text-red-400">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <div className="text-center">
+              <p className="font-[Poppins] text-sm font-semibold text-white">
+                Erro ao buscar registros
+              </p>
+              <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
+                Verifique sua conexão e tente novamente.
+              </p>
+            </div>
+            <button
+              onClick={() => refetchSearch()}
+              disabled={isSearching}
+              className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 font-[Poppins] text-sm text-red-300 transition-colors hover:bg-red-500/20 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isSearching ? "animate-spin" : ""}`} />
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
+        {/* ── Results ── */}
+        {!isLoading && !searchError && items.length > 0 && (
+          <EntityTable
+            items={items}
+            entity={displayEntity}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
+
+        {/* ── Empty: searched but nothing found ── */}
+        {!isLoading && !searchError && currentFilter && items.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-16">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-neutral-950/60 text-zinc-600">
+              <SearchX className="h-6 w-6" />
+            </div>
+            <div className="text-center">
+              <p className="font-[Poppins] text-sm font-semibold text-white">
+                Nenhum resultado encontrado
+              </p>
+              <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
+                Tente ajustar os filtros de busca ou selecionar outra categoria.
+              </p>
+            </div>
+            <button
+              onClick={handleResetList}
+              className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Limpar filtros
+            </button>
+          </div>
+        )}
+
+        {/* ── Empty: no search yet ── */}
+        {!isLoading && !currentFilter && (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-20">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-neutral-950/60 text-zinc-700">
+              <FolderSearch className="h-7 w-7" />
+            </div>
+            <div className="text-center">
+              <p className="font-[Poppins] text-sm font-semibold text-white">
+                Pronto para buscar
+              </p>
+              <p className="mt-1 max-w-xs font-[Poppins] text-xs leading-relaxed text-zinc-500">
+                Configure os filtros acima e clique em{" "}
+                <span className="text-zinc-400">Buscar</span> para listar os registros
+                do sistema.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-2.5">
+              <SlidersHorizontal className="h-3.5 w-3.5 text-zinc-600" />
+              <span className="font-[Poppins] text-xs text-zinc-600">
+                Tipo de filtro → Selecionar → Buscar
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

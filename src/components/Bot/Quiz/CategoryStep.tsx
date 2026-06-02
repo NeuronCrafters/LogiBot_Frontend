@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { logger } from "@/utils/logger";
 import { Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
 import { ChoiceButtonGroup } from "@/components/Buttons/ChoiceButtonGroup";
 import { formatTitle } from "@/utils/formatText";
 import { quizService } from "@/services/api/api_quiz";
@@ -32,12 +31,7 @@ export function CategoryStep({ buttons, onNext }: CategoryStepProps) {
   };
 
   return (
-    <motion.div
-      className="w-full"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
+    <div className="w-full">
       {loading && (
         <div className="flex justify-center items-center w-full py-6">
           <Loader2 className="animate-spin text-indigo-400 w-5 h-5" />
@@ -53,6 +47,6 @@ export function CategoryStep({ buttons, onNext }: CategoryStepProps) {
           onSelect={handleClick}
         />
       )}
-    </motion.div>
+    </div>
   );
 }

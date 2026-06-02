@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { historyService } from "@/services/api/api_history";
 import { GraduationCap, Loader2, AlertCircle, Plus } from "lucide-react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime } from "@/utils/formatDate";
 
@@ -91,11 +90,8 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
       ) : (
         <div className="flex flex-col gap-0.5">
           {quizzes.map((quiz, index) => (
-            <motion.div
+            <div
               key={quiz.quizId || index}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2, delay: index * 0.03 }}
               onClick={() => handleSelect(quiz.quizId)}
               className="group flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
             >
@@ -113,7 +109,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
                   </span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}

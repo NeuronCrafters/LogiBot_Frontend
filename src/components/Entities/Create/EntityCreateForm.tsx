@@ -5,7 +5,6 @@ import { CourseForm } from "./CourseForm";
 import { ProfessorForm } from "./ProfessorForm";
 import { ClassForm } from "./ClassForm";
 import { DisciplineForm } from "./DisciplineForm";
-import { motion, AnimatePresence } from "framer-motion";
 import type {
   UniversityData,
   CourseData,
@@ -23,19 +22,24 @@ type Cls = ClassData & { id?: string | number };
 type Disc = DisciplineData & { id?: string | number };
 
 interface EntityCreateFormProps {
-  onSubmit: (
-    entidade: EntityType,
-    item: Univ | Course | Prof | Cls | Disc
-  ) => void;
+  onSubmit: (entidade: EntityType, item: Univ | Course | Prof | Cls | Disc) => void;
   initialData?:
-  | { type: "university"; data: Univ }
-  | { type: "course"; data: Course }
-  | { type: "class"; data: Cls }
-  | { type: "professor"; data: Prof }
-  | { type: "discipline"; data: Disc };
+    | { type: "university"; data: Univ }
+    | { type: "course"; data: Course }
+    | { type: "class"; data: Cls }
+    | { type: "professor"; data: Prof }
+    | { type: "discipline"; data: Disc };
   onEntityChange?: () => void;
   animateForm?: boolean;
 }
+
+const ENTITY_LABELS: Record<EntityType, string> = {
+  university: "Universidade",
+  course: "Curso",
+  class: "Turma",
+  professor: "Professor",
+  discipline: "Disciplina",
+};
 
 export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
   onSubmit,
@@ -68,108 +72,76 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
     }
   }, [selectedEntity, onEntityChange]);
 
-  const handleSelectChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setSelectedEntity(e.target.value as EntityType);
-  };
-
-  const initial =
-    initialData?.type === selectedEntity ? initialData.data : undefined;
+  const initial = initialData?.type === selectedEntity ? initialData.data : undefined;
 
   return (
-    <div className="entity-form-panel rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
-      <h2 className="font-[Poppins] text-base font-semibold text-white">
-        Nova entidade
-      </h2>
+    <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+      {/* Header */}
+      <div className="mb-5">
+        <h2 className="font-[Poppins] text-base font-semibold text-white">
+          Nova entidade
+        </h2>
+        <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
+          Selecione o tipo de registro e preencha as informações abaixo.
+        </p>
+      </div>
 
-      <label className="mt-5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Selecione a entidade</label>
-      <select
-        value={selectedEntity}
-        onChange={handleSelectChange}
-        className="mt-2 h-12 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
-      >
-        <option value="">-- Escolha --</option>
-        {allowedEntities.map((ent) => (
-          <option key={ent} value={ent}>
-            {{
-              university: "Universidade",
-              course: "Curso",
-              class: "Turma",
-              professor: "Professor",
-              discipline: "Disciplina",
-            }[ent]}
-          </option>
-        ))}
-      </select>
+      {/* Entity type selector */}
+      <div>
+        <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Tipo de entidade
+        </label>
+        <select
+          value={selectedEntity}
+          onChange={(e) => setSelectedEntity(e.target.value as EntityType)}
+          className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
+        >
+          <option value="">Selecione o tipo</option>
+          {allowedEntities.map((ent) => (
+            <option key={ent} value={ent}>
+              {ENTITY_LABELS[ent]}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <AnimatePresence>
-        {selectedEntity === "university" && isAdmin && animateForm && (
-          <motion.div
-            key="university"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
+      {/* Form area — only when entity selected */}
+      {selectedEntity && animateForm && (
+        <>
+          <div className="my-5 border-t border-white/5" />
+
+          {selectedEntity === "university" && isAdmin && (
             <UniversityForm
               onSubmit={(dados) => onSubmit("university", dados)}
               initialData={initial as Univ | undefined}
             />
-          </motion.div>
-        )}
-        {selectedEntity === "course" && isAdmin && animateForm && (
-          <motion.div
-            key="course"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
+          )}
+          {selectedEntity === "course" && isAdmin && (
             <CourseForm
               onSubmit={(dados) => onSubmit("course", dados)}
               initialData={initial as Course | undefined}
             />
-          </motion.div>
-        )}
-        {selectedEntity === "class" && animateForm && (
-          <motion.div
-            key="class"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
+          )}
+          {selectedEntity === "class" && (
             <ClassForm
               onSubmit={(dados) => onSubmit("class", dados)}
               initialData={initial as Cls | undefined}
             />
-          </motion.div>
-        )}
-        {selectedEntity === "professor" && isAdmin && animateForm && (
-          <motion.div
-            key="professor"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
+          )}
+          {selectedEntity === "professor" && isAdmin && (
             <ProfessorForm
               onSubmit={(dados) => onSubmit("professor", dados)}
               initialData={initial as Prof | undefined}
             />
-          </motion.div>
-        )}
-        {selectedEntity === "discipline" && (isAdmin || isCoordinator) && animateForm && (
-          <motion.div
-            key="discipline"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
+          )}
+          {selectedEntity === "discipline" && (isAdmin || isCoordinator) && (
             <DisciplineForm
               onSubmit={(dados) => onSubmit("discipline", dados)}
               initialData={initial as Disc | undefined}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </>
+      )}
     </div>
   );
 };

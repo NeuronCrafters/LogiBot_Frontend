@@ -15,15 +15,20 @@ export interface CourseFormProps {
   initialData?: CourseData;
 }
 
+const labelCls =
+  "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
+const inputCls =
+  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
+const selectCls =
+  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60";
+
 function CourseForm({ onSubmit, initialData }: CourseFormProps) {
   const [academicData, setAcademicData] = useState<{
     universities: University[];
   } | null>(null);
 
-  const [name, setName] = useState<string>(initialData?.name || "");
-  const [universityId, setUniversityId] = useState<string>(
-    initialData?.universityId || ""
-  );
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [universityId, setUniversityId] = useState(initialData?.universityId ?? "");
 
   useMemo(() => {
     const fetchAcademicData = async () => {
@@ -37,39 +42,38 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
     fetchAcademicData();
   }, []);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !universityId) return;
-
-    onSubmit({
-      name: name.trim(),
-      universityId
-    });
-
-    setName("");
-    setUniversityId("");
-  }, [name, universityId, onSubmit]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!name.trim() || !universityId) return;
+      onSubmit({ name: name.trim(), universityId });
+      setName("");
+      setUniversityId("");
+    },
+    [name, universityId, onSubmit]
+  );
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+    <form onSubmit={handleSubmit} className="mt-5 space-y-4">
       <div>
-        <label className="block text-white mb-2">Nome do Curso:</label>
+        <label className={labelCls}>Nome do Curso</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          placeholder="Ex: Ciência da Computação"
           required
-          className="p-2 rounded w-full bg-[#141414] text-white"
+          className={inputCls}
         />
       </div>
 
       <div>
-        <label className="block text-white mb-2">Universidade:</label>
+        <label className={labelCls}>Universidade</label>
         <select
           value={universityId}
           onChange={(e) => setUniversityId(e.target.value)}
           required
-          className="p-2 rounded w-full bg-[#141414] text-white"
+          className={selectCls}
         >
           <option value="">Selecione a universidade</option>
           {academicData?.universities.map((uni) => (
@@ -80,7 +84,7 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
         </select>
       </div>
 
-      <div className="pt-2">
+      <div className="pt-1">
         <EntityActionButton
           action={initialData ? "update" : "create"}
           onClick={handleSubmit}

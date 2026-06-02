@@ -1,18 +1,29 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { academicFiltersApi } from "@/services/apiClient";
 import type { ProfessorData } from "@/@types/FormsDataTypes";
 import { EntityActionButton } from "@/components/Buttons/EntityActionButton";
-import { Eye, EyeOff } from "lucide-react";
 
 export interface ProfessorFormProps {
   onSubmit: (data: ProfessorData) => void;
   initialData?: ProfessorData;
 }
 
+const labelCls =
+  "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
+const inputCls =
+  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
+const selectCls =
+  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60";
+
 function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
-  const { data: academicData, isLoading: loadingAcademicData, error } = useQuery({
-    queryKey: ['academicData'],
+  const {
+    data: academicData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["academicData"],
     queryFn: async () => {
       const response = await academicFiltersApi.getAcademicData();
       return response.data;
@@ -32,112 +43,109 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
   const availableCourses = useMemo(() => {
     if (!academicData?.universities || !school) return [];
-
-    const university = academicData.universities.find(u => u._id === school);
-    return university?.courses || [];
+    return academicData.universities.find((u) => u._id === school)?.courses ?? [];
   }, [academicData, school]);
-
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !email.trim() || !password.trim() || !school || courses.length === 0) return;
-
-    onSubmit({
-      name: name.trim(),
-      email: email.trim(),
-      password: password.trim(),
-      school,
-      courses,
-    });
-
-    setName("");
-    setEmail("");
-    setPassword("");
-    setSchool("");
-    setCourses([]);
-  }, [name, email, password, school, courses, onSubmit]);
 
   const handleUniversityChange = useCallback((universityId: string) => {
     setSchool(universityId);
     setCourses([]);
   }, []);
 
-  if (loadingAcademicData) {
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!name.trim() || !email.trim() || !password.trim() || !school || courses.length === 0)
+        return;
+      onSubmit({ name: name.trim(), email: email.trim(), password: password.trim(), school, courses });
+      setName("");
+      setEmail("");
+      setPassword("");
+      setSchool("");
+      setCourses([]);
+    },
+    [name, email, password, school, courses, onSubmit]
+  );
+
+  if (isLoading) {
     return (
-      <div className="mt-4 space-y-4">
-        <div className="text-white">Carregando dados acadêmicos...</div>
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-12 rounded bg-white/10 animate-pulse" />
-          ))}
+      <div className="mt-5 space-y-3">
+        <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Carregando dados acadêmicos...
         </div>
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-11 rounded-xl bg-white/5 animate-pulse" />
+        ))}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 mt-4 border rounded-lg bg-red-600/20 border-red-600/50">
-        <p className="text-red-300">
+      <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4">
+        <p className="font-[Poppins] text-sm text-red-400">
           Erro ao carregar dados acadêmicos. Tente novamente.
-        </p>
-        <p className="mt-1 text-sm text-red-400">
-          {error instanceof Error ? error.message : 'Erro desconhecido'}
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-      <div>
-        <label className="block mb-2 text-white">Nome do Professor:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
-        />
+    <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Nome completo</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ex: João da Silva"
+            required
+            className={inputCls}
+          />
+        </div>
+
+        <div>
+          <label className={labelCls}>E-mail</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="professor@universidade.edu.br"
+            required
+            className={inputCls}
+          />
+        </div>
       </div>
 
       <div>
-        <label className="block mb-2 text-white">Email:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
-        />
-      </div>
-
-      <div>
-        <label className="block mb-2 text-white">Senha:</label>
+        <label className={labelCls}>Senha de acesso</label>
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mínimo 6 caracteres"
             required
-            className="p-2 pr-10 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
+            className={`${inputCls} pr-11`}
           />
           <button
             type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute inset-y-0 right-0 flex items-center pr-2 text-white transition-colors hover:text-gray-300"
+            onClick={() => setShowPassword((p) => !p)}
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
           >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
       </div>
 
       <div>
-        <label className="block mb-2 text-white">Universidade:</label>
+        <label className={labelCls}>Universidade</label>
         <select
           value={school}
           onChange={(e) => handleUniversityChange(e.target.value)}
           required
-          className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
+          className={selectCls}
         >
           <option value="">Selecione a universidade</option>
           {academicData?.universities.map((uni) => (
@@ -150,12 +158,12 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
       {school && availableCourses.length > 0 && (
         <div>
-          <label className="block mb-2 text-white">Curso:</label>
+          <label className={labelCls}>Curso</label>
           <select
             value={courses[0] ?? ""}
             onChange={(e) => setCourses(e.target.value ? [e.target.value] : [])}
             required
-            className="p-2 rounded w-full bg-[#141414] text-white border border-white/10 focus:ring-2 focus:ring-white outline-none"
+            className={selectCls}
           >
             <option value="">Selecione o curso</option>
             {availableCourses.map((course) => (
@@ -168,14 +176,14 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       )}
 
       {school && availableCourses.length === 0 && (
-        <div className="p-3 border rounded-lg bg-yellow-600/20 border-yellow-600/50">
-          <p className="text-sm text-yellow-300">
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
+          <p className="font-[Poppins] text-sm text-amber-400">
             Nenhum curso encontrado para esta universidade.
           </p>
         </div>
       )}
 
-      <div className="pt-2">
+      <div className="pt-1">
         <EntityActionButton
           action={initialData ? "update" : "create"}
           onClick={handleSubmit}

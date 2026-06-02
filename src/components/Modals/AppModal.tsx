@@ -1,5 +1,4 @@
 import { type ReactNode } from "react";
-import { motion } from "framer-motion";
 import {
   CheckCircle2,
   Info,
@@ -100,12 +99,7 @@ export function AppModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        className="w-full max-w-md"
-      >
+      <div className="w-full max-w-md">
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] text-white shadow-2xl shadow-black/30">
           <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
             <div className="flex items-start gap-3">
@@ -164,7 +158,7 @@ export function AppModal({
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

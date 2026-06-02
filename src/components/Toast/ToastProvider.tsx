@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle, XCircle, Info, AlertTriangle, X } from "lucide-react";
 import { subscribeToToast, type ToastEvent, type ToastType } from "@/utils/toast";
 
@@ -33,14 +32,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       {createPortal(
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none">
-          <AnimatePresence>
+          <>
             {toasts.map(t => (
-              <motion.div
+              <div
                 key={t.id}
-                initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0,  scale: 1    }}
-                exit={{    opacity: 0,         scale: 0.95 }}
-                transition={{ duration: 0.18, ease: "easeOut" }}
                 className="pointer-events-auto flex items-center gap-3 rounded-lg bg-[#333] px-4 py-3 text-sm text-white shadow-lg"
               >
                 {ICONS[t.type]}
@@ -51,9 +46,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
-              </motion.div>
+              </div>
             ))}
-          </AnimatePresence>
+          </>
         </div>,
         document.body
       )}

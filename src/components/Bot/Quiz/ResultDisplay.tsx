@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Typograph } from "@/components/Typograph/Typograph";
 
@@ -34,12 +33,7 @@ export function ResultDisplay({ totalCorrectAnswers, totalWrongAnswers, detalhes
   }, [totalCorrectAnswers, totalWrongAnswers]);
 
   return (
-    <motion.div
-      className="mx-auto w-full max-w-3xl space-y-4 break-words text-left whitespace-normal"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="mx-auto w-full max-w-3xl space-y-4 break-words text-left whitespace-normal">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
           <div className="flex items-center gap-2 text-sm text-emerald-400">
@@ -67,39 +61,30 @@ export function ResultDisplay({ totalCorrectAnswers, totalWrongAnswers, detalhes
                 {isOpen ? <ChevronUp className="w-5 h-5 text-white/70 flex-shrink-0" /> : <ChevronDown className="w-5 h-5 text-white/70 flex-shrink-0" />}
               </button>
 
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    key="content"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-3 pt-3 border-t border-white/10 overflow-hidden"
-                  >
-                    <div className="text-sm text-white/80 space-y-2">
-                      {!isCorrect && (
-                        <p>
-                          <strong className="text-white/90 font-semibold">Sua resposta: </strong>
-                          {q.selected} - {q.selectedText}
-                        </p>
-                      )}
+              {isOpen && (
+                <div className="mt-3 pt-3 border-t border-white/10">
+                  <div className="text-sm text-white/80 space-y-2">
+                    {!isCorrect && (
                       <p>
-                        <strong className="text-white/90 font-semibold">Resposta correta: </strong>
-                        {q.correct} - {q.correctText}
+                        <strong className="text-white/90 font-semibold">Sua resposta: </strong>
+                        {q.selected} - {q.selectedText}
                       </p>
-                      <p>
-                        <strong className="text-white/90 font-semibold">Explicação: </strong>
-                        {q.explanation}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    )}
+                    <p>
+                      <strong className="text-white/90 font-semibold">Resposta correta: </strong>
+                      {q.correct} - {q.correctText}
+                    </p>
+                    <p>
+                      <strong className="text-white/90 font-semibold">Explicação: </strong>
+                      {q.explanation}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 }

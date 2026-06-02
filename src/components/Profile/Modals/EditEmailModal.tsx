@@ -2,8 +2,6 @@ import { useState } from "react";
 import { X, Save, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Typograph } from "@/components/Typograph/Typograph";
-import { motion, AnimatePresence } from "framer-motion";
-
 interface EditEmailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,15 +21,10 @@ export function EditEmailModal({ isOpen, onClose, currentEmail, onSave }: EditEm
   };
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-md bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden"
-          >
+          <div className="w-full max-w-md bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <div className="flex items-center gap-2">
                 <Mail size={18} className="text-purple-400" />
@@ -70,9 +63,9 @@ export function EditEmailModal({ isOpen, onClose, currentEmail, onSave }: EditEm
                 <Save size={16} /> Salvar
               </Button>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

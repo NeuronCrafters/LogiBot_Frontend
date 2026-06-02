@@ -1,5 +1,4 @@
 import * as React from "react"
-import { AnimatePresence, motion } from "framer-motion"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -39,26 +38,19 @@ const DialogContent = React.forwardRef<
 >(({ className, children }, ref) => {
   const { open, setOpen } = React.useContext(DialogContext);
   return (
-    <AnimatePresence>
+    <>
       {open && (
         <>
-          <motion.div
+          <div
             className="fixed inset-0 z-50 bg-black/80"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             onClick={() => setOpen(false)}
           />
-          <motion.div
+          <div
             ref={ref}
             className={cn(
               "fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
               className
             )}
-            initial={{ opacity: 0, scale: 0.95, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -8 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
           >
             {children}
             <button
@@ -68,10 +60,10 @@ const DialogContent = React.forwardRef<
               <X className="h-4 w-4" />
               <span className="sr-only">Fechar</span>
             </button>
-          </motion.div>
+          </div>
         </>
       )}
-    </AnimatePresence>
+    </>
   );
 });
 DialogContent.displayName = "DialogContent";

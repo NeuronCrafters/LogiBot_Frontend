@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { MessageSquare, Lock, Info } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Typograph } from '@/components/Typograph/Typograph';
@@ -6,12 +5,7 @@ import { Typograph } from '@/components/Typograph/Typograph';
 export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles }) => {
   return (
     <div className="flex-1 w-full max-w-2xl px-4 pt-32 pb-40 mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-8 text-center"
-      >
+      <div className="mb-8 text-center">
         <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full shadow-lg bg-gradient-to-r from-violet-500 to-purple-600">
           <MessageSquare size={32} className="text-white" />
         </div>
@@ -30,14 +24,9 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
           weight="regular"
           fontFamily="poppins"
         />
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg"
-      >
+      <div className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg">
         <div className="flex items-start gap-4 mb-4">
           <Lock className="mt-1 text-purple-500" size={24} />
           <div>
@@ -80,15 +69,9 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
             />
           </AlertDescription>
         </Alert>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-        className="text-center"
-      >
-      </motion.div>
+      <div className="text-center" />
     </div>
   );
 };
@@ -96,12 +79,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({ userRoles
 export const AdminWelcome: React.FC = () => {
   return (
     <div className="flex-1 w-full max-w-2xl px-4 pt-32 pb-40 mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-8 text-center"
-      >
+      <div className="mb-8 text-center">
         <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full shadow-lg bg-gradient-to-r from-fuchsia-500 to-orange-600">
           <Lock size={32} className="text-white" />
         </div>
@@ -120,14 +98,9 @@ export const AdminWelcome: React.FC = () => {
           weight="regular"
           fontFamily="poppins"
         />
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg"
-      >
+      <div className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg">
         <div className="flex items-start gap-4 mb-4">
           <Info className="mt-1 text-fuchsia-400" size={24} />
           <div>
@@ -172,15 +145,9 @@ export const AdminWelcome: React.FC = () => {
             </AlertDescription>
           </Alert>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-        className="text-center"
-      >
-      </motion.div>
+      <div className="text-center" />
     </div>
   );
 };

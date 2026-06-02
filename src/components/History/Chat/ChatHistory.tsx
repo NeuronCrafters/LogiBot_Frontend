@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { MessageSquare, Loader2, AlertCircle, Plus } from "lucide-react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime } from "@/utils/formatDate";
 import { useChatHistory } from "@/hooks/use-ChatHistory";
@@ -62,11 +61,8 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
       ) : (
         <div className="flex flex-col gap-0.5">
           {sessions.map((session, index) => (
-            <motion.div
+            <div
               key={session.sessionId}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2, delay: index * 0.03 }}
               onClick={() => handleSelect(session.sessionId)}
               className="group flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
             >
@@ -81,7 +77,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
                     : ""}
                 </span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}

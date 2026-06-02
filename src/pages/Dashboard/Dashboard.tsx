@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { addDays, formatISODate } from "@/utils/formatDate";
 import { BarChart2, Filter, MousePointer2 } from "lucide-react";
 import { Typograph } from "@/components/Typograph/Typograph";
@@ -101,12 +100,7 @@ export function Dashboard() {
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
-        <motion.section
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6"
-        >
+        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
@@ -126,7 +120,7 @@ export function Dashboard() {
               Filtros obrigatórios
             </div>
           </div>
-        </motion.section>
+        </section>
 
         <DashboardFilter onChange={handleEntityFilterChange} />
 
@@ -144,13 +138,7 @@ export function Dashboard() {
             />
           </div>
         ) : (
-          <motion.div
-            key={key}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             <UsageChart filter={legacyFilter} />
             {legacyFilter.type === "student" && (
               <AccessPatternChart filters={dashboardFilters} />
@@ -172,7 +160,7 @@ export function Dashboard() {
             </div>
             <EffortMatrixChart filters={dashboardFilters} />
             <LearningJourneyChart filters={dashboardFilters} />
-          </motion.div>
+          </div>
         )}
       </div>
     </main>

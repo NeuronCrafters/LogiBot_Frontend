@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Brain } from "lucide-react";
 import { useAuth } from "@/hooks/use-Auth";
 import { useQuizFlow } from "@/hooks/use-QuizFlow";
@@ -70,7 +69,7 @@ export function Quiz() {
             </div>
 
             <button
-              onClick={() => navigate("/inicio")}
+              onClick={() => navigate("/chat")}
               className="inline-flex h-10 w-fit items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 font-[Poppins] text-sm font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -118,67 +117,30 @@ export function Quiz() {
             ))}
           </div>
 
-          <AnimatePresence mode="wait">
+          <>
             {(step === "initial" || step === "levels") && (
-              <motion.div
-                key="levels"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.3 }}
-              >
-                <LevelStep onNext={handleLevelNext} />
-              </motion.div>
+              <LevelStep onNext={handleLevelNext} />
             )}
             {step === "categories" && (
-              <motion.div
-                key="categories"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.3 }}
-              >
-                <CategoryStep
-                  buttons={categoryButtons}
-                  onNext={handleCategoryNext}
-                />
-              </motion.div>
+              <CategoryStep
+                buttons={categoryButtons}
+                onNext={handleCategoryNext}
+              />
             )}
             {step === "subsubjects" && (
-              <motion.div
-                key="subsubjects"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.3 }}
-              >
-                <SubsubjectStep
-                  buttons={subsubjectButtons}
-                  onNext={handleSubsubjectNext}
-                />
-              </motion.div>
+              <SubsubjectStep
+                buttons={subsubjectButtons}
+                onNext={handleSubsubjectNext}
+              />
             )}
             {step === "questions" && (
-              <motion.div
-                key="questions"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.3 }}
-              >
-                <QuestionsDisplay
-                  questions={questions}
-                  onSubmitAnswers={handleSubmitAnswers}
-                />
-              </motion.div>
+              <QuestionsDisplay
+                questions={questions}
+                onSubmitAnswers={handleSubmitAnswers}
+              />
             )}
             {step === "results" && resultData && (
-              <motion.div
-                key="results"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
+              <>
                 <ResultDisplay
                   totalCorrectAnswers={resultData.totalCorrectAnswers}
                   totalWrongAnswers={resultData.totalWrongAnswers}
@@ -192,9 +154,9 @@ export function Quiz() {
                     Continuar praticando
                   </button>
                 </div>
-              </motion.div>
+              </>
             )}
-          </AnimatePresence>
+          </>
         </section>
       </div>
     </main>

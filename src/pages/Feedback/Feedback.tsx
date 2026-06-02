@@ -1,5 +1,4 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { motion } from "framer-motion";
 import { toast } from "@/utils/toast";
 import {
   AlertCircle,
@@ -90,12 +89,7 @@ export function Feedback() {
   return (
     <>
       <main className="flex min-h-full flex-1 items-center overflow-y-auto px-4 py-6 font-[Poppins] md:px-8 md:py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"
-        >
+        <div className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
           <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
               <MessageSquare className="h-6 w-6" />
@@ -221,7 +215,7 @@ export function Feedback() {
               </Button>
             </div>
           </form>
-        </motion.div>
+        </div>
       </main>
     </>
   );

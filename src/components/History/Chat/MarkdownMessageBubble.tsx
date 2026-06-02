@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Copy, Check } from "lucide-react";
@@ -82,26 +81,16 @@ export function MarkdownMessageBubble({ text, sender }: MarkdownMessageBubblePro
 
   if (isUser) {
     return (
-      <motion.div
-        className="flex justify-end mb-6 px-2"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
-      >
+      <div className="flex justify-end mb-6 px-2">
         <div className="max-w-[75%] bg-neutral-800 border border-neutral-700 rounded-2xl rounded-br-sm px-4 py-3">
           <p className="text-gray-100 text-sm leading-relaxed font-[Poppins] whitespace-pre-wrap">{text}</p>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      className="flex gap-3 mb-6 px-2"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-    >
+    <div className="flex gap-3 mb-6 px-2">
       <div className="flex-shrink-0 mt-1">
         <div className="w-7 h-7 rounded-full bg-neutral-900 border border-neutral-700 p-0.5 flex items-center justify-center shadow">
           <img src={logo} alt="Bot" className="w-full h-full object-contain" />
@@ -112,6 +101,6 @@ export function MarkdownMessageBubble({ text, sender }: MarkdownMessageBubblePro
           {text}
         </Markdown>
       </div>
-    </motion.div>
+    </div>
   );
 }

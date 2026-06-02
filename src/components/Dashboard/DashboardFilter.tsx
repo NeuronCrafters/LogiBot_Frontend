@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { Label } from "@/components/ui/label";
 import { addDays, formatISODate } from "@/utils/formatDate";
@@ -119,14 +118,7 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
   };
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6"
-    >
+    <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <h3 className="font-[Poppins] text-base font-semibold text-white">
         Filtros
       </h3>
@@ -143,7 +135,7 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
               id="entity-type"
               value={entityType}
               onChange={(e) => handleEntityTypeChange(e.target.value)}
-              className="h-12 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
+              className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
             >
               <option value="">Selecione uma Entidade</option>
 
@@ -166,6 +158,6 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
         )}
 
       </div>
-    </motion.div>
+    </div>
   );
 }

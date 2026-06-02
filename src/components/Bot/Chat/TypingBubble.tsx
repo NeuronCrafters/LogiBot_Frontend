@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Typograph } from "@/components/Typograph/Typograph";
 
 interface TypingBubbleProps {
@@ -29,12 +28,7 @@ export function TypingBubble({ onDone, text }: TypingBubbleProps) {
   }, [onDone]);
 
   return (
-    <motion.div
-      className="flex items-end w-full mb-3 justify-start animate-fade-in"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="flex items-end w-full mb-3 justify-start animate-fade-in">
       <div className="bg-[#2c2c2c] text-gray-200 px-4 py-2 rounded-xl rounded-bl-none shadow max-w-[75%]">
         <Typograph
           text={showText ? text : `Só um momento${".".repeat(dotCount)}`}
@@ -44,6 +38,6 @@ export function TypingBubble({ onDone, text }: TypingBubbleProps) {
           colorText="text-gray-200"
         />
       </div>
-    </motion.div>
+    </div>
   );
 }

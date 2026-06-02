@@ -3,7 +3,6 @@ import { logger } from "@/utils/logger";
 import { User } from '@/contexts/AuthContext';
 import { ChatInput } from '@/components/Inputs/ChatInput';
 import { useQuizFlow } from '@/hooks/use-QuizFlow';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams } from "react-router-dom";
 import { MarkdownMessageBubble } from '../History/Chat/MarkdownMessageBubble';
@@ -164,19 +163,14 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         </div>
       )}
 
-      <AnimatePresence>
-        {showScrollButton && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 8 }}
-            onClick={() => scrollToBottom(true)}
-            className="absolute bottom-36 left-0 right-0 mx-auto w-fit z-20 p-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-full shadow-lg border border-neutral-600 transition-colors cursor-pointer"
-          >
-            <ArrowDown size={16} />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {showScrollButton && (
+        <button
+          onClick={() => scrollToBottom(true)}
+          className="absolute bottom-36 left-0 right-0 mx-auto w-fit z-20 p-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-full shadow-lg border border-neutral-600 transition-colors cursor-pointer"
+        >
+          <ArrowDown size={16} />
+        </button>
+      )}
     </div>
   );
 };

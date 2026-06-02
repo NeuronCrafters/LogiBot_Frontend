@@ -10,8 +10,13 @@ export interface UniversityFormProps {
   initialData?: UniversityData;
 }
 
+const labelCls =
+  "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
+const inputCls =
+  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
+
 function UniversityForm({ onSubmit, initialData }: UniversityFormProps) {
-  const [name, setName] = useState<string>(initialData?.name || "");
+  const [name, setName] = useState(initialData?.name ?? "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,19 +26,20 @@ function UniversityForm({ onSubmit, initialData }: UniversityFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+    <form onSubmit={handleSubmit} className="mt-5 space-y-4">
       <div>
-        <label className="block text-white mb-2">Nome da Universidade:</label>
+        <label className={labelCls}>Nome da Universidade</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          placeholder="Ex: Universidade Federal de São Paulo"
           required
-          className="p-2 rounded w-full bg-[#141414] text-white"
+          className={inputCls}
         />
       </div>
 
-      <div className="pt-2">
+      <div className="pt-1">
         <EntityActionButton
           action={initialData ? "update" : "create"}
           onClick={handleSubmit}

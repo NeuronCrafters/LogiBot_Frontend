@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { logger } from "@/utils/logger";
 import { Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
 import { Typograph } from "@/components/Typograph/Typograph";
 import { ChoiceButtonGroup } from "@/components/Buttons/ChoiceButtonGroup";
 import { formatTitle } from "@/utils/formatText";
@@ -41,22 +40,17 @@ export function LevelStep({ onNext }: LevelStepProps) {
 
   if (loading) {
     return (
-      <motion.div className="flex justify-center items-center w-full py-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div className="flex justify-center items-center w-full py-4">
         <div className="flex items-center gap-2 text-gray-400 bg-[#1f1f1f] border border-white/10 px-4 py-2 rounded-2xl shadow">
           <Loader2 className="animate-spin w-4 h-4" />
           <span className="font-[Poppins] text-sm">Carregando níveis...</span>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      className="w-full"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
+    <div className="w-full">
       <div>
         <Typograph
           text="Escolha seu nível de dificuldade"
@@ -76,6 +70,6 @@ export function LevelStep({ onNext }: LevelStepProps) {
         />
         {isSubmitting && <Loader2 className="animate-spin text-indigo-400 mx-auto mt-4" />}
       </div>
-    </motion.div>
+    </div>
   );
 }

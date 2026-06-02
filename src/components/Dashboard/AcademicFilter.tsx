@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { academicFiltersApi } from "@/services/apiClient";
 import { LogEntityType } from "@/services/api/api_routes";
@@ -260,12 +259,12 @@ export function AcademicFilter({
   if (error) return <div className="text-red-500">Erro ao carregar dados</div>;
 
   return (
-    <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
+    <div className="w-full">
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-4">
         {showUniversitySelect && (
           <select
             className={cn(
-              "h-12 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
+              "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
               !isUniversityEnabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={!isUniversityEnabled || isLoading}
@@ -292,7 +291,7 @@ export function AcademicFilter({
         {showCourseSelect && (
           <select
             className={cn(
-              "h-12 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
+              "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
               !isCourseEnabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={!isCourseEnabled || isLoading}
@@ -325,7 +324,7 @@ export function AcademicFilter({
         {isProfessor && entityType === "student" && (
           <select
             className={cn(
-              "h-12 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
+              "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
               !isCourseEnabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={!isCourseEnabled || isLoading}
@@ -344,7 +343,7 @@ export function AcademicFilter({
         {showClassSelect && (
           <select
             className={cn(
-              "h-12 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
+              "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
               !isClassEnabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={!isClassEnabled || isLoading}
@@ -377,7 +376,7 @@ export function AcademicFilter({
         {canShowEntitySelector() && (
           <select
             className={cn(
-              "h-12 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
+              "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
               (!canShowEntitySelector() || isLoading) && "opacity-50 cursor-not-allowed"
             )}
             disabled={!canShowEntitySelector() || isLoading}
@@ -428,6 +427,6 @@ export function AcademicFilter({
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

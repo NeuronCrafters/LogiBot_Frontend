@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { MessageCircle, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -6,12 +5,9 @@ export function InitialChoiceStep() {
   const navigate = useNavigate();
 
   return (
-    <motion.div
+    <div
       id="initial-choice-container"
       className="w-full px-4 py-8"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
     >
       <h2 className="text-center text-white font-[Poppins] font-semibold text-xl mb-8">
         O que deseja fazer hoje?
@@ -56,6 +52,6 @@ export function InitialChoiceStep() {
           </span>
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 }
