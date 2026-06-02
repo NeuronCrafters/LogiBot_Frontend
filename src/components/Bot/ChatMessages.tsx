@@ -126,7 +126,7 @@ const markdownComponents = {
             {...props}
             onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = "/api/placeholder/400/300";
+                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23262626'/%3E%3Ctext x='200' y='150' fill='%23d4d4d4' font-family='Arial,sans-serif' font-size='16' text-anchor='middle' dominant-baseline='middle'%3EImagem indisponivel%3C/text%3E%3C/svg%3E";
                 e.currentTarget.alt = "Imagem não carregada";
             }}
         />
