@@ -35,7 +35,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [greetingDone, setGreetingDone] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
   const [inputText, setInputText] = useState("");
-  const [fakeTypingDelay, setFakeTypingDelay] = useState(false);
+  const [fakeTypingDelay] = useState(false);
 
   const [previousQuestions, setPreviousQuestions] = useState<Question[][]>([]);
   const [previousResults, setPreviousResults] = useState<VerifyQuizResponse[]>([]);
@@ -126,13 +126,17 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     }
   }
 
+  const TYPING_ID = "bot-typing-indicator";
+
   async function sendMessage(message: string) {
     if (!message.trim()) return;
 
     addMessage(message, "user");
 
-    setTyping(true);
-    setFakeTypingDelay(true);
+    setMessages((prev) => [
+      ...prev,
+      { id: TYPING_ID, text: "", sender: "bot", type: "typing" },
+    ]);
 
     try {
       const res = await chatApi.askTutor(message, userId, sessionId || undefined);
@@ -141,16 +145,17 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
         setSessionId(res.sessionId);
       }
 
-      setTimeout(() => {
-        addMessage(res.responses[0]?.text || "Desculpe, não entendi.", "bot");
-        setTyping(false);
-        setFakeTypingDelay(false);
-      }, 1200);
+      const responseText = res.responses[0]?.text || "Desculpe, não entendi.";
+      setMessages((prev) => [
+        ...prev.filter((m) => m.id !== TYPING_ID),
+        { id: crypto.randomUUID(), text: responseText, sender: "bot", type: "text" },
+      ]);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || "Erro no chat.";
-      addMessage(errorMsg, "bot");
-      setTyping(false);
-      setFakeTypingDelay(false);
+      setMessages((prev) => [
+        ...prev.filter((m) => m.id !== TYPING_ID),
+        { id: crypto.randomUUID(), text: errorMsg, sender: "bot", type: "text" },
+      ]);
     }
   }
 

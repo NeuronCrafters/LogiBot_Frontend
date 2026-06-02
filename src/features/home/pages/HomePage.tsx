@@ -1,8 +1,8 @@
-﻿import { useState, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+﻿import { type ReactNode } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { AnimatedLogo } from "@/shared/components/AnimatedLogo";
 import { Footer } from "@/features/home/components/Footer";
-import { AppModal } from "@/shared/components/feedback/AppModal";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import logoMascote from "@/assets/logo.svg";
 import { ArrowRight, BarChart2, BookOpen, Building2, CheckCircle, GraduationCap, MessageCircle, Play, Sparkles, Users } from "lucide-react";
 
@@ -19,15 +19,17 @@ const profiles = [
 ];
 
 export function Home() {
-  const [showInfo, setShowInfo] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  const handleStart = () => setShowInfo(true);
-  const handleAccept = () => { setShowInfo(false); navigate("/signin"); };
+  if (!loading && isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
+
+  const handleStart = () => navigate("/signin");
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
-      {showInfo && <AppModal isOpen={true} type="info" title="Bem-vindo ao LogiBots.AI" description="O LogiBots.AI é um sistema de apoio acadêmico gratuito. Para usar todas as funcionalidades, é necessário criar uma conta gratuita." onConfirm={handleAccept} onClose={() => setShowInfo(false)} />}
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-neutral-950/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">

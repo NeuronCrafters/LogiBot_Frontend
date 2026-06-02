@@ -6,7 +6,7 @@ import { useQuizFlow } from '@/features/quiz/hooks/useQuizFlow';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams } from "react-router-dom";
 import { MarkdownMessageBubble } from './MarkdownMessageBubble';
-import { TypingBubble } from "./TypingBubble";
+import { ChatTypingDots } from "./ChatTypingDots";
 import { historyService } from '@/features/chat/api/chatHistoryApi';
 
 interface StudentChatContentProps {
@@ -59,12 +59,15 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
       try {
         const data = await historyService.getChatMessages(userId, sessionIdFromUrl);
 
-        if (data && data.messages && Array.isArray(data.messages)) {
-          const formatted = data.messages.map((m: any, index: number) => ({
-            id: m._id || `msg-${Date.now()}-${index}`,
+        // Backend returns a raw array; also handle wrapped { messages: [...] } for safety
+        const rows: any[] = Array.isArray(data) ? data : (data as any)?.messages ?? [];
+
+        if (rows.length > 0) {
+          const formatted = rows.map((m: any, index: number) => ({
+            id: m.id || m._id || `msg-${index}`,
             text: m.content || '',
             sender: (m.role === 'assistant' ? 'bot' : 'user') as "user" | "bot",
-            type: 'text' as const
+            type: 'text' as const,
           }));
 
           setMessages(formatted);
@@ -136,7 +139,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
 
             {messages.map((msg, index) => (
               msg.type === 'typing' ? (
-                <TypingBubble key={msg.id || index} text={msg.text} onDone={() => { }} />
+                <ChatTypingDots key={msg.id || index} />
               ) : (
                 <MarkdownMessageBubble
                   key={msg.id || index}
