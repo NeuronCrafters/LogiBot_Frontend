@@ -1,7 +1,5 @@
-import React, { useMemo } from "react";
-import { createAvatar } from "@dicebear/core";
-import { bottts } from "@dicebear/collection";
-import clsx from "clsx";
+import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 interface AvatarProps {
   seed: string;
@@ -9,24 +7,19 @@ interface AvatarProps {
   backgroundColor?: string;
 }
 
-export const Avatar: React.FC<AvatarProps> = ({
-  seed,
-  className,
-  backgroundColor = "#3a3a3a",
-}) => {
-  const bucket = Math.floor(Date.now() / (6 * 60 * 60 * 1000));
-  const fullSeed = `${seed}-${bucket}`;
-
-  const dataUri = useMemo(() => {
-    return createAvatar(bottts, { seed: fullSeed, size: 160 }).toDataUri();
-  }, [fullSeed]);
+export function Avatar({ seed, className, backgroundColor = "#3a3a3a" }: AvatarProps) {
+  const avatarUrl = useMemo(() => {
+    const bucket = Math.floor(Date.now() / (6 * 60 * 60 * 1000));
+    const fullSeed = encodeURIComponent(`${seed}-${bucket}`);
+    return `https://api.dicebear.com/9.x/bottts/svg?seed=${fullSeed}&size=160`;
+  }, [seed]);
 
   return (
     <div
-      className={clsx("rounded-full overflow-hidden", className)}
+      className={cn("overflow-hidden rounded-full", className)}
       style={{ backgroundColor }}
     >
-      <img src={dataUri} alt="avatar" className="w-full h-full block" />
+      <img src={avatarUrl} alt="avatar" className="block h-full w-full" />
     </div>
   );
-};
+}

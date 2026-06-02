@@ -12,7 +12,7 @@ import {
   User as UserIcon,
   Users,
 } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { toast } from "@/utils/toast";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-Auth";

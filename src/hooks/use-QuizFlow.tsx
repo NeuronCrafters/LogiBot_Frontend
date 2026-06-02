@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { Question } from "@/@types/QuestionType";
 import { formatTitle } from "@/utils/formatText";
 import { ButtonData } from "@/components/Bot/Quiz/CategoryStep";
@@ -45,7 +44,7 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     setMessages((prev) => [
       ...prev,
       {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         text,
         sender,
         type,

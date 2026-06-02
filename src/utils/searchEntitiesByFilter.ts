@@ -2,7 +2,7 @@ import { coordinatorApi, professorApi, academicFiltersApi, adminApi } from "@/se
 import { logger } from "@/utils/logger";
 import type { FilterData } from "@/@types/ChartsType";
 import type { ListItem } from "@/components/Entities/List/EntityTable";
-import toast from "react-hot-toast";
+import { toast } from "@/utils/toast";
 
 export type Role = "admin" | "course-coordinator" | "professor";
 

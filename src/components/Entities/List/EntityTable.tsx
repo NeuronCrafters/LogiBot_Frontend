@@ -13,7 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { EntityActionButton } from "@/components/Buttons/EntityActionButton";
 import { AppModal } from "@/components/Modals/AppModal";
-import { toast } from "react-hot-toast";
+import { toast } from "@/utils/toast";
 import { adminApi } from "@/services/apiClient";
 import { CoordinatorRoleSection } from "@/components/Entities/List/CoordinatorRoleSection";
 import { Skeleton } from "@/components/ui/skeleton";

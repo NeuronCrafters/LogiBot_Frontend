@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { addDays, format } from "date-fns";
+import { addDays, formatISODate } from "@/utils/formatDate";
 import { BarChart2, Filter, MousePointer2 } from "lucide-react";
 import { Typograph } from "@/components/Typograph/Typograph";
 import { DashboardFilter } from "@/components/Dashboard/DashboardFilter";
@@ -51,10 +51,10 @@ export function Dashboard() {
       const newDashboardFilters: DashboardFilterParams = {
         ...currentLegacyFilter.hierarchyParams,
         startDate: currentDateRange?.from
-          ? format(currentDateRange.from, "yyyy-MM-dd")
+          ? formatISODate(currentDateRange.from)
           : undefined,
         endDate: currentDateRange?.to
-          ? format(currentDateRange.to, "yyyy-MM-dd")
+          ? formatISODate(currentDateRange.to)
           : undefined,
       };
 

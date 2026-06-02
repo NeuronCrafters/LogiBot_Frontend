@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { MessageSquare, Loader2, AlertCircle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { formatRelativeTime } from "@/utils/formatDate";
 import { useChatHistory } from "@/hooks/use-ChatHistory";
 
 interface ChatHistoryProps {
@@ -78,10 +77,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
                 </span>
                 <span className="text-[11px] text-zinc-600 font-[Poppins] leading-snug">
                   {session.lastActivityAt
-                    ? formatDistanceToNow(new Date(session.lastActivityAt), {
-                        addSuffix: true,
-                        locale: ptBR,
-                      })
+                    ? formatRelativeTime(new Date(session.lastActivityAt))
                     : ""}
                 </span>
               </div>

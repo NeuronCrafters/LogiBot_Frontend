@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-Auth";
 import { Label } from "@/components/ui/label";
-import { addDays, format } from "date-fns";
+import { addDays, formatISODate } from "@/utils/formatDate";
 import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
 import { DashboardFilterParams } from "@/services/api/api_dashboard";
 import { AcademicFilter } from "./AcademicFilter";
@@ -63,10 +63,10 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
     const allParams: DashboardFilterParams = {
       ...currentHierarchy,
       startDate: currentDateRange?.from
-        ? format(currentDateRange.from, 'yyyy-MM-dd')
+        ? formatISODate(currentDateRange.from)
         : undefined,
       endDate: currentDateRange?.to
-        ? format(currentDateRange.to, 'yyyy-MM-dd')
+        ? formatISODate(currentDateRange.to)
         : undefined,
     };
 

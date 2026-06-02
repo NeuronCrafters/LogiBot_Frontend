@@ -4,8 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { motion } from "framer-motion";
 import { dashboardApi, DashboardFilterParams } from "@/services/api/api_dashboard";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
-import { format, formatDistanceStrict } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { formatDateTime, formatDuration } from "@/utils/formatDate";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 interface SessionData {
@@ -28,12 +27,10 @@ interface ChartProps {
 const CustomSessionTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data: ProcessedSession = payload[0].payload;
-    const options = { locale: ptBR };
-
     return (
       <div className="p-3 bg-[#1f1f1f] border border-white/20 rounded-lg text-white text-sm shadow-xl space-y-1">
-        <p><strong>Entrada:</strong> {format(data.startTime, "HH:mm:ss 'de' dd/MM/yy", options)}</p>
-        <p><strong>Saída:</strong> {format(data.endTime, "HH:mm:ss 'de' dd/MM/yy", options)}</p>
+        <p><strong>Entrada:</strong> {formatDateTime(data.startTime)}</p>
+        <p><strong>Saída:</strong> {formatDateTime(data.endTime)}</p>
         <p className="border-t border-white/10 pt-1 mt-1"><strong>Duração:</strong> {data.duration}</p>
       </div>
     );
@@ -54,7 +51,7 @@ function useIndividualSessionData(filters: ChartProps['filters']) {
         const startTime = new Date(session.startTime);
         const endTime = new Date(session.endTime);
 
-        const duration = formatDistanceStrict(endTime, startTime, { locale: ptBR });
+        const duration = formatDuration(endTime, startTime);
 
         return {
           day: startTime.getDay(),

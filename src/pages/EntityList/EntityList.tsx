@@ -10,7 +10,7 @@ import { searchEntitiesByFilter } from "@/utils/searchEntitiesByFilter";
 import type { FilterData } from "@/@types/ChartsType";
 import type { ListItem } from "@/components/Entities/List/EntityTable";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-hot-toast";
+import { toast } from "@/utils/toast";
 import { academicApi, adminApi } from "@/services/apiClient";
 
 type EntityType = "university" | "course" | "discipline" | "class" | "professor" | "student";

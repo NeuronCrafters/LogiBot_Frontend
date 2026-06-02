@@ -4,8 +4,7 @@ import { historyService } from "@/services/api/api_history";
 import { GraduationCap, Loader2, AlertCircle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { formatRelativeTime } from "@/utils/formatDate";
 
 interface QuizSession {
   quizId: string;
@@ -107,10 +106,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
                 </span>
                 <div className="flex items-center gap-2 leading-snug">
                   <span className="text-[11px] text-zinc-600 font-[Poppins]">
-                    {formatDistanceToNow(new Date(quiz.completedAt), {
-                      addSuffix: true,
-                      locale: ptBR,
-                    })}
+                    {formatRelativeTime(new Date(quiz.completedAt))}
                   </span>
                   <span className="text-[11px] text-emerald-400 font-[Poppins] font-semibold">
                     {quiz.score}/{quiz.totalQuestions}

@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from "@/utils/toast";
 import {
   AlertCircle,
   Bug,
@@ -89,7 +89,6 @@ export function Feedback() {
 
   return (
     <>
-      <Toaster />
       <main className="flex min-h-full flex-1 items-center overflow-y-auto px-4 py-6 font-[Poppins] md:px-8 md:py-8">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
