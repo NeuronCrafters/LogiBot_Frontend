@@ -1,6 +1,6 @@
 import { LogEntityType, LogModeType } from "@/services/api/api_routes";
 
-export interface ChartFilterState {
+export interface DashboardFilterState {
   type: LogEntityType;
   ids: string[];
   mode: LogModeType;

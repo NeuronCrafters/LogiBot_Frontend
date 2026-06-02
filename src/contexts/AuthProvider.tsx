@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           prefetchChatHistory(user._id);
         }
 
-        navigate("/chat");
+        navigate("/inicio");
       }
     } catch (error: any) {
       const message = error?.response?.data?.message || "erro ao autenticar";

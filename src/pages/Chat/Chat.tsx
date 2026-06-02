@@ -1,13 +1,10 @@
 import { useAuth } from "@/hooks/use-Auth";
-import ChatLayout from "@/components/components/Chat/ChatLayout";
-import { AdminWelcome, NonStudentWelcome } from "@/components/components/Chat/ChatWelcomePages";
-import StudentChatContent from "@/components/components/Chat/StudentChatContent";
-import { useState } from "react";
+import { AdminWelcome, NonStudentWelcome } from "@/components/Chat/ChatWelcomePages";
+import StudentChatContent from "@/components/Chat/StudentChatContent";
 import { useMultiPageTour, UserRole } from "@/hooks/useMultiPageTour";
 
 export function Chat() {
     const { user, isAuthenticated } = useAuth();
-    const [menuOpen, setMenuOpen] = useState(false);
 
     const userRoles = Array.isArray(user?.role) ? user?.role : user?.role ? [user.role] : [];
     const isStudent = userRoles.includes('student');
@@ -15,13 +12,10 @@ export function Chat() {
 
     const mainRole = (userRoles[0] || 'guest') as UserRole;
 
-    useMultiPageTour(mainRole, {
-        openMenu: () => setMenuOpen(true),
-        closeMenu: () => setMenuOpen(false),
-    });
+    useMultiPageTour(mainRole);
 
     return (
-        <ChatLayout user={user} menuOpen={menuOpen} setMenuOpen={setMenuOpen}>
+        <>
             {isAuthenticated && isStudent && user && (
                 <StudentChatContent user={user} />
             )}
@@ -33,6 +27,6 @@ export function Chat() {
             {isAuthenticated && !isStudent && !isAdmin && (
                 <NonStudentWelcome userRoles={userRoles} />
             )}
-        </ChatLayout>
+        </>
     );
 }

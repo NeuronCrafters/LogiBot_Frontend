@@ -2,7 +2,7 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Question } from "@/@types/QuestionType";
 import { formatTitle } from "@/utils/formatText";
-import { ButtonData } from "@/components/components/Bot/Quiz/CategoryStep";
+import { ButtonData } from "@/components/Bot/Quiz/CategoryStep";
 import { quizService, VerifyQuizResponse } from "@/services/api/api_quiz";
 import { rasaService } from "@/services/api/api_rasa";
 

@@ -4,7 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
   --bg-dark: #141414;
   --bg-darker: #1f1f1f;
@@ -21,6 +20,26 @@ input:-webkit-autofill:focus {
   caret-color: white;
 }
 
+/* Dark scrollbar — global */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #404040 transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #404040;
+  border-radius: 3px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #525252;
+}
+
 textarea::-webkit-scrollbar {
   width: 6px;
 }
@@ -28,8 +47,8 @@ textarea::-webkit-scrollbar-track {
   background: transparent;
 }
 textarea::-webkit-scrollbar-thumb {
-  background-color: #4b5563;
-  border-radius: 20px;
+  background-color: #404040;
+  border-radius: 3px;
 }
 
 .form-container {
@@ -66,6 +85,38 @@ textarea::-webkit-scrollbar-thumb {
   border-radius: 0.5rem;
   width: 100%;
   margin-bottom: 1rem;
+}
+
+.entity-form-panel form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: rgb(161 161 170);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.entity-form-panel form input,
+.entity-form-panel form select {
+  width: 100%;
+  min-height: 3rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(9, 9, 11, 0.6);
+  color: white;
+  padding: 0.75rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.entity-form-panel form input:focus,
+.entity-form-panel form select:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(9, 9, 11, 0.8);
 }
 
 :root.light {
