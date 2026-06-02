@@ -75,7 +75,7 @@ export function Feedback() {
 
     try {
       setLoading(true);
-      await api.post("/feedbacks/send", { message: message.trim(), type });
+      await api.post("/feedback", { message: message.trim(), type });
       toast.success("Feedback enviado com sucesso!");
       setMessage("");
       setType("");

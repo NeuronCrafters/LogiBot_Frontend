@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login(email: string, password: string) {
     try {
       const response = await api.post(
-        "/session",
+        "/auth/session",
         { email, password },
         { withCredentials: true }
       );
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function getUser() {
     try {
-      const response = await api.get("/me", { withCredentials: true });
+      const response = await api.get("/auth/me", { withCredentials: true });
       const data = response.data;
 
       const safeUser: User = {
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     try {
       await flushClicks();
-      await api.post("/logout", {}, { withCredentials: true });
+      await api.post("/auth/logout", {}, { withCredentials: true });
     } catch (error) {
       logger.error("Auth", "Erro ao fazer logout.", error);
     } finally {

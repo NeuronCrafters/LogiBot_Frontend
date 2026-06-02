@@ -22,17 +22,17 @@ export interface ChatHistoryDetail {
 
 export const historyService = {
   async getChatSessions(userId: string): Promise<ChatSession[]> {
-    const response = await api.get(`/history/chat/sessions/${userId}`);
+    const response = await api.get(`/chat/sessions/${userId}`);
     return response.data;
   },
 
   async getChatMessages(userId: string, sessionId: string): Promise<ChatHistoryDetail> {
-    const response = await api.get(`/history/chat/messages/${userId}/${sessionId}`);
+    const response = await api.get(`/chat/sessions/${userId}/${sessionId}/messages`);
     return response.data;
   },
 
   async getQuizHistory(userId: string) {
-    const response = await api.get(`/history/quiz/${userId}`);
+    const response = await api.get(`/quiz/history/${userId}`);
     return response.data;
   }
 };

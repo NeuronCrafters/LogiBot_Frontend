@@ -25,101 +25,101 @@ export const ACADEMIC_ROUTES: Record<
   { post: string; get: string; delete: string }
 > = {
   university: {
-    post: "/academic-institution/university",
-    get: "/academic-institution/university",
-    delete: "/academic-institution/university",
+    post: "/academic/universities",
+    get: "/academic/universities",
+    delete: "/academic/universities",
   },
   course: {
-    post: "/academic-institution/course",
-    get: "/academic-institution/course",
-    delete: "/academic-institution/course",
+    post: "/academic/courses",
+    get: "/academic/universities",
+    delete: "/academic/courses",
   },
   class: {
-    post: "/academic-institution/class",
-    get: "/academic-institution/class",
-    delete: "/academic-institution/class",
+    post: "/academic/classes",
+    get: "/academic/courses",
+    delete: "/academic/classes",
   },
   discipline: {
-    post: "/academic-institution/discipline",
-    get: "/academic-institution/discipline",
-    delete: "/academic-institution/discipline",
+    post: "/academic/disciplines",
+    get: "/academic/disciplines",
+    delete: "/academic/disciplines",
   },
 };
 
 export const ACADEMICFILTER_ROUTES = {
-  academicData: "/academicFilters/data"
+  academicData: "/academic/filters"
 };
 
 export const RASA_ROUTES = {
-  talk: "/sael/talk",
-  listarNiveis: "/sael/action/listar_niveis",
-  definirNivel: "/sael/action/definir_nivel",
-  listarOpcoes: "/sael/action/listar_opcoes",
-  listarSubopcoes: "/sael/action/listar_subopcoes",
-  gerarPerguntas: "/sael/action/gerar_perguntas",
-  getGabarito: "/sael/action/gabarito",
-  verificarRespostas: "/sael/action/send",
-  actionConversar: "/sael/action/conversar",
-  actionPerguntar: "/sael/action/perguntar",
+  talk: "/chat/messages",
+  listarNiveis: "/quiz/levels",
+  definirNivel: "/quiz/level",
+  listarOpcoes: "/quiz/categories",
+  listarSubopcoes: "/quiz/subcategories",
+  gerarPerguntas: "/quiz/questions",
+  getGabarito: "/quiz/answer-key",
+  verificarRespostas: "/quiz/answers",
+  actionConversar: "/chat/messages",
+  actionPerguntar: "/chat/messages",
 };
 
 export const ADMIN_ROUTES = {
-  createProfessor: "/admin/professor",
-  deleteProfessor: "/admin/professor/:professorId",
+  createProfessor: "/admin/professors",
+  deleteProfessor: "/admin/professors/:professorId",
   listAllProfessors: "/admin/professors",
-  listProfessorsByUniversity: "/admin/university/:schoolId/professors",
-  listProfessorsByCourse: "/admin/course/:courseId/professors",
-  updateProfessorRole: "/admin/professor/:id/role",
+  listProfessorsByUniversity: "/admin/universities/:schoolId/professors",
+  listProfessorsByCourse: "/admin/courses/:courseId/professors",
+  updateProfessorRole: "/admin/professors/:id/role",
   listStudents: "/admin/students",
   listStudentsByClass: "/admin/classes/:classId/students",
-  deleteStudent: "/admin/coordinator/student",
+  deleteStudent: "/admin/students/:studentId",
 } as const;
 
 export const PROFESSOR_ROUTES = {
-  listMyStudents: "/admin/professor/students",
+  listMyStudents: "/admin/professor-students",
 } as const;
 
 export const COORDINATOR_ROUTES = {
   listMyProfessors: "/admin/coordinator/professors",
   listMyStudents: "/admin/coordinator/students",
   listStudentsByDiscipline:
-    "/admin/coordinator/students/discipline/:disciplineId",
+    "/admin/coordinator/disciplines/:disciplineId/students",
   listDisciplines: "/admin/coordinator/disciplines",
   listClasses: "/admin/coordinator/classes",
 } as const;
 
 export const LOG_ROUTES = {
   student: {
-    accuracy: (id: string) => `/logs/student/${id}/accuracy`,
-    usage: (id: string) => `/logs/student/${id}/usage`,
-    subjects: (id: string) => `/logs/student/${id}/subjects/summary`,
+    accuracy: (id: string) => `/logs/students/${id}/accuracy`,
+    usage: (id: string) => `/logs/students/${id}/usage`,
+    subjects: (id: string) => `/logs/students/${id}/subjects/summary`,
   },
   class: {
-    accuracy: (id: string) => `/logs/class/${id}/accuracy`,
-    usage: (id: string) => `/logs/class/${id}/usage`,
-    subjects: (id: string) => `/logs/class/${id}/subjects/summary`,
+    accuracy: (id: string) => `/logs/classes/${id}/accuracy`,
+    usage: (id: string) => `/logs/classes/${id}/usage`,
+    subjects: (id: string) => `/logs/classes/${id}/subjects/summary`,
   },
   course: {
-    accuracy: (id: string) => `/logs/course/${id}/accuracy`,
-    usage: (id: string) => `/logs/course/${id}/usage`,
-    subjects: (id: string) => `/logs/course/${id}/subjects/summary`,
+    accuracy: (id: string) => `/logs/courses/${id}/accuracy`,
+    usage: (id: string) => `/logs/courses/${id}/usage`,
+    subjects: (id: string) => `/logs/courses/${id}/subjects/summary`,
   },
   discipline: {
-    accuracy: (id: string) => `/logs/discipline/${id}/accuracy`,
-    usage: (id: string) => `/logs/discipline/${id}/usage`,
-    subjects: (id: string) => `/logs/discipline/${id}/subjects/summary`,
+    accuracy: (id: string) => `/logs/disciplines/${id}/accuracy`,
+    usage: (id: string) => `/logs/disciplines/${id}/usage`,
+    subjects: (id: string) => `/logs/disciplines/${id}/subjects/summary`,
   },
   university: {
-    accuracy: (id: string) => `/logs/university/${id}/accuracy`,
-    usage: (id: string) => `/logs/university/${id}/usage`,
-    subjects: (id: string) => `/logs/university/${id}/subjects/summary`,
+    accuracy: (id: string) => `/logs/universities/${id}/accuracy`,
+    usage: (id: string) => `/logs/universities/${id}/usage`,
+    subjects: (id: string) => `/logs/universities/${id}/subjects/summary`,
   },
   summary: {
-    university: (id: string) => `/logs/university/${id}/summary`,
-    course: (id: string) => `/logs/course/${id}/summary`,
-    class: (id: string) => `/logs/class/${id}/summary`,
-    discipline: (id: string) => `/logs/discipline/${id}/summary`,
-    filteredStudent: `/logs/student/summary/filtered`,
+    university: (id: string) => `/logs/universities/${id}/summary`,
+    course: (id: string) => `/logs/courses/${id}/summary`,
+    class: (id: string) => `/logs/classes/${id}/summary`,
+    discipline: (id: string) => `/logs/disciplines/${id}/summary`,
+    filteredStudent: `/logs/students/summary`,
   }
 } as const;
 
@@ -129,5 +129,6 @@ export const PROFESSOR_LOG_ROUTES = {
 } as const;
 
 export const USER_ANALYSIS_ROUTES = {
-  addInteraction: "/useranalysis/interaction",
+  addInteraction: "/analytics/interaction",
+  addSubjectClicks: "/analytics/subject-clicks",
 } as const;

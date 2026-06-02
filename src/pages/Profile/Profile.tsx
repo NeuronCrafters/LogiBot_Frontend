@@ -121,7 +121,8 @@ export function Profile() {
 
   const handleUpdateName = async (newName: string) => {
     try {
-      const response = await api.patch(`/users/${user._id}/name`, {
+      const response = await api.patch("/account/name", {
+        userId: user._id,
         name: newName,
       });
 
@@ -140,7 +141,8 @@ export function Profile() {
 
   const handleUpdateEmail = async (newEmail: string) => {
     try {
-      const response = await api.patch(`/users/${user._id}/email`, {
+      const response = await api.patch("/account/email", {
+        userId: user._id,
         email: newEmail,
       });
 
@@ -160,7 +162,7 @@ export function Profile() {
 
   const handleUpdatePassword = async (currentPass: string, newPass: string) => {
     try {
-      await api.patch(`/users/password`, {
+      await api.patch("/account/password", {
         currentPassword: currentPass,
         newPassword: newPass,
       });

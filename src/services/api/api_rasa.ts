@@ -9,7 +9,7 @@ interface RasaActionResponse {
 export const rasaService = {
   async sendMessage(message: string) {
     const response = await api.post(
-      "/sael/talk",
+      "/chat/messages",
       { message },
       { withCredentials: true }
     );
@@ -18,7 +18,7 @@ export const rasaService = {
 
   async listarNiveis() {
     try {
-      const response = await api.get("/sael/action/listar_niveis", {
+      const response = await api.get("/quiz/levels", {
         withCredentials: true,
       });
       return response.data;
@@ -30,15 +30,15 @@ export const rasaService = {
 
   async definirNivel(nivel: string) {
     const response = await api.post(
-      "/sael/action/definir_nivel",
-      { nivel },
+      "/quiz/level",
+      { level: nivel },
       { withCredentials: true }
     );
     return response.data;
   },
 
   async listarOpcoes() {
-    const response = await api.get("/sael/action/listar_opcoes", {
+    const response = await api.get("/quiz/categories", {
       withCredentials: true,
     });
     return response.data;
@@ -46,8 +46,8 @@ export const rasaService = {
 
   async listarSubopcoes(categoria: string) {
     const response = await api.post(
-      "/sael/action/listar_subopcoes",
-      { categoria },
+      "/quiz/subcategories",
+      { category: categoria },
       { withCredentials: true }
     );
     return response.data;
@@ -55,15 +55,15 @@ export const rasaService = {
 
   async gerarPerguntas(pergunta: string) {
     const response = await api.post(
-      "/sael/action/gerar_perguntas",
-      { pergunta },
+      "/quiz/questions",
+      { subtopic: pergunta },
       { withCredentials: true }
     );
     return response.data;
   },
 
   async getGabarito() {
-    const response = await api.get("/sael/action/gabarito", {
+    const response = await api.get("/quiz/answer-key", {
       withCredentials: true,
     });
     return response.data;
@@ -71,8 +71,8 @@ export const rasaService = {
 
   async verificarRespostas(respostas: string[]) {
     const response = await api.post(
-      "/sael/action/send",
-      { respostas },
+      "/quiz/answers",
+      { answers: respostas },
       { withCredentials: true }
     );
     return response.data;
@@ -80,7 +80,7 @@ export const rasaService = {
 
   async perguntar(message: string, senderId: string, sessionId?: string): Promise<RasaActionResponse> {
     const response = await api.post(
-      "/sael/action/perguntar",
+      "/chat/messages",
       { message, senderId, sessionId },
       { withCredentials: true }
     );
@@ -89,8 +89,8 @@ export const rasaService = {
 
   async conversar() {
     const response = await api.post(
-      "/sael/action/conversar",
-      {},
+      "/chat/messages",
+      { message: "conversar" },
       { withCredentials: true }
     );
     return response.data;

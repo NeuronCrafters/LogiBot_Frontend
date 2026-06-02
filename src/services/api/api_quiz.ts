@@ -40,7 +40,7 @@ export const quizService = {
   },
 
   async setLevel(nivel: string): Promise<CategoryResponse> {
-    const response = await api.post("/quiz/set-level", { nivel });
+    const response = await api.post("/quiz/level", { level: nivel });
     return response.data;
   },
 
@@ -50,12 +50,12 @@ export const quizService = {
   },
 
   async generateQuiz(subtopic: string): Promise<GenerateQuizResponse> {
-    const response = await api.post("/quiz/generate", { subtopic });
+    const response = await api.post("/quiz/questions", { subtopic });
     return response.data;
   },
 
   async verifyQuiz(answers: string[]): Promise<VerifyQuizResponse> {
-    const response = await api.post("/quiz/verify", { answers });
+    const response = await api.post("/quiz/answers", { answers });
     return response.data;
   },
 };

@@ -9,6 +9,8 @@ export interface EffortMatrixData {
     name: string;
     performance: number;
     effort: number;
+    originalPerformance?: number;
+    originalEffort?: number;
     isAverage?: boolean;
   }[];
   averages: {

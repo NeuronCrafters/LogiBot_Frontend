@@ -76,7 +76,7 @@ export function AuthPage({ mode }: AuthPageProps) {
 
     setLoading(true);
     try {
-      await api.post("/users", {
+      await api.post("/auth/register", {
         name: finalName,
         email: finalEmail,
         password: finalPassword,

@@ -37,8 +37,14 @@ export const academicApi = {
     return postRequest<T>(url, data);
   },
   async get<T>(entity: AcademicEntityType, id?: string): Promise<T> {
-    const base = ACADEMIC_ROUTES[entity].get;
-    const url = id ? `${base}/${id}` : base;
+    let url = ACADEMIC_ROUTES[entity].get;
+    if (entity === "course" && id) {
+      url = `/academic/universities/${id}/courses`;
+    } else if (entity === "class" && id) {
+      url = `/academic/courses/${id}/classes`;
+    } else if (id) {
+      url = `${url}/${id}`;
+    }
     return getRequest<T>(url);
   },
   async delete<T>(entity: AcademicEntityType, id: string): Promise<T> {
@@ -104,7 +110,7 @@ export const adminApi = {
   },
 
   deleteStudent: <T>(studentId: string): Promise<T> =>
-    deleteRequest<T>(`${ADMIN_ROUTES.deleteStudent}?studentId=${studentId}`),
+    deleteRequest<T>(ADMIN_ROUTES.deleteStudent.replace(":studentId", studentId)),
 };
 
 export const professorApi = {

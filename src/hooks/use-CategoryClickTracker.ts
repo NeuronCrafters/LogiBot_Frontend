@@ -33,7 +33,7 @@ export function useCategoryClickTracker(userId: string | null) {
         if (Object.keys(payload).length === 0) return;
         try {
             await api.post(
-                "/useranalysis/subject-clicks",
+                "/analytics/subject-clicks",
                 { userId, clicks: payload },
                 { withCredentials: true }
             );

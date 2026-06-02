@@ -52,10 +52,10 @@ function useUsageData(filter: UsageChartProps["filter"]) {
         return { totalUsageTime: response.usageTimeInSeconds, usageTime: response.usageTime, dailyUsage: response.dailyUsage || [], sessions: response.sessions || [] };
       }
       if (isStudent) {
-        const response = await api.post("/logs/student/summary/filtered", { universityId, courseId, classId, studentId: mainId, disciplineId });
+        const response = await api.post("/logs/students/summary", { universityId, courseId, classId, studentId: mainId, disciplineId });
         return { totalUsageTime: response.data.usageTimeInSeconds, usageTime: response.data.usageTime, dailyUsage: response.data.dailyUsage || [], sessions: response.data.sessions || [] };
       }
-      const urls: Record<string, string> = { university: `/logs/university/${mainId}/summary`, course: `/logs/course/${mainId}/summary`, class: `/logs/class/${mainId}/summary`, discipline: `/logs/discipline/${mainId}/summary` };
+      const urls: Record<string, string> = { university: `/logs/universities/${mainId}/summary`, course: `/logs/courses/${mainId}/summary`, class: `/logs/classes/${mainId}/summary`, discipline: `/logs/disciplines/${mainId}/summary` };
       const url = urls[filter.type];
       if (!url) throw new Error(`Tipo de entidade não suportado: ${filter.type}`);
       const response = await api.get(url);
