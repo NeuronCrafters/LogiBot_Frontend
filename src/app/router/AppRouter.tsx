@@ -1,0 +1,121 @@
+import React, { Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
+import { Home } from "@/features/home/pages/HomePage";
+import { AuthPage } from "@/features/auth/pages/AuthPage";
+import ProtectedRoute from "@/app/router/ProtectedRoute";
+import { AppLayout } from "@/shared/components/layout/AppLayout";
+import { Start } from "@/features/home/pages/StartPage";
+
+const Chat = React.lazy(() =>
+  import("@/features/chat/pages/ChatPage").then((m) => ({ default: m.Chat })),
+);
+const Dashboard = React.lazy(() =>
+  import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.Dashboard })),
+);
+const CreateEntities = React.lazy(() =>
+  import("@/features/admin/pages/CreateEntitiesPage").then((m) => ({
+    default: m.CreateEntities,
+  })),
+);
+const Profile = React.lazy(() =>
+  import("@/features/account/pages/ProfilePage").then((m) => ({ default: m.Profile })),
+);
+const EntityList = React.lazy(() =>
+  import("@/features/admin/pages/EntityListPage").then((m) => ({
+    default: m.EntityList,
+  })),
+);
+const Feedback = React.lazy(() =>
+  import("@/features/feedback/pages/FeedbackPage").then((m) => ({ default: m.Feedback })),
+);
+const Quiz = React.lazy(() =>
+  import("@/features/quiz/pages/QuizPage").then((m) => ({ default: m.Quiz })),
+);
+
+function PageLoader() {
+  return (
+    <div className="flex flex-1 items-center justify-center bg-neutral-900">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-blue-400" />
+    </div>
+  );
+}
+
+export default function AppRouter() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/signin" element={<AuthPage mode="signin" />} />
+      <Route path="/signup" element={<AuthPage mode="signup" />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/home" element={<Start />} />
+          <Route
+            path="/chat"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Chat />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/quiz"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Quiz />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/quiz/results/:id"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Quiz />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/entities/create"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <CreateEntities />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/entities"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <EntityList />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Profile />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/feedback"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Feedback />
+              </Suspense>
+            }
+          />
+        </Route>
+      </Route>
+    </Routes>
+  );
+}

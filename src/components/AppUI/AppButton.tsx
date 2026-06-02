@@ -1,5 +1,5 @@
-import { type ButtonHTMLAttributes, type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+﻿import { type ButtonHTMLAttributes, type ReactNode } from "react";
+import { cn } from "@/shared/lib/cn";
 
 type AppButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 type AppButtonSize = "sm" | "md" | "icon";

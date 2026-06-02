@@ -1,5 +1,5 @@
-import { type InputHTMLAttributes, type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+﻿import { type InputHTMLAttributes, type ReactNode } from "react";
+import { cn } from "@/shared/lib/cn";
 
 interface AppInputProps extends InputHTMLAttributes<HTMLInputElement> {
   icon?: ReactNode;

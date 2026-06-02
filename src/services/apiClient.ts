@@ -1,4 +1,4 @@
-import { api } from "@/services/api/api";
+﻿import { api } from "@/shared/api/httpClient";
 import {
   ACADEMIC_ROUTES,
   RASA_ROUTES,
@@ -9,7 +9,7 @@ import {
   AcademicEntityType,
 
 } from "./api/api_routes";
-import { academicFiltersApi } from "./api/api_academicFilters";
+import { academicFiltersApi } from "@/features/academic/api/academicFiltersApi";
 
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });

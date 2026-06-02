@@ -1,5 +1,5 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+﻿import * as React from "react"
+import { cn } from "@/shared/lib/cn"
 
 const ALERT_BASE =
   "relative w-full rounded-lg border px-4 py-3 text-sm " +
