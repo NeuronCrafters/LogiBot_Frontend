@@ -1,4 +1,5 @@
 import axios from "axios";
+import { logger } from "@/utils/logger";
 
 const API_KEY = import.meta.env.VITE_API_KEY || "YCQHmf3Zvti8FIi4PC38T4ert4v8zIOp";
 const configuredBaseURL = import.meta.env.VITE_API_BASE_URL?.trim();
@@ -22,9 +23,9 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            console.warn("usuário não autenticado");
+            logger.warn("API", "Usuário não autenticado.");
         } else if (error.response?.status >= 500) {
-            console.log("erro interno do servidor:", error.response.data);
+            logger.error("API", "Erro interno do servidor.", error.response.data);
         }
         return Promise.reject(error);
     }
@@ -34,9 +35,9 @@ publicApi.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            console.warn("erro público de autenticação");
+            logger.warn("API", "Erro público de autenticação.");
         } else if (error.response?.status >= 500) {
-            console.log("erro interno público:", error.response.data);
+            logger.error("API", "Erro interno público.", error.response.data);
         }
         return Promise.reject(error);
     }

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { logger } from "@/utils/logger";
 import { api } from "@/services/api/api";
 
 const STORAGE_KEY = "category_clicks";
@@ -39,7 +40,7 @@ export function useCategoryClickTracker(userId: string | null) {
             clicksRef.current = {};
             localStorage.removeItem(STORAGE_KEY);
         } catch (err) {
-            console.error("Erro ao enviar clicks de categoria:", err);
+            logger.error("Analytics", "Erro ao enviar clicks de categoria.", err);
         }
     }
 

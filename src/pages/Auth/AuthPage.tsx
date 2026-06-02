@@ -14,7 +14,6 @@ import {
 import { AnimatedLogo } from "@/components/AnimatedLogo/AnimatedLogo";
 import { AppModal } from "@/components/Modals/AppModal";
 import { useAuth } from "@/hooks/use-Auth";
-import { useMultiPageTour } from "@/hooks/useMultiPageTour";
 import { api } from "@/services/api/api";
 
 type AuthMode = "signin" | "signup";
@@ -34,8 +33,6 @@ export function AuthPage({ mode }: AuthPageProps) {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
-
-  useMultiPageTour("guest");
 
   const handleLogin = async () => {
     const finalEmail = email.replace(/\s/g, "");
@@ -116,8 +113,8 @@ export function AuthPage({ mode }: AuthPageProps) {
         onClose={() => setShowConsent(false)}
       />
 
-      <main className="flex min-h-screen items-center justify-center px-4 py-8 font-[Poppins] sm:px-6">
-        <div className="grid w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-2xl shadow-black/30 lg:grid-cols-[0.9fr_1fr]">
+      <main className="flex min-h-screen font-[Poppins] sm:items-center sm:justify-center sm:px-6 sm:py-8">
+        <div className="grid w-full sm:max-w-4xl overflow-hidden sm:rounded-2xl sm:border sm:border-white/10 bg-[#1f1f1f] sm:shadow-2xl sm:shadow-black/30 lg:grid-cols-[0.9fr_1fr]">
           <section className="relative hidden min-h-[560px] flex-col items-center justify-center overflow-hidden border-r border-white/10 bg-neutral-950/60 p-8 lg:flex">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-blue-500/10 blur-3xl" />
 
@@ -140,7 +137,7 @@ export function AuthPage({ mode }: AuthPageProps) {
             </div>
           </section>
 
-          <section className="flex min-h-[560px] items-center justify-center p-5 sm:p-8">
+          <section className="flex flex-1 min-h-screen sm:min-h-[560px] items-center justify-center p-6 sm:p-8">
             <div className="w-full max-w-sm">
               <div className="mb-8 lg:hidden">
                 <Link

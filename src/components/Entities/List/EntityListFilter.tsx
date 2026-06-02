@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { logger } from "@/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-Auth";
 import { academicFiltersApi } from "@/services/apiClient";
@@ -192,7 +193,7 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
       ? fixedUniversity
       : (showUniversitySelect ? selectedUniversity : undefined);
 
-    console.log("vai buscar:", {
+    logger.info("Admin", "Iniciando busca.", {
       filterType,
       universityId,
       courseId: showCourseSelect ? selectedCourse : undefined,

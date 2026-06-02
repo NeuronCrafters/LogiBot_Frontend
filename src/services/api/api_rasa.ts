@@ -1,4 +1,5 @@
 import { api } from "@/services/api/api";
+import { logger } from "@/utils/logger";
 
 interface RasaActionResponse {
   responses: { text: string }[];
@@ -22,7 +23,7 @@ export const rasaService = {
       });
       return response.data;
     } catch (error) {
-      console.error("erro na requisição listarNiveis:", error);
+      logger.error("Rasa", "Erro na requisição listarNiveis.", error);
       throw error;
     }
   },

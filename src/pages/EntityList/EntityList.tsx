@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logger } from "@/utils/logger";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, TableProperties } from "lucide-react";
 import { EntityListFilter } from "@/components/Entities/List/EntityListFilter";
@@ -39,7 +40,7 @@ export function EntityList() {
         const result = await searchEntitiesByFilter(userRole, currentFilter);
         return result;
       } catch (error) {
-        console.error("Erro na busca:", error);
+        logger.error("Admin", "Erro na busca.", error);
         throw new Error("Falha ao buscar entidades");
       }
     },
@@ -62,7 +63,7 @@ export function EntityList() {
       queryClient.setQueryData(['searchEntities', userRole, currentFilter], data);
     },
     onError: (error) => {
-      console.error("Erro na busca:", error);
+      logger.error("Admin", "Erro na busca.", error);
       toast.error("Erro ao buscar registros. Tente novamente.");
     }
   });
@@ -95,7 +96,7 @@ export function EntityList() {
       }
     },
     onError: (error) => {
-      console.error("Erro ao deletar:", error);
+      logger.error("Admin", "Erro ao deletar.", error);
       toast.error("Erro ao deletar registro.");
     }
   });

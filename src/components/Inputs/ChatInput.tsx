@@ -1,4 +1,5 @@
 import { ArrowUp, Loader2 } from "lucide-react";
+import { logger } from "@/utils/logger";
 import { userAnalysisApi } from "@/services/api/api_userAnalysis";
 import { useState, useRef, useEffect } from "react";
 
@@ -39,7 +40,7 @@ export function ChatInput({ inputText, setInputText, sendMessage, isWaitingRespo
             setInputText("");
             if (textareaRef.current) textareaRef.current.style.height = "auto";
         } catch (err) {
-            console.error(err);
+            logger.error("Chat", "Erro ao enviar mensagem.", err);
         } finally {
             setIsSending(false);
         }

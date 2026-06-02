@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { logger } from "@/utils/logger";
 import {
   BookOpen,
   GraduationCap,
@@ -19,7 +20,6 @@ import { api } from "@/services/api/api";
 import { Avatar } from "@/components/Avatar/Avatar";
 import { Typograph } from "@/components/Typograph/Typograph";
 import { DisciplineCode } from "@/components/Profile/DisciplineCode";
-import { useMultiPageTour, UserRole } from "@/hooks/useMultiPageTour";
 import { EditNameModal } from "@/components/Profile/Modals/EditNameModal";
 import { EditEmailModal } from "@/components/Profile/Modals/EditEmailModal";
 import { EditPasswordModal } from "@/components/Profile/Modals/EditPasswordModal";
@@ -70,10 +70,6 @@ export function Profile() {
   const [showEditName, setShowEditName] = useState(false);
   const [showEditEmail, setShowEditEmail] = useState(false);
   const [showEditPassword, setShowEditPassword] = useState(false);
-
-  const mainRole =
-    (user && (Array.isArray(user.role) ? user.role[0] : user.role)) as UserRole || "guest";
-  useMultiPageTour(mainRole);
 
   if (loading) {
     return (
@@ -136,7 +132,7 @@ export function Profile() {
 
       toast.success("Nome atualizado com sucesso!");
     } catch (error: any) {
-      console.error(error);
+      logger.error("Profile", "Erro ao atualizar nome.", error);
       const message = error.response?.data?.message || "Erro ao atualizar nome.";
       toast.error(message);
       throw error;
@@ -155,7 +151,7 @@ export function Profile() {
 
       toast.success("E-mail atualizado com sucesso!");
     } catch (error: any) {
-      console.error(error);
+      logger.error("Profile", "Erro ao atualizar e-mail.", error);
       const message =
         error.response?.data?.message || "Erro ao atualizar e-mail.";
       toast.error(message);
@@ -172,7 +168,7 @@ export function Profile() {
 
       toast.success("Senha alterada com sucesso!");
     } catch (error: any) {
-      console.error(error);
+      logger.error("Profile", "Erro ao alterar senha.", error);
       const message = error.response?.data?.error || "Erro ao alterar senha.";
       toast.error(message);
       throw error;

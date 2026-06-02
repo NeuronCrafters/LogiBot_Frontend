@@ -1,4 +1,5 @@
 import { Download } from "lucide-react";
+import { logger } from "@/utils/logger";
 import { useRef } from "react";
 
 interface ChartDownloadButtonProps {
@@ -46,7 +47,7 @@ export function ChartDownloadButton({
     try {
       exportChartSvg(containerId, fileName);
     } catch (error) {
-      console.warn(error);
+      logger.warn("Dashboard", "Erro ao exportar gráfico.", error);
     }
   };
 

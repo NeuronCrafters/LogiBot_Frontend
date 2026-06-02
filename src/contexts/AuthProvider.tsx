@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { logger } from "@/utils/logger";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/services/api/api";
 import { AuthContext, AuthContextData, User } from "./AuthContext";
@@ -56,13 +57,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         className: Array.isArray(data.className) ? data.className : [data.className],
       };
 
+      localStorage.setItem("has_session", "1");
       setUser(safeUser);
 
       if (safeUser._id) {
         prefetchChatHistory(safeUser._id);
       }
-    } catch (error) {
-      console.error("erro ao obter usuário:", error);
+    } catch (error: any) {
+      if (error?.response?.status !== 401) {
+        logger.error("Auth", "Erro ao obter usuário.", error);
+      }
+      localStorage.removeItem("has_session");
       setUser(null);
     }
   }
@@ -72,8 +77,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await flushClicks();
       await api.post("/logout", {}, { withCredentials: true });
     } catch (error) {
-      console.error("erro ao fazer logout:", error);
+      logger.error("Auth", "Erro ao fazer logout.", error);
     } finally {
+      localStorage.removeItem("has_session");
       queryClient.clear();
       setUser(null);
       navigate("/signin");
@@ -89,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     inactivityTimer.current = setTimeout(() => {
       if (isAuthenticated) {
-        console.log("usuário inativo por 2 horas, desconectando");
+        logger.info("Auth", "Usuário inativo por 2 horas. Desconectando.");
         logout();
       }
     }, INACTIVITY_TIMEOUT);
@@ -114,7 +120,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, resetInactivityTimer]);
 
   useEffect(() => {
-    getUser().finally(() => setLoading(false));
+    if (localStorage.getItem("has_session")) {
+      getUser().finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const contextValue: AuthContextData = {

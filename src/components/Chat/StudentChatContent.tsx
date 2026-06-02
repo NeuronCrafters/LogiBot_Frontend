@@ -1,4 +1,5 @@
 import { ArrowDown } from 'lucide-react';
+import { logger } from "@/utils/logger";
 import { User } from '@/contexts/AuthContext';
 import { ChatInput } from '@/components/Inputs/ChatInput';
 import { useQuizFlow } from '@/hooks/use-QuizFlow';
@@ -74,7 +75,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
           setTimeout(() => scrollToBottom(false), 100);
         }
       } catch (error) {
-        console.error("Erro ao carregar histórico:", error);
+        logger.error("Chat", "Erro ao carregar histórico.", error);
       } finally {
         setLoadingHistory(false);
       }
@@ -101,7 +102,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     try {
       await sendMessage(text);
     } catch (error) {
-      console.error(error);
+      logger.error("Chat", "Erro ao enviar mensagem.", error);
     } finally {
       setIsWaitingResponse(false);
     }

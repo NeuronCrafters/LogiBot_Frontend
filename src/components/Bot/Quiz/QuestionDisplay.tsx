@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logger } from "@/utils/logger";
 import { Question } from "@/@types/QuestionType";
 import { Typograph } from "@/components/Typograph/Typograph";
 import { QuizAnswerButton } from "@/components/Buttons/QuizAnswerButton";
@@ -37,7 +38,7 @@ export function QuestionsDisplay({
     try {
       await onSubmitAnswers(answers);
     } catch (err) {
-      console.error(err);
+      logger.error("Quiz", "Erro ao submeter respostas.", err);
       setIsSubmitting(false);
     }
   };

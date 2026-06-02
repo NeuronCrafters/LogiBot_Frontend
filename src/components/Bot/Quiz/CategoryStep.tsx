@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logger } from "@/utils/logger";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChoiceButtonGroup } from "@/components/Buttons/ChoiceButtonGroup";
@@ -25,7 +26,7 @@ export function CategoryStep({ buttons, onNext }: CategoryStepProps) {
       const subSubjects = res.buttons || [];
       onNext(subSubjects, categoriaPayload);
     } catch (err) {
-      console.error("Erro em CategoryStep:", err);
+      logger.error("Quiz", "Erro ao listar subcategorias.", err);
       onNext([], categoriaPayload);
     }
   };

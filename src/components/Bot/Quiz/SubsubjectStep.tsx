@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logger } from "@/utils/logger";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { ChoiceButtonGroup } from "@/components/Buttons/ChoiceButtonGroup";
@@ -23,7 +24,7 @@ export function SubsubjectStep({ buttons, onNext }: SubsubjectStepProps) {
       const qs: Question[] = Array.isArray(res.questions) ? res.questions : [];
       onNext(qs, subtopicoPayload);
     } catch (error: any) {
-      console.error("SubsubjectStep erro ao gerar perguntas:", error);
+      logger.error("Quiz", "Erro ao gerar perguntas.", error);
       const msg = error.response?.data?.message || "Erro ao gerar perguntas";
       onNext([], msg);
     }

@@ -1,4 +1,5 @@
 import { coordinatorApi, professorApi, academicFiltersApi, adminApi } from "@/services/apiClient";
+import { logger } from "@/utils/logger";
 import type { FilterData } from "@/@types/ChartsType";
 import type { ListItem } from "@/components/Entities/List/EntityTable";
 import toast from "react-hot-toast";
@@ -367,7 +368,7 @@ export async function searchEntitiesByFilter(
 
     return { items: fetched, entity: selectedEntity };
   } catch (err) {
-    console.error("erro ao buscar dados:", err);
+    logger.error("Search", "Erro ao buscar dados.", err);
     toast.error("Erro ao buscar dados");
     return { items: [], entity: "student" };
   }

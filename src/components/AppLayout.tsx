@@ -73,7 +73,7 @@ export function AppLayout({ children, pageTitle, pageIcon }: AppLayoutProps) {
         </aside>
 
         {/* Main content panel — inset card floating over the sidebar background */}
-        <div className="flex-1 my-3 mr-3 rounded-2xl bg-neutral-900 overflow-hidden flex flex-col min-w-0">
+        <div className="flex-1 md:my-3 md:mr-3 md:rounded-2xl bg-neutral-900 overflow-hidden flex flex-col min-w-0">
           {/* Top bar — mobile only */}
           <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-white/5 shrink-0">
             <button

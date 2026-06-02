@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logger } from "@/utils/logger";
 import { rasaService } from "@/services/api/api_rasa";
 import { Button } from "@/components/ui/button";
 
@@ -14,13 +15,13 @@ function ChatResponseHandler({ onSend }: ChatResponseHandlerProps) {
       try {
         const data = await rasaService.listarNiveis();
         const firstResponse = data.responses?.[0];
-        console.log("Resposta Rasa:", firstResponse);
+        logger.info("Chat", "Resposta Rasa recebida.", firstResponse);
 
         if (firstResponse?.buttons?.length > 0) {
           setButtons(firstResponse.buttons);
         }
       } catch (error) {
-        console.error("Erro ao listar níveis:", error);
+        logger.error("Chat", "Erro ao listar níveis.", error);
       }
     }
 

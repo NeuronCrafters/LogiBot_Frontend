@@ -1,4 +1,5 @@
 import { Avatar } from "@/components/Avatar/Avatar";
+import { logger } from "@/utils/logger";
 import logo from "@/assets/logo.svg";
 import { Typograph } from "@/components/Typograph/Typograph";
 import Markdown from "react-markdown";
@@ -139,7 +140,7 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
 
         // Validação crítica: verifica se content existe e é string
         if (!content || typeof content !== 'string') {
-            console.warn('Mensagem com content inválido:', message);
+            logger.warn("Chat", "Mensagem com content inválido.", message);
             return null;
         }
 

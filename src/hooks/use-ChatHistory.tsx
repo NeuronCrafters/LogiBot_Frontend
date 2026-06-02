@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { logger } from "@/utils/logger";
 import { historyService, ChatSession, ChatHistoryDetail } from '@/services/api/api_history';
 
 interface UseChatHistoryOptions {
@@ -42,7 +43,7 @@ function useChatHistory({ userId, enabled = true }: UseChatHistoryOptions) {
 
       return result;
     } catch (error) {
-      console.error('Erro ao buscar mensagens:', error);
+      logger.error("ChatHistory", "Erro ao buscar mensagens.", error);
       throw error;
     }
   };

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logger } from "@/utils/logger";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-Auth";
 import {
@@ -78,7 +79,7 @@ export function EntityTable({ entity, items, onEdit, onDelete }: EntityTableProp
           courseId: editItem.courseId
         }));
       } catch (error) {
-        console.error("Erro ao carregar candidatos:", error);
+        logger.error("Admin", "Erro ao carregar candidatos.", error);
         throw new Error("Falha ao carregar candidatos a coordenador");
       }
     },
@@ -105,7 +106,7 @@ export function EntityTable({ entity, items, onEdit, onDelete }: EntityTableProp
       queryClient.invalidateQueries({ queryKey: ['searchEntities'] });
     },
     onError: (error) => {
-      console.error("Erro ao deletar:", error);
+      logger.error("Admin", "Erro ao deletar.", error);
       toast.error("Erro ao deletar registro.");
     }
   });
@@ -145,7 +146,7 @@ export function EntityTable({ entity, items, onEdit, onDelete }: EntityTableProp
       queryClient.invalidateQueries({ queryKey: ['searchEntities'] });
     },
     onError: (error: any) => {
-      console.error("Erro ao atualizar coordenador:", error);
+      logger.error("Admin", "Erro ao atualizar coordenador.", error);
       const msg = error?.response?.data?.message || "Erro ao atualizar cargo.";
       toast.error(msg);
     }
@@ -185,7 +186,7 @@ export function EntityTable({ entity, items, onEdit, onDelete }: EntityTableProp
   };
 
   const handleEdit = (item: ListItem) => {
-    console.log("ID da Turma:", item.classId);
+    logger.info("Admin", "ID da turma selecionada.", { classId: item.classId });
     resetCoordinatorForm();
     setEditItem(item);
     onEdit(item);

@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/use-Auth";
+import { logger } from "@/utils/logger";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EntityCreateForm } from "@/components/Entities/Create/EntityCreateForm";
@@ -27,7 +28,7 @@ export function CreateEntities() {
 
   const createMutation = useMutation({
     mutationFn: async ({ entity, item }: { entity: string; item: any }) => {
-      console.log(`Enviando ${entity}:`, item);
+      logger.info("Admin", `Enviando ${entity}.`, item);
 
       let response: ApiResponse;
 
@@ -40,7 +41,7 @@ export function CreateEntities() {
           courses: item.courses
         };
 
-        console.log("Professor payload para criação:", professorPayload);
+        logger.info("Admin", "Professor payload para criação.", professorPayload);
         response = await adminApi.createProfessor<ApiResponse>(professorPayload);
       } else if (["university", "course", "class", "discipline"].includes(entity)) {
         response = await academicApi.post<ApiResponse>(entity as AcademicEntityType, item);
@@ -51,7 +52,7 @@ export function CreateEntities() {
       return { response, entity, item };
     },
     onSuccess: ({ response, entity, item }) => {
-      console.log("Resposta da API:", response);
+      logger.info("Admin", "Resposta da API.", response);
 
       const newItem: RecentItem = {
         id: response?.id || response?._id || `temp-${Date.now()}`,
@@ -68,7 +69,7 @@ export function CreateEntities() {
       triggerToast("success", "Cadastro realizado com sucesso!");
     },
     onError: (error) => {
-      console.error("Erro ao enviar dados:", error);
+      logger.error("Admin", "Erro ao enviar dados.", error);
       triggerToast("error", "Erro ao cadastrar. Verifique o console para mais detalhes.");
     }
   });
@@ -93,7 +94,7 @@ export function CreateEntities() {
       triggerToast("success", "Registro excluído com sucesso.");
     },
     onError: (error) => {
-      console.error("Erro ao excluir:", error);
+      logger.error("Admin", "Erro ao excluir.", error);
       triggerToast("error", "Erro ao excluir registro.");
     },
     onSettled: () => {
@@ -125,7 +126,7 @@ export function CreateEntities() {
       setRecentItems((prev) => [updated, ...prev.filter((i) => i.id !== item.id).slice(0, 19)]);
       triggerToast("success", "Item preparado para edição.");
     } catch (error) {
-      console.error("Erro ao preparar item para edição:", error);
+      logger.error("Admin", "Erro ao preparar item para edição.", error);
       triggerToast("error", "Erro ao preparar edição.");
     }
   };

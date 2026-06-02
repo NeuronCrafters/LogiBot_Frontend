@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logger } from "@/utils/logger";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Typograph } from "@/components/Typograph/Typograph";
@@ -22,7 +23,7 @@ export function LevelStep({ onNext }: LevelStepProps) {
       .then((data) => {
         setLevels(data.buttons || []);
       })
-      .catch(console.error)
+      .catch((err: unknown) => logger.error("Quiz", "Erro ao listar níveis.", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,7 +34,7 @@ export function LevelStep({ onNext }: LevelStepProps) {
       const botoesAssuntos = res.categories || [];
       onNext(botoesAssuntos, nivelPayload);
     } catch (err) {
-      console.error("Erro ao definir nível:", err);
+      logger.error("Quiz", "Erro ao definir nível.", err);
       onNext([], nivelPayload);
     }
   };

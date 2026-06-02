@@ -1,4 +1,5 @@
 import { api } from "@/services/api/api";
+import { logger } from "@/utils/logger";
 import { LOG_ROUTES, PROFESSOR_LOG_ROUTES } from "./api_routes";
 import { LogApiResponse, UserAnalysisLog, LogFilterParams } from "../../@types/Log";
 
@@ -52,7 +53,7 @@ export const logApiSmart = {
 
         try {
           const response = await getRequest<any>(url);
-          console.log("resposta da API para aluno:", response);
+          logger.info("LogAPI", "Resposta da API para aluno.", response);
           const result = response.data || response;
           return result;
         } catch (error) {

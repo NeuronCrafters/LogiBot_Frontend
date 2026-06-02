@@ -181,7 +181,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
       )}
 
       {/* Logout */}
-      <div className="p-3 border-t border-white/5 shrink-0">
+      <div className="p-3 border-t border-white/5 shrink-0 mt-auto">
         <button
           id="header-logout-button"
           onClick={handleLogout}

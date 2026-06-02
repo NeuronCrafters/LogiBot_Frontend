@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { logger } from "@/utils/logger";
 import { academicFiltersApi } from "@/services/apiClient";
 import { EntityActionButton } from "@/components/Buttons/EntityActionButton";
 import { University } from "@/services/api/api_academicFilters";
@@ -30,7 +31,7 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
         const response = await academicFiltersApi.getAcademicData();
         setAcademicData(response.data);
       } catch (error) {
-        console.error("Erro ao carregar dados acadêmicos:", error);
+        logger.error("Admin", "Erro ao carregar dados acadêmicos.", error);
       }
     };
     fetchAcademicData();

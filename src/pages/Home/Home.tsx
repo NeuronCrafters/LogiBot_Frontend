@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { AnimatedLogo } from "@/components/AnimatedLogo/AnimatedLogo";
 import { Footer } from "@/components/Footer/Footer";
 import { AppModal } from "@/components/Modals/AppModal";
-import { useMultiPageTour } from "@/hooks/useMultiPageTour";
 import logoMascote from "@/assets/logo.svg";
 import {
   ArrowRight,
@@ -66,8 +65,6 @@ const profiles = [
 export function Home() {
   const [showInfo, setShowInfo] = useState(false);
   const navigate = useNavigate();
-
-  useMultiPageTour("guest");
 
   const handleStart = () => {
     setShowInfo(true);
