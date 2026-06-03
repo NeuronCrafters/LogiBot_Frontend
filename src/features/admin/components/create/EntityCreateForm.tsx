@@ -20,13 +20,15 @@ interface EntityCreateFormProps {
   initialData?: { type: "university"; data: Univ } | { type: "course"; data: Course } | { type: "class"; data: Cls } | { type: "professor"; data: Prof } | { type: "discipline"; data: Disc };
   onEntityChange?: () => void;
   animateForm?: boolean;
+  defaultEntity?: EntityType;
+  lockEntity?: boolean;
 }
 
 const ENTITY_LABELS: Record<EntityType, string> = {
   university: "Universidade", course: "Curso", class: "Turma", professor: "Professor", discipline: "Disciplina",
 };
 
-export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({ onSubmit, initialData, onEntityChange, animateForm = false }) => {
+export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({ onSubmit, initialData, onEntityChange, animateForm = false, defaultEntity, lockEntity = false }) => {
   const { user } = useAuth();
   if (!user) return null;
 
@@ -36,11 +38,19 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({ onSubmit, in
 
   if (!isAdmin && !isCoordinator) return null;
 
-  const allowedEntities: EntityType[] = isAdmin ? ["university", "course", "class", "professor", "discipline"] : ["class", "discipline"];
+  const allowedEntities: EntityType[] = isAdmin ? ["university", "course", "class", "professor", "discipline"] : ["class", "discipline", "professor"];
 
   const [selectedEntity, setSelectedEntity] = useState<EntityType | "">(
-    initialData?.type && allowedEntities.includes(initialData.type) ? initialData.type : ""
+    defaultEntity && allowedEntities.includes(defaultEntity)
+      ? defaultEntity
+      : initialData?.type && allowedEntities.includes(initialData.type)
+        ? initialData.type
+        : ""
   );
+
+  useEffect(() => {
+    if (defaultEntity && allowedEntities.includes(defaultEntity)) setSelectedEntity(defaultEntity);
+  }, [defaultEntity, allowedEntities]);
 
   useEffect(() => {
     if (selectedEntity && onEntityChange) onEntityChange();
@@ -55,13 +65,15 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({ onSubmit, in
         <p className="mt-1 font-[Poppins] text-xs text-zinc-500">Selecione o tipo de registro e preencha as informações abaixo.</p>
       </div>
 
-      <div>
-        <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Tipo de entidade</label>
-        <select value={selectedEntity} onChange={(e) => setSelectedEntity(e.target.value as EntityType)} className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60">
-          <option value="">Selecione o tipo</option>
-          {allowedEntities.map((ent) => <option key={ent} value={ent}>{ENTITY_LABELS[ent]}</option>)}
-        </select>
-      </div>
+      {!lockEntity && (
+        <div>
+          <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Tipo de entidade</label>
+          <select value={selectedEntity} onChange={(e) => setSelectedEntity(e.target.value as EntityType)} className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60">
+            <option value="">Selecione o tipo</option>
+            {allowedEntities.map((ent) => <option key={ent} value={ent}>{ENTITY_LABELS[ent]}</option>)}
+          </select>
+        </div>
+      )}
 
       {selectedEntity && animateForm && (
         <>
@@ -69,7 +81,7 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({ onSubmit, in
           {selectedEntity === "university" && isAdmin && <UniversityForm onSubmit={(dados) => onSubmit("university", dados)} initialData={initial as Univ | undefined} />}
           {selectedEntity === "course" && isAdmin && <CourseForm onSubmit={(dados) => onSubmit("course", dados)} initialData={initial as Course | undefined} />}
           {selectedEntity === "class" && <ClassForm onSubmit={(dados) => onSubmit("class", dados)} initialData={initial as Cls | undefined} />}
-          {selectedEntity === "professor" && isAdmin && <ProfessorForm onSubmit={(dados) => onSubmit("professor", dados)} initialData={initial as Prof | undefined} />}
+          {selectedEntity === "professor" && (isAdmin || isCoordinator) && <ProfessorForm onSubmit={(dados) => onSubmit("professor", dados)} initialData={initial as Prof | undefined} />}
           {selectedEntity === "discipline" && (isAdmin || isCoordinator) && <DisciplineForm onSubmit={(dados) => onSubmit("discipline", dados)} initialData={initial as Disc | undefined} />}
         </>
       )}

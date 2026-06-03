@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ChatHistory } from "@/features/chat/components/ChatHistory";
 import { QuizHistory } from "@/features/quiz/components/QuizHistory";
-import { PieChart, Settings, TableProperties, User, Send, LogOut, X, Brain, MessageCircle, Clock } from "lucide-react";
+import { PieChart, Settings, TableProperties, User, Send, LogOut, X, Brain, MessageCircle, Clock, GraduationCap, Users, Library, School, BookOpen } from "lucide-react";
 import logoMascote from "@/assets/logo.svg";
 
 interface SidebarProps {
@@ -23,7 +23,16 @@ const STUDENT_SECTIONS: NavSection[] = [
 function buildStaffSections(role: Role): NavSection[] {
   const gestao: NavItem[] = [];
   if (["teacher", "course-coordinator", "admin"].includes(role)) gestao.push({ path: "/dashboard", icon: <PieChart className="w-4 h-4" />, label: "Dashboard" });
-  if (["admin", "course-coordinator"].includes(role)) gestao.push({ path: "/entities/create", icon: <Settings className="w-4 h-4" />, label: "Criar Entidades" });
+  if (["admin", "course-coordinator"].includes(role)) {
+    gestao.push({ path: "/entities/create", icon: <Settings className="w-4 h-4" />, label: "Criar Entidades" });
+    if (role === "admin") {
+      gestao.push({ path: "/entities/create/university", icon: <School className="w-4 h-4" />, label: "Nova Universidade" });
+      gestao.push({ path: "/entities/create/course", icon: <BookOpen className="w-4 h-4" />, label: "Novo Curso" });
+    }
+    gestao.push({ path: "/entities/create/class", icon: <Users className="w-4 h-4" />, label: "Nova Turma" });
+    gestao.push({ path: "/entities/create/discipline", icon: <Library className="w-4 h-4" />, label: "Nova Disciplina" });
+    gestao.push({ path: "/entities/create/professor", icon: <GraduationCap className="w-4 h-4" />, label: "Novo Professor" });
+  }
   if (["admin", "teacher", "course-coordinator"].includes(role)) gestao.push({ path: "/entities", icon: <TableProperties className="w-4 h-4" />, label: "Listar Entidades" });
   return [
     { label: "Gestão", items: gestao },

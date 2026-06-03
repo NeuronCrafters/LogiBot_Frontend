@@ -1,6 +1,8 @@
 ﻿import { api } from "@/shared/api/httpClient";
 import {
   ACADEMIC_ROUTES,
+  CLASS_DISCIPLINE_ROUTES,
+  DISCIPLINE_PROFESSOR_ROUTES,
   RASA_ROUTES,
   ADMIN_ROUTES,
   PROFESSOR_ROUTES,
@@ -52,6 +54,22 @@ export const academicApi = {
     const url = `${base}/${id}`;
     return deleteRequest<T>(url);
   },
+  attachProfessorToDiscipline: <T>(disciplineId: string, professorId: string) =>
+    postRequest<T>(DISCIPLINE_PROFESSOR_ROUTES.attach.replace(":disciplineId", disciplineId), { professorId }),
+  detachProfessorFromDiscipline: <T>(disciplineId: string, professorId: string) =>
+    deleteRequest<T>(
+      DISCIPLINE_PROFESSOR_ROUTES.detach
+        .replace(":disciplineId", disciplineId)
+        .replace(":professorId", professorId)
+    ),
+  attachDisciplineToClass: <T>(classId: string, disciplineId: string) =>
+    postRequest<T>(CLASS_DISCIPLINE_ROUTES.attach.replace(":classId", classId), { disciplineId }),
+  detachDisciplineFromClass: <T>(classId: string, disciplineId: string) =>
+    deleteRequest<T>(
+      CLASS_DISCIPLINE_ROUTES.detach
+        .replace(":classId", classId)
+        .replace(":disciplineId", disciplineId)
+    ),
 };
 
 export { academicFiltersApi };

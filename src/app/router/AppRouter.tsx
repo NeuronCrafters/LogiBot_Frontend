@@ -91,6 +91,14 @@ export default function AppRouter() {
             }
           />
           <Route
+            path="/entities/create/:entityType"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <CreateEntities />
+              </Suspense>
+            }
+          />
+          <Route
             path="/entities"
             element={
               <Suspense fallback={<PageLoader />}>

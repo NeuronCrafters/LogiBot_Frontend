@@ -1,19 +1,40 @@
 ﻿import { useAuth } from "@/features/auth/hooks/useAuth";
 import { logger } from "@/shared/lib/logger";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EntityCreateForm } from "@/features/admin/components/create/EntityCreateForm";
 import { PlusCircle, ShieldOff } from "lucide-react";
 import { AppModal } from "@/shared/components/feedback/AppModal";
 import { RecentEntityList, RecentItem } from "@/features/admin/components/create/RecentEntityList";
+import { ProfessorDisciplineManager } from "@/features/admin/components/create/ProfessorDisciplineManager";
+import { ClassDisciplineManager } from "@/features/admin/components/create/ClassDisciplineManager";
 import { academicApi, adminApi } from "@/services/apiClient";
 import { AcademicEntityType } from "@/services/api/api_routes";
 import { toast } from "@/shared/lib/toast";
 
-interface ApiResponse { id?: string; _id?: string; [key: string]: any; }
+interface ApiResponse { id?: string; _id?: string; registrationCodes?: RecentItem["registrationCodes"]; [key: string]: any; }
+type EntityType = "university" | "course" | "class" | "professor" | "discipline";
+const ENTITY_TITLES: Record<EntityType, string> = {
+  university: "Criar universidade",
+  course: "Criar curso",
+  class: "Criar turma",
+  professor: "Criar professor",
+  discipline: "Criar disciplina",
+};
+
+function getCreatedEntity(response: ApiResponse, entity: string) {
+  if (entity === "class") return response.class || response;
+  if (entity === "discipline") return response.discipline || response;
+  if (entity === "course") return response.course || response;
+  if (entity === "university") return response.university || response;
+  if (entity === "professor") return response.professor || response;
+  return response;
+}
 
 export function CreateEntities() {
   const { user } = useAuth();
+  const { entityType } = useParams();
   const queryClient = useQueryClient();
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
   const [confirmDeleteItem, setConfirmDeleteItem] = useState<RecentItem | null>(null);
@@ -32,11 +53,19 @@ export function CreateEntities() {
       return { response, entity, item };
     },
     onSuccess: ({ response, entity, item }) => {
-      const newItem: RecentItem = { id: response?.id || response?._id || `temp-${Date.now()}`, name: item.name || "Item sem nome", type: entity, action: "create" };
+      const created = getCreatedEntity(response, entity);
+      const registrationCodes = response.registrationCodes || created.registrationCodes;
+      const newItem: RecentItem = {
+        id: created?.id || created?._id || response?.id || response?._id || `temp-${Date.now()}`,
+        name: created?.name || item.name || "Item sem nome",
+        type: entity,
+        action: "create",
+        registrationCodes,
+      };
       setRecentItems((prev) => [newItem, ...prev.slice(0, 19)]);
       queryClient.invalidateQueries({ queryKey: ["recentItems"] });
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Cadastro realizado com sucesso!");
+      toast.success(registrationCodes?.length ? "Cadastro realizado. Código de aluno gerado." : "Cadastro realizado com sucesso!");
     },
     onError: (error) => { logger.error("Admin", "Erro ao enviar dados.", error); toast.error("Erro ao cadastrar. Verifique os dados e tente novamente."); },
   });
@@ -58,6 +87,8 @@ export function CreateEntities() {
   const roles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = roles.includes("admin");
   const isCoordinator = roles.includes("course-coordinator");
+  const routeEntity = ["university", "course", "class", "professor", "discipline"].includes(String(entityType)) ? entityType as EntityType : undefined;
+  const allowedRouteEntity = routeEntity && (isAdmin || ["class", "discipline", "professor"].includes(routeEntity)) ? routeEntity : undefined;
 
   if (!isAdmin && !isCoordinator) {
     return (
@@ -81,12 +112,14 @@ export function CreateEntities() {
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400"><PlusCircle className="h-5 w-5" /></div>
             <div>
               <h1 className="font-[Poppins] text-2xl font-semibold text-white">Criar entidades</h1>
-              <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">Cadastre universidades, cursos, turmas, disciplinas e professores.</p>
+              <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">{allowedRouteEntity ? ENTITY_TITLES[allowedRouteEntity] : "Cadastre universidades, cursos, turmas, disciplinas e professores."}</p>
             </div>
           </div>
         </section>
 
-        <EntityCreateForm onSubmit={handleSubmit} initialData={undefined} animateForm={true} />
+        <EntityCreateForm onSubmit={handleSubmit} initialData={undefined} animateForm={true} defaultEntity={allowedRouteEntity} lockEntity={!!allowedRouteEntity} />
+        {(!allowedRouteEntity || allowedRouteEntity === "class" || allowedRouteEntity === "discipline") && <ClassDisciplineManager />}
+        {(!allowedRouteEntity || allowedRouteEntity === "professor" || allowedRouteEntity === "discipline") && <ProfessorDisciplineManager />}
         <RecentEntityList items={recentItems} onEdit={handleEdit} onDelete={handleDelete} loading={isLoading} />
       </div>
 

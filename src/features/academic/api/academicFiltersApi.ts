@@ -30,6 +30,7 @@ export interface Class {
   name: string;
   disciplines: BasicInfo[];
   students: Student[];
+  code?: string;
 }
 
 export interface Discipline {

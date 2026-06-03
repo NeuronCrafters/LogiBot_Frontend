@@ -7,6 +7,7 @@ export interface RecentItem {
   name: string;
   type: string;
   action: "create" | "update";
+  registrationCodes?: Array<{ code: string; classId?: string; disciplineId?: string; className?: string; disciplineName?: string }>;
 }
 
 interface RecentEntityListProps {
@@ -79,6 +80,15 @@ export function RecentEntityList({ items, onEdit, loading = false }: RecentEntit
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-[Poppins] text-sm font-medium text-zinc-200">{item.name || "Sem nome"}</p>
                       <div className="mt-1 flex items-center gap-2"><TypeBadge type={item.type} /><span className="font-[Poppins] text-[10px] text-zinc-700">{item.action === "update" ? "Editado" : "Criado"}</span></div>
+                      {item.registrationCodes?.length ? (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {item.registrationCodes.map((registration) => (
+                            <span key={`${registration.classId}-${registration.disciplineId}-${registration.code}`} className="rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-mono text-[11px] text-blue-300">
+                              {registration.code}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                   <button onClick={() => handleEditClick(item)} title="Editar" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 opacity-0 transition-all hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400 group-hover:opacity-100">

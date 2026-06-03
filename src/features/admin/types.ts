@@ -27,6 +27,7 @@ export interface ClassData {
   _id?: string | number;
   name: string;
   courseId: string;
+  disciplineIds?: string[];
 }
 
 export interface DisciplineData {

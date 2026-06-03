@@ -10,6 +10,7 @@ export interface ClassData {
   _id?: string | number;
   name: string;
   courseId: string;
+  disciplineIds?: string[];
 }
 
 export interface ClassFormProps {
@@ -20,6 +21,20 @@ export interface ClassFormProps {
 const labelCls = "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
 const inputCls = "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
 const selectCls = "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60";
+
+function CheckboxList({ items, selected, onToggle, emptyText }: { items: { _id: string; name: string }[]; selected: string[]; onToggle: (id: string) => void; emptyText: string }) {
+  if (items.length === 0) return <p className="px-3 py-2 text-sm text-zinc-600 font-[Poppins]">{emptyText}</p>;
+  return (
+    <div className="max-h-36 overflow-y-auto rounded-xl border border-white/10 bg-neutral-950/60 p-1.5 space-y-0.5">
+      {items.map((item) => (
+        <label key={item._id} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer transition-colors">
+          <input type="checkbox" checked={selected.includes(item._id)} onChange={() => onToggle(item._id)} className="accent-blue-500 w-3.5 h-3.5 shrink-0" />
+          <span className="text-sm text-zinc-300 font-[Poppins] leading-snug">{item.name}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
 
 function ClassForm({ onSubmit, initialData }: ClassFormProps) {
   const { user } = useAuth();
@@ -40,18 +55,16 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
   const [name, setName] = useState(initialData?.name ?? "");
   const [selectedUniversity, setSelectedUniversity] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(initialData?.courseId ?? "");
+  const [selectedDisciplineIds, setSelectedDisciplineIds] = useState<string[]>(initialData?.disciplineIds ?? []);
 
   const getFirstId = (value: string | string[] | undefined): string => {
     if (!value) return "";
     return Array.isArray(value) ? value[0] ?? "" : value;
   };
 
-  const getCoordinatorCourseId = (u: any): string => {
-    if (!u?.courses || !Array.isArray(u.courses)) return "";
-    const first = u.courses[0];
-    if (first?.id) return first.id;
-    if (typeof first === "string") return first;
-    return "";
+  const getCoordinatorCourseIds = (u: any): string[] => {
+    if (!u?.courses || !Array.isArray(u.courses)) return [];
+    return u.courses.map((course: any) => typeof course === "string" ? course : course?.id).filter(Boolean);
   };
 
   const filteredUniversities = useMemo(() => {
@@ -70,28 +83,37 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
     const courses = uni?.courses ?? [];
     if (isAdmin) return courses;
     if (isCoordinator && user?.courses) {
-      const courseId = getCoordinatorCourseId(user);
-      return courses.filter((c) => c._id === courseId);
+      const courseIds = getCoordinatorCourseIds(user);
+      return courses.filter((c) => courseIds.includes(c._id));
     }
     return [];
   }, [academicData, selectedUniversity, isAdmin, isCoordinator, user]);
 
+  const availableDisciplines = useMemo(() => {
+    if (!academicData || !selectedCourse) return [];
+    const uni = academicData.universities.find((u) => u.courses.some((c) => c._id === selectedCourse));
+    return uni?.courses.find((c) => c._id === selectedCourse)?.disciplines ?? [];
+  }, [academicData, selectedCourse]);
+
   React.useEffect(() => {
     if (isCoordinator && user?.schoolId && user?.courses && filteredUniversities.length > 0) {
       const uniId = getFirstId(user.schoolId);
-      const courseId = getCoordinatorCourseId(user);
+      const courseId = getCoordinatorCourseIds(user)[0] || "";
       if (!selectedUniversity && uniId) setSelectedUniversity(uniId);
       if (!selectedCourse && courseId) setSelectedCourse(courseId);
     }
   }, [isCoordinator, user, filteredUniversities, selectedUniversity, selectedCourse]);
 
+  const toggleDiscipline = useCallback((id: string) => setSelectedDisciplineIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]), []);
+
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !selectedCourse) return;
-    onSubmit({ name: name.trim(), courseId: selectedCourse });
+    onSubmit({ name: name.trim(), courseId: selectedCourse, disciplineIds: selectedDisciplineIds });
     setName("");
+    setSelectedDisciplineIds([]);
     if (isAdmin) { setSelectedUniversity(""); setSelectedCourse(""); }
-  }, [name, selectedCourse, onSubmit, isAdmin]);
+  }, [name, selectedCourse, selectedDisciplineIds, onSubmit, isAdmin]);
 
   if (isLoading) {
     return (
@@ -110,7 +132,7 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
       </div>
       <div>
         <label className={labelCls}>Universidade</label>
-        <select value={selectedUniversity} onChange={(e) => { setSelectedUniversity(e.target.value); setSelectedCourse(""); }} required className={selectCls}>
+        <select value={selectedUniversity} onChange={(e) => { setSelectedUniversity(e.target.value); setSelectedCourse(""); setSelectedDisciplineIds([]); }} required className={selectCls}>
           <option value="">Selecione a universidade</option>
           {filteredUniversities.map((uni) => <option key={uni._id} value={uni._id}>{uni.name}</option>)}
         </select>
@@ -118,10 +140,17 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
       {selectedUniversity && (
         <div>
           <label className={labelCls}>Curso</label>
-          <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)} required className={selectCls}>
+          <select value={selectedCourse} onChange={(e) => { setSelectedCourse(e.target.value); setSelectedDisciplineIds([]); }} required className={selectCls}>
             <option value="">Selecione o curso</option>
             {availableCourses.map((course) => <option key={course._id} value={course._id}>{course.name}</option>)}
           </select>
+        </div>
+      )}
+      {selectedCourse && (
+        <div>
+          <label className={labelCls}>Disciplinas vinculadas {selectedDisciplineIds.length > 0 && <span className="normal-case tracking-normal text-blue-400 ml-1">({selectedDisciplineIds.length} selecionada{selectedDisciplineIds.length !== 1 ? "s" : ""})</span>}</label>
+          <CheckboxList items={availableDisciplines} selected={selectedDisciplineIds} onToggle={toggleDiscipline} emptyText="Nenhuma disciplina disponível para este curso. Você pode criar a turma sem disciplinas e vincular depois." />
+          <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">Cada disciplina selecionada gera um código de cadastro para alunos desta turma.</p>
         </div>
       )}
       <div className="pt-1">

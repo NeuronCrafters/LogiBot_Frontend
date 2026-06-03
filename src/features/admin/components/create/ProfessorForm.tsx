@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { academicFiltersApi } from "@/services/apiClient";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { ProfessorData } from "@/features/admin/types";
 import { EntityActionButton } from "@/features/admin/components/EntityActionButton";
 
@@ -15,6 +16,10 @@ const inputCls = "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/6
 const selectCls = "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60";
 
 function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
+  const { user } = useAuth();
+  const roles = Array.isArray(user?.role) ? user.role : [user?.role];
+  const isCoordinator = roles.includes("course-coordinator") && !roles.includes("admin");
+
   const { data: academicData, isLoading, error } = useQuery({
     queryKey: ["academicData"],
     queryFn: async () => { const response = await academicFiltersApi.getAcademicData(); return response.data; },
@@ -31,6 +36,11 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
   const [courses, setCourses] = useState<string[]>(initialData?.courses ?? []);
   const [showPassword, setShowPassword] = useState(false);
 
+  const getFirstId = (value: string | string[] | undefined): string => {
+    if (!value) return "";
+    return Array.isArray(value) ? value[0] ?? "" : value;
+  };
+
   const availableCourses = useMemo(() => {
     if (!academicData?.universities || !school) return [];
     return academicData.universities.find((u) => u._id === school)?.courses ?? [];
@@ -38,12 +48,18 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
   const handleUniversityChange = useCallback((universityId: string) => { setSchool(universityId); setCourses([]); }, []);
 
+  React.useEffect(() => {
+    if (!isCoordinator || school) return;
+    const coordinatorSchool = getFirstId(user?.schoolId) || user?.school || "";
+    if (coordinatorSchool) setSchool(coordinatorSchool);
+  }, [isCoordinator, school, user]);
+
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim() || !school || courses.length === 0) return;
     onSubmit({ name: name.trim(), email: email.trim(), password: password.trim(), school, courses });
-    setName(""); setEmail(""); setPassword(""); setSchool(""); setCourses([]);
-  }, [name, email, password, school, courses, onSubmit]);
+    setName(""); setEmail(""); setPassword(""); if (!isCoordinator) setSchool(""); setCourses([]);
+  }, [name, email, password, school, courses, onSubmit, isCoordinator]);
 
   if (isLoading) return (
     <div className="mt-5 space-y-3">
@@ -75,7 +91,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       </div>
       <div>
         <label className={labelCls}>Universidade</label>
-        <select value={school} onChange={(e) => handleUniversityChange(e.target.value)} required className={selectCls}>
+        <select value={school} onChange={(e) => handleUniversityChange(e.target.value)} required disabled={isCoordinator} className={selectCls}>
           <option value="">Selecione a universidade</option>
           {academicData?.universities.map((uni) => <option key={uni._id} value={uni._id}>{uni.name}</option>)}
         </select>

@@ -46,6 +46,16 @@ export const ACADEMIC_ROUTES: Record<
   },
 };
 
+export const DISCIPLINE_PROFESSOR_ROUTES = {
+  attach: "/academic/disciplines/:disciplineId/professors",
+  detach: "/academic/disciplines/:disciplineId/professors/:professorId",
+} as const;
+
+export const CLASS_DISCIPLINE_ROUTES = {
+  attach: "/academic/classes/:classId/disciplines",
+  detach: "/academic/classes/:classId/disciplines/:disciplineId",
+} as const;
+
 export const ACADEMICFILTER_ROUTES = {
   academicData: "/academic/filters"
 };
