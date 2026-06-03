@@ -9,8 +9,13 @@ interface QuestionsDisplayProps {
   onSubmitAnswers: (answers: string[]) => Promise<void>;
 }
 
-export function QuestionsDisplay({ questions, onSubmitAnswers }: QuestionsDisplayProps) {
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
+export function QuestionsDisplay({
+  questions,
+  onSubmitAnswers,
+}: QuestionsDisplayProps) {
+  const [selectedAnswers, setSelectedAnswers] = useState<
+    Record<number, string>
+  >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cleanOptionText = (text: string) => text.replace(/^[A-E][).]\s*/, "");
@@ -43,9 +48,18 @@ export function QuestionsDisplay({ questions, onSubmitAnswers }: QuestionsDispla
   return (
     <div className="space-y-6">
       {questions.map((q, i) => (
-        <div key={i} className="space-y-3 rounded-2xl border border-white/10 bg-neutral-950/50 p-4">
+        <div
+          key={i}
+          className="space-y-3 rounded-2xl border border-white/10 bg-neutral-950/50 p-4"
+        >
           <div className="rounded-xl border border-indigo-400/20 bg-indigo-500/10 p-4">
-            <Typograph text={`${i + 1}. ${q.question}`} variant="text7" fontFamily="poppins" weight="medium" colorText="text-white" />
+            <Typograph
+              text={`${i + 1}. ${q.question}`}
+              variant="text7"
+              fontFamily="poppins"
+              weight="medium"
+              colorText="text-white"
+            />
           </div>
           <div className="flex flex-col gap-2">
             {q.options.map((opt, j) => {
@@ -58,7 +72,9 @@ export function QuestionsDisplay({ questions, onSubmitAnswers }: QuestionsDispla
                   disabled={isSubmitting}
                   text={
                     <span className="flex items-start gap-2">
-                      <span className="font-bold text-indigo-400">{letter}</span>
+                      <span className="font-bold text-indigo-400">
+                        {letter}
+                      </span>
                       <span className="text-white">{cleanOptionText(opt)}</span>
                     </span>
                   }
@@ -77,7 +93,14 @@ export function QuestionsDisplay({ questions, onSubmitAnswers }: QuestionsDispla
           text={isSubmitting ? "Analisando respostas..." : "Enviar respostas"}
         />
         {isSubmitting && (
-          <Typograph text="Por favor, aguarde enquanto suas respostas são analisadas..." variant="text10" fontFamily="poppins" weight="regular" colorText="text-white/70" className="mt-2" />
+          <Typograph
+            text="Por favor, aguarde enquanto suas respostas são analisadas..."
+            variant="text10"
+            fontFamily="poppins"
+            weight="regular"
+            colorText="text-white/70"
+            className="mt-2"
+          />
         )}
       </div>
     </div>

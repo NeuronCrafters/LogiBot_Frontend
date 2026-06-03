@@ -10,7 +10,10 @@ export function InitialChoiceStep() {
         O que deseja fazer hoje?
       </h2>
 
-      <div id="chat-mode-options" className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+      <div
+        id="chat-mode-options"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto"
+      >
         <button
           id="chat-button"
           onClick={() => navigate("/chat")}
@@ -20,7 +23,9 @@ export function InitialChoiceStep() {
             <MessageCircle className="w-8 h-8 text-blue-400" />
           </div>
           <div className="flex flex-col gap-1 text-center">
-            <span className="text-white font-[Poppins] font-semibold text-base">Conversa Livre</span>
+            <span className="text-white font-[Poppins] font-semibold text-base">
+              Conversa Livre
+            </span>
             <span className="text-gray-400 font-[Poppins] text-sm leading-snug">
               Tire dúvidas sobre lógica de programação com o LogiBot
             </span>
@@ -39,9 +44,12 @@ export function InitialChoiceStep() {
             <Brain className="w-8 h-8 text-indigo-400" />
           </div>
           <div className="flex flex-col gap-1 text-center">
-            <span className="text-white font-[Poppins] font-semibold text-base">Quiz</span>
+            <span className="text-white font-[Poppins] font-semibold text-base">
+              Quiz
+            </span>
             <span className="text-gray-400 font-[Poppins] text-sm leading-snug">
-              Teste seus conhecimentos com 5 perguntas personalizadas por nível e tema
+              Teste seus conhecimentos com 5 perguntas personalizadas por nível
+              e tema
             </span>
           </div>
           <span className="mt-auto w-full py-2 bg-indigo-600 hover:bg-indigo-700 border border-indigo-400/40 text-white font-semibold text-sm rounded-md transition-colors shadow-md shadow-indigo-900/30">

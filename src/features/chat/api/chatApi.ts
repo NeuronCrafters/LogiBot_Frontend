@@ -10,16 +10,20 @@ export const chatApi = {
     const response = await api.post(
       "/chat/messages",
       { message },
-      { withCredentials: true }
+      { withCredentials: true },
     );
     return response.data;
   },
 
-  async askTutor(message: string, senderId: string, sessionId?: string): Promise<ChatActionResponse> {
+  async askTutor(
+    message: string,
+    senderId: string,
+    sessionId?: string,
+  ): Promise<ChatActionResponse> {
     const response = await api.post(
       "/chat/messages",
       { message, senderId, sessionId },
-      { withCredentials: true }
+      { withCredentials: true },
     );
     return response.data;
   },
@@ -28,7 +32,7 @@ export const chatApi = {
     const response = await api.post(
       "/chat/messages",
       { message: "conversar" },
-      { withCredentials: true }
+      { withCredentials: true },
     );
     return response.data;
   },

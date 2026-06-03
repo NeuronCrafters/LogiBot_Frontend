@@ -1,13 +1,13 @@
-﻿import { ArrowDown } from 'lucide-react';
+﻿import { ArrowDown } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
-import { User } from '@/app/providers/AuthContext';
-import { ChatInput } from '@/features/chat/components/ChatInput';
-import { useQuizFlow } from '@/features/quiz/hooks/useQuizFlow';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { User } from "@/app/providers/AuthContext";
+import { ChatInput } from "@/features/chat/components/ChatInput";
+import { useQuizFlow } from "@/features/quiz/hooks/useQuizFlow";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { MarkdownMessageBubble } from './MarkdownMessageBubble';
+import { MarkdownMessageBubble } from "./MarkdownMessageBubble";
 import { ChatTypingDots } from "./ChatTypingDots";
-import { historyService } from '@/features/chat/api/chatHistoryApi';
+import { historyService } from "@/features/chat/api/chatHistoryApi";
 
 interface StudentChatContentProps {
   user: User;
@@ -59,21 +59,26 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
       setLoadingHistory(true);
 
       try {
-        const data = await historyService.getChatMessages(userId, sessionIdFromUrl);
+        const data = await historyService.getChatMessages(
+          userId,
+          sessionIdFromUrl,
+        );
 
         // Backend returns a raw array; also handle wrapped { messages: [...] } for safety
-        const rows: any[] = Array.isArray(data) ? data : (data as any)?.messages ?? [];
+        const rows: any[] = Array.isArray(data)
+          ? data
+          : ((data as any)?.messages ?? []);
 
         if (rows.length > 0) {
           const formatted = rows.map((m: any, index: number) => ({
             id: m.id || m._id || `msg-${index}`,
-            text: m.content || '',
-            sender: (m.role === 'assistant' ? 'bot' : 'user') as "user" | "bot",
-            type: 'text' as const,
+            text: m.content || "",
+            sender: (m.role === "assistant" ? "bot" : "user") as "user" | "bot",
+            type: "text" as const,
           }));
 
           setMessages(formatted);
-          setMode('chat');
+          setMode("chat");
           setSessionId(sessionIdFromUrl);
 
           setTimeout(() => scrollToBottom(false), 100);
@@ -86,7 +91,14 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     }
 
     loadHistory();
-  }, [sessionIdFromUrl, userId, setMessages, setMode, setSessionId, scrollToBottom]);
+  }, [
+    sessionIdFromUrl,
+    userId,
+    setMessages,
+    setMode,
+    setSessionId,
+    scrollToBottom,
+  ]);
 
   const checkScrollPosition = useCallback(() => {
     if (containerRef.current) {
@@ -125,7 +137,9 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
       <div className="flex items-center justify-center h-screen text-white">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="font-poppins text-sm text-gray-400">Carregando conversa...</p>
+          <p className="font-poppins text-sm text-gray-400">
+            Carregando conversa...
+          </p>
         </div>
       </div>
     );
@@ -147,8 +161,8 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
               </div>
             )}
 
-            {messages.map((msg, index) => (
-              msg.type === 'typing' ? (
+            {messages.map((msg, index) =>
+              msg.type === "typing" ? (
                 <ChatTypingDots key={msg.id || index} />
               ) : (
                 <MarkdownMessageBubble
@@ -156,8 +170,8 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                   text={msg.text}
                   sender={msg.sender as "user" | "bot"}
                 />
-              )
-            ))}
+              ),
+            )}
             <div ref={messagesEndRef} />
           </div>
         )}

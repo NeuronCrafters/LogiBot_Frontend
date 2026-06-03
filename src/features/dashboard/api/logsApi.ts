@@ -1,6 +1,10 @@
 import { api } from "@/shared/api/httpClient";
 import { LOG_ROUTES, PROFESSOR_LOG_ROUTES } from "@/services/api/api_routes";
-import { LogApiResponse, UserAnalysisLog, LogFilterParams } from "@/features/dashboard/logTypes";
+import {
+  LogApiResponse,
+  UserAnalysisLog,
+  LogFilterParams,
+} from "@/features/dashboard/logTypes";
 
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
@@ -19,47 +23,80 @@ function unwrapLogResponse<T>(response: LogApiResponse<T> | T): T {
   return response as T;
 }
 
-function isFailedEnvelope<T>(response: LogApiResponse<T> | T): response is LogApiResponse<T> {
-  return Boolean(response && typeof response === "object" && "success" in response && !(response as LogApiResponse<T>).success);
+function isFailedEnvelope<T>(
+  response: LogApiResponse<T> | T,
+): response is LogApiResponse<T> {
+  return Boolean(
+    response &&
+    typeof response === "object" &&
+    "success" in response &&
+    !(response as LogApiResponse<T>).success,
+  );
 }
 
-export type LogEntityType = "university" | "course" | "class" | "student" | "discipline";
+export type LogEntityType =
+  | "university"
+  | "course"
+  | "class"
+  | "student"
+  | "discipline";
 export type LogMetricType = "accuracy" | "usage" | "subjects";
 
 export const logApi = {
   getUniversitySummary: async (id: string) =>
-    getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(LOG_ROUTES.summary.university(id)),
+    getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(
+      LOG_ROUTES.summary.university(id),
+    ),
 
   getCourseSummary: async (id: string) =>
-    getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(LOG_ROUTES.summary.course(id)),
+    getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(
+      LOG_ROUTES.summary.course(id),
+    ),
 
   getClassSummary: async (id: string) =>
-    getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(LOG_ROUTES.summary.class(id)),
+    getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(
+      LOG_ROUTES.summary.class(id),
+    ),
 
   getDisciplineSummary: async (id: string) =>
-    getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(LOG_ROUTES.summary.discipline(id)),
+    getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(
+      LOG_ROUTES.summary.discipline(id),
+    ),
 
-  getFilteredStudentSummary: async (params: LogFilterParams): Promise<UserAnalysisLog> => {
-    const response = await postRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(
-      LOG_ROUTES.summary.filteredStudent,
-      params,
-    );
-    if (isFailedEnvelope(response)) throw new Error(response.error || "Erro ao buscar dados de usuário");
+  getFilteredStudentSummary: async (
+    params: LogFilterParams,
+  ): Promise<UserAnalysisLog> => {
+    const response = await postRequest<
+      LogApiResponse<UserAnalysisLog> | UserAnalysisLog
+    >(LOG_ROUTES.summary.filteredStudent, params);
+    if (isFailedEnvelope(response))
+      throw new Error(response.error || "Erro ao buscar dados de usuário");
     return unwrapLogResponse(response);
   },
 
-  getAccuracyData: async (entity: LogEntityType, id: string, filters?: LogFilterParams) => {
+  getAccuracyData: async (
+    entity: LogEntityType,
+    id: string,
+    filters?: LogFilterParams,
+  ) => {
     const summary = await logApi.fetchSummary(entity, id, filters);
     const totalCorrect = summary.totalCorrectAnswers;
     const totalWrong = summary.totalWrongAnswers;
     return {
       totalCorrect,
       totalWrong,
-      accuracy: (totalCorrect + totalWrong) > 0 ? (totalCorrect / (totalCorrect + totalWrong)) * 100 : 0,
+      accuracy:
+        totalCorrect + totalWrong > 0
+          ? (totalCorrect / (totalCorrect + totalWrong)) * 100
+          : 0,
     };
   },
 
-  getUsageData: async (entity: LogEntityType, id: string, filters?: LogFilterParams) => {
+  getUsageData: async (
+    entity: LogEntityType,
+    id: string,
+    filters?: LogFilterParams,
+  ) => {
     const summary = await logApi.fetchSummary(entity, id, filters);
     return {
       totalUsageTime: summary.usageTimeInSeconds,
@@ -69,7 +106,11 @@ export const logApi = {
     };
   },
 
-  getSubjectsData: async (entity: LogEntityType, id: string, filters?: LogFilterParams) => {
+  getSubjectsData: async (
+    entity: LogEntityType,
+    id: string,
+    filters?: LogFilterParams,
+  ) => {
     const summary = await logApi.fetchSummary(entity, id, filters);
     return {
       subjectFrequency: summary.subjectCounts,
@@ -77,14 +118,25 @@ export const logApi = {
   },
 
   getProfessorStudentsByDiscipline: async (disciplineId: string) => {
-    return getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(PROFESSOR_LOG_ROUTES.listStudentsByDiscipline(disciplineId));
+    return getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(
+      PROFESSOR_LOG_ROUTES.listStudentsByDiscipline(disciplineId),
+    );
   },
 
-  getProfessorStudentDetails: async (studentId: string, disciplineId: string) => {
-    return getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(PROFESSOR_LOG_ROUTES.getStudentDetails(studentId, disciplineId));
+  getProfessorStudentDetails: async (
+    studentId: string,
+    disciplineId: string,
+  ) => {
+    return getRequest<LogApiResponse<UserAnalysisLog> | UserAnalysisLog>(
+      PROFESSOR_LOG_ROUTES.getStudentDetails(studentId, disciplineId),
+    );
   },
 
-  fetchSummary: async (entity: LogEntityType, id: string, filters?: LogFilterParams): Promise<UserAnalysisLog> => {
+  fetchSummary: async (
+    entity: LogEntityType,
+    id: string,
+    filters?: LogFilterParams,
+  ): Promise<UserAnalysisLog> => {
     switch (entity) {
       case "university":
         return unwrapLogResponse(await logApi.getUniversitySummary(id));

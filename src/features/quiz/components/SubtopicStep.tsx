@@ -38,7 +38,10 @@ export function SubtopicStep({ buttons, onNext }: SubtopicStepProps) {
       ) : (
         <ChoiceButtonGroup
           colorScheme="indigo"
-          options={buttons.map((btn) => ({ label: formatTitle(btn.title), value: btn.payload }))}
+          options={buttons.map((btn) => ({
+            label: formatTitle(btn.title),
+            value: btn.payload,
+          }))}
           onSelect={handleClick}
         />
       )}

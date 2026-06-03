@@ -9,7 +9,13 @@ import { SubtopicStep } from "@/features/quiz/components/SubtopicStep";
 import { QuestionsDisplay } from "@/features/quiz/components/QuestionDisplay";
 import { ResultDisplay } from "@/features/quiz/components/ResultDisplay";
 
-const PROGRESS_STEPS = ["Nível", "Categoria", "Subtópico", "Perguntas", "Resultado"] as const;
+const PROGRESS_STEPS = [
+  "Nível",
+  "Categoria",
+  "Subtópico",
+  "Perguntas",
+  "Resultado",
+] as const;
 
 const STEP_INDEX: Record<string, number> = {
   levels: 0,
@@ -53,7 +59,9 @@ export function Quiz() {
                 <Brain className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="font-[Poppins] text-2xl font-semibold text-white">Quiz</h1>
+                <h1 className="font-[Poppins] text-2xl font-semibold text-white">
+                  Quiz
+                </h1>
                 <p className="mt-2 font-[Poppins] text-sm leading-relaxed text-zinc-400">
                   Pratique por nível, tema e subtópico com feedback imediato.
                 </p>
@@ -88,24 +96,47 @@ export function Quiz() {
                   </div>
                   <span
                     className={`hidden max-w-20 truncate font-[Poppins] text-[10px] transition-colors sm:block ${
-                      i === currentIndex ? "text-white" : i < currentIndex ? "text-indigo-400" : "text-zinc-600"
+                      i === currentIndex
+                        ? "text-white"
+                        : i < currentIndex
+                          ? "text-indigo-400"
+                          : "text-zinc-600"
                     }`}
                   >
                     {label}
                   </span>
                 </div>
                 {i < PROGRESS_STEPS.length - 1 && (
-                  <div className={`mx-2 mb-5 h-px flex-1 transition-colors ${i < currentIndex ? "bg-indigo-500" : "bg-white/10"}`} />
+                  <div
+                    className={`mx-2 mb-5 h-px flex-1 transition-colors ${i < currentIndex ? "bg-indigo-500" : "bg-white/10"}`}
+                  />
                 )}
               </div>
             ))}
           </div>
 
           <>
-            {(step === "initial" || step === "levels") && <LevelStep onNext={handleLevelNext} />}
-            {step === "categories" && <CategoryStep buttons={categoryButtons} onNext={handleCategoryNext} />}
-            {step === "subsubjects" && <SubtopicStep buttons={subsubjectButtons} onNext={handleSubsubjectNext} />}
-            {step === "questions" && <QuestionsDisplay questions={questions} onSubmitAnswers={handleSubmitAnswers} />}
+            {(step === "initial" || step === "levels") && (
+              <LevelStep onNext={handleLevelNext} />
+            )}
+            {step === "categories" && (
+              <CategoryStep
+                buttons={categoryButtons}
+                onNext={handleCategoryNext}
+              />
+            )}
+            {step === "subsubjects" && (
+              <SubtopicStep
+                buttons={subsubjectButtons}
+                onNext={handleSubsubjectNext}
+              />
+            )}
+            {step === "questions" && (
+              <QuestionsDisplay
+                questions={questions}
+                onSubmitAnswers={handleSubmitAnswers}
+              />
+            )}
             {step === "results" && resultData && (
               <>
                 <ResultDisplay

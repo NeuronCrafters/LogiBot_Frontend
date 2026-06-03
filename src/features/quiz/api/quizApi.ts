@@ -5,9 +5,16 @@ interface Button {
   title: string;
   payload: string;
 }
-interface LevelResponse { buttons: Button[]; }
-interface CategoryResponse { message: string; categories: Button[]; }
-interface SubcategoryResponse { buttons: Button[]; }
+interface LevelResponse {
+  buttons: Button[];
+}
+interface CategoryResponse {
+  message: string;
+  categories: Button[];
+}
+interface SubcategoryResponse {
+  buttons: Button[];
+}
 interface GenerateQuizResponse {
   success: boolean;
   assunto: string;

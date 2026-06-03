@@ -10,7 +10,7 @@ export function usePersistedArray<T>(key: string, defaultValue: T[]) {
     sessionStorage.setItem(key, JSON.stringify(state));
   }, [key, state]);
 
-  const push = (item: T) => setState(prev => [...prev, item]);
+  const push = (item: T) => setState((prev) => [...prev, item]);
   const clear = () => setState([]);
 
   return { state, push, clear };

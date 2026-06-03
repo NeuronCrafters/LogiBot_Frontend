@@ -40,7 +40,10 @@ export function CategoryStep({ buttons, onNext }: CategoryStepProps) {
       {!loading && (
         <ChoiceButtonGroup
           colorScheme="indigo"
-          options={buttons.map((btn) => ({ label: formatTitle(btn.title), value: btn.payload }))}
+          options={buttons.map((btn) => ({
+            label: formatTitle(btn.title),
+            value: btn.payload,
+          }))}
           onSelect={handleClick}
         />
       )}

@@ -5,7 +5,7 @@ export const userAnalysisApi = {
     return api.post(
       "/analytics/interaction",
       { message: text },
-      { withCredentials: true }
+      { withCredentials: true },
     );
   },
 };

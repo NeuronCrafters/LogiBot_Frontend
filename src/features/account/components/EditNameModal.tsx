@@ -10,11 +10,20 @@ interface EditNameModalProps {
   onSave: (newName: string) => void;
 }
 
-export function EditNameModal({ isOpen, onClose, currentName, onSave }: EditNameModalProps) {
+export function EditNameModal({
+  isOpen,
+  onClose,
+  currentName,
+  onSave,
+}: EditNameModalProps) {
   const [name, setName] = useState("");
 
   const handleSave = () => {
-    if (name.trim()) { onSave(name); setName(""); onClose(); }
+    if (name.trim()) {
+      onSave(name);
+      setName("");
+      onClose();
+    }
   };
 
   return (
@@ -23,22 +32,60 @@ export function EditNameModal({ isOpen, onClose, currentName, onSave }: EditName
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-              <div className="flex items-center gap-2"><User size={18} className="text-blue-400" /><Typograph text="Alterar Nome" colorText="text-white" variant="text4" weight="semibold" fontFamily="poppins" /></div>
-              <button onClick={onClose} className="text-zinc-400 hover:text-white"><X size={20} /></button>
+              <div className="flex items-center gap-2">
+                <User size={18} className="text-blue-400" />
+                <Typograph
+                  text="Alterar Nome"
+                  colorText="text-white"
+                  variant="text4"
+                  weight="semibold"
+                  fontFamily="poppins"
+                />
+              </div>
+              <button
+                onClick={onClose}
+                className="text-zinc-400 hover:text-white"
+              >
+                <X size={20} />
+              </button>
             </div>
             <div className="p-6 space-y-5">
               <div className="space-y-2">
-                <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Nome Atual</label>
-                <div className="w-full bg-[#141414]/50 border border-zinc-800 rounded-lg p-3 text-zinc-400 cursor-not-allowed select-none">{currentName}</div>
+                <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">
+                  Nome Atual
+                </label>
+                <div className="w-full bg-[#141414]/50 border border-zinc-800 rounded-lg p-3 text-zinc-400 cursor-not-allowed select-none">
+                  {currentName}
+                </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">Novo Nome</label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Digite o novo nome" className="w-full bg-[#141414] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-colors placeholder:text-zinc-600" />
+                <label className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
+                  Novo Nome
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Digite o novo nome"
+                  className="w-full bg-[#141414] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-colors placeholder:text-zinc-600"
+                />
               </div>
             </div>
             <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-[#1a1a1a]">
-              <Button variant="ghost" onClick={onClose} className="text-zinc-400 hover:bg-red-600 hover:text-white">Cancelar</Button>
-              <Button onClick={handleSave} disabled={!name.trim()} className="bg-blue-600 hover:bg-blue-700 text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"><Save size={16} /> Salvar</Button>
+              <Button
+                variant="ghost"
+                onClick={onClose}
+                className="text-zinc-400 hover:bg-red-600 hover:text-white"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!name.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Save size={16} /> Salvar
+              </Button>
             </div>
           </div>
         </div>

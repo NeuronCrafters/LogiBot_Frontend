@@ -12,7 +12,11 @@ interface ChatHistoryProps {
 function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
   const navigate = useNavigate();
 
-  const { sessions = [], isLoading, isError } = useChatHistory({
+  const {
+    sessions = [],
+    isLoading,
+    isError,
+  } = useChatHistory({
     userId,
     enabled: !!userId,
   });
@@ -31,7 +35,9 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
     return (
       <div className="flex flex-col items-center justify-center h-40 gap-2">
         <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
-        <span className="text-xs text-zinc-500 font-[Poppins]">Carregando...</span>
+        <span className="text-xs text-zinc-500 font-[Poppins]">
+          Carregando...
+        </span>
       </div>
     );
   }
@@ -51,12 +57,16 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
       {isError ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
           <AlertCircle className="w-5 h-5 text-red-500" />
-          <span className="text-xs text-zinc-500 font-[Poppins]">Erro ao carregar histórico.</span>
+          <span className="text-xs text-zinc-500 font-[Poppins]">
+            Erro ao carregar histórico.
+          </span>
         </div>
       ) : hasNoSessions ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
           <MessageSquare className="w-5 h-5 text-zinc-700" />
-          <span className="text-xs text-zinc-500 font-[Poppins]">Nenhuma conversa iniciada.</span>
+          <span className="text-xs text-zinc-500 font-[Poppins]">
+            Nenhuma conversa iniciada.
+          </span>
         </div>
       ) : (
         <div className="flex flex-col gap-0.5">
@@ -66,13 +76,18 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
               onClick={() => handleSelect(session.sessionId)}
               className="group flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
             >
-              <MessageSquare size={14} className="text-blue-400 shrink-0 mt-0.5" />
+              <MessageSquare
+                size={14}
+                className="text-blue-400 shrink-0 mt-0.5"
+              />
               <div className="flex flex-col min-w-0 flex-1">
                 <span className="text-xs font-[Poppins] text-zinc-300 group-hover:text-white truncate leading-snug transition-colors">
                   {session.title || "Nova Interação"}
                 </span>
                 <span className="text-[11px] text-zinc-600 font-[Poppins] leading-snug">
-                  {session.lastActivityAt ? formatRelativeTime(new Date(session.lastActivityAt)) : ""}
+                  {session.lastActivityAt
+                    ? formatRelativeTime(new Date(session.lastActivityAt))
+                    : ""}
                 </span>
               </div>
             </div>

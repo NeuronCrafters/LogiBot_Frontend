@@ -47,18 +47,18 @@ export interface EntitySearchResult {
 }
 
 export type FilterType =
-  | 'universities'
-  | 'courses'
-  | 'disciplines'
-  | 'classes'
-  | 'professors'
-  | 'students'
-  | 'students-discipline'
+  | "universities"
+  | "courses"
+  | "disciplines"
+  | "classes"
+  | "professors"
+  | "students"
+  | "students-discipline"
   | "students-class"
-  | 'students-course';
+  | "students-course";
 
 export interface FilterData {
-  filterType: FilterType | '';
+  filterType: FilterType | "";
   universityId?: string;
   courseId?: string;
   disciplineId?: string;

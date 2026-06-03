@@ -18,11 +18,14 @@ export function LevelStep({ onNext }: LevelStepProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    quizService.listLevels()
+    quizService
+      .listLevels()
       .then((data) => {
         setLevels(data.buttons || []);
       })
-      .catch((err: unknown) => logger.error("Quiz", "Erro ao listar níveis.", err))
+      .catch((err: unknown) =>
+        logger.error("Quiz", "Erro ao listar níveis.", err),
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -52,13 +55,25 @@ export function LevelStep({ onNext }: LevelStepProps) {
   return (
     <div className="w-full">
       <div>
-        <Typograph text="Escolha seu nível de dificuldade" variant="text4" weight="medium" fontFamily="poppins" colorText="text-white" className="mb-5 text-center" />
+        <Typograph
+          text="Escolha seu nível de dificuldade"
+          variant="text4"
+          weight="medium"
+          fontFamily="poppins"
+          colorText="text-white"
+          className="mb-5 text-center"
+        />
         <ChoiceButtonGroup
           colorScheme="indigo"
-          options={levels.map((l) => ({ label: formatTitle(l.title), value: l.payload }))}
+          options={levels.map((l) => ({
+            label: formatTitle(l.title),
+            value: l.payload,
+          }))}
           onSelect={handleSelect}
         />
-        {isSubmitting && <Loader2 className="animate-spin text-indigo-400 mx-auto mt-4" />}
+        {isSubmitting && (
+          <Loader2 className="animate-spin text-indigo-400 mx-auto mt-4" />
+        )}
       </div>
     </div>
   );

@@ -11,14 +11,9 @@ export type LogEntityType =
   | "discipline"
   | "university";
 
-export type LogMetricType =
-  | "accuracy"
-  | "usage"
-  | "subjects";
+export type LogMetricType = "accuracy" | "usage" | "subjects";
 
-export type LogModeType =
-  | "individual"
-  | "comparison";
+export type LogModeType = "individual" | "comparison";
 
 export const ACADEMIC_ROUTES: Record<
   AcademicEntityType,
@@ -62,7 +57,7 @@ export const CLASS_DISCIPLINE_ROUTES = {
 } as const;
 
 export const ACADEMICFILTER_ROUTES = {
-  academicData: "/academic/filters"
+  academicData: "/academic/filters",
 };
 
 export const RASA_ROUTES = {
@@ -136,12 +131,14 @@ export const LOG_ROUTES = {
     class: (id: string) => `/logs/classes/${id}/summary`,
     discipline: (id: string) => `/logs/disciplines/${id}/summary`,
     filteredStudent: `/logs/students/summary`,
-  }
+  },
 } as const;
 
 export const PROFESSOR_LOG_ROUTES = {
-  listStudentsByDiscipline: (disciplineId: string) => `/logs/professor/students?disciplineId=${disciplineId}`,
-  getStudentDetails: (studentId: string, disciplineId: string) => `/logs/professor/students/${studentId}?disciplineId=${disciplineId}`,
+  listStudentsByDiscipline: (disciplineId: string) =>
+    `/logs/professor/students?disciplineId=${disciplineId}`,
+  getStudentDetails: (studentId: string, disciplineId: string) =>
+    `/logs/professor/students/${studentId}?disciplineId=${disciplineId}`,
 } as const;
 
 export const USER_ANALYSIS_ROUTES = {

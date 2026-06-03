@@ -18,37 +18,70 @@ import { GeneralScoreChart } from "@/features/dashboard/components/charts/Genera
 type DateRange = { from?: Date; to?: Date };
 
 export function Dashboard() {
-  const [dashboardFilters, setDashboardFilters] = useState<DashboardFilterParams>({});
-  const [legacyFilter, setLegacyFilter] = useState<DashboardFilterState & { hierarchyParams: Omit<DashboardFilterParams, "startDate" | "endDate"> }>(
-    { type: "student", ids: [], mode: "individual", hierarchyParams: {} }
-  );
-  const [dateRange] = useState<DateRange | undefined>({ from: addDays(new Date(), -30), to: new Date() });
+  const [dashboardFilters, setDashboardFilters] =
+    useState<DashboardFilterParams>({});
+  const [legacyFilter, setLegacyFilter] = useState<
+    DashboardFilterState & {
+      hierarchyParams: Omit<DashboardFilterParams, "startDate" | "endDate">;
+    }
+  >({ type: "student", ids: [], mode: "individual", hierarchyParams: {} });
+  const [dateRange] = useState<DateRange | undefined>({
+    from: addDays(new Date(), -30),
+    to: new Date(),
+  });
   const [hasSelection, setHasSelection] = useState(false);
   const [, setKey] = useState(0);
 
-  const updateAllFilters = useCallback((currentLegacyFilter: typeof legacyFilter, currentDateRange: typeof dateRange) => {
-    const validIds = currentLegacyFilter.ids.filter((id) => id && id.trim() !== "");
-    const mainId = validIds[0] || "";
-    const newDashboardFilters: DashboardFilterParams = {
-      ...currentLegacyFilter.hierarchyParams,
-      startDate: currentDateRange?.from ? formatISODate(currentDateRange.from) : undefined,
-      endDate: currentDateRange?.to ? formatISODate(currentDateRange.to) : undefined,
-    };
-    if (currentLegacyFilter.type === "student") {
-      newDashboardFilters.studentId = mainId;
-    } else if (mainId) {
-      newDashboardFilters[`${currentLegacyFilter.type}Id` as keyof DashboardFilterParams] = mainId;
-    }
-    setDashboardFilters(newDashboardFilters);
-    setHasSelection(!!mainId);
-    setKey((k) => k + 1);
-  }, []);
+  const updateAllFilters = useCallback(
+    (
+      currentLegacyFilter: typeof legacyFilter,
+      currentDateRange: typeof dateRange,
+    ) => {
+      const validIds = currentLegacyFilter.ids.filter(
+        (id) => id && id.trim() !== "",
+      );
+      const mainId = validIds[0] || "";
+      const newDashboardFilters: DashboardFilterParams = {
+        ...currentLegacyFilter.hierarchyParams,
+        startDate: currentDateRange?.from
+          ? formatISODate(currentDateRange.from)
+          : undefined,
+        endDate: currentDateRange?.to
+          ? formatISODate(currentDateRange.to)
+          : undefined,
+      };
+      if (currentLegacyFilter.type === "student") {
+        newDashboardFilters.studentId = mainId;
+      } else if (mainId) {
+        newDashboardFilters[
+          `${currentLegacyFilter.type}Id` as keyof DashboardFilterParams
+        ] = mainId;
+      }
+      setDashboardFilters(newDashboardFilters);
+      setHasSelection(!!mainId);
+      setKey((k) => k + 1);
+    },
+    [],
+  );
 
-  const handleEntityFilterChange = useCallback((type: LogEntityType, ids: string[], mode: LogModeType, hierarchyParams?: Omit<DashboardFilterParams, "startDate" | "endDate">) => {
-    const newLegacyFilter = { type, ids: ids.filter((id) => id && id.trim() !== ""), mode, hierarchyParams: hierarchyParams || {} };
-    setLegacyFilter(newLegacyFilter);
-    updateAllFilters(newLegacyFilter, dateRange);
-  }, [dateRange, updateAllFilters]);
+  const handleEntityFilterChange = useCallback(
+    (
+      type: LogEntityType,
+      ids: string[],
+      mode: LogModeType,
+      hierarchyParams?: Omit<DashboardFilterParams, "startDate" | "endDate">,
+    ) => {
+      const newLegacyFilter = {
+        type,
+        ids: ids.filter((id) => id && id.trim() !== ""),
+        mode,
+        hierarchyParams: hierarchyParams || {},
+      };
+      setLegacyFilter(newLegacyFilter);
+      updateAllFilters(newLegacyFilter, dateRange);
+    },
+    [dateRange, updateAllFilters],
+  );
 
   useEffect(() => {
     if (hasSelection) updateAllFilters(legacyFilter, dateRange);
@@ -64,8 +97,12 @@ export function Dashboard() {
                 <BarChart2 className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="font-[Poppins] text-2xl font-semibold text-white">Dashboard de atividades</h1>
-                <p className="mt-2 font-[Poppins] text-sm leading-relaxed text-zinc-400">Visualize métricas detalhadas por entidade e período.</p>
+                <h1 className="font-[Poppins] text-2xl font-semibold text-white">
+                  Dashboard de atividades
+                </h1>
+                <p className="mt-2 font-[Poppins] text-sm leading-relaxed text-zinc-400">
+                  Visualize métricas detalhadas por entidade e período.
+                </p>
               </div>
             </div>
             <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 font-[Poppins] text-xs font-medium text-zinc-400">
@@ -82,17 +119,33 @@ export function Dashboard() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-500">
               <MousePointer2 className="h-5 w-5" />
             </div>
-            <Typograph text="Selecione uma entidade para visualizar os dados" variant="text7" colorText="text-zinc-400" weight="medium" fontFamily="poppins" />
+            <Typograph
+              text="Selecione uma entidade para visualizar os dados"
+              variant="text7"
+              colorText="text-zinc-400"
+              weight="medium"
+              fontFamily="poppins"
+            />
           </div>
         ) : (
           <div className="space-y-6">
             <UsageChart filter={legacyFilter} />
-            {legacyFilter.type === "student" && <AccessPatternChart filters={dashboardFilters} />}
+            {legacyFilter.type === "student" && (
+              <AccessPatternChart filters={dashboardFilters} />
+            )}
             <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2">
-              <div className="h-full"><CorrectWrongChart filter={legacyFilter} /></div>
-              <div className="h-full"><GeneralScoreChart filters={dashboardFilters} /></div>
-              <div className="h-full"><CategoryChart filter={legacyFilter} /></div>
-              <div className="h-full"><ProficiencyRadarChart filters={dashboardFilters} /></div>
+              <div className="h-full">
+                <CorrectWrongChart filter={legacyFilter} />
+              </div>
+              <div className="h-full">
+                <GeneralScoreChart filters={dashboardFilters} />
+              </div>
+              <div className="h-full">
+                <CategoryChart filter={legacyFilter} />
+              </div>
+              <div className="h-full">
+                <ProficiencyRadarChart filters={dashboardFilters} />
+              </div>
             </div>
             <EffortMatrixChart filters={dashboardFilters} />
             <LearningJourneyChart filters={dashboardFilters} />

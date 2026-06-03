@@ -26,23 +26,32 @@ export const adminApi = {
     postRequest<T>(ADMIN_ROUTES.createProfessor, data),
 
   deleteProfessor: <T>(professorId: string): Promise<T> =>
-    deleteRequest<T>(ADMIN_ROUTES.deleteProfessor.replace(":professorId", professorId)),
+    deleteRequest<T>(
+      ADMIN_ROUTES.deleteProfessor.replace(":professorId", professorId),
+    ),
 
   listAllProfessors: <T>(): Promise<T> =>
     getRequest<T>(ADMIN_ROUTES.listAllProfessors),
 
   listProfessorsByUniversity: <T>(schoolId: string): Promise<T> =>
-    getRequest<T>(ADMIN_ROUTES.listProfessorsByUniversity.replace(":schoolId", schoolId)),
+    getRequest<T>(
+      ADMIN_ROUTES.listProfessorsByUniversity.replace(":schoolId", schoolId),
+    ),
 
   listProfessorsByCourse: <T>(courseId: string): Promise<T> =>
-    getRequest<T>(ADMIN_ROUTES.listProfessorsByCourse.replace(":courseId", courseId)),
+    getRequest<T>(
+      ADMIN_ROUTES.listProfessorsByCourse.replace(":courseId", courseId),
+    ),
 
   updateProfessorRole: <T>(id: string, action: "add" | "remove"): Promise<T> =>
-    patchRequest<T>(ADMIN_ROUTES.updateProfessorRole.replace(":id", id), { action }),
+    patchRequest<T>(ADMIN_ROUTES.updateProfessorRole.replace(":id", id), {
+      action,
+    }),
 
-  listStudents: <T>(): Promise<T> =>
-    getRequest<T>(ADMIN_ROUTES.listStudents),
+  listStudents: <T>(): Promise<T> => getRequest<T>(ADMIN_ROUTES.listStudents),
 
   deleteStudent: <T>(studentId: string): Promise<T> =>
-    deleteRequest<T>(ADMIN_ROUTES.deleteStudent.replace(":studentId", studentId)),
+    deleteRequest<T>(
+      ADMIN_ROUTES.deleteStudent.replace(":studentId", studentId),
+    ),
 };

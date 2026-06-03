@@ -8,7 +8,7 @@ export interface ChatSession {
 
 export interface HistoryMessage {
   _id?: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: string;
 }
@@ -26,13 +26,18 @@ export const historyService = {
     return response.data;
   },
 
-  async getChatMessages(userId: string, sessionId: string): Promise<ChatHistoryDetail> {
-    const response = await api.get(`/chat/sessions/${userId}/${sessionId}/messages`);
+  async getChatMessages(
+    userId: string,
+    sessionId: string,
+  ): Promise<ChatHistoryDetail> {
+    const response = await api.get(
+      `/chat/sessions/${userId}/${sessionId}/messages`,
+    );
     return response.data;
   },
 
   async getQuizHistory(userId: string) {
     const response = await api.get(`/quiz/history/${userId}`);
     return response.data;
-  }
+  },
 };

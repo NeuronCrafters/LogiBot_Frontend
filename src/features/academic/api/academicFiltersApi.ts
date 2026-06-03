@@ -97,49 +97,76 @@ export const academicFiltersApi = {
 
   getCourses: async (universityId: string): Promise<Course[]> => {
     const res = await academicFiltersApi.getAcademicData();
-    return res.data.universities.find((u) => u._id === universityId)?.courses ?? [];
+    return (
+      res.data.universities.find((u) => u._id === universityId)?.courses ?? []
+    );
   },
 
-  getClasses: async (universityId: string, courseId: string): Promise<Class[]> => {
+  getClasses: async (
+    universityId: string,
+    courseId: string,
+  ): Promise<Class[]> => {
     const res = await academicFiltersApi.getAcademicData();
     const uni = res.data.universities.find((u) => u._id === universityId);
     return uni?.courses.find((c) => c._id === courseId)?.classes ?? [];
   },
 
-  getDisciplines: async (universityId: string, courseId: string): Promise<Discipline[]> => {
+  getDisciplines: async (
+    universityId: string,
+    courseId: string,
+  ): Promise<Discipline[]> => {
     const res = await academicFiltersApi.getAcademicData();
     const uni = res.data.universities.find((u) => u._id === universityId);
     return uni?.courses.find((c) => c._id === courseId)?.disciplines ?? [];
   },
 
-  getProfessors: async (universityId: string, courseId?: string): Promise<Professor[]> => {
+  getProfessors: async (
+    universityId: string,
+    courseId?: string,
+  ): Promise<Professor[]> => {
     const res = await academicFiltersApi.getAcademicData();
     const uni = res.data.universities.find((u) => u._id === universityId);
     if (!uni) return [];
-    if (courseId) return uni.courses.find((c) => c._id === courseId)?.professors ?? [];
+    if (courseId)
+      return uni.courses.find((c) => c._id === courseId)?.professors ?? [];
     const seen = new Set<string>();
-    return uni.courses.flatMap((c) => c.professors).filter((p) => {
-      if (seen.has(p._id)) return false;
-      seen.add(p._id);
-      return true;
-    });
+    return uni.courses
+      .flatMap((c) => c.professors)
+      .filter((p) => {
+        if (seen.has(p._id)) return false;
+        seen.add(p._id);
+        return true;
+      });
   },
 
-  getStudentsByClass: async (universityId: string, courseId: string, classId: string): Promise<Student[]> => {
+  getStudentsByClass: async (
+    universityId: string,
+    courseId: string,
+    classId: string,
+  ): Promise<Student[]> => {
     const res = await academicFiltersApi.getAcademicData();
     const uni = res.data.universities.find((u) => u._id === universityId);
     const course = uni?.courses.find((c) => c._id === courseId);
     return course?.classes.find((cl) => cl._id === classId)?.students ?? [];
   },
 
-  getStudentsByDiscipline: async (universityId: string, courseId: string, disciplineId: string): Promise<Student[]> => {
+  getStudentsByDiscipline: async (
+    universityId: string,
+    courseId: string,
+    disciplineId: string,
+  ): Promise<Student[]> => {
     const res = await academicFiltersApi.getAcademicData();
     const uni = res.data.universities.find((u) => u._id === universityId);
     const course = uni?.courses.find((c) => c._id === courseId);
-    return course?.disciplines.find((d) => d._id === disciplineId)?.students ?? [];
+    return (
+      course?.disciplines.find((d) => d._id === disciplineId)?.students ?? []
+    );
   },
 
-  getStudentsByCourse: async (universityId: string, courseId: string): Promise<Student[]> => {
+  getStudentsByCourse: async (
+    universityId: string,
+    courseId: string,
+  ): Promise<Student[]> => {
     const res = await academicFiltersApi.getAcademicData();
     const uni = res.data.universities.find((u) => u._id === universityId);
     return uni?.courses.find((c) => c._id === courseId)?.students ?? [];

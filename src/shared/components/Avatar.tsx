@@ -7,7 +7,11 @@ interface AvatarProps {
   backgroundColor?: string;
 }
 
-export function Avatar({ seed, className, backgroundColor = "#3a3a3a" }: AvatarProps) {
+export function Avatar({
+  seed,
+  className,
+  backgroundColor = "#3a3a3a",
+}: AvatarProps) {
   const avatarUrl = useMemo(() => {
     const bucket = Math.floor(Date.now() / (6 * 60 * 60 * 1000));
     const fullSeed = encodeURIComponent(`${seed}-${bucket}`);
@@ -15,7 +19,10 @@ export function Avatar({ seed, className, backgroundColor = "#3a3a3a" }: AvatarP
   }, [seed]);
 
   return (
-    <div className={cn("overflow-hidden rounded-full", className)} style={{ backgroundColor }}>
+    <div
+      className={cn("overflow-hidden rounded-full", className)}
+      style={{ backgroundColor }}
+    >
       <img src={avatarUrl} alt="avatar" className="block h-full w-full" />
     </div>
   );

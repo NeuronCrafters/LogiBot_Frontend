@@ -5,7 +5,7 @@ import type {
   ProficiencyRadarData,
   LearningJourneyData,
   AccessPatternData,
-  SessionDetailsData
+  SessionDetailsData,
 } from "@/features/dashboard/types";
 
 export interface DashboardFilterParams {
@@ -20,20 +20,20 @@ export interface DashboardFilterParams {
 
 export const dashboardApi = {
   getTopicPerformance: (filters: DashboardFilterParams) =>
-    api.post<TopicPerformanceData[]>('/dashboard/topic-performance', filters),
+    api.post<TopicPerformanceData[]>("/dashboard/topic-performance", filters),
 
   getEffortMatrix: (filters: DashboardFilterParams) =>
-    api.post<EffortMatrixData>('/dashboard/effort-matrix', filters),
+    api.post<EffortMatrixData>("/dashboard/effort-matrix", filters),
 
   getProficiencyRadar: (filters: DashboardFilterParams) =>
-    api.post<ProficiencyRadarData>('/dashboard/proficiency-radar', filters),
+    api.post<ProficiencyRadarData>("/dashboard/proficiency-radar", filters),
 
   getLearningJourney: (filters: DashboardFilterParams) =>
-    api.post<LearningJourneyData>('/dashboard/learning-journey', filters),
+    api.post<LearningJourneyData>("/dashboard/learning-journey", filters),
 
   getAccessPattern: (filters: DashboardFilterParams) =>
-    api.post<AccessPatternData>('/dashboard/access-pattern', filters),
+    api.post<AccessPatternData>("/dashboard/access-pattern", filters),
 
   getSessionDetails: (filters: DashboardFilterParams) =>
-    api.post<SessionDetailsData[]>('/dashboard/session-details', filters),
+    api.post<SessionDetailsData[]>("/dashboard/session-details", filters),
 };

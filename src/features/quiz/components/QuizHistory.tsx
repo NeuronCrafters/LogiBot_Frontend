@@ -43,7 +43,9 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
     }
 
     if (userId) fetchHistory();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [userId]);
 
   const handleSelect = (quizId: string) => {
@@ -60,7 +62,9 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
     return (
       <div className="flex flex-col items-center justify-center h-40 gap-2">
         <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
-        <span className="text-xs text-zinc-500 font-[Poppins]">Carregando quizzes...</span>
+        <span className="text-xs text-zinc-500 font-[Poppins]">
+          Carregando quizzes...
+        </span>
       </div>
     );
   }
@@ -80,12 +84,16 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
       {error ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
           <AlertCircle className="w-5 h-5 text-red-500" />
-          <span className="text-xs text-zinc-500 font-[Poppins]">Erro ao carregar histórico.</span>
+          <span className="text-xs text-zinc-500 font-[Poppins]">
+            Erro ao carregar histórico.
+          </span>
         </div>
       ) : hasNoQuizzes ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
           <GraduationCap className="w-5 h-5 text-zinc-700" />
-          <span className="text-xs text-zinc-500 font-[Poppins]">Nenhum quiz realizado.</span>
+          <span className="text-xs text-zinc-500 font-[Poppins]">
+            Nenhum quiz realizado.
+          </span>
         </div>
       ) : (
         <div className="flex flex-col gap-0.5">
@@ -95,7 +103,10 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
               onClick={() => handleSelect(quiz.quizId)}
               className="group flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
             >
-              <GraduationCap size={14} className="text-indigo-400 shrink-0 mt-0.5" />
+              <GraduationCap
+                size={14}
+                className="text-indigo-400 shrink-0 mt-0.5"
+              />
               <div className="flex flex-col min-w-0 flex-1">
                 <span className="text-xs font-[Poppins] text-zinc-300 group-hover:text-white truncate leading-snug transition-colors">
                   {quiz.title || "Quiz Prático"}

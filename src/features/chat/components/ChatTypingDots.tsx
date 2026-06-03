@@ -10,9 +10,18 @@ export function ChatTypingDots() {
       </div>
       <div className="bg-[#2a2a2a] border border-neutral-700 px-4 py-3 rounded-2xl rounded-bl-sm">
         <div className="flex items-center gap-1.5 h-5">
-          <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-          <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "160ms" }} />
-          <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "320ms" }} />
+          <span
+            className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce"
+            style={{ animationDelay: "0ms" }}
+          />
+          <span
+            className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce"
+            style={{ animationDelay: "160ms" }}
+          />
+          <span
+            className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce"
+            style={{ animationDelay: "320ms" }}
+          />
         </div>
       </div>
     </div>

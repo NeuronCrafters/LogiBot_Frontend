@@ -1,6 +1,10 @@
-﻿import { useQuery, useQueryClient } from '@tanstack/react-query';
+﻿import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { logger } from "@/shared/lib/logger";
-import { historyService, ChatSession, ChatHistoryDetail } from '@/features/chat/api/chatHistoryApi';
+import {
+  historyService,
+  ChatSession,
+  ChatHistoryDetail,
+} from "@/features/chat/api/chatHistoryApi";
 
 interface UseChatHistoryOptions {
   userId: string;
@@ -17,7 +21,7 @@ function useChatHistory({ userId, enabled = true }: UseChatHistoryOptions) {
     error,
     refetch,
   } = useQuery<ChatSession[]>({
-    queryKey: ['chatHistory', userId],
+    queryKey: ["chatHistory", userId],
     queryFn: async () => {
       const result = await historyService.getChatSessions(userId);
       return result;
@@ -30,10 +34,12 @@ function useChatHistory({ userId, enabled = true }: UseChatHistoryOptions) {
     retry: 2,
   });
 
-  const getChatMessages = async (sessionId: string): Promise<ChatHistoryDetail> => {
+  const getChatMessages = async (
+    sessionId: string,
+  ): Promise<ChatHistoryDetail> => {
     try {
       const result = await queryClient.fetchQuery<ChatHistoryDetail>({
-        queryKey: ['chatMessages', userId, sessionId],
+        queryKey: ["chatMessages", userId, sessionId],
         queryFn: async () => {
           const data = await historyService.getChatMessages(userId, sessionId);
           return data;
@@ -49,19 +55,19 @@ function useChatHistory({ userId, enabled = true }: UseChatHistoryOptions) {
   };
 
   const invalidateHistory = () => {
-    queryClient.invalidateQueries({ queryKey: ['chatHistory', userId] });
+    queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
   };
 
   const addSessionToCache = (newSession: ChatSession) => {
     queryClient.setQueryData<ChatSession[]>(
-      ['chatHistory', userId],
-      (old = []) => [newSession, ...old]
+      ["chatHistory", userId],
+      (old = []) => [newSession, ...old],
     );
   };
 
   const clearCache = () => {
-    queryClient.removeQueries({ queryKey: ['chatHistory', userId] });
-    queryClient.removeQueries({ queryKey: ['chatMessages', userId] });
+    queryClient.removeQueries({ queryKey: ["chatHistory", userId] });
+    queryClient.removeQueries({ queryKey: ["chatMessages", userId] });
   };
 
   return {
@@ -82,7 +88,7 @@ export function usePrefetchChatHistory() {
 
   return (userId: string) => {
     queryClient.prefetchQuery({
-      queryKey: ['chatHistory', userId],
+      queryKey: ["chatHistory", userId],
       queryFn: () => historyService.getChatSessions(userId),
       staleTime: 5 * 60 * 1000,
     });

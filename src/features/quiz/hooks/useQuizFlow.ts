@@ -5,7 +5,13 @@ import { ButtonData } from "@/features/quiz/components/CategoryStep";
 import { quizService, VerifyQuizResponse } from "@/features/quiz/api/quizApi";
 import { chatApi } from "@/features/chat/api/chatApi";
 
-type QuizStep = "initial" | "levels" | "categories" | "subsubjects" | "questions" | "results";
+type QuizStep =
+  | "initial"
+  | "levels"
+  | "categories"
+  | "subsubjects"
+  | "questions"
+  | "results";
 type AppMode = "none" | "quiz" | "chat";
 
 export interface ChatMsg {
@@ -38,9 +44,15 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
   const [fakeTypingDelay] = useState(false);
 
   const [previousQuestions, setPreviousQuestions] = useState<Question[][]>([]);
-  const [previousResults, setPreviousResults] = useState<VerifyQuizResponse[]>([]);
+  const [previousResults, setPreviousResults] = useState<VerifyQuizResponse[]>(
+    [],
+  );
 
-  function addMessage(text: string, sender: "user" | "bot", type: "text" | "typing" = "text") {
+  function addMessage(
+    text: string,
+    sender: "user" | "bot",
+    type: "text" | "typing" = "text",
+  ) {
     setMessages((prev) => [
       ...prev,
       {
@@ -119,7 +131,8 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
 
       setStep("results");
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message ?? "Erro ao verificar respostas.";
+      const errorMsg =
+        err.response?.data?.message ?? "Erro ao verificar respostas.";
       addMessage(errorMsg, "bot");
     } finally {
       setTyping(false);
@@ -139,7 +152,11 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
     ]);
 
     try {
-      const res = await chatApi.askTutor(message, userId, sessionId || undefined);
+      const res = await chatApi.askTutor(
+        message,
+        userId,
+        sessionId || undefined,
+      );
 
       if (res.sessionId) {
         setSessionId(res.sessionId);
@@ -148,13 +165,23 @@ export function useQuizFlow({ userId }: useQuizFlowProps) {
       const responseText = res.responses[0]?.text || "Desculpe, não entendi.";
       setMessages((prev) => [
         ...prev.filter((m) => m.id !== TYPING_ID),
-        { id: crypto.randomUUID(), text: responseText, sender: "bot", type: "text" },
+        {
+          id: crypto.randomUUID(),
+          text: responseText,
+          sender: "bot",
+          type: "text",
+        },
       ]);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || "Erro no chat.";
       setMessages((prev) => [
         ...prev.filter((m) => m.id !== TYPING_ID),
-        { id: crypto.randomUUID(), text: errorMsg, sender: "bot", type: "text" },
+        {
+          id: crypto.randomUUID(),
+          text: errorMsg,
+          sender: "bot",
+          type: "text",
+        },
       ]);
     }
   }

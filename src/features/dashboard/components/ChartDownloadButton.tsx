@@ -10,7 +10,10 @@ interface ChartDownloadButtonProps {
   className?: string;
 }
 
-async function downloadChartAsPng(containerId: string, fileName: string): Promise<void> {
+async function downloadChartAsPng(
+  containerId: string,
+  fileName: string,
+): Promise<void> {
   const container = document.getElementById(containerId);
   if (!container) throw new Error(`Container '${containerId}' não encontrado.`);
 
@@ -28,7 +31,12 @@ async function downloadChartAsPng(containerId: string, fileName: string): Promis
   document.body.removeChild(link);
 }
 
-export function ChartDownloadButton({ containerId, fileName, info, className }: ChartDownloadButtonProps) {
+export function ChartDownloadButton({
+  containerId,
+  fileName,
+  info,
+  className,
+}: ChartDownloadButtonProps) {
   const [downloading, setDownloading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
@@ -64,9 +72,11 @@ export function ChartDownloadButton({ containerId, fileName, info, className }: 
             type="button"
             aria-label="Informações sobre o gráfico"
             onClick={() => setShowInfo((v) => !v)}
-            className={`rounded-lg border p-2 transition-colors ${showInfo
-              ? "border-blue-500/40 bg-blue-500/10 text-blue-400"
-              : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"}`}
+            className={`rounded-lg border p-2 transition-colors ${
+              showInfo
+                ? "border-blue-500/40 bg-blue-500/10 text-blue-400"
+                : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+            }`}
           >
             <Info className="h-4 w-4" />
           </button>
@@ -74,12 +84,19 @@ export function ChartDownloadButton({ containerId, fileName, info, className }: 
           {showInfo && (
             <div className="absolute right-0 top-11 z-50 w-72 rounded-xl border border-white/10 bg-[#141414] p-4 shadow-2xl shadow-black/60">
               <div className="mb-2 flex items-center justify-between">
-                <span className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Sobre este gráfico</span>
-                <button onClick={() => setShowInfo(false)} className="text-zinc-600 transition-colors hover:text-zinc-400">
+                <span className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Sobre este gráfico
+                </span>
+                <button
+                  onClick={() => setShowInfo(false)}
+                  className="text-zinc-600 transition-colors hover:text-zinc-400"
+                >
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <p className="font-[Poppins] text-xs leading-relaxed text-zinc-400">{info}</p>
+              <p className="font-[Poppins] text-xs leading-relaxed text-zinc-400">
+                {info}
+              </p>
             </div>
           )}
         </div>

@@ -9,11 +9,28 @@ import { AcademicDataResponse, Student } from "@/features/academic/types";
 interface AcademicFilterProps {
   entityType: LogEntityType;
   multiple?: boolean;
-  onSelect: (ids: string[], hierarchy?: { universityId?: string; courseId?: string; classId?: string; disciplineId?: string }) => void;
-  additionalParams?: { universityId?: string; courseId?: string; classId?: string };
+  onSelect: (
+    ids: string[],
+    hierarchy?: {
+      universityId?: string;
+      courseId?: string;
+      classId?: string;
+      disciplineId?: string;
+    },
+  ) => void;
+  additionalParams?: {
+    universityId?: string;
+    courseId?: string;
+    classId?: string;
+  };
 }
 
-export function AcademicFilter({ entityType, multiple = false, onSelect, additionalParams }: AcademicFilterProps) {
+export function AcademicFilter({
+  entityType,
+  multiple = false,
+  onSelect,
+  additionalParams,
+}: AcademicFilterProps) {
   const { user } = useAuth();
   const [searchTerm] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -31,8 +48,9 @@ export function AcademicFilter({ entityType, multiple = false, onSelect, additio
   const isCoordinator = roles.includes("course-coordinator");
   const isProfessor = roles.includes("professor");
 
-  const first = <T,>(v: T | T[]) => Array.isArray(v) ? (v.length ? v[0] : undefined) : v;
-  const userUniversityId = first(user.schoolId) as string || "";
+  const first = <T,>(v: T | T[]) =>
+    Array.isArray(v) ? (v.length ? v[0] : undefined) : v;
+  const userUniversityId = (first(user.schoolId) as string) || "";
 
   const normalizeToId = (v: unknown): string => {
     if (typeof v === "string") return v.trim();
@@ -45,20 +63,35 @@ export function AcademicFilter({ entityType, multiple = false, onSelect, additio
 
   const collectIds = (input: unknown): string[] => {
     const arr = Array.isArray(input) ? input : input ? [input] : [];
-    return [...new Set(arr.map(normalizeToId).filter((id): id is string => id.length > 0))];
+    return [
+      ...new Set(
+        arr.map(normalizeToId).filter((id): id is string => id.length > 0),
+      ),
+    ];
   };
 
-  const userCourseIds = collectIds(user?.courses?.length ? user.courses : user.courseId);
-  const userClassIds = collectIds(user?.classes?.length ? user.classes : user.classId ?? user.class);
+  const userCourseIds = collectIds(
+    user?.courses?.length ? user.courses : user.courseId,
+  );
+  const userClassIds = collectIds(
+    user?.classes?.length ? user.classes : (user.classId ?? user.class),
+  );
 
   const userDisciplineIds = useMemo(() => {
     if (!isProfessor) return [];
     return collectIds(user.disciplines ?? user.disciplineId ?? user.discipline);
   }, [user, isProfessor, user?._id]);
 
-  const [selectedUniversity, setSelectedUniversity] = useState(additionalParams?.universityId || userUniversityId);
-  const [selectedCourse, setSelectedCourse] = useState(additionalParams?.courseId || (isProfessor && userCourseIds.length === 1 ? userCourseIds[0] : ""));
-  const [selectedClass, setSelectedClass] = useState(additionalParams?.classId || "");
+  const [selectedUniversity, setSelectedUniversity] = useState(
+    additionalParams?.universityId || userUniversityId,
+  );
+  const [selectedCourse, setSelectedCourse] = useState(
+    additionalParams?.courseId ||
+      (isProfessor && userCourseIds.length === 1 ? userCourseIds[0] : ""),
+  );
+  const [selectedClass, setSelectedClass] = useState(
+    additionalParams?.classId || "",
+  );
   const [selectedDiscipline, setSelectedDiscipline] = useState("");
 
   const universities = useMemo(() => {
@@ -74,35 +107,75 @@ export function AcademicFilter({ entityType, multiple = false, onSelect, additio
     if (isCoordinator) return all;
     if (isProfessor) return all.filter((c) => userCourseIds.includes(c._id));
     return [];
-  }, [universities, selectedUniversity, isAdmin, isCoordinator, isProfessor, userCourseIds, user?._id]);
+  }, [
+    universities,
+    selectedUniversity,
+    isAdmin,
+    isCoordinator,
+    isProfessor,
+    userCourseIds,
+    user?._id,
+  ]);
 
   const classes = useMemo(() => {
     const crs = courses.find((c) => c._id === selectedCourse);
     const all = crs?.classes ?? [];
     if (isAdmin || isCoordinator) return all;
-    if (isProfessor) return all.filter((classe) => userClassIds.includes(classe._id) || classe.disciplines?.some(d => userDisciplineIds.includes(d._id)));
+    if (isProfessor)
+      return all.filter(
+        (classe) =>
+          userClassIds.includes(classe._id) ||
+          classe.disciplines?.some((d) => userDisciplineIds.includes(d._id)),
+      );
     return [];
-  }, [courses, selectedCourse, isAdmin, isCoordinator, isProfessor, userClassIds, userDisciplineIds, user?._id]);
+  }, [
+    courses,
+    selectedCourse,
+    isAdmin,
+    isCoordinator,
+    isProfessor,
+    userClassIds,
+    userDisciplineIds,
+    user?._id,
+  ]);
 
   const disciplines = useMemo(() => {
     const crs = courses.find((c) => c._id === selectedCourse);
     const all = crs?.disciplines ?? [];
     if (isAdmin || isCoordinator) return all;
     if (isProfessor) {
-      return all.filter((disc) =>
-        userDisciplineIds.includes(disc._id) ||
-        crs?.classes?.some((classe) => userClassIds.includes(classe._id) && classe.disciplines?.some((item) => item._id === disc._id)),
+      return all.filter(
+        (disc) =>
+          userDisciplineIds.includes(disc._id) ||
+          crs?.classes?.some(
+            (classe) =>
+              userClassIds.includes(classe._id) &&
+              classe.disciplines?.some((item) => item._id === disc._id),
+          ),
       );
     }
     return [];
-  }, [courses, selectedCourse, isAdmin, isCoordinator, isProfessor, userClassIds, userDisciplineIds, user?._id]);
+  }, [
+    courses,
+    selectedCourse,
+    isAdmin,
+    isCoordinator,
+    isProfessor,
+    userClassIds,
+    userDisciplineIds,
+    user?._id,
+  ]);
 
   const entities = useMemo(() => {
     switch (entityType) {
-      case "university": return universities;
-      case "course": return courses;
-      case "class": return classes;
-      case "discipline": return disciplines;
+      case "university":
+        return universities;
+      case "course":
+        return courses;
+      case "class":
+        return classes;
+      case "discipline":
+        return disciplines;
       case "student": {
         if (isAdmin || isCoordinator) {
           const cls = classes.find((c) => c._id === selectedClass);
@@ -112,37 +185,86 @@ export function AcademicFilter({ entityType, multiple = false, onSelect, additio
           const allStudents: Student[] = [];
           classes.forEach((classe) => {
             if (selectedClass && classe._id !== selectedClass) return;
-            if (selectedDiscipline && !classe.disciplines?.some(d => d._id === selectedDiscipline)) return;
+            if (
+              selectedDiscipline &&
+              !classe.disciplines?.some((d) => d._id === selectedDiscipline)
+            )
+              return;
             if (classe.students) allStudents.push(...classe.students);
           });
-          return allStudents.filter((student, index, self) => index === self.findIndex((s) => s._id === student._id));
+          return allStudents.filter(
+            (student, index, self) =>
+              index === self.findIndex((s) => s._id === student._id),
+          );
         }
         return [];
       }
-      default: return [];
+      default:
+        return [];
     }
-  }, [entityType, universities, courses, classes, disciplines, selectedClass, isAdmin, isCoordinator, isProfessor, user?._id, selectedDiscipline]);
+  }, [
+    entityType,
+    universities,
+    courses,
+    classes,
+    disciplines,
+    selectedClass,
+    isAdmin,
+    isCoordinator,
+    isProfessor,
+    user?._id,
+    selectedDiscipline,
+  ]);
 
-  const filteredEntities = entities.filter((e) => e.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredEntities = entities.filter((e) =>
+    e.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
-  const toggleItem = useCallback((id: string) => {
-    const updated = multiple ? (selectedIds.includes(id) ? selectedIds.filter((i) => i !== id) : [...selectedIds, id]) : [id];
-    setSelectedIds(updated);
-    const hierarchy = {
-      universityId: selectedUniversity || undefined,
-      courseId: selectedCourse || undefined,
-      classId: selectedClass || undefined,
-      disciplineId: entityType === 'discipline' ? id : selectedDiscipline || undefined,
-    };
-    onSelect(updated, hierarchy);
-    if (!multiple) setOpen(false);
-  }, [multiple, selectedIds, selectedUniversity, selectedCourse, selectedClass, onSelect, entityType, selectedDiscipline]);
+  const toggleItem = useCallback(
+    (id: string) => {
+      const updated = multiple
+        ? selectedIds.includes(id)
+          ? selectedIds.filter((i) => i !== id)
+          : [...selectedIds, id]
+        : [id];
+      setSelectedIds(updated);
+      const hierarchy = {
+        universityId: selectedUniversity || undefined,
+        courseId: selectedCourse || undefined,
+        classId: selectedClass || undefined,
+        disciplineId:
+          entityType === "discipline" ? id : selectedDiscipline || undefined,
+      };
+      onSelect(updated, hierarchy);
+      if (!multiple) setOpen(false);
+    },
+    [
+      multiple,
+      selectedIds,
+      selectedUniversity,
+      selectedCourse,
+      selectedClass,
+      onSelect,
+      entityType,
+      selectedDiscipline,
+    ],
+  );
 
-  const selectedNames = selectedIds.map((id) => entities.find((e) => e._id === id)?.name ?? id).filter(Boolean);
+  const selectedNames = selectedIds
+    .map((id) => entities.find((e) => e._id === id)?.name ?? id)
+    .filter(Boolean);
 
-  const showUniversitySelect = !["university"].includes(entityType) && ["course", "class", "student", "discipline"].includes(entityType) && !isProfessor;
-  const showCourseSelect = !["course"].includes(entityType) && ["class", "student", "discipline"].includes(entityType);
-  const showClassSelect = !["class"].includes(entityType) && ["student"].includes(entityType) && (isAdmin || isCoordinator || isProfessor);
+  const showUniversitySelect =
+    !["university"].includes(entityType) &&
+    ["course", "class", "student", "discipline"].includes(entityType) &&
+    !isProfessor;
+  const showCourseSelect =
+    !["course"].includes(entityType) &&
+    ["class", "student", "discipline"].includes(entityType);
+  const showClassSelect =
+    !["class"].includes(entityType) &&
+    ["student"].includes(entityType) &&
+    (isAdmin || isCoordinator || isProfessor);
 
   const isUniversityEnabled = universities.length > 0;
   const isCourseEnabled = !!selectedUniversity && courses.length > 0;
@@ -150,66 +272,180 @@ export function AcademicFilter({ entityType, multiple = false, onSelect, additio
 
   const canShowEntitySelector = () => {
     switch (entityType) {
-      case "university": return isAdmin;
-      case "course": return !!selectedUniversity;
-      case "class": return !!selectedUniversity && !!selectedCourse;
-      case "discipline": return !!selectedUniversity && !!selectedCourse;
+      case "university":
+        return isAdmin;
+      case "course":
+        return !!selectedUniversity;
+      case "class":
+        return !!selectedUniversity && !!selectedCourse;
+      case "discipline":
+        return !!selectedUniversity && !!selectedCourse;
       case "student":
         if (isProfessor) return !!selectedUniversity && !!selectedCourse;
         return !!selectedUniversity && !!selectedCourse && !!selectedClass;
-      default: return false;
+      default:
+        return false;
     }
   };
 
   const handleDisciplineChange = (disciplineId: string) => {
     setSelectedDiscipline(disciplineId);
     setSelectedIds([]);
-    onSelect([], { universityId: selectedUniversity, courseId: selectedCourse, disciplineId });
+    onSelect([], {
+      universityId: selectedUniversity,
+      courseId: selectedCourse,
+      disciplineId,
+    });
   };
 
   if (error) return <div className="text-red-500">Erro ao carregar dados</div>;
 
-  const selectClass = cn("h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60");
+  const selectClass = cn(
+    "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
+  );
 
   return (
     <div className="w-full">
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-4">
         {showUniversitySelect && (
-          <select className={cn(selectClass, !isUniversityEnabled && "opacity-50 cursor-not-allowed")} disabled={!isUniversityEnabled || isLoading} value={selectedUniversity}
-            onChange={(e) => { setSelectedUniversity(e.target.value); setSelectedCourse(""); setSelectedClass(""); setSelectedDiscipline(""); setSelectedIds([]); onSelect([], { universityId: e.target.value }); }}>
-            <option value="" className="bg-[#1f1f1f]">{isAdmin ? "Selecione a Universidade" : universities[0]?.name || "Universidade"}</option>
-            {universities.map((u) => <option key={u._id} value={u._id} className="bg-[#1f1f1f]">{u.name}</option>)}
+          <select
+            className={cn(
+              selectClass,
+              !isUniversityEnabled && "opacity-50 cursor-not-allowed",
+            )}
+            disabled={!isUniversityEnabled || isLoading}
+            value={selectedUniversity}
+            onChange={(e) => {
+              setSelectedUniversity(e.target.value);
+              setSelectedCourse("");
+              setSelectedClass("");
+              setSelectedDiscipline("");
+              setSelectedIds([]);
+              onSelect([], { universityId: e.target.value });
+            }}
+          >
+            <option value="" className="bg-[#1f1f1f]">
+              {isAdmin
+                ? "Selecione a Universidade"
+                : universities[0]?.name || "Universidade"}
+            </option>
+            {universities.map((u) => (
+              <option key={u._id} value={u._id} className="bg-[#1f1f1f]">
+                {u.name}
+              </option>
+            ))}
           </select>
         )}
 
         {showCourseSelect && (
-          <select className={cn(selectClass, !isCourseEnabled && "opacity-50 cursor-not-allowed")} disabled={!isCourseEnabled || isLoading} value={selectedCourse}
-            onChange={(e) => { setSelectedCourse(e.target.value); setSelectedClass(""); setSelectedDiscipline(""); setSelectedIds([]); onSelect([], { universityId: selectedUniversity, courseId: e.target.value }); }}>
-            <option value="" className="bg-[#1f1f1f]">{!selectedUniversity ? "Selecione a Universidade..." : courses.length === 0 ? "Nenhum curso disponível" : "Selecione o Curso"}</option>
-            {courses.map((c) => <option key={c._id} value={c._id} className="bg-[#1f1f1f]">{c.name}</option>)}
+          <select
+            className={cn(
+              selectClass,
+              !isCourseEnabled && "opacity-50 cursor-not-allowed",
+            )}
+            disabled={!isCourseEnabled || isLoading}
+            value={selectedCourse}
+            onChange={(e) => {
+              setSelectedCourse(e.target.value);
+              setSelectedClass("");
+              setSelectedDiscipline("");
+              setSelectedIds([]);
+              onSelect([], {
+                universityId: selectedUniversity,
+                courseId: e.target.value,
+              });
+            }}
+          >
+            <option value="" className="bg-[#1f1f1f]">
+              {!selectedUniversity
+                ? "Selecione a Universidade..."
+                : courses.length === 0
+                  ? "Nenhum curso disponível"
+                  : "Selecione o Curso"}
+            </option>
+            {courses.map((c) => (
+              <option key={c._id} value={c._id} className="bg-[#1f1f1f]">
+                {c.name}
+              </option>
+            ))}
           </select>
         )}
 
         {isProfessor && entityType === "student" && (
-          <select className={cn(selectClass, !isCourseEnabled && "opacity-50 cursor-not-allowed")} disabled={!isCourseEnabled || isLoading} value={selectedDiscipline} onChange={(e) => handleDisciplineChange(e.target.value)}>
-            <option value="" className="bg-[#1f1f1f]">Selecione a Disciplina</option>
-            {disciplines.map((d) => <option key={d._id} value={d._id} className="bg-[#1f1f1f]">{d.name}</option>)}
+          <select
+            className={cn(
+              selectClass,
+              !isCourseEnabled && "opacity-50 cursor-not-allowed",
+            )}
+            disabled={!isCourseEnabled || isLoading}
+            value={selectedDiscipline}
+            onChange={(e) => handleDisciplineChange(e.target.value)}
+          >
+            <option value="" className="bg-[#1f1f1f]">
+              Selecione a Disciplina
+            </option>
+            {disciplines.map((d) => (
+              <option key={d._id} value={d._id} className="bg-[#1f1f1f]">
+                {d.name}
+              </option>
+            ))}
           </select>
         )}
 
         {showClassSelect && (
-          <select className={cn(selectClass, !isClassEnabled && "opacity-50 cursor-not-allowed")} disabled={!isClassEnabled || isLoading} value={selectedClass}
-            onChange={(e) => { setSelectedClass(e.target.value); setSelectedIds([]); onSelect([], { universityId: selectedUniversity, courseId: selectedCourse, classId: e.target.value }); }}>
-            <option value="" className="bg-[#1f1f1f]">{!selectedCourse ? "Selecione o Curso..." : classes.length === 0 ? "Nenhuma turma disponível" : "Selecione a Turma"}</option>
-            {classes.map((c) => <option key={c._id} value={c._id} className="bg-[#1f1f1f]">{c.name}</option>)}
+          <select
+            className={cn(
+              selectClass,
+              !isClassEnabled && "opacity-50 cursor-not-allowed",
+            )}
+            disabled={!isClassEnabled || isLoading}
+            value={selectedClass}
+            onChange={(e) => {
+              setSelectedClass(e.target.value);
+              setSelectedIds([]);
+              onSelect([], {
+                universityId: selectedUniversity,
+                courseId: selectedCourse,
+                classId: e.target.value,
+              });
+            }}
+          >
+            <option value="" className="bg-[#1f1f1f]">
+              {!selectedCourse
+                ? "Selecione o Curso..."
+                : classes.length === 0
+                  ? "Nenhuma turma disponível"
+                  : "Selecione a Turma"}
+            </option>
+            {classes.map((c) => (
+              <option key={c._id} value={c._id} className="bg-[#1f1f1f]">
+                {c.name}
+              </option>
+            ))}
           </select>
         )}
 
         {canShowEntitySelector() && (
-          <select className={cn(selectClass, (!canShowEntitySelector() || isLoading) && "opacity-50 cursor-not-allowed")} disabled={!canShowEntitySelector() || isLoading} value={selectedIds[0] ?? ""}
-            onChange={(e) => toggleItem(e.target.value)}>
-            <option value="" className="bg-[#1f1f1f]">{isLoading ? "Carregando..." : `Selecione ${entityType === "student" ? "o aluno" : entityType === "discipline" ? "a disciplina" : entityType === "class" ? "a turma" : entityType === "course" ? "o curso" : "a universidade"}`}</option>
-            {filteredEntities.map((item) => <option key={item._id} value={item._id} className="bg-[#1f1f1f]">{item.name}</option>)}
+          <select
+            className={cn(
+              selectClass,
+              (!canShowEntitySelector() || isLoading) &&
+                "opacity-50 cursor-not-allowed",
+            )}
+            disabled={!canShowEntitySelector() || isLoading}
+            value={selectedIds[0] ?? ""}
+            onChange={(e) => toggleItem(e.target.value)}
+          >
+            <option value="" className="bg-[#1f1f1f]">
+              {isLoading
+                ? "Carregando..."
+                : `Selecione ${entityType === "student" ? "o aluno" : entityType === "discipline" ? "a disciplina" : entityType === "class" ? "a turma" : entityType === "course" ? "o curso" : "a universidade"}`}
+            </option>
+            {filteredEntities.map((item) => (
+              <option key={item._id} value={item._id} className="bg-[#1f1f1f]">
+                {item.name}
+              </option>
+            ))}
           </select>
         )}
       </div>
@@ -217,9 +453,17 @@ export function AcademicFilter({ entityType, multiple = false, onSelect, additio
       {multiple && selectedIds.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-3 w-full">
           {selectedNames.map((name, idx) => (
-            <div key={selectedIds[idx]} className="flex items-center px-3 py-1 text-sm text-white rounded-full border bg-indigo-500/20 border-indigo-500/30 max-w-full">
+            <div
+              key={selectedIds[idx]}
+              className="flex items-center px-3 py-1 text-sm text-white rounded-full border bg-indigo-500/20 border-indigo-500/30 max-w-full"
+            >
               <span className="truncate max-w-[200px]">{name}</span>
-              <button className="ml-2 hover:text-white/90 shrink-0" onClick={() => toggleItem(selectedIds[idx])}>×</button>
+              <button
+                className="ml-2 hover:text-white/90 shrink-0"
+                onClick={() => toggleItem(selectedIds[idx])}
+              >
+                ×
+              </button>
             </div>
           ))}
         </div>
