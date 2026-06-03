@@ -22,21 +22,6 @@ const ManageEntities = React.lazy(() =>
     default: m.ManageEntities,
   })),
 );
-const EditEntity = React.lazy(() =>
-  import("@/features/admin/pages/EditEntityPage").then((m) => ({
-    default: m.EditEntity,
-  })),
-);
-const ClassDisciplineLinksPage = React.lazy(() =>
-  import("@/features/admin/pages/EntityLinksPage").then((m) => ({
-    default: m.ClassDisciplineLinksPage,
-  })),
-);
-const ProfessorDisciplineLinksPage = React.lazy(() =>
-  import("@/features/admin/pages/EntityLinksPage").then((m) => ({
-    default: m.ProfessorDisciplineLinksPage,
-  })),
-);
 const Profile = React.lazy(() =>
   import("@/features/account/pages/ProfilePage").then((m) => ({ default: m.Profile })),
 );
@@ -116,19 +101,11 @@ export default function AppRouter() {
           />
           <Route
             path="/entities/links/class-disciplines"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <ClassDisciplineLinksPage />
-              </Suspense>
-            }
+            element={<Navigate to="/entities/manage" replace />}
           />
           <Route
             path="/entities/links/professor-disciplines"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <ProfessorDisciplineLinksPage />
-              </Suspense>
-            }
+            element={<Navigate to="/entities/manage" replace />}
           />
           <Route
             path="/entities/create/:entityType"
@@ -140,11 +117,7 @@ export default function AppRouter() {
           />
           <Route
             path="/entities/edit/:entityType/:id"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <EditEntity />
-              </Suspense>
-            }
+            element={<Navigate to="/entities/manage" replace />}
           />
           <Route
             path="/entities"

@@ -1,23 +1,35 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
+import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  BookOpen,
   FolderSearch,
+  GraduationCap,
+  Library,
+  Loader2,
   RefreshCw,
+  School,
   SearchX,
   SlidersHorizontal,
   TableProperties,
+  Users,
+  X,
 } from "lucide-react";
 import { EntityListFilter } from "@/features/admin/components/list/EntityListFilter";
 import { EntityTable } from "@/features/admin/components/list/EntityTable";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { searchEntitiesByFilter } from "@/features/admin/lib/searchEntitiesByFilter";
+import { ClassForm } from "@/features/admin/components/create/ClassForm";
+import { DisciplineForm } from "@/features/admin/components/create/DisciplineForm";
+import { ProfessorForm } from "@/features/admin/components/create/ProfessorForm";
+import { UniversityForm } from "@/features/admin/components/create/UniversityForm";
+import { CourseForm } from "@/features/admin/components/create/CourseForm";
 import type { FilterData } from "@/features/dashboard/filterTypes";
 import type { ListItem } from "@/features/admin/components/list/EntityTable";
 import { toast } from "@/shared/lib/toast";
 import { logger } from "@/shared/lib/logger";
-import { academicApi, adminApi } from "@/services/apiClient";
+import { academicApi, academicFiltersApi, adminApi } from "@/services/apiClient";
 
 type EntityType =
   | "university"
@@ -36,12 +48,68 @@ const ENTITY_LABEL: Record<string, string> = {
   student: "aluno",
 };
 
+const EDIT_META: Record<string, { label: string; icon: ReactNode }> = {
+  university: { label: "Editar Universidade", icon: <School className="h-5 w-5" /> },
+  course: { label: "Editar Curso", icon: <BookOpen className="h-5 w-5" /> },
+  class: { label: "Editar Turma", icon: <Users className="h-5 w-5" /> },
+  discipline: { label: "Editar Disciplina", icon: <Library className="h-5 w-5" /> },
+  professor: { label: "Editar Professor", icon: <GraduationCap className="h-5 w-5" /> },
+};
+
+function FormModal({
+  title,
+  icon,
+  onClose,
+  children,
+}: {
+  title: string;
+  icon: ReactNode;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="flex min-h-full items-start justify-center px-4 py-10">
+        <div className="w-full max-w-lg">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1c1c1c] shadow-2xl shadow-black/40">
+            <div className="flex items-center justify-between border-b border-white/10 p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                  {icon}
+                </div>
+                <h2 className="font-[Poppins] text-base font-semibold text-white">
+                  {title}
+                </h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-5">{children}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function EntityList() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [currentFilter, setCurrentFilter] = useState<FilterData | null>(null);
   const [entity, setEntity] = useState<EntityType>("university");
+  const [editTarget, setEditTarget] = useState<{
+    entityType: EntityType;
+    id: string;
+  } | null>(null);
 
   const userRoles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isAdmin = userRoles.includes("admin");
@@ -75,6 +143,88 @@ export function EntityList() {
     retry: 2,
     retryDelay: (i) => Math.min(1000 * 2 ** i, 30000),
   });
+
+  const { data: academicData, isLoading: isLoadingAcademic } = useQuery({
+    queryKey: ["academicData"],
+    queryFn: async () => {
+      const response = await academicFiltersApi.getAcademicData();
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: !!editTarget,
+  });
+
+  const editInitialData = useMemo(() => {
+    if (!academicData || !editTarget) return null;
+    const { entityType, id } = editTarget;
+
+    for (const university of academicData.universities) {
+      if (entityType === "university" && university._id === id)
+        return {
+          type: "university" as const,
+          data: { id: university._id, name: university.name },
+        };
+
+      for (const course of university.courses) {
+        if (entityType === "course" && course._id === id)
+          return {
+            type: "course" as const,
+            data: { id: course._id, name: course.name, universityId: university._id },
+          };
+
+        const classItem = course.classes.find((c: any) => c._id === id);
+        if (entityType === "class" && classItem)
+          return {
+            type: "class" as const,
+            data: {
+              id: classItem._id,
+              name: classItem.name,
+              universityId: university._id,
+              courseId: course._id,
+              disciplineIds: classItem.disciplines.map((d: any) => d._id),
+            },
+          };
+
+        const discipline = course.disciplines.find((d: any) => d._id === id);
+        if (entityType === "discipline" && discipline)
+          return {
+            type: "discipline" as const,
+            data: {
+              id: discipline._id,
+              name: discipline.name,
+              universityId: university._id,
+              courseId: course._id,
+              classIds: discipline.classes.map((c: any) => c._id),
+              professorIds: discipline.professors.map((p: any) => p._id),
+            },
+          };
+      }
+    }
+
+    if (entityType === "professor") {
+      for (const university of academicData.universities) {
+        const courses = university.courses.filter((c: any) =>
+          c.professors.some((p: any) => p._id === id),
+        );
+        const professor = courses
+          .flatMap((c: any) => c.professors)
+          .find((p: any) => p._id === id);
+        if (professor)
+          return {
+            type: "professor" as const,
+            data: {
+              id: professor._id,
+              name: professor.name,
+              email: professor.email,
+              school: university._id,
+              courses: courses.map((c: any) => c._id),
+            },
+          };
+      }
+    }
+
+    return null;
+  }, [academicData, editTarget]);
 
   const items = searchResults?.items ?? [];
   const displayEntity = searchResults?.entity ?? entity;
@@ -126,6 +276,32 @@ export function EntityList() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({
+      entityType,
+      item,
+    }: {
+      entityType: EntityType;
+      item: any;
+    }) => {
+      if (!editTarget?.id) throw new Error("ID ausente");
+      if (entityType === "professor")
+        return adminApi.updateProfessor(editTarget.id, item);
+      return academicApi.update(entityType as any, editTarget.id, item);
+    },
+    onSuccess: () => {
+      toast.success("Registro atualizado com sucesso.");
+      queryClient.invalidateQueries({ queryKey: ["academicData"] });
+      queryClient.invalidateQueries({ queryKey: ["searchEntities"] });
+      setEditTarget(null);
+      if (currentFilter) refetchSearch();
+    },
+    onError: (error) => {
+      logger.error("Admin", "Erro ao atualizar registro.", error);
+      toast.error("Erro ao atualizar. Verifique os dados e tente novamente.");
+    },
+  });
+
   const handleSearch = (filterData: FilterData) => {
     setCurrentFilter(filterData);
     searchMutation.mutate(filterData);
@@ -136,7 +312,7 @@ export function EntityList() {
     queryClient.removeQueries({ queryKey: ["searchEntities", userRole] });
   };
   const handleEdit = (item: ListItem) =>
-    navigate(`/entities/edit/${displayEntity}/${item.id}`);
+    setEditTarget({ entityType: displayEntity as EntityType, id: item.id });
   const handleDelete = (id: string) => deleteMutation.mutate(id);
   const isLoading = searchMutation.isPending || isSearching;
 
@@ -270,6 +446,64 @@ export function EntityList() {
           </div>
         )}
       </div>
+
+      {editTarget && (
+        <FormModal
+          title={EDIT_META[editTarget.entityType]?.label ?? "Editar"}
+          icon={EDIT_META[editTarget.entityType]?.icon ?? <School className="h-5 w-5" />}
+          onClose={() => setEditTarget(null)}
+        >
+          {isLoadingAcademic || !editInitialData ? (
+            <div className="flex items-center gap-2 py-6 font-[Poppins] text-sm text-zinc-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Carregando dados...
+            </div>
+          ) : (
+            <>
+              {editTarget.entityType === "university" && (
+                <UniversityForm
+                  initialData={editInitialData.data as any}
+                  onSubmit={(data) =>
+                    updateMutation.mutate({ entityType: "university", item: data })
+                  }
+                />
+              )}
+              {editTarget.entityType === "course" && (
+                <CourseForm
+                  initialData={editInitialData.data as any}
+                  onSubmit={(data) =>
+                    updateMutation.mutate({ entityType: "course", item: data })
+                  }
+                />
+              )}
+              {editTarget.entityType === "class" && (
+                <ClassForm
+                  initialData={editInitialData.data as any}
+                  onSubmit={(data) =>
+                    updateMutation.mutate({ entityType: "class", item: data })
+                  }
+                />
+              )}
+              {editTarget.entityType === "discipline" && (
+                <DisciplineForm
+                  initialData={editInitialData.data as any}
+                  onSubmit={(data) =>
+                    updateMutation.mutate({ entityType: "discipline", item: data })
+                  }
+                />
+              )}
+              {editTarget.entityType === "professor" && (
+                <ProfessorForm
+                  initialData={editInitialData.data as any}
+                  onSubmit={(data) =>
+                    updateMutation.mutate({ entityType: "professor", item: data })
+                  }
+                />
+              )}
+            </>
+          )}
+        </FormModal>
+      )}
     </main>
   );
 }

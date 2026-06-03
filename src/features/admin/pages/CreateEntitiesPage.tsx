@@ -94,21 +94,8 @@ function PermissionDenied() {
 
 function NextActions({ entity }: { entity: EntityType }) {
   const actions = [
-    ...(entity === "class" || entity === "discipline"
-      ? [
-          {
-            to: "/entities/links/class-disciplines",
-            label: "Gerenciar disciplinas por turma",
-          },
-        ]
-      : []),
-    ...(entity === "professor" || entity === "discipline"
-      ? [
-          {
-            to: "/entities/links/professor-disciplines",
-            label: "Gerenciar professores por disciplina",
-          },
-        ]
+    ...(["class", "discipline", "professor"].includes(entity)
+      ? [{ to: "/entities/manage", label: "Gerenciar vínculos" }]
       : []),
     { to: "/entities", label: "Listar entidades" },
   ];
@@ -248,7 +235,7 @@ export function CreateEntities() {
         {recentItems.length > 0 && <NextActions entity={routeEntity} />}
         <RecentEntityList
           items={recentItems}
-          onEdit={(item) => navigate(`/entities/edit/${item.type}/${item.id}`)}
+          onEdit={() => navigate("/entities/manage")}
           loading={createMutation.isPending}
         />
       </div>
