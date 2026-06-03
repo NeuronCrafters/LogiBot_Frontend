@@ -31,7 +31,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <>
       {children}
       {createPortal(
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none">
+        <div className="fixed right-4 top-4 z-[9999] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2 pointer-events-none sm:right-6 sm:top-6">
           <>
             {toasts.map(t => (
               <div

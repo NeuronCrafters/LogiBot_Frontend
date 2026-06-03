@@ -41,14 +41,16 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = (smooth = true) => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: containerRef.current.scrollHeight,
+  const scrollToBottom = useCallback((smooth = true) => {
+    const container = containerRef.current;
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
         behavior: smooth ? "smooth" : "auto",
       });
+      setShowScrollButton(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     async function loadHistory() {
@@ -84,7 +86,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     }
 
     loadHistory();
-  }, [sessionIdFromUrl, userId, setMessages, setMode, setSessionId]);
+  }, [sessionIdFromUrl, userId, setMessages, setMode, setSessionId, scrollToBottom]);
 
   const checkScrollPosition = useCallback(() => {
     if (containerRef.current) {
@@ -95,8 +97,16 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   }, []);
 
   useEffect(() => {
-    checkScrollPosition();
-  }, [messages, checkScrollPosition]);
+    if (mode !== "chat" && !sessionIdFromUrl) return;
+
+    const frameId = window.requestAnimationFrame(() => scrollToBottom(true));
+    const timeoutId = window.setTimeout(() => scrollToBottom(true), 50);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [messages, mode, sessionIdFromUrl, scrollToBottom]);
 
   const handleSendWrapper = async (text: string) => {
     scrollToBottom();
