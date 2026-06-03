@@ -462,7 +462,7 @@ export function ManageEntities() {
         </FormModal>
       )}
 
-      {/* ── Links modal (Disciplinas por Turma / Professores por Disciplina) ── */}
+      {/* Links modal (Grade da Turma / Professores por Disciplina) */}
       {linksModal && (
         <FormModal
           wide

@@ -161,7 +161,7 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
         <div>
           <label className={labelCls}>Disciplinas vinculadas {selectedDisciplineIds.length > 0 && <span className="normal-case tracking-normal text-blue-400 ml-1">({selectedDisciplineIds.length} selecionada{selectedDisciplineIds.length !== 1 ? "s" : ""})</span>}</label>
           <CheckboxList items={availableDisciplines} selected={selectedDisciplineIds} onToggle={toggleDiscipline} emptyText="Nenhuma disciplina disponível para este curso. Você pode criar a turma sem disciplinas e vincular depois." />
-          <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">Cada disciplina selecionada gera um código de cadastro para alunos desta turma.</p>
+          <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">A turma gera um codigo unico de acesso; as disciplinas selecionadas formam a grade da turma.</p>
         </div>
       )}
       <div className="pt-1">

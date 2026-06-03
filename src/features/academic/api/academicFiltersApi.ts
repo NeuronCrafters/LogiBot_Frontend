@@ -5,7 +5,7 @@ import { api } from "@/shared/api/httpClient";
 export interface BasicInfo {
   _id: string;
   name: string;
-  code?: string;
+  registrationCode?: string;
 }
 
 export interface Student {
@@ -30,13 +30,12 @@ export interface Class {
   name: string;
   disciplines: BasicInfo[];
   students: Student[];
-  code?: string;
+  registrationCode: string;
 }
 
 export interface Discipline {
   _id: string;
   name: string;
-  code: string;
   classes: BasicInfo[];
   professors: Professor[];
   students: Student[];

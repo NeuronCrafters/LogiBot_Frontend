@@ -1,12 +1,10 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronDown, Copy } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface Discipline {
   id: string;
   name: string;
-  code: string;
 }
 
 interface DisciplineCodeProps {
@@ -15,14 +13,6 @@ interface DisciplineCodeProps {
 }
 
 export function DisciplineCode({ text, disciplines }: DisciplineCodeProps) {
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  const handleCopy = (code: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(code);
-    setTimeout(() => setCopiedCode(null), 2000);
-  };
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -37,15 +27,8 @@ export function DisciplineCode({ text, disciplines }: DisciplineCodeProps) {
         </DialogHeader>
         <div className="mt-4 space-y-3">
           {disciplines.map((disc) => (
-            <div key={disc.id} className="flex flex-col gap-3 rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="break-words text-sm font-medium text-white">{disc.name}</p>
-                <p className="mt-1 font-mono text-xs text-zinc-500">{disc.code}</p>
-              </div>
-              <Button variant="ghost" size="sm" className="w-full justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-indigo-300 hover:bg-white/10 hover:text-indigo-200 sm:w-auto" onClick={() => handleCopy(disc.code)}>
-                {copiedCode === disc.code ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
-                {copiedCode === disc.code ? "Copiado" : "Copiar código"}
-              </Button>
+            <div key={disc.id} className="rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3">
+              <p className="break-words text-sm font-medium text-white">{disc.name}</p>
             </div>
           ))}
         </div>

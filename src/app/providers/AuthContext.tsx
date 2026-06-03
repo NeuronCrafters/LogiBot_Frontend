@@ -15,7 +15,7 @@ export interface User {
     class?: string[] | string;
     classes?: (string | { _id: string; id?: string })[];
     className?: string[] | string;
-    disciplines?: string | string[];
+    disciplines?: string | string[] | Array<{ id: string; _id?: string; name: string }>;
     disciplineId?: string | string[];
     discipline?: string | string[];
     classId?: string[] | string;

@@ -58,6 +58,7 @@ export const DISCIPLINE_PROFESSOR_ROUTES = {
 export const CLASS_DISCIPLINE_ROUTES = {
   attach: "/academic/classes/:classId/disciplines",
   detach: "/academic/classes/:classId/disciplines/:disciplineId",
+  regenerateCode: "/academic/classes/:classId/registration-code",
 } as const;
 
 export const ACADEMICFILTER_ROUTES = {

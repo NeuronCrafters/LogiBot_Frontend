@@ -67,13 +67,6 @@ function professorToListItem(professor: RawProfessor): ListItem {
   };
 }
 
-function studentHasDiscipline(student: RawStudent, disciplineId: string) {
-  return student.disciplines?.some((discipline) => {
-    if (typeof discipline === "string") return discipline === disciplineId;
-    return itemId(discipline) === disciplineId;
-  }) ?? false;
-}
-
 export async function searchEntitiesByFilter(role: Role, filterData: FilterData): Promise<{ items: ListItem[]; entity: EntityType }> {
   try {
     let fetched: ListItem[] = [];
@@ -102,7 +95,7 @@ export async function searchEntitiesByFilter(role: Role, filterData: FilterData)
           const university = academicData.data.universities.find((u) => u._id === filterData.universityId);
           const course = university?.courses.find((c) => c._id === filterData.courseId);
           if (!course) { toast.error("Curso não encontrado"); return { items: [], entity: "student" }; }
-          fetched = course.disciplines.map((d) => ({ id: d._id, name: d.name, code: d.code }));
+          fetched = course.disciplines.map((d) => ({ id: d._id, name: d.name }));
           selectedEntity = "discipline";
           break;
         }
@@ -117,11 +110,19 @@ export async function searchEntitiesByFilter(role: Role, filterData: FilterData)
           break;
         }
         case "students":
-        case "students-course":
-        case "students-discipline": {
+        case "students-course": {
           let students = asArray<RawStudent>(await adminApi.listStudents<ApiListResponse<RawStudent>>());
           if (filterData.courseId) students = students.filter((s) => (s.course || s.courseId) === filterData.courseId);
-          if (filterData.disciplineId) students = students.filter((s) => studentHasDiscipline(s, filterData.disciplineId!));
+          fetched = students.map(studentToListItem);
+          selectedEntity = "student";
+          break;
+        }
+        case "students-discipline": {
+          if (!filterData.universityId || !filterData.courseId || !filterData.disciplineId) { toast.error("Universidade, Curso e Disciplina obrigatorios"); return { items: [], entity: "student" }; }
+          const academicData = await academicFiltersApi.getAcademicData();
+          const university = academicData.data.universities.find((u) => u._id === filterData.universityId);
+          const course = university?.courses.find((c) => c._id === filterData.courseId);
+          const students = course?.disciplines.find((d) => d._id === filterData.disciplineId)?.students ?? [];
           fetched = students.map(studentToListItem);
           selectedEntity = "student";
           break;
@@ -147,7 +148,7 @@ export async function searchEntitiesByFilter(role: Role, filterData: FilterData)
       switch (filterData.filterType) {
         case "disciplines": {
           const disciplines = asArray<ListItem>(await coordinatorApi.listDisciplines<ApiListResponse<ListItem>>());
-          fetched = disciplines.map((d) => ({ id: d.id, name: d.name, code: d.code }));
+          fetched = disciplines.map((d) => ({ id: d.id, name: d.name }));
           selectedEntity = "discipline";
           break;
         }
@@ -189,9 +190,8 @@ export async function searchEntitiesByFilter(role: Role, filterData: FilterData)
     if (role === "professor") {
       switch (filterData.filterType) {
         case "students-discipline": {
-          const raw = asArray<RawStudent>(await professorApi.listMyStudents<ApiListResponse<RawStudent>>());
-          const filtered = filterData.disciplineId ? raw.filter((student) => studentHasDiscipline(student, filterData.disciplineId!)) : raw;
-          fetched = filtered.map(studentToListItem);
+          const students = asArray<RawStudent>(await professorApi.listMyStudents<ApiListResponse<RawStudent>>());
+          fetched = students.map(studentToListItem);
           selectedEntity = "student";
           break;
         }

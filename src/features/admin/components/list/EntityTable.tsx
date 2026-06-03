@@ -56,7 +56,7 @@ export function EntityTable({ entity, items, onEdit, onDelete }: EntityTableProp
   const canDelete = isAdmin;
   const showActions = canEdit || canDelete;
   const colCount = hasPeopleColumns ? (showActions ? 5 : 4) : showActions ? 4 : 3;
-  const headerSecondary = entity === "discipline" ? "Codigo" : hasPeopleColumns ? "E-mail" : "ID";
+  const headerSecondary = hasPeopleColumns ? "E-mail" : "ID";
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-lg shadow-black/10">

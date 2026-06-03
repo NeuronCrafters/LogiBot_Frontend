@@ -12,12 +12,12 @@ import { EditNameModal } from "@/features/account/components/EditNameModal";
 import { EditEmailModal } from "@/features/account/components/EditEmailModal";
 import { EditPasswordModal } from "@/features/account/components/EditPasswordModal";
 
-interface DisciplineObject { id: string; name: string; code: string; }
+interface DisciplineObject { id: string; name: string; }
 
 const translateRole = (r: string) => ({ student: "Estudante", professor: "Professor", teacher: "Professor", "course-coordinator": "Coordenador de Curso", admin: "Administrador" })[r] ?? r;
 
 function isDisciplineObj(d: unknown): d is DisciplineObject {
-  return d !== null && typeof d === "object" && "id" in d && "name" in d && "code" in d;
+  return d !== null && typeof d === "object" && "id" in d && "name" in d;
 }
 
 function getNames(value: unknown): string {
@@ -57,7 +57,7 @@ export function Profile() {
   const profCourses = getNames(user.courses);
   const profClasses = getNames(user.classes);
   const disciplineObjects: DisciplineObject[] = Array.isArray(user.disciplines)
-    ? user.disciplines.reduce<DisciplineObject[]>((acc, d) => { if (isDisciplineObj(d)) acc.push(d); else if (typeof d === "string") acc.push({ id: d, name: d, code: d }); return acc; }, [])
+    ? user.disciplines.reduce<DisciplineObject[]>((acc, d) => { if (isDisciplineObj(d)) acc.push(d); else if (typeof d === "string") acc.push({ id: d, name: d }); return acc; }, [])
     : [];
   const profDisciplines = disciplineObjects.length > 0 ? disciplineObjects.map((d) => d.name).join(", ") : "-";
 

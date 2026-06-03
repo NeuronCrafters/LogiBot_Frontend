@@ -28,7 +28,7 @@ export function ClassDisciplineLinksPage() {
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 text-white md:px-8 md:py-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
-        <LinksHeader title="Disciplinas por Turma" description="Escolha uma turma, visualize as disciplinas vinculadas e gere codigos para novos vinculos." icon={<Link2 className="h-5 w-5" />} />
+        <LinksHeader title="Grade da Turma" description="Escolha uma turma e controle as disciplinas vinculadas a ela." icon={<Link2 className="h-5 w-5" />} />
         <ClassDisciplineManager
           initialUniversityId={universityId}
           initialCourseId={courseId}

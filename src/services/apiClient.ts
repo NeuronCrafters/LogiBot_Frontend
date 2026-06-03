@@ -75,6 +75,8 @@ export const academicApi = {
         .replace(":classId", classId)
         .replace(":disciplineId", disciplineId)
     ),
+  regenerateClassRegistrationCode: <T>(classId: string) =>
+    patchRequest<T>(CLASS_DISCIPLINE_ROUTES.regenerateCode.replace(":classId", classId), {}),
   enrollStudentInClass: (classId: string, studentId: string) =>
     postRequest(`/academic/classes/${classId}/students`, { studentId }),
   removeStudentFromClass: (classId: string, studentId: string) =>

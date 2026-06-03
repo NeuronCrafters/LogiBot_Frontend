@@ -14,7 +14,7 @@ import { logger } from "@/shared/lib/logger";
 interface ApiResponse {
   id?: string;
   _id?: string;
-  registrationCodes?: RecentItem["registrationCodes"];
+  registrationCode?: string;
   [key: string]: any;
 }
 
@@ -23,7 +23,7 @@ type EntityType = "university" | "course" | "class" | "professor" | "discipline"
 const ENTITY_META: Record<EntityType, { title: string; description: string; icon: ReactNode }> = {
   university: { title: "Nova Universidade", description: "Cadastre uma instituicao para organizar cursos, turmas e usuarios.", icon: <School className="h-5 w-5" /> },
   course: { title: "Novo Curso", description: "Crie um curso dentro de uma universidade ja cadastrada.", icon: <BookOpen className="h-5 w-5" /> },
-  class: { title: "Nova Turma", description: "Crie uma turma e, se quiser, selecione disciplinas para gerar codigos de cadastro.", icon: <Users className="h-5 w-5" /> },
+  class: { title: "Nova Turma", description: "Crie uma turma, defina sua grade e gere um codigo unico de acesso para os alunos.", icon: <Users className="h-5 w-5" /> },
   discipline: { title: "Nova Disciplina", description: "Crie uma disciplina e vincule turmas ou professores quando fizer sentido.", icon: <Library className="h-5 w-5" /> },
   professor: { title: "Novo Professor", description: "Crie o acesso de professor e vincule ao curso correto.", icon: <GraduationCap className="h-5 w-5" /> },
 };
@@ -95,18 +95,18 @@ export function CreateEntities() {
     },
     onSuccess: ({ response, entity, item }) => {
       const created = getCreatedEntity(response, entity);
-      const registrationCodes = response.registrationCodes || created.registrationCodes;
+      const registrationCode = response.registrationCode || created.registrationCode;
       const newItem: RecentItem = {
         id: created?.id || created?._id || response?.id || response?._id || `temp-${Date.now()}`,
         name: created?.name || item.name || "Item sem nome",
         type: entity,
         action: "create",
-        registrationCodes,
+        registrationCode,
       };
       setRecentItems((prev) => [newItem, ...prev.slice(0, 19)]);
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       queryClient.invalidateQueries({ queryKey: ["searchEntities"] });
-      toast.success(registrationCodes?.length ? "Cadastro realizado. Codigo de aluno gerado." : "Cadastro realizado com sucesso!");
+      toast.success(registrationCode ? "Turma criada. Codigo de acesso gerado." : "Cadastro realizado com sucesso!");
     },
     onError: (error) => {
       logger.error("Admin", "Erro ao enviar dados.", error);

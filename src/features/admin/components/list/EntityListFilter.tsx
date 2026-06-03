@@ -8,7 +8,7 @@ import { EntityActionButton } from "@/features/admin/components/EntityActionButt
 
 interface Institution { _id: string; name: string; courses: Course[]; }
 interface Course { _id: string; name: string; disciplines: Discipline[]; classes: Class[]; }
-interface Discipline { _id: string; name: string; code: string; }
+interface Discipline { _id: string; name: string; }
 interface Class { _id: string; name: string; }
 
 interface EntityListFilterProps {
@@ -151,7 +151,7 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Disciplina</label>
             <select value={selectedDiscipline} onChange={(e) => setSelectedDiscipline(e.target.value)} className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60" disabled={loading || disciplines.length === 0}>
               <option value="">Selecione a disciplina</option>
-              {disciplines.map((d) => <option key={d._id} value={d._id}>{d.name} {d.code && `(${d.code})`}</option>)}
+              {disciplines.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
             </select>
           </div>
         )}
