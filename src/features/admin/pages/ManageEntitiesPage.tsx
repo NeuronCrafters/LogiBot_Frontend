@@ -23,30 +23,70 @@ import { AppModal } from "@/shared/components/feedback/AppModal";
 import { ClassForm } from "@/features/admin/components/create/ClassForm";
 import { DisciplineForm } from "@/features/admin/components/create/DisciplineForm";
 import { ProfessorForm } from "@/features/admin/components/create/ProfessorForm";
+import { ClassDisciplineManager } from "@/features/admin/components/create/ClassDisciplineManager";
+import { ProfessorDisciplineManager } from "@/features/admin/components/create/ProfessorDisciplineManager";
 
 type Tab = "classes" | "disciplines" | "professors";
+
+type LinksModal = {
+  type: "class-disciplines" | "professor-disciplines";
+  universityId: string;
+  courseId: string;
+  classId?: string;
+  disciplineId?: string;
+  label: string;
+};
 
 const selectCls =
   "h-10 rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 min-w-[180px]";
 
-const MODAL_META: Record<Tab, { title: string; icon: ReactNode }> = {
-  classes: { title: "Nova Turma", icon: <Users className="h-5 w-5" /> },
-  disciplines: { title: "Nova Disciplina", icon: <Library className="h-5 w-5" /> },
-  professors: { title: "Novo Professor", icon: <GraduationCap className="h-5 w-5" /> },
+const MODAL_META: Record<Tab, { create: string; edit: string; icon: ReactNode }> = {
+  classes:     { create: "Nova Turma",       edit: "Editar Turma",       icon: <Users className="h-5 w-5" /> },
+  disciplines: { create: "Nova Disciplina",  edit: "Editar Disciplina",  icon: <Library className="h-5 w-5" /> },
+  professors:  { create: "Novo Professor",   edit: "Editar Professor",   icon: <GraduationCap className="h-5 w-5" /> },
 };
 
-function TabButton({
-  active,
-  onClick,
-  icon,
-  label,
-  count,
+// ── Modal shell (shared for create / edit / links) ────────────────────────────
+
+function FormModal({
+  title, icon, onClose, children, wide = false,
 }: {
-  active: boolean;
-  onClick: () => void;
-  icon: ReactNode;
-  label: string;
-  count: number;
+  title: string; icon: ReactNode; onClose: () => void; children: ReactNode; wide?: boolean;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="flex min-h-full items-start justify-center px-4 py-10">
+        <div className={`w-full ${wide ? "max-w-4xl" : "max-w-lg"}`}>
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1c1c1c] shadow-2xl shadow-black/40">
+            <div className="flex items-center justify-between border-b border-white/10 p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                  {icon}
+                </div>
+                <h2 className="font-[Poppins] text-base font-semibold text-white">{title}</h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-5">{children}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── UI primitives ─────────────────────────────────────────────────────────────
+
+function TabButton({ active, onClick, icon, label, count }: {
+  active: boolean; onClick: () => void; icon: ReactNode; label: string; count: number;
 }) {
   return (
     <button
@@ -57,11 +97,9 @@ function TabButton({
     >
       {icon}
       {label}
-      <span
-        className={`rounded-full px-1.5 py-0.5 font-[Poppins] text-xs leading-none ${
-          active ? "bg-blue-500/20 text-blue-400" : "bg-white/5 text-zinc-600"
-        }`}
-      >
+      <span className={`rounded-full px-1.5 py-0.5 font-[Poppins] text-xs leading-none ${
+        active ? "bg-blue-500/20 text-blue-400" : "bg-white/5 text-zinc-600"
+      }`}>
         {count}
       </span>
     </button>
@@ -69,31 +107,22 @@ function TabButton({
 }
 
 function EntityCard({
-  name,
-  subtitle,
-  badge,
-  editPath,
-  linksPath,
-  linksLabel,
-  linksState,
-  onDelete,
+  name, subtitle, badge,
+  onEdit, onLinks, linksLabel, onDelete,
 }: {
   name: string;
   subtitle?: string;
   badge?: string;
-  editPath: string;
-  linksPath?: string;
+  onEdit: () => void;
+  onLinks?: () => void;
   linksLabel?: string;
-  linksState?: Record<string, string>;
   onDelete: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] p-4 shadow-md shadow-black/10 transition-colors hover:border-white/20">
       <div>
         <p className="font-[Poppins] text-sm font-semibold text-white leading-snug">{name}</p>
-        {subtitle && (
-          <p className="mt-0.5 font-[Poppins] text-xs text-zinc-500 truncate">{subtitle}</p>
-        )}
+        {subtitle && <p className="mt-0.5 font-[Poppins] text-xs text-zinc-500 truncate">{subtitle}</p>}
         {badge !== undefined && (
           <span className="mt-2 inline-flex items-center rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-[Poppins] text-xs text-blue-400">
             {badge}
@@ -101,23 +130,22 @@ function EntityCard({
         )}
       </div>
       <div className="flex items-center gap-1.5 border-t border-white/5 pt-3">
-        {linksPath && (
-          <Link
-            to={linksPath}
-            state={linksState}
+        {onLinks && (
+          <button
+            onClick={onLinks}
             className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
           >
             <Link2 className="h-3 w-3" />
             {linksLabel ?? "Vínculos"}
-          </Link>
+          </button>
         )}
-        <Link
-          to={editPath}
+        <button
+          onClick={onEdit}
           className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
           <Pencil className="h-3 w-3" />
           Editar
-        </Link>
+        </button>
         <button
           onClick={onDelete}
           className="ml-auto flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-1.5 text-zinc-600 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
@@ -130,14 +158,8 @@ function EntityCard({
   );
 }
 
-function EmptyTab({
-  message,
-  createLabel,
-  onCreateClick,
-}: {
-  message: string;
-  createLabel: string;
-  onCreateClick: () => void;
+function EmptyTab({ message, createLabel, onCreateClick }: {
+  message: string; createLabel: string; onCreateClick: () => void;
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-14">
@@ -146,12 +168,13 @@ function EmptyTab({
         onClick={onCreateClick}
         className="flex items-center gap-1.5 rounded-lg bg-blue-600/80 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-600"
       >
-        <Plus className="h-4 w-4" />
-        {createLabel}
+        <Plus className="h-4 w-4" />{createLabel}
       </button>
     </div>
   );
 }
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 
 export function ManageEntities() {
   const { user } = useAuth();
@@ -160,11 +183,9 @@ export function ManageEntities() {
   const [adminUniversityId, setAdminUniversityId] = useState("");
   const [adminCourseId, setAdminCourseId] = useState("");
   const [createModal, setCreateModal] = useState<Tab | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{
-    id: string;
-    name: string;
-    type: string;
-  } | null>(null);
+  const [editTarget, setEditTarget] = useState<{ tab: Tab; id: string; entity: any } | null>(null);
+  const [linksModal, setLinksModal] = useState<LinksModal | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; type: string } | null>(null);
 
   const roles = Array.isArray(user?.role) ? (user?.role ?? []) : [user?.role];
   const isAdmin = roles.includes("admin");
@@ -181,24 +202,17 @@ export function ManageEntities() {
     gcTime: 10 * 60 * 1000,
   });
 
-  const universities = useMemo(
-    () => (academicData?.universities as any[]) ?? [],
-    [academicData],
-  );
+  const universities = useMemo(() => (academicData?.universities as any[]) ?? [], [academicData]);
 
   const coordUniversityId = useMemo(() => {
     if (!user?.schoolId) return "";
-    return Array.isArray(user.schoolId)
-      ? String(user.schoolId[0] ?? "")
-      : String(user.schoolId);
+    return Array.isArray(user.schoolId) ? String(user.schoolId[0] ?? "") : String(user.schoolId);
   }, [user?.schoolId]);
 
   const coordCourseIds = useMemo(() => {
     if (!user?.courses) return [] as string[];
     const arr = Array.isArray(user.courses) ? user.courses : [user.courses];
-    return arr
-      .map((c: any) => (typeof c === "string" ? c : (c?.id ?? c?._id ?? "")))
-      .filter(Boolean) as string[];
+    return arr.map((c: any) => (typeof c === "string" ? c : (c?.id ?? c?._id ?? ""))).filter(Boolean) as string[];
   }, [user?.courses]);
 
   const adminCourses = useMemo(() => {
@@ -214,36 +228,31 @@ export function ManageEntities() {
     }
     const uni = universities.find((u) => u._id === coordUniversityId);
     if (!uni) return null;
-    return (
-      (uni.courses as any[])?.find((c) => coordCourseIds.includes(c._id)) ?? null
-    );
+    return (uni.courses as any[])?.find((c) => coordCourseIds.includes(c._id)) ?? null;
   }, [isAdmin, universities, adminUniversityId, adminCourseId, coordUniversityId, coordCourseIds]);
 
-  const classes = (activeCourse?.classes as any[]) ?? [];
+  const classes     = (activeCourse?.classes     as any[]) ?? [];
   const disciplines = (activeCourse?.disciplines as any[]) ?? [];
-  const professors = (activeCourse?.professors as any[]) ?? [];
+  const professors  = (activeCourse?.professors  as any[]) ?? [];
 
+  // Mutations
   const createMutation = useMutation({
     mutationFn: async ({ entity, item }: { entity: string; item: any }) => {
-      if (entity === "professor") {
-        return adminApi.createProfessor({
-          name: item.name,
-          email: item.email,
-          password: item.password,
-          school: item.school,
-          courses: item.courses,
-        });
-      }
+      if (entity === "professor")
+        return adminApi.createProfessor({ name: item.name, email: item.email, password: item.password, school: item.school, courses: item.courses });
       return academicApi.post(entity as any, item);
     },
-    onSuccess: () => {
-      toast.success("Cadastrado com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      setCreateModal(null);
+    onSuccess: () => { toast.success("Cadastrado com sucesso!"); queryClient.invalidateQueries({ queryKey: ["academicData"] }); setCreateModal(null); },
+    onError: () => toast.error("Erro ao cadastrar. Verifique os dados e tente novamente."),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ entity, id, item }: { entity: string; id: string; item: any }) => {
+      if (entity === "professor") return adminApi.updateProfessor(id, item);
+      return academicApi.update(entity as any, id, item);
     },
-    onError: () => {
-      toast.error("Erro ao cadastrar. Verifique os dados e tente novamente.");
-    },
+    onSuccess: () => { toast.success("Atualizado com sucesso!"); queryClient.invalidateQueries({ queryKey: ["academicData"] }); setEditTarget(null); },
+    onError: () => toast.error("Erro ao atualizar. Verifique os dados e tente novamente."),
   });
 
   const deleteMutation = useMutation({
@@ -251,53 +260,34 @@ export function ManageEntities() {
       if (type === "professor") return adminApi.deleteProfessor(id);
       return academicApi.delete(type as any, id);
     },
-    onSuccess: () => {
-      toast.success("Excluído com sucesso.");
-      queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      setDeleteTarget(null);
-    },
-    onError: () => {
-      toast.error("Erro ao excluir. Tente novamente.");
-      setDeleteTarget(null);
-    },
+    onSuccess: () => { toast.success("Excluído com sucesso."); queryClient.invalidateQueries({ queryKey: ["academicData"] }); setDeleteTarget(null); },
+    onError: () => { toast.error("Erro ao excluir. Tente novamente."); setDeleteTarget(null); },
   });
 
   if (!user || (!isAdmin && !isCoordinator)) return null;
 
   const effectiveUniversityId = isAdmin ? adminUniversityId : coordUniversityId;
-  const effectiveCourseId = isAdmin ? adminCourseId : (coordCourseIds[0] ?? "");
+  const effectiveCourseId     = isAdmin ? adminCourseId : (coordCourseIds[0] ?? "");
+
+  function buildEditInitialData(t: Tab, entity: any) {
+    if (t === "classes") return { id: entity._id, _id: entity._id, name: entity.name, courseId: effectiveCourseId, universityId: effectiveUniversityId, disciplineIds: (entity.disciplines ?? entity.disciplineIds ?? []).map((d: any) => typeof d === "string" ? d : d._id) };
+    if (t === "disciplines") return { id: entity._id, _id: entity._id, name: entity.name, courseId: effectiveCourseId, universityId: effectiveUniversityId, classIds: (entity.classes ?? []).map((c: any) => typeof c === "string" ? c : c._id), professorIds: (entity.professors ?? []).map((p: any) => typeof p === "string" ? p : p._id) };
+    return { id: entity._id, _id: entity._id, name: entity.name, email: entity.email, school: effectiveUniversityId, courses: [effectiveCourseId].filter(Boolean) };
+  }
 
   const TABS = [
-    {
-      key: "classes" as Tab,
-      label: "Turmas",
-      icon: <Users className="h-4 w-4" />,
-      count: classes.length,
-      createLabel: "Nova Turma",
-    },
-    {
-      key: "disciplines" as Tab,
-      label: "Disciplinas",
-      icon: <Library className="h-4 w-4" />,
-      count: disciplines.length,
-      createLabel: "Nova Disciplina",
-    },
-    {
-      key: "professors" as Tab,
-      label: "Professores",
-      icon: <GraduationCap className="h-4 w-4" />,
-      count: professors.length,
-      createLabel: "Novo Professor",
-    },
+    { key: "classes"     as Tab, label: "Turmas",      icon: <Users className="h-4 w-4" />,        count: classes.length,     createLabel: "Nova Turma" },
+    { key: "disciplines" as Tab, label: "Disciplinas", icon: <Library className="h-4 w-4" />,       count: disciplines.length, createLabel: "Nova Disciplina" },
+    { key: "professors"  as Tab, label: "Professores", icon: <GraduationCap className="h-4 w-4" />, count: professors.length,  createLabel: "Novo Professor" },
   ];
-
   const activeTab = TABS.find((t) => t.key === tab)!;
   const needsCourseSelection = isAdmin && (!adminUniversityId || !adminCourseId);
 
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 text-white md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
-        {/* Page header */}
+
+        {/* Header */}
         <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
@@ -305,29 +295,17 @@ export function ManageEntities() {
                 <TableProperties className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                  Gestão Acadêmica
-                </h1>
-                <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                  Crie, edite e vincule turmas, disciplinas e professores.
-                </p>
+                <h1 className="font-[Poppins] text-2xl font-semibold text-white">Gestão Acadêmica</h1>
+                <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">Crie, edite e vincule turmas, disciplinas e professores.</p>
               </div>
             </div>
             {isAdmin && (
               <div className="flex flex-wrap gap-2">
-                <Link
-                  to="/entities/create/university"
-                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  <School className="h-3.5 w-3.5" />
-                  Nova Universidade
+                <Link to="/entities/create/university" className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
+                  <School className="h-3.5 w-3.5" />Nova Universidade
                 </Link>
-                <Link
-                  to="/entities/create/course"
-                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  <BookOpen className="h-3.5 w-3.5" />
-                  Novo Curso
+                <Link to="/entities/create/course" className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
+                  <BookOpen className="h-3.5 w-3.5" />Novo Curso
                 </Link>
               </div>
             )}
@@ -336,41 +314,18 @@ export function ManageEntities() {
           {isAdmin && (
             <div className="mt-4 flex flex-wrap items-end gap-3 border-t border-white/5 pt-4">
               <div className="flex flex-col gap-1">
-                <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Universidade
-                </label>
-                <select
-                  value={adminUniversityId}
-                  onChange={(e) => {
-                    setAdminUniversityId(e.target.value);
-                    setAdminCourseId("");
-                  }}
-                  className={selectCls}
-                >
+                <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Universidade</label>
+                <select value={adminUniversityId} onChange={(e) => { setAdminUniversityId(e.target.value); setAdminCourseId(""); }} className={selectCls}>
                   <option value="">Selecione</option>
-                  {universities.map((u: any) => (
-                    <option key={u._id} value={u._id}>
-                      {u.name}
-                    </option>
-                  ))}
+                  {universities.map((u: any) => <option key={u._id} value={u._id}>{u.name}</option>)}
                 </select>
               </div>
               {adminUniversityId && (
                 <div className="flex flex-col gap-1">
-                  <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Curso
-                  </label>
-                  <select
-                    value={adminCourseId}
-                    onChange={(e) => setAdminCourseId(e.target.value)}
-                    className={selectCls}
-                  >
+                  <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Curso</label>
+                  <select value={adminCourseId} onChange={(e) => setAdminCourseId(e.target.value)} className={selectCls}>
                     <option value="">Selecione</option>
-                    {adminCourses.map((c: any) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
-                      </option>
-                    ))}
+                    {adminCourses.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
                   </select>
                 </div>
               )}
@@ -378,213 +333,158 @@ export function ManageEntities() {
           )}
         </section>
 
-        {/* Loading */}
         {isLoading && (
           <div className="flex items-center justify-center gap-2 py-12 font-[Poppins] text-sm text-zinc-500">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Carregando dados acadêmicos...
+            <Loader2 className="h-4 w-4 animate-spin" />Carregando dados acadêmicos...
           </div>
         )}
 
-        {/* Admin: needs to select a course first */}
         {!isLoading && needsCourseSelection && (
           <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-16">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-neutral-950/60 text-zinc-600">
               <BookOpen className="h-6 w-6" />
             </div>
             <div className="text-center">
-              <p className="font-[Poppins] text-sm font-semibold text-white">
-                Selecione universidade e curso
-              </p>
-              <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Escolha acima para ver e gerenciar as entidades.
-              </p>
+              <p className="font-[Poppins] text-sm font-semibold text-white">Selecione universidade e curso</p>
+              <p className="mt-1 font-[Poppins] text-xs text-zinc-500">Escolha acima para ver e gerenciar as entidades.</p>
             </div>
           </div>
         )}
 
-        {/* Main content */}
         {!isLoading && !needsCourseSelection && (
           <>
             {/* Tab bar + create button */}
             <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] px-5 py-4 shadow-lg shadow-black/10 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex gap-0.5 overflow-x-auto">
                 {TABS.map((t) => (
-                  <TabButton
-                    key={t.key}
-                    active={tab === t.key}
-                    onClick={() => setTab(t.key)}
-                    icon={t.icon}
-                    label={t.label}
-                    count={t.count}
-                  />
+                  <TabButton key={t.key} active={tab === t.key} onClick={() => setTab(t.key)} icon={t.icon} label={t.label} count={t.count} />
                 ))}
               </div>
               <button
                 onClick={() => setCreateModal(tab)}
                 className="flex items-center gap-1.5 self-start rounded-lg bg-blue-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 sm:self-auto"
               >
-                <Plus className="h-4 w-4" />
-                {activeTab.createLabel}
+                <Plus className="h-4 w-4" />{activeTab.createLabel}
               </button>
             </div>
 
             {/* Turmas */}
-            {tab === "classes" &&
-              (classes.length === 0 ? (
-                <EmptyTab
-                  message="Nenhuma turma cadastrada neste curso."
-                  createLabel="Nova Turma"
-                  onCreateClick={() => setCreateModal("classes")}
-                />
-              ) : (
-                <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {classes.map((cls: any) => {
-                    const discCount = (cls.disciplines ?? cls.disciplineIds ?? []).length;
-                    return (
-                      <EntityCard
-                        key={cls._id}
-                        name={cls.name}
-                        badge={`${discCount} ${discCount === 1 ? "disciplina" : "disciplinas"}`}
-                        editPath={`/entities/edit/class/${cls._id}`}
-                        linksPath="/entities/links/class-disciplines"
-                        linksLabel="Disciplinas"
-                        linksState={{ universityId: effectiveUniversityId, courseId: effectiveCourseId, classId: cls._id }}
-                        onDelete={() =>
-                          setDeleteTarget({ id: cls._id, name: cls.name, type: "class" })
-                        }
-                      />
-                    );
-                  })}
-                </section>
-              ))}
+            {tab === "classes" && (classes.length === 0 ? (
+              <EmptyTab message="Nenhuma turma cadastrada neste curso." createLabel="Nova Turma" onCreateClick={() => setCreateModal("classes")} />
+            ) : (
+              <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {classes.map((cls: any) => {
+                  const discCount = (cls.disciplines ?? cls.disciplineIds ?? []).length;
+                  return (
+                    <EntityCard
+                      key={cls._id}
+                      name={cls.name}
+                      badge={`${discCount} ${discCount === 1 ? "disciplina" : "disciplinas"}`}
+                      onEdit={() => setEditTarget({ tab: "classes", id: cls._id, entity: cls })}
+                      onLinks={() => setLinksModal({ type: "class-disciplines", universityId: effectiveUniversityId, courseId: effectiveCourseId, classId: cls._id, label: cls.name })}
+                      linksLabel="Disciplinas"
+                      onDelete={() => setDeleteTarget({ id: cls._id, name: cls.name, type: "class" })}
+                    />
+                  );
+                })}
+              </section>
+            ))}
 
             {/* Disciplinas */}
-            {tab === "disciplines" &&
-              (disciplines.length === 0 ? (
-                <EmptyTab
-                  message="Nenhuma disciplina cadastrada neste curso."
-                  createLabel="Nova Disciplina"
-                  onCreateClick={() => setCreateModal("disciplines")}
-                />
-              ) : (
-                <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {disciplines.map((disc: any) => {
-                    const profCount = (disc.professors ?? []).length;
-                    return (
-                      <EntityCard
-                        key={disc._id}
-                        name={disc.name}
-                        badge={`${profCount} ${profCount === 1 ? "professor" : "professores"}`}
-                        editPath={`/entities/edit/discipline/${disc._id}`}
-                        linksPath="/entities/links/professor-disciplines"
-                        linksLabel="Professores"
-                        linksState={{ universityId: effectiveUniversityId, courseId: effectiveCourseId, disciplineId: disc._id }}
-                        onDelete={() =>
-                          setDeleteTarget({ id: disc._id, name: disc.name, type: "discipline" })
-                        }
-                      />
-                    );
-                  })}
-                </section>
-              ))}
+            {tab === "disciplines" && (disciplines.length === 0 ? (
+              <EmptyTab message="Nenhuma disciplina cadastrada neste curso." createLabel="Nova Disciplina" onCreateClick={() => setCreateModal("disciplines")} />
+            ) : (
+              <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {disciplines.map((disc: any) => {
+                  const profCount = (disc.professors ?? []).length;
+                  return (
+                    <EntityCard
+                      key={disc._id}
+                      name={disc.name}
+                      badge={`${profCount} ${profCount === 1 ? "professor" : "professores"}`}
+                      onEdit={() => setEditTarget({ tab: "disciplines", id: disc._id, entity: disc })}
+                      onLinks={() => setLinksModal({ type: "professor-disciplines", universityId: effectiveUniversityId, courseId: effectiveCourseId, disciplineId: disc._id, label: disc.name })}
+                      linksLabel="Professores"
+                      onDelete={() => setDeleteTarget({ id: disc._id, name: disc.name, type: "discipline" })}
+                    />
+                  );
+                })}
+              </section>
+            ))}
 
             {/* Professores */}
-            {tab === "professors" &&
-              (professors.length === 0 ? (
-                <EmptyTab
-                  message="Nenhum professor cadastrado neste curso."
-                  createLabel="Novo Professor"
-                  onCreateClick={() => setCreateModal("professors")}
-                />
-              ) : (
-                <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {professors.map((prof: any) => (
-                    <EntityCard
-                      key={prof._id}
-                      name={prof.name}
-                      subtitle={prof.email}
-                      editPath={`/entities/edit/professor/${prof._id}`}
-                      onDelete={() =>
-                        setDeleteTarget({ id: prof._id, name: prof.name, type: "professor" })
-                      }
-                    />
-                  ))}
-                </section>
-              ))}
+            {tab === "professors" && (professors.length === 0 ? (
+              <EmptyTab message="Nenhum professor cadastrado neste curso." createLabel="Novo Professor" onCreateClick={() => setCreateModal("professors")} />
+            ) : (
+              <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {professors.map((prof: any) => (
+                  <EntityCard
+                    key={prof._id}
+                    name={prof.name}
+                    subtitle={prof.email}
+                    onEdit={() => setEditTarget({ tab: "professors", id: prof._id, entity: prof })}
+                    onDelete={() => setDeleteTarget({ id: prof._id, name: prof.name, type: "professor" })}
+                  />
+                ))}
+              </section>
+            ))}
           </>
         )}
       </div>
 
-      {/* Create modal */}
+      {/* ── Create modal ─────────────────────────────────────── */}
       {createModal && (
-        <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setCreateModal(null);
-          }}
-        >
-          <div className="flex min-h-full items-start justify-center px-4 py-10">
-            <div className="w-full max-w-lg">
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1c1c1c] shadow-2xl shadow-black/40">
-                {/* Modal header */}
-                <div className="flex items-center justify-between border-b border-white/10 p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
-                      {MODAL_META[createModal].icon}
-                    </div>
-                    <h2 className="font-[Poppins] text-base font-semibold text-white">
-                      {MODAL_META[createModal].title}
-                    </h2>
-                  </div>
-                  <button
-                    onClick={() => setCreateModal(null)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {/* Modal form */}
-                <div className="p-5">
-                  {createModal === "classes" && (
-                    <ClassForm
-                      onSubmit={(data) =>
-                        createMutation.mutate({ entity: "class", item: data })
-                      }
-                    />
-                  )}
-                  {createModal === "disciplines" && (
-                    <DisciplineForm
-                      onSubmit={(data) =>
-                        createMutation.mutate({ entity: "discipline", item: data })
-                      }
-                    />
-                  )}
-                  {createModal === "professors" && (
-                    <ProfessorForm
-                      onSubmit={(data) =>
-                        createMutation.mutate({ entity: "professor", item: data })
-                      }
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <FormModal title={MODAL_META[createModal].create} icon={MODAL_META[createModal].icon} onClose={() => setCreateModal(null)}>
+          {createModal === "classes"     && <ClassForm     onSubmit={(data) => createMutation.mutate({ entity: "class",      item: data })} />}
+          {createModal === "disciplines" && <DisciplineForm onSubmit={(data) => createMutation.mutate({ entity: "discipline", item: data })} />}
+          {createModal === "professors"  && <ProfessorForm  onSubmit={(data) => createMutation.mutate({ entity: "professor",  item: data })} />}
+        </FormModal>
       )}
 
-      {/* Delete confirmation */}
+      {/* ── Edit modal ───────────────────────────────────────── */}
+      {editTarget && (
+        <FormModal title={MODAL_META[editTarget.tab].edit} icon={MODAL_META[editTarget.tab].icon} onClose={() => setEditTarget(null)}>
+          {editTarget.tab === "classes"     && <ClassForm     initialData={buildEditInitialData("classes",     editTarget.entity) as any} onSubmit={(data) => updateMutation.mutate({ entity: "class",      id: editTarget.id, item: data })} />}
+          {editTarget.tab === "disciplines" && <DisciplineForm initialData={buildEditInitialData("disciplines", editTarget.entity) as any} onSubmit={(data) => updateMutation.mutate({ entity: "discipline", id: editTarget.id, item: data })} />}
+          {editTarget.tab === "professors"  && <ProfessorForm  initialData={buildEditInitialData("professors",  editTarget.entity) as any} onSubmit={(data) => updateMutation.mutate({ entity: "professor",  id: editTarget.id, item: data })} />}
+        </FormModal>
+      )}
+
+      {/* ── Links modal (Disciplinas por Turma / Professores por Disciplina) ── */}
+      {linksModal && (
+        <FormModal
+          wide
+          title={linksModal.type === "class-disciplines"
+            ? `Disciplinas — ${linksModal.label}`
+            : `Professores & Alunos — ${linksModal.label}`}
+          icon={linksModal.type === "class-disciplines" ? <Library className="h-5 w-5" /> : <GraduationCap className="h-5 w-5" />}
+          onClose={() => setLinksModal(null)}
+        >
+          {linksModal.type === "class-disciplines" ? (
+            <ClassDisciplineManager
+              inModal
+              initialUniversityId={linksModal.universityId}
+              initialCourseId={linksModal.courseId}
+              initialClassId={linksModal.classId}
+            />
+          ) : (
+            <ProfessorDisciplineManager
+              inModal
+              initialUniversityId={linksModal.universityId}
+              initialCourseId={linksModal.courseId}
+              initialDisciplineId={linksModal.disciplineId}
+            />
+          )}
+        </FormModal>
+      )}
+
+      {/* ── Delete confirmation ──────────────────────────────── */}
       <AppModal
         isOpen={!!deleteTarget}
         type="delete"
         title={`Excluir "${deleteTarget?.name}"`}
         description="Esta ação não pode ser desfeita. O registro será removido permanentemente."
-        onConfirm={() =>
-          deleteTarget &&
-          deleteMutation.mutate({ id: deleteTarget.id, type: deleteTarget.type })
-        }
+        onConfirm={() => deleteTarget && deleteMutation.mutate({ id: deleteTarget.id, type: deleteTarget.type })}
         onCancel={() => setDeleteTarget(null)}
         onClose={() => setDeleteTarget(null)}
         disabled={deleteMutation.isPending}

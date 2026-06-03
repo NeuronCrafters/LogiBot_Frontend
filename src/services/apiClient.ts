@@ -75,6 +75,14 @@ export const academicApi = {
         .replace(":classId", classId)
         .replace(":disciplineId", disciplineId)
     ),
+  enrollStudentInClass: (classId: string, studentId: string) =>
+    postRequest(`/academic/classes/${classId}/students`, { studentId }),
+  removeStudentFromClass: (classId: string, studentId: string) =>
+    deleteRequest(`/academic/classes/${classId}/students/${studentId}`),
+  enrollStudentInDiscipline: (disciplineId: string, studentId: string) =>
+    postRequest(`/academic/disciplines/${disciplineId}/students`, { studentId }),
+  removeStudentFromDiscipline: (disciplineId: string, studentId: string) =>
+    deleteRequest(`/academic/disciplines/${disciplineId}/students/${studentId}`),
 };
 
 export { academicFiltersApi };
