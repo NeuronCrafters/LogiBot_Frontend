@@ -3,6 +3,8 @@ import remarkGfm from "remark-gfm";
 import { Copy, Check } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import { useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const CodeBlock = ({
   language,
@@ -42,11 +44,21 @@ const CodeBlock = ({
           )}
         </button>
       </div>
-      <pre className="m-0 p-4 bg-[#1e1e1e] overflow-x-auto">
-        <code className="text-sm font-mono text-gray-200 leading-relaxed">
-          {children}
-        </code>
-      </pre>
+      <SyntaxHighlighter
+        language={language}
+        style={oneDark}
+        customStyle={{
+          margin: 0,
+          borderRadius: 0,
+          fontSize: "0.875rem",
+          lineHeight: "1.625",
+          background: "#1e1e1e",
+        }}
+        codeTagProps={{ style: { fontFamily: "ui-monospace, monospace" } }}
+        wrapLongLines={false}
+      >
+        {children}
+      </SyntaxHighlighter>
     </div>
   );
 };
