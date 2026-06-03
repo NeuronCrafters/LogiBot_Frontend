@@ -107,12 +107,12 @@ function TabButton({ active, onClick, icon, label, count }: {
 }
 
 function EntityCard({
-  name, subtitle, badge,
+  name, subtitle, badges,
   onEdit, onLinks, linksLabel, onDelete,
 }: {
   name: string;
   subtitle?: string;
-  badge?: string;
+  badges?: string[];
   onEdit: () => void;
   onLinks?: () => void;
   linksLabel?: string;
@@ -123,10 +123,14 @@ function EntityCard({
       <div>
         <p className="font-[Poppins] text-sm font-semibold text-white leading-snug">{name}</p>
         {subtitle && <p className="mt-0.5 font-[Poppins] text-xs text-zinc-500 truncate">{subtitle}</p>}
-        {badge !== undefined && (
-          <span className="mt-2 inline-flex items-center rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-[Poppins] text-xs text-blue-400">
-            {badge}
-          </span>
+        {badges && badges.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {badges.map((b) => (
+              <span key={b} className="inline-flex items-center rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-[Poppins] text-xs text-blue-400">
+                {b}
+              </span>
+            ))}
+          </div>
         )}
       </div>
       <div className="flex items-center gap-1.5 border-t border-white/5 pt-3">
@@ -375,11 +379,15 @@ export function ManageEntities() {
               <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {classes.map((cls: any) => {
                   const discCount = (cls.disciplines ?? cls.disciplineIds ?? []).length;
+                  const studCount = (cls.students ?? []).length;
                   return (
                     <EntityCard
                       key={cls._id}
                       name={cls.name}
-                      badge={`${discCount} ${discCount === 1 ? "disciplina" : "disciplinas"}`}
+                      badges={[
+                        `${discCount} ${discCount === 1 ? "disciplina" : "disciplinas"}`,
+                        `${studCount} ${studCount === 1 ? "aluno" : "alunos"}`,
+                      ]}
                       onEdit={() => setEditTarget({ tab: "classes", id: cls._id, entity: cls })}
                       onLinks={() => setLinksModal({ type: "class-disciplines", universityId: effectiveUniversityId, courseId: effectiveCourseId, classId: cls._id, label: cls.name })}
                       linksLabel="Disciplinas"
@@ -397,11 +405,15 @@ export function ManageEntities() {
               <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {disciplines.map((disc: any) => {
                   const profCount = (disc.professors ?? []).length;
+                  const studCount = (disc.students ?? []).length;
                   return (
                     <EntityCard
                       key={disc._id}
                       name={disc.name}
-                      badge={`${profCount} ${profCount === 1 ? "professor" : "professores"}`}
+                      badges={[
+                        `${profCount} ${profCount === 1 ? "professor" : "professores"}`,
+                        `${studCount} ${studCount === 1 ? "aluno" : "alunos"}`,
+                      ]}
                       onEdit={() => setEditTarget({ tab: "disciplines", id: disc._id, entity: disc })}
                       onLinks={() => setLinksModal({ type: "professor-disciplines", universityId: effectiveUniversityId, courseId: effectiveCourseId, disciplineId: disc._id, label: disc.name })}
                       linksLabel="Professores"

@@ -91,30 +91,32 @@ export function ProfessorDisciplineManager({
         </div>
       )}
 
-      {/* Selectors */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div>
-          <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Universidade</label>
-          <select value={selectedUniversity} onChange={(e) => resetAfterUniversity(e.target.value)} className={selectCls}>
-            <option value="">Selecione</option>
-            {academicData?.universities.map((university) => <option key={university._id} value={university._id}>{university.name}</option>)}
-          </select>
+      {/* Selectors — hidden in modal since the entity is already pre-selected */}
+      {!inModal && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <div>
+            <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Universidade</label>
+            <select value={selectedUniversity} onChange={(e) => resetAfterUniversity(e.target.value)} className={selectCls}>
+              <option value="">Selecione</option>
+              {academicData?.universities.map((university) => <option key={university._id} value={university._id}>{university.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Curso</label>
+            <select value={selectedCourse} onChange={(e) => resetAfterCourse(e.target.value)} className={selectCls} disabled={!selectedUniversity}>
+              <option value="">Selecione</option>
+              {courses.map((item) => <option key={item._id} value={item._id}>{item.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Disciplina</label>
+            <select value={selectedDiscipline} onChange={(e) => { setSelectedDiscipline(e.target.value); setSelectedProfessor(""); setSelectedStudent(""); }} className={selectCls} disabled={!selectedCourse}>
+              <option value="">Selecione</option>
+              {course?.disciplines.map((item) => <option key={item._id} value={item._id}>{item.name}</option>)}
+            </select>
+          </div>
         </div>
-        <div>
-          <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Curso</label>
-          <select value={selectedCourse} onChange={(e) => resetAfterCourse(e.target.value)} className={selectCls} disabled={!selectedUniversity}>
-            <option value="">Selecione</option>
-            {courses.map((item) => <option key={item._id} value={item._id}>{item.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">Disciplina</label>
-          <select value={selectedDiscipline} onChange={(e) => { setSelectedDiscipline(e.target.value); setSelectedProfessor(""); setSelectedStudent(""); }} className={selectCls} disabled={!selectedCourse}>
-            <option value="">Selecione</option>
-            {course?.disciplines.map((item) => <option key={item._id} value={item._id}>{item.name}</option>)}
-          </select>
-        </div>
-      </div>
+      )}
 
       {discipline && (
         <div className="mt-6 space-y-6">
