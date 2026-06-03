@@ -22,27 +22,31 @@ export type LogModeType =
 
 export const ACADEMIC_ROUTES: Record<
   AcademicEntityType,
-  { post: string; get: string; delete: string }
+  { post: string; get: string; delete: string; patch: string }
 > = {
   university: {
     post: "/academic/universities",
     get: "/academic/universities",
     delete: "/academic/universities",
+    patch: "/academic/universities",
   },
   course: {
     post: "/academic/courses",
     get: "/academic/universities",
     delete: "/academic/courses",
+    patch: "/academic/courses",
   },
   class: {
     post: "/academic/classes",
     get: "/academic/courses",
     delete: "/academic/classes",
+    patch: "/academic/classes",
   },
   discipline: {
     post: "/academic/disciplines",
     get: "/academic/disciplines",
     delete: "/academic/disciplines",
+    patch: "/academic/disciplines",
   },
 };
 
@@ -76,6 +80,7 @@ export const RASA_ROUTES = {
 export const ADMIN_ROUTES = {
   createProfessor: "/admin/professors",
   deleteProfessor: "/admin/professors/:professorId",
+  updateProfessor: "/admin/professors/:professorId",
   listAllProfessors: "/admin/professors",
   listProfessorsByUniversity: "/admin/universities/:schoolId/professors",
   listProfessorsByCourse: "/admin/courses/:courseId/professors",

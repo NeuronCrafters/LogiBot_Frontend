@@ -54,6 +54,11 @@ export const academicApi = {
     const url = `${base}/${id}`;
     return deleteRequest<T>(url);
   },
+  async update<T>(entity: AcademicEntityType, id: string, data: object): Promise<T> {
+    const base = ACADEMIC_ROUTES[entity].patch;
+    const url = `${base}/${id}`;
+    return patchRequest<T>(url, data);
+  },
   attachProfessorToDiscipline: <T>(disciplineId: string, professorId: string) =>
     postRequest<T>(DISCIPLINE_PROFESSOR_ROUTES.attach.replace(":disciplineId", disciplineId), { professorId }),
   detachProfessorFromDiscipline: <T>(disciplineId: string, professorId: string) =>
@@ -81,6 +86,12 @@ export const adminApi = {
   deleteProfessor: <T>(professorId: string) =>
     deleteRequest<T>(
       ADMIN_ROUTES.deleteProfessor.replace(":professorId", professorId)
+    ),
+
+  updateProfessor: <T>(professorId: string, data: object) =>
+    patchRequest<T>(
+      ADMIN_ROUTES.updateProfessor.replace(":professorId", professorId),
+      data
     ),
 
   listAllProfessors: <T>() => getRequest<T>(ADMIN_ROUTES.listAllProfessors),

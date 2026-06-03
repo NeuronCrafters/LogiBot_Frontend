@@ -43,8 +43,11 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
 
   const availableCourses = useMemo(() => {
     if (!academicData?.universities || !school) return [];
-    return academicData.universities.find((u) => u._id === school)?.courses ?? [];
-  }, [academicData, school]);
+    const universityCourses = academicData.universities.find((u) => u._id === school)?.courses ?? [];
+    if (!isCoordinator) return universityCourses;
+    const allowedCourseIds = Array.isArray(user?.courses) ? user.courses : user?.courses ? [String(user.courses)] : [];
+    return universityCourses.filter((course) => allowedCourseIds.includes(course._id));
+  }, [academicData, school, isCoordinator, user]);
 
   const handleUniversityChange = useCallback((universityId: string) => { setSchool(universityId); setCourses([]); }, []);
 
@@ -54,12 +57,23 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     if (coordinatorSchool) setSchool(coordinatorSchool);
   }, [isCoordinator, school, user]);
 
+  React.useEffect(() => {
+    if (!initialData) return;
+    setName(initialData.name ?? "");
+    setEmail(initialData.email ?? "");
+    setPassword("");
+    setSchool(initialData.school ?? "");
+    setCourses(initialData.courses ?? []);
+  }, [initialData]);
+
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !password.trim() || !school || courses.length === 0) return;
-    onSubmit({ name: name.trim(), email: email.trim(), password: password.trim(), school, courses });
-    setName(""); setEmail(""); setPassword(""); if (!isCoordinator) setSchool(""); setCourses([]);
-  }, [name, email, password, school, courses, onSubmit, isCoordinator]);
+    if (!name.trim() || !email.trim() || (!initialData && !password.trim()) || !school || courses.length === 0) return;
+    onSubmit({ name: name.trim(), email: email.trim(), password: password.trim() || undefined, school, courses });
+    if (!initialData) {
+      setName(""); setEmail(""); setPassword(""); if (!isCoordinator) setSchool(""); setCourses([]);
+    }
+  }, [name, email, password, school, courses, onSubmit, isCoordinator, initialData]);
 
   if (isLoading) return (
     <div className="mt-5 space-y-3">
@@ -83,7 +97,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       <div>
         <label className={labelCls}>Senha de acesso</label>
         <div className="relative">
-          <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" required className={`${inputCls} pr-11`} />
+          <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={initialData ? "Deixe em branco para manter a senha" : "Mínimo 6 caracteres"} required={!initialData} className={`${inputCls} pr-11`} />
           <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500 hover:text-zinc-300 transition-colors">
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>

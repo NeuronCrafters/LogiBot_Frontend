@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { EntityActionButton } from "@/features/admin/components/EntityActionButton";
 
 export interface UniversityData {
@@ -16,11 +16,13 @@ const inputCls = "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/6
 function UniversityForm({ onSubmit, initialData }: UniversityFormProps) {
   const [name, setName] = useState(initialData?.name ?? "");
 
+  useEffect(() => setName(initialData?.name ?? ""), [initialData]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     onSubmit({ name: name.trim() });
-    setName("");
+    if (!initialData) setName("");
   };
 
   return (

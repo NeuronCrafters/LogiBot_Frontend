@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import { Home } from "@/features/home/pages/HomePage";
 import { AuthPage } from "@/features/auth/pages/AuthPage";
 import ProtectedRoute from "@/app/router/ProtectedRoute";
@@ -15,6 +15,26 @@ const Dashboard = React.lazy(() =>
 const CreateEntities = React.lazy(() =>
   import("@/features/admin/pages/CreateEntitiesPage").then((m) => ({
     default: m.CreateEntities,
+  })),
+);
+const ManageEntities = React.lazy(() =>
+  import("@/features/admin/pages/ManageEntitiesPage").then((m) => ({
+    default: m.ManageEntities,
+  })),
+);
+const EditEntity = React.lazy(() =>
+  import("@/features/admin/pages/EditEntityPage").then((m) => ({
+    default: m.EditEntity,
+  })),
+);
+const ClassDisciplineLinksPage = React.lazy(() =>
+  import("@/features/admin/pages/EntityLinksPage").then((m) => ({
+    default: m.ClassDisciplineLinksPage,
+  })),
+);
+const ProfessorDisciplineLinksPage = React.lazy(() =>
+  import("@/features/admin/pages/EntityLinksPage").then((m) => ({
+    default: m.ProfessorDisciplineLinksPage,
   })),
 );
 const Profile = React.lazy(() =>
@@ -84,9 +104,29 @@ export default function AppRouter() {
           />
           <Route
             path="/entities/create"
+            element={<Navigate to="/entities/manage" replace />}
+          />
+          <Route
+            path="/entities/manage"
             element={
               <Suspense fallback={<PageLoader />}>
-                <CreateEntities />
+                <ManageEntities />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/entities/links/class-disciplines"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ClassDisciplineLinksPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/entities/links/professor-disciplines"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ProfessorDisciplineLinksPage />
               </Suspense>
             }
           />
@@ -95,6 +135,14 @@ export default function AppRouter() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <CreateEntities />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/entities/edit/:entityType/:id"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <EditEntity />
               </Suspense>
             }
           />

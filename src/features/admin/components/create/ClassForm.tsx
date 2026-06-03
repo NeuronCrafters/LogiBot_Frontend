@@ -9,6 +9,7 @@ export interface ClassData {
   id?: string | number;
   _id?: string | number;
   name: string;
+  universityId?: string;
   courseId: string;
   disciplineIds?: string[];
 }
@@ -104,16 +105,26 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
     }
   }, [isCoordinator, user, filteredUniversities, selectedUniversity, selectedCourse]);
 
+  React.useEffect(() => {
+    if (!initialData) return;
+    setName(initialData.name ?? "");
+    setSelectedUniversity(initialData.universityId ?? "");
+    setSelectedCourse(initialData.courseId ?? "");
+    setSelectedDisciplineIds(initialData.disciplineIds ?? []);
+  }, [initialData]);
+
   const toggleDiscipline = useCallback((id: string) => setSelectedDisciplineIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]), []);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !selectedCourse) return;
     onSubmit({ name: name.trim(), courseId: selectedCourse, disciplineIds: selectedDisciplineIds });
-    setName("");
-    setSelectedDisciplineIds([]);
-    if (isAdmin) { setSelectedUniversity(""); setSelectedCourse(""); }
-  }, [name, selectedCourse, selectedDisciplineIds, onSubmit, isAdmin]);
+    if (!initialData) {
+      setName("");
+      setSelectedDisciplineIds([]);
+      if (isAdmin) { setSelectedUniversity(""); setSelectedCourse(""); }
+    }
+  }, [name, selectedCourse, selectedDisciplineIds, onSubmit, isAdmin, initialData]);
 
   if (isLoading) {
     return (

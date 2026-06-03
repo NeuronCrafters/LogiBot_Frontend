@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { logger } from "@/shared/lib/logger";
 import { academicFiltersApi } from "@/services/apiClient";
 import { EntityActionButton } from "@/features/admin/components/EntityActionButton";
@@ -24,31 +24,38 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
   const [name, setName] = useState(initialData?.name ?? "");
   const [universityId, setUniversityId] = useState(initialData?.universityId ?? "");
 
-  useMemo(() => {
+  useEffect(() => {
     const fetchAcademicData = async () => {
       try {
         const response = await academicFiltersApi.getAcademicData();
         setAcademicData(response.data);
       } catch (error) {
-        logger.error("Admin", "Erro ao carregar dados acadêmicos.", error);
+        logger.error("Admin", "Erro ao carregar dados academicos.", error);
       }
     };
     fetchAcademicData();
   }, []);
 
+  useEffect(() => {
+    setName(initialData?.name ?? "");
+    setUniversityId(initialData?.universityId ?? "");
+  }, [initialData]);
+
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !universityId) return;
     onSubmit({ name: name.trim(), universityId });
-    setName("");
-    setUniversityId("");
-  }, [name, universityId, onSubmit]);
+    if (!initialData) {
+      setName("");
+      setUniversityId("");
+    }
+  }, [name, universityId, onSubmit, initialData]);
 
   return (
     <form onSubmit={handleSubmit} className="mt-5 space-y-4">
       <div>
         <label className={labelCls}>Nome do Curso</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Ciência da Computação" required className={inputCls} />
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Ciencia da Computacao" required className={inputCls} />
       </div>
       <div>
         <label className={labelCls}>Universidade</label>

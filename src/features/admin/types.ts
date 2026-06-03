@@ -17,7 +17,7 @@ export interface ProfessorData {
   _id?: string | number;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   school: string;
   courses: string[];
 }
@@ -26,6 +26,7 @@ export interface ClassData {
   id?: string | number;
   _id?: string | number;
   name: string;
+  universityId?: string;
   courseId: string;
   disciplineIds?: string[];
 }
@@ -34,6 +35,7 @@ export interface DisciplineData {
   id?: string | number;
   _id?: string | number;
   name: string;
+  universityId?: string;
   courseId: string;
   classIds: string[];
   professorIds: string[];

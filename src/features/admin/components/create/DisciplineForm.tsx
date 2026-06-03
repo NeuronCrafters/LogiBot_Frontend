@@ -8,6 +8,7 @@ export interface DisciplineData {
   id?: string | number;
   _id?: string | number;
   name: string;
+  universityId?: string;
   courseId: string;
   classIds: string[];
   professorIds: string[];
@@ -50,6 +51,15 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>(initialData?.classIds ?? []);
   const [selectedProfessorIds, setSelectedProfessorIds] = useState<string[]>(initialData?.professorIds ?? []);
 
+  React.useEffect(() => {
+    if (!initialData) return;
+    setName(initialData.name ?? "");
+    setSelectedUniversity(initialData.universityId ?? "");
+    setSelectedCourse(initialData.courseId ?? "");
+    setSelectedClassIds(initialData.classIds ?? []);
+    setSelectedProfessorIds(initialData.professorIds ?? []);
+  }, [initialData]);
+
   const availableCourses = useMemo(() => {
     if (!academicData || !selectedUniversity) return [];
     const uni = academicData.universities.find((u) => u._id === selectedUniversity);
@@ -75,8 +85,10 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     e.preventDefault();
     if (!name.trim() || !selectedCourse) return;
     onSubmit({ name: name.trim(), courseId: selectedCourse, classIds: selectedClassIds, professorIds: selectedProfessorIds });
-    setName(""); setSelectedUniversity(""); setSelectedCourse(""); setSelectedClassIds([]); setSelectedProfessorIds([]);
-  }, [name, selectedCourse, selectedClassIds, selectedProfessorIds, onSubmit]);
+    if (!initialData) {
+      setName(""); setSelectedUniversity(""); setSelectedCourse(""); setSelectedClassIds([]); setSelectedProfessorIds([]);
+    }
+  }, [name, selectedCourse, selectedClassIds, selectedProfessorIds, onSubmit, initialData]);
 
   if (isLoading) return <div className="mt-5 flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm"><Loader2 className="w-4 h-4 animate-spin" />Carregando dados acadêmicos...</div>;
 
