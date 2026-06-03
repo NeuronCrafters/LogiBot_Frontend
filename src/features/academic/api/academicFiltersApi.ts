@@ -1,28 +1,28 @@
 import { api } from "@/shared/api/httpClient";
 
-export interface AcademicDataResponse {
-  success: boolean;
-  data: {
-    universities: University[];
-  };
-  summary: DataSummary;
-  user: UserInfo;
-  meta: ResponseMeta;
-}
+// ─── Entity types (mirror what buildAcademicFilters returns) ────────────────
 
-export interface University {
+export interface BasicInfo {
   _id: string;
   name: string;
-  courses: Course[];
+  code?: string;
 }
 
-export interface Course {
+export interface Student {
   _id: string;
   name: string;
-  classes: Class[];
-  disciplines: Discipline[];
-  professors: Professor[];
-  students: Student[];
+  email: string;
+  status: "active" | "graduated" | "dropped";
+  photo?: string;
+  level?: string;
+}
+
+export interface Professor {
+  _id: string;
+  name: string;
+  email: string;
+  role: string[];
+  photo?: string;
 }
 
 export interface Class {
@@ -39,37 +39,25 @@ export interface Discipline {
   code: string;
   classes: BasicInfo[];
   professors: Professor[];
-  students: StudentWithClass[];
+  students: Student[];
 }
 
-export interface Professor {
+export interface Course {
   _id: string;
   name: string;
-  email: string;
-  role: string[];
-  photo?: string;
-  disciplines?: BasicInfo[];
+  classes: Class[];
+  disciplines: Discipline[];
+  professors: Professor[];
+  students: Student[];
 }
 
-export interface Student {
+export interface University {
   _id: string;
   name: string;
-  email: string;
-  status: 'active' | 'graduated' | 'dropped';
-  photo?: string;
-  level?: string;
+  courses: Course[];
 }
 
-export interface StudentWithClass extends Student {
-  class: BasicInfo;
-  disciplines?: BasicInfo[];
-}
-
-export interface BasicInfo {
-  _id: string;
-  name: string;
-  code?: string;
-}
+// ─── Response envelope (matches backend academicFiltersService exactly) ─────
 
 export interface DataSummary {
   universities: number;
@@ -78,218 +66,148 @@ export interface DataSummary {
   disciplines: number;
   professors: number;
   students: number;
-  userLevel: 'ADMIN' | 'COORDINATOR' | 'PROFESSOR';
 }
 
-export interface UserInfo {
-  _id: string;
-  name: string;
-  email: string;
-  role: string[];
-  permissions: UserPermissions;
-  accessLevel: string;
-  context: {
-    school: string;
-    course?: string;
-    disciplines: number;
-  };
+export interface AcademicDataResponse {
+  success: boolean;
+  data: { universities: University[] };
+  summary: DataSummary;
+  user: { _id: string; name: string; email: string; role: string[] };
+  meta: { timestamp: string; version: string };
 }
 
-export interface UserPermissions {
-  canViewAllUniversities: boolean;
-  canViewAllCourses: boolean;
-  canViewOwnCourse: boolean;
-  canViewClasses: boolean;
-  canViewDisciplines: boolean;
-  canViewStudents: boolean;
-  canViewProfessors: boolean;
-  canViewAnalytics: boolean;
-  canExportData: boolean;
-  canCreateCourse: boolean;
-  canEditCourse: boolean;
-  canCreateClass: boolean;
-  canEditClass: boolean;
-  canCreateDiscipline: boolean;
-  canEditDiscipline: boolean;
-  canManageStudents: boolean;
-  canManageProfessors: boolean;
-  canAssignProfessors: boolean;
-  canManageEnrollments: boolean;
-  canGenerateReports: boolean;
-  canViewDetailedAnalytics: boolean;
-  canExportStudentData: boolean;
-  canViewOwnDisciplines: boolean;
-  canManageOwnDisciplineStudents: boolean;
-  canViewStudentProgress: boolean;
-}
-
-export interface ResponseMeta {
-  timestamp: string;
-  version: string;
-  source: string;
-}
+// ─── HTTP helper ─────────────────────────────────────────────────────────────
 
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
   return response.data;
 };
 
+// ─── API ─────────────────────────────────────────────────────────────────────
+
 export const academicFiltersApi = {
   getAcademicData: (): Promise<AcademicDataResponse> =>
     getRequest<AcademicDataResponse>("/academic/filters"),
 
+  // ── Convenience getters (all derived from the single cached endpoint) ───
+
   getUniversities: async (): Promise<University[]> => {
-    const response = await academicFiltersApi.getAcademicData();
-    return response.data.universities;
+    const res = await academicFiltersApi.getAcademicData();
+    return res.data.universities;
   },
 
   getCourses: async (universityId: string): Promise<Course[]> => {
-    const response = await academicFiltersApi.getAcademicData();
-    const university = response.data.universities.find(u => u._id === universityId);
-    return university?.courses || [];
+    const res = await academicFiltersApi.getAcademicData();
+    return res.data.universities.find((u) => u._id === universityId)?.courses ?? [];
   },
 
   getClasses: async (universityId: string, courseId: string): Promise<Class[]> => {
-    const response = await academicFiltersApi.getAcademicData();
-    const university = response.data.universities.find(u => u._id === universityId);
-    const course = university?.courses.find(c => c._id === courseId);
-    return course?.classes || [];
+    const res = await academicFiltersApi.getAcademicData();
+    const uni = res.data.universities.find((u) => u._id === universityId);
+    return uni?.courses.find((c) => c._id === courseId)?.classes ?? [];
   },
 
   getDisciplines: async (universityId: string, courseId: string): Promise<Discipline[]> => {
-    const response = await academicFiltersApi.getAcademicData();
-    const university = response.data.universities.find(u => u._id === universityId);
-    const course = university?.courses.find(c => c._id === courseId);
-    return course?.disciplines || [];
+    const res = await academicFiltersApi.getAcademicData();
+    const uni = res.data.universities.find((u) => u._id === universityId);
+    return uni?.courses.find((c) => c._id === courseId)?.disciplines ?? [];
   },
 
   getProfessors: async (universityId: string, courseId?: string): Promise<Professor[]> => {
-    const response = await academicFiltersApi.getAcademicData();
-    const university = response.data.universities.find(u => u._id === universityId);
-
-    if (courseId) {
-      const course = university?.courses.find(c => c._id === courseId);
-      return course?.professors || [];
-    }
-
-    const allProfessors: Professor[] = [];
-    university?.courses.forEach(course => {
-      allProfessors.push(...course.professors);
+    const res = await academicFiltersApi.getAcademicData();
+    const uni = res.data.universities.find((u) => u._id === universityId);
+    if (!uni) return [];
+    if (courseId) return uni.courses.find((c) => c._id === courseId)?.professors ?? [];
+    const seen = new Set<string>();
+    return uni.courses.flatMap((c) => c.professors).filter((p) => {
+      if (seen.has(p._id)) return false;
+      seen.add(p._id);
+      return true;
     });
-
-    return allProfessors.filter((prof, index, self) =>
-      self.findIndex(p => p._id === prof._id) === index
-    );
   },
 
   getStudentsByClass: async (universityId: string, courseId: string, classId: string): Promise<Student[]> => {
-    const response = await academicFiltersApi.getAcademicData();
-    const university = response.data.universities.find(u => u._id === universityId);
-    const course = university?.courses.find(c => c._id === courseId);
-    const classData = course?.classes.find(cl => cl._id === classId);
-    return classData?.students || [];
+    const res = await academicFiltersApi.getAcademicData();
+    const uni = res.data.universities.find((u) => u._id === universityId);
+    const course = uni?.courses.find((c) => c._id === courseId);
+    return course?.classes.find((cl) => cl._id === classId)?.students ?? [];
   },
 
-  getStudentsByDiscipline: async (universityId: string, courseId: string, disciplineId: string): Promise<StudentWithClass[]> => {
-    const response = await academicFiltersApi.getAcademicData();
-    const university = response.data.universities.find(u => u._id === universityId);
-    const course = university?.courses.find(c => c._id === courseId);
-    const discipline = course?.disciplines.find(d => d._id === disciplineId);
-    return discipline?.students || [];
+  getStudentsByDiscipline: async (universityId: string, courseId: string, disciplineId: string): Promise<Student[]> => {
+    const res = await academicFiltersApi.getAcademicData();
+    const uni = res.data.universities.find((u) => u._id === universityId);
+    const course = uni?.courses.find((c) => c._id === courseId);
+    return course?.disciplines.find((d) => d._id === disciplineId)?.students ?? [];
   },
 
   getStudentsByCourse: async (universityId: string, courseId: string): Promise<Student[]> => {
-    const response = await academicFiltersApi.getAcademicData();
-    const university = response.data.universities.find(u => u._id === universityId);
-    const course = university?.courses.find(c => c._id === courseId);
-    return course?.students || [];
+    const res = await academicFiltersApi.getAcademicData();
+    const uni = res.data.universities.find((u) => u._id === universityId);
+    return uni?.courses.find((c) => c._id === courseId)?.students ?? [];
   },
 
+  getSummary: async (): Promise<DataSummary> => {
+    const res = await academicFiltersApi.getAcademicData();
+    return res.summary;
+  },
+
+  // ── Find-by-ID helpers ───────────────────────────────────────────────────
+
   findUniversityById: async (id: string): Promise<University | null> => {
-    const response = await academicFiltersApi.getAcademicData();
-    return response.data.universities.find(u => u._id === id) || null;
+    const res = await academicFiltersApi.getAcademicData();
+    return res.data.universities.find((u) => u._id === id) ?? null;
   },
 
   findCourseById: async (id: string): Promise<Course | null> => {
-    const response = await academicFiltersApi.getAcademicData();
-    for (const university of response.data.universities) {
-      const course = university.courses.find(c => c._id === id);
+    const res = await academicFiltersApi.getAcademicData();
+    for (const uni of res.data.universities) {
+      const course = uni.courses.find((c) => c._id === id);
       if (course) return course;
     }
     return null;
   },
 
   findClassById: async (id: string): Promise<Class | null> => {
-    const response = await academicFiltersApi.getAcademicData();
-    for (const university of response.data.universities) {
-      for (const course of university.courses) {
-        const classData = course.classes.find(c => c._id === id);
-        if (classData) return classData;
+    const res = await academicFiltersApi.getAcademicData();
+    for (const uni of res.data.universities)
+      for (const course of uni.courses) {
+        const cls = course.classes.find((c) => c._id === id);
+        if (cls) return cls;
       }
-    }
     return null;
   },
 
   findDisciplineById: async (id: string): Promise<Discipline | null> => {
-    const response = await academicFiltersApi.getAcademicData();
-    for (const university of response.data.universities) {
-      for (const course of university.courses) {
-        const discipline = course.disciplines.find(d => d._id === id);
-        if (discipline) return discipline;
+    const res = await academicFiltersApi.getAcademicData();
+    for (const uni of res.data.universities)
+      for (const course of uni.courses) {
+        const disc = course.disciplines.find((d) => d._id === id);
+        if (disc) return disc;
       }
-    }
     return null;
   },
 
   findProfessorById: async (id: string): Promise<Professor | null> => {
-    const response = await academicFiltersApi.getAcademicData();
-    for (const university of response.data.universities) {
-      for (const course of university.courses) {
-        const professor = course.professors.find(p => p._id === id);
-        if (professor) return professor;
+    const res = await academicFiltersApi.getAcademicData();
+    for (const uni of res.data.universities)
+      for (const course of uni.courses) {
+        const prof = course.professors.find((p) => p._id === id);
+        if (prof) return prof;
       }
-    }
     return null;
   },
 
   findStudentById: async (id: string): Promise<Student | null> => {
-    const response = await academicFiltersApi.getAcademicData();
-    for (const university of response.data.universities) {
-      for (const course of university.courses) {
-        const student = course.students.find(s => s._id === id);
-        if (student) return student;
-
-        for (const classData of course.classes) {
-          const classStudent = classData.students.find(s => s._id === id);
-          if (classStudent) return classStudent;
-        }
-
-        for (const discipline of course.disciplines) {
-          const disciplineStudent = discipline.students.find(s => s._id === id);
-          if (disciplineStudent) return disciplineStudent;
+    const res = await academicFiltersApi.getAcademicData();
+    for (const uni of res.data.universities)
+      for (const course of uni.courses) {
+        const s = course.students.find((st) => st._id === id);
+        if (s) return s;
+        for (const cls of course.classes) {
+          const cs = cls.students.find((st) => st._id === id);
+          if (cs) return cs;
         }
       }
-    }
     return null;
   },
-
-  getSummary: async (): Promise<DataSummary> => {
-    const response = await academicFiltersApi.getAcademicData();
-    return response.summary;
-  },
-
-  getUserPermissions: async (): Promise<UserPermissions> => {
-    const response = await academicFiltersApi.getAcademicData();
-    return response.user.permissions;
-  },
-
-  getUserContext: async (): Promise<UserInfo> => {
-    const response = await academicFiltersApi.getAcademicData();
-    return response.user;
-  },
-
-  canUserView: async (resource: keyof UserPermissions): Promise<boolean> => {
-    const response = await academicFiltersApi.getAcademicData();
-    return response.user.permissions[resource];
-  }
 };

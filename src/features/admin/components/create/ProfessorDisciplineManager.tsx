@@ -7,11 +7,19 @@ import { toast } from "@/shared/lib/toast";
 const labelCls = "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
 const selectCls = "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60";
 
-export function ProfessorDisciplineManager() {
+export function ProfessorDisciplineManager({
+  initialUniversityId = "",
+  initialCourseId = "",
+  initialDisciplineId = "",
+}: {
+  initialUniversityId?: string;
+  initialCourseId?: string;
+  initialDisciplineId?: string;
+} = {}) {
   const queryClient = useQueryClient();
-  const [selectedUniversity, setSelectedUniversity] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [selectedDiscipline, setSelectedDiscipline] = useState("");
+  const [selectedUniversity, setSelectedUniversity] = useState(initialUniversityId);
+  const [selectedCourse, setSelectedCourse] = useState(initialCourseId);
+  const [selectedDiscipline, setSelectedDiscipline] = useState(initialDisciplineId);
   const [selectedProfessor, setSelectedProfessor] = useState("");
 
   const { data: academicData, isLoading } = useQuery({

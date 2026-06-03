@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { Link2, Users } from "lucide-react";
 import { ClassDisciplineManager } from "@/features/admin/components/create/ClassDisciplineManager";
 import { ProfessorDisciplineManager } from "@/features/admin/components/create/ProfessorDisciplineManager";
@@ -18,22 +19,42 @@ function LinksHeader({ title, description, icon }: { title: string; description:
 }
 
 export function ClassDisciplineLinksPage() {
+  const { state } = useLocation();
+  const { universityId, courseId, classId } = (state ?? {}) as {
+    universityId?: string;
+    courseId?: string;
+    classId?: string;
+  };
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 text-white md:px-8 md:py-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
         <LinksHeader title="Disciplinas por Turma" description="Escolha uma turma, visualize as disciplinas vinculadas e gere codigos para novos vinculos." icon={<Link2 className="h-5 w-5" />} />
-        <ClassDisciplineManager />
+        <ClassDisciplineManager
+          initialUniversityId={universityId}
+          initialCourseId={courseId}
+          initialClassId={classId}
+        />
       </div>
     </main>
   );
 }
 
 export function ProfessorDisciplineLinksPage() {
+  const { state } = useLocation();
+  const { universityId, courseId, disciplineId } = (state ?? {}) as {
+    universityId?: string;
+    courseId?: string;
+    disciplineId?: string;
+  };
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 text-white md:px-8 md:py-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
         <LinksHeader title="Professores por Disciplina" description="Escolha uma disciplina e controle quais professores estao vinculados a ela." icon={<Users className="h-5 w-5" />} />
-        <ProfessorDisciplineManager />
+        <ProfessorDisciplineManager
+          initialUniversityId={universityId}
+          initialCourseId={courseId}
+          initialDisciplineId={disciplineId}
+        />
       </div>
     </main>
   );

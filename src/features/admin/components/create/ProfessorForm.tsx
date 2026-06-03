@@ -45,7 +45,10 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     if (!academicData?.universities || !school) return [];
     const universityCourses = academicData.universities.find((u) => u._id === school)?.courses ?? [];
     if (!isCoordinator) return universityCourses;
-    const allowedCourseIds = Array.isArray(user?.courses) ? user.courses : user?.courses ? [String(user.courses)] : [];
+    const rawCourses = Array.isArray(user?.courses) ? user.courses : user?.courses ? [user.courses] : [];
+    const allowedCourseIds = rawCourses
+      .map((c: any) => (typeof c === "string" ? c : (c?.id ?? c?._id ?? "")))
+      .filter(Boolean);
     return universityCourses.filter((course) => allowedCourseIds.includes(course._id));
   }, [academicData, school, isCoordinator, user]);
 

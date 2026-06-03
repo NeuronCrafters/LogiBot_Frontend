@@ -11,11 +11,19 @@ type RegistrationResponse = {
   registrationCodes?: Array<{ code: string; classId: string; disciplineId: string }>;
 };
 
-export function ClassDisciplineManager() {
+export function ClassDisciplineManager({
+  initialUniversityId = "",
+  initialCourseId = "",
+  initialClassId = "",
+}: {
+  initialUniversityId?: string;
+  initialCourseId?: string;
+  initialClassId?: string;
+} = {}) {
   const queryClient = useQueryClient();
-  const [selectedUniversity, setSelectedUniversity] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedUniversity, setSelectedUniversity] = useState(initialUniversityId);
+  const [selectedCourse, setSelectedCourse] = useState(initialCourseId);
+  const [selectedClass, setSelectedClass] = useState(initialClassId);
   const [selectedDiscipline, setSelectedDiscipline] = useState("");
   const [lastCode, setLastCode] = useState("");
 

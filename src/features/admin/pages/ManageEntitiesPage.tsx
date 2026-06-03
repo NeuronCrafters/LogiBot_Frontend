@@ -16,14 +16,24 @@ import {
   TableProperties,
   Trash2,
   Users,
+  X,
 } from "lucide-react";
 import { toast } from "@/shared/lib/toast";
 import { AppModal } from "@/shared/components/feedback/AppModal";
+import { ClassForm } from "@/features/admin/components/create/ClassForm";
+import { DisciplineForm } from "@/features/admin/components/create/DisciplineForm";
+import { ProfessorForm } from "@/features/admin/components/create/ProfessorForm";
 
 type Tab = "classes" | "disciplines" | "professors";
 
 const selectCls =
   "h-10 rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 min-w-[180px]";
+
+const MODAL_META: Record<Tab, { title: string; icon: ReactNode }> = {
+  classes: { title: "Nova Turma", icon: <Users className="h-5 w-5" /> },
+  disciplines: { title: "Nova Disciplina", icon: <Library className="h-5 w-5" /> },
+  professors: { title: "Novo Professor", icon: <GraduationCap className="h-5 w-5" /> },
+};
 
 function TabButton({
   active,
@@ -65,6 +75,7 @@ function EntityCard({
   editPath,
   linksPath,
   linksLabel,
+  linksState,
   onDelete,
 }: {
   name: string;
@@ -73,6 +84,7 @@ function EntityCard({
   editPath: string;
   linksPath?: string;
   linksLabel?: string;
+  linksState?: Record<string, string>;
   onDelete: () => void;
 }) {
   return (
@@ -92,6 +104,7 @@ function EntityCard({
         {linksPath && (
           <Link
             to={linksPath}
+            state={linksState}
             className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
           >
             <Link2 className="h-3 w-3" />
@@ -119,23 +132,23 @@ function EntityCard({
 
 function EmptyTab({
   message,
-  createPath,
   createLabel,
+  onCreateClick,
 }: {
   message: string;
-  createPath: string;
   createLabel: string;
+  onCreateClick: () => void;
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-14">
       <p className="font-[Poppins] text-sm text-zinc-500">{message}</p>
-      <Link
-        to={createPath}
+      <button
+        onClick={onCreateClick}
         className="flex items-center gap-1.5 rounded-lg bg-blue-600/80 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-600"
       >
         <Plus className="h-4 w-4" />
         {createLabel}
-      </Link>
+      </button>
     </div>
   );
 }
@@ -146,6 +159,7 @@ export function ManageEntities() {
   const [tab, setTab] = useState<Tab>("classes");
   const [adminUniversityId, setAdminUniversityId] = useState("");
   const [adminCourseId, setAdminCourseId] = useState("");
+  const [createModal, setCreateModal] = useState<Tab | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string;
     name: string;
@@ -209,6 +223,29 @@ export function ManageEntities() {
   const disciplines = (activeCourse?.disciplines as any[]) ?? [];
   const professors = (activeCourse?.professors as any[]) ?? [];
 
+  const createMutation = useMutation({
+    mutationFn: async ({ entity, item }: { entity: string; item: any }) => {
+      if (entity === "professor") {
+        return adminApi.createProfessor({
+          name: item.name,
+          email: item.email,
+          password: item.password,
+          school: item.school,
+          courses: item.courses,
+        });
+      }
+      return academicApi.post(entity as any, item);
+    },
+    onSuccess: () => {
+      toast.success("Cadastrado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["academicData"] });
+      setCreateModal(null);
+    },
+    onError: () => {
+      toast.error("Erro ao cadastrar. Verifique os dados e tente novamente.");
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async ({ id, type }: { id: string; type: string }) => {
       if (type === "professor") return adminApi.deleteProfessor(id);
@@ -227,13 +264,15 @@ export function ManageEntities() {
 
   if (!user || (!isAdmin && !isCoordinator)) return null;
 
+  const effectiveUniversityId = isAdmin ? adminUniversityId : coordUniversityId;
+  const effectiveCourseId = isAdmin ? adminCourseId : (coordCourseIds[0] ?? "");
+
   const TABS = [
     {
       key: "classes" as Tab,
       label: "Turmas",
       icon: <Users className="h-4 w-4" />,
       count: classes.length,
-      createPath: "/entities/create/class",
       createLabel: "Nova Turma",
     },
     {
@@ -241,7 +280,6 @@ export function ManageEntities() {
       label: "Disciplinas",
       icon: <Library className="h-4 w-4" />,
       count: disciplines.length,
-      createPath: "/entities/create/discipline",
       createLabel: "Nova Disciplina",
     },
     {
@@ -249,7 +287,6 @@ export function ManageEntities() {
       label: "Professores",
       icon: <GraduationCap className="h-4 w-4" />,
       count: professors.length,
-      createPath: "/entities/create/professor",
       createLabel: "Novo Professor",
     },
   ];
@@ -383,13 +420,13 @@ export function ManageEntities() {
                   />
                 ))}
               </div>
-              <Link
-                to={activeTab.createPath}
+              <button
+                onClick={() => setCreateModal(tab)}
                 className="flex items-center gap-1.5 self-start rounded-lg bg-blue-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 sm:self-auto"
               >
                 <Plus className="h-4 w-4" />
                 {activeTab.createLabel}
-              </Link>
+              </button>
             </div>
 
             {/* Turmas */}
@@ -397,8 +434,8 @@ export function ManageEntities() {
               (classes.length === 0 ? (
                 <EmptyTab
                   message="Nenhuma turma cadastrada neste curso."
-                  createPath="/entities/create/class"
                   createLabel="Nova Turma"
+                  onCreateClick={() => setCreateModal("classes")}
                 />
               ) : (
                 <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -412,6 +449,7 @@ export function ManageEntities() {
                         editPath={`/entities/edit/class/${cls._id}`}
                         linksPath="/entities/links/class-disciplines"
                         linksLabel="Disciplinas"
+                        linksState={{ universityId: effectiveUniversityId, courseId: effectiveCourseId, classId: cls._id }}
                         onDelete={() =>
                           setDeleteTarget({ id: cls._id, name: cls.name, type: "class" })
                         }
@@ -426,8 +464,8 @@ export function ManageEntities() {
               (disciplines.length === 0 ? (
                 <EmptyTab
                   message="Nenhuma disciplina cadastrada neste curso."
-                  createPath="/entities/create/discipline"
                   createLabel="Nova Disciplina"
+                  onCreateClick={() => setCreateModal("disciplines")}
                 />
               ) : (
                 <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -441,6 +479,7 @@ export function ManageEntities() {
                         editPath={`/entities/edit/discipline/${disc._id}`}
                         linksPath="/entities/links/professor-disciplines"
                         linksLabel="Professores"
+                        linksState={{ universityId: effectiveUniversityId, courseId: effectiveCourseId, disciplineId: disc._id }}
                         onDelete={() =>
                           setDeleteTarget({ id: disc._id, name: disc.name, type: "discipline" })
                         }
@@ -455,8 +494,8 @@ export function ManageEntities() {
               (professors.length === 0 ? (
                 <EmptyTab
                   message="Nenhum professor cadastrado neste curso."
-                  createPath="/entities/create/professor"
                   createLabel="Novo Professor"
+                  onCreateClick={() => setCreateModal("professors")}
                 />
               ) : (
                 <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -477,6 +516,66 @@ export function ManageEntities() {
         )}
       </div>
 
+      {/* Create modal */}
+      {createModal && (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setCreateModal(null);
+          }}
+        >
+          <div className="flex min-h-full items-start justify-center px-4 py-10">
+            <div className="w-full max-w-lg">
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1c1c1c] shadow-2xl shadow-black/40">
+                {/* Modal header */}
+                <div className="flex items-center justify-between border-b border-white/10 p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                      {MODAL_META[createModal].icon}
+                    </div>
+                    <h2 className="font-[Poppins] text-base font-semibold text-white">
+                      {MODAL_META[createModal].title}
+                    </h2>
+                  </div>
+                  <button
+                    onClick={() => setCreateModal(null)}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Modal form */}
+                <div className="p-5">
+                  {createModal === "classes" && (
+                    <ClassForm
+                      onSubmit={(data) =>
+                        createMutation.mutate({ entity: "class", item: data })
+                      }
+                    />
+                  )}
+                  {createModal === "disciplines" && (
+                    <DisciplineForm
+                      onSubmit={(data) =>
+                        createMutation.mutate({ entity: "discipline", item: data })
+                      }
+                    />
+                  )}
+                  {createModal === "professors" && (
+                    <ProfessorForm
+                      onSubmit={(data) =>
+                        createMutation.mutate({ entity: "professor", item: data })
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation */}
       <AppModal
         isOpen={!!deleteTarget}
         type="delete"
