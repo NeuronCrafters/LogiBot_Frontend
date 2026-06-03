@@ -1,161 +1,173 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Brain } from "lucide-react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useQuizFlow } from "@/features/quiz/hooks/useQuizFlow";
-import { LevelStep } from "@/features/quiz/components/LevelStep";
-import { CategoryStep } from "@/features/quiz/components/CategoryStep";
-import { SubtopicStep } from "@/features/quiz/components/SubtopicStep";
-import { QuestionsDisplay } from "@/features/quiz/components/QuestionDisplay";
-import { ResultDisplay } from "@/features/quiz/components/ResultDisplay";
+import { useQuery } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
+import { studentQuizApi } from "@/features/quiz/api/quizApi";
+import { QUIZ_TOPICS } from "@/features/quiz/types";
+import type { StudentQuizItem } from "@/features/quiz/types";
 
-const PROGRESS_STEPS = [
-  "Nível",
-  "Categoria",
-  "Subtópico",
-  "Perguntas",
-  "Resultado",
-] as const;
+const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
+  QUIZ_TOPICS.map((t) => [t.value, t.label]),
+);
 
-const STEP_INDEX: Record<string, number> = {
-  levels: 0,
-  categories: 1,
-  subsubjects: 2,
-  questions: 3,
-  results: 4,
-};
+function QuizCard({
+  quiz,
+  onClick,
+}: {
+  quiz: StudentQuizItem;
+  onClick: () => void;
+}) {
+  const pct =
+    quiz.attempted && quiz.bestTotalQuestions
+      ? Math.round((quiz.bestScore! / quiz.bestTotalQuestions) * 100)
+      : null;
+
+  return (
+    <button
+      onClick={onClick}
+      className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 text-left shadow-md shadow-black/10 transition-all hover:border-white/20 hover:bg-[#252525]"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+          <Brain className="h-5 w-5" />
+        </div>
+        {quiz.attempted ? (
+          <span className="flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 font-[Poppins] text-xs font-medium text-emerald-400">
+            <CheckCircle2 className="h-3 w-3" />
+            {pct}%
+          </span>
+        ) : (
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 font-[Poppins] text-xs text-zinc-500">
+            Não respondido
+          </span>
+        )}
+      </div>
+
+      <div className="flex-1">
+        <p className="font-[Poppins] text-sm font-semibold leading-snug text-white">
+          {quiz.title}
+        </p>
+        {quiz.description && (
+          <p className="mt-1 line-clamp-2 font-[Poppins] text-xs leading-relaxed text-zinc-500">
+            {quiz.description}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 border-t border-white/5 pt-3">
+        <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-indigo-400">
+          <BookOpen className="h-3 w-3" />
+          {quiz.disciplineName}
+        </span>
+        <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-[10px] text-zinc-500">
+          {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
+        </span>
+        <span className="ml-auto flex items-center gap-1 font-[Poppins] text-[10px] text-zinc-600">
+          {quiz.questionCount} {quiz.questionCount === 1 ? "questão" : "questões"}
+          <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </div>
+    </button>
+  );
+}
 
 export function Quiz() {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const userId = user?._id || "user";
 
   const {
-    step,
-    questions,
-    resultData,
-    categoryButtons,
-    subsubjectButtons,
-    handleInitialChoice,
-    handleLevelNext,
-    handleCategoryNext,
-    handleSubsubjectNext,
-    handleSubmitAnswers,
-  } = useQuizFlow({ userId });
-
-  useEffect(() => {
-    handleInitialChoice("quiz");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const currentIndex = STEP_INDEX[step] ?? 0;
+    data: quizzes,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["studentQuizHub"],
+    queryFn: studentQuizApi.getHub,
+    staleTime: 2 * 60 * 1000,
+  });
 
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
+      <div className="mx-auto w-full max-w-7xl space-y-5">
         <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
-                <Brain className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                  Quiz
-                </h1>
-                <p className="mt-2 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                  Pratique por nível, tema e subtópico com feedback imediato.
-                </p>
-              </div>
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+              <Brain className="h-5 w-5" />
             </div>
+            <div>
+              <h1 className="font-[Poppins] text-2xl font-semibold text-white">
+                Meus Quizzes
+              </h1>
+              <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">
+                Quizzes disponíveis para as disciplinas da sua turma.
+              </p>
+            </div>
+          </div>
+        </section>
 
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-[#1f1f1f] py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+            <p className="font-[Poppins] text-sm text-zinc-500">
+              Carregando quizzes...
+            </p>
+          </div>
+        )}
+
+        {error && !isLoading && (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-red-500/20 bg-red-500/5 py-16">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 text-red-400">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <div className="text-center">
+              <p className="font-[Poppins] text-sm font-semibold text-white">
+                Erro ao carregar quizzes
+              </p>
+              <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
+                Verifique sua conexão e tente novamente.
+              </p>
+            </div>
             <button
-              onClick={() => navigate("/chat")}
-              className="inline-flex h-10 w-fit items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 font-[Poppins] text-sm font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+              onClick={() => refetch()}
+              className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 font-[Poppins] text-sm text-red-300 transition-colors hover:bg-red-500/20"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
+              Tentar novamente
             </button>
           </div>
-        </section>
+        )}
 
-        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
-          <div className="mb-8 flex items-center justify-between">
-            {PROGRESS_STEPS.map((label, i) => (
-              <div key={label} className="flex flex-1 items-center">
-                <div className="flex min-w-0 flex-col items-center gap-2">
-                  <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-full font-[Poppins] text-xs font-semibold transition-all ${
-                      i < currentIndex
-                        ? "bg-indigo-600 text-white"
-                        : i === currentIndex
-                          ? "bg-indigo-500 text-white ring-2 ring-indigo-400/30"
-                          : "bg-white/10 text-zinc-500"
-                    }`}
-                  >
-                    {i + 1}
-                  </div>
-                  <span
-                    className={`hidden max-w-20 truncate font-[Poppins] text-[10px] transition-colors sm:block ${
-                      i === currentIndex
-                        ? "text-white"
-                        : i < currentIndex
-                          ? "text-indigo-400"
-                          : "text-zinc-600"
-                    }`}
-                  >
-                    {label}
-                  </span>
-                </div>
-                {i < PROGRESS_STEPS.length - 1 && (
-                  <div
-                    className={`mx-2 mb-5 h-px flex-1 transition-colors ${i < currentIndex ? "bg-indigo-500" : "bg-white/10"}`}
-                  />
-                )}
-              </div>
-            ))}
+        {!isLoading && !error && quizzes?.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-20">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-neutral-950/60 text-zinc-700">
+              <Brain className="h-7 w-7" />
+            </div>
+            <div className="text-center">
+              <p className="font-[Poppins] text-sm font-semibold text-white">
+                Nenhum quiz disponível
+              </p>
+              <p className="mt-1 max-w-xs font-[Poppins] text-xs leading-relaxed text-zinc-500">
+                Seus professores ainda não criaram quizzes para as suas disciplinas.
+              </p>
+            </div>
           </div>
+        )}
 
-          <>
-            {(step === "initial" || step === "levels") && (
-              <LevelStep onNext={handleLevelNext} />
-            )}
-            {step === "categories" && (
-              <CategoryStep
-                buttons={categoryButtons}
-                onNext={handleCategoryNext}
+        {!isLoading && !error && quizzes && quizzes.length > 0 && (
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {quizzes.map((quiz) => (
+              <QuizCard
+                key={quiz.id}
+                quiz={quiz}
+                onClick={() => navigate(`/quiz/${quiz.id}`)}
               />
-            )}
-            {step === "subsubjects" && (
-              <SubtopicStep
-                buttons={subsubjectButtons}
-                onNext={handleSubsubjectNext}
-              />
-            )}
-            {step === "questions" && (
-              <QuestionsDisplay
-                questions={questions}
-                onSubmitAnswers={handleSubmitAnswers}
-              />
-            )}
-            {step === "results" && resultData && (
-              <>
-                <ResultDisplay
-                  totalCorrectAnswers={resultData.totalCorrectAnswers}
-                  totalWrongAnswers={resultData.totalWrongAnswers}
-                  detalhes={resultData.detalhes}
-                />
-                <div className="mt-8 flex justify-center">
-                  <button
-                    onClick={() => handleInitialChoice("quiz")}
-                    className="h-11 rounded-lg border border-indigo-400/40 bg-indigo-600 px-5 font-[Poppins] text-sm font-semibold text-white shadow-md shadow-indigo-900/30 transition-colors hover:bg-indigo-700"
-                  >
-                    Continuar praticando
-                  </button>
-                </div>
-              </>
-            )}
-          </>
-        </section>
+            ))}
+          </section>
+        )}
       </div>
     </main>
   );

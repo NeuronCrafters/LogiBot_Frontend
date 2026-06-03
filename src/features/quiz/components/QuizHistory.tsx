@@ -1,17 +1,14 @@
-﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { historyService } from "@/features/chat/api/chatHistoryApi";
-import { GraduationCap, Loader2, AlertCircle, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { AlertCircle, Brain, GraduationCap, Loader2, Plus } from "lucide-react";
+import { quizHistoryApi } from "@/features/quiz/api/quizApi";
+import { QUIZ_TOPICS } from "@/features/quiz/types";
 import { formatRelativeTime } from "@/shared/lib/formatDate";
+import { Button } from "@/components/ui/button";
 
-interface QuizSession {
-  quizId: string;
-  title: string;
-  score: number;
-  totalQuestions: number;
-  completedAt: string;
-}
+const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
+  QUIZ_TOPICS.map((t) => [t.value, t.label]),
+);
 
 interface QuizHistoryProps {
   userId: string;
@@ -19,37 +16,17 @@ interface QuizHistoryProps {
 }
 
 export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
-  const [quizzes, setQuizzes] = useState<QuizSession[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchHistory() {
-      try {
-        setLoading(true);
-        const data = await historyService.getQuizHistory(userId);
-        if (isMounted) {
-          setQuizzes(Array.isArray(data) ? data : []);
-          setError(false);
-        }
-      } catch {
-        if (isMounted) setError(true);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    if (userId) fetchHistory();
-    return () => {
-      isMounted = false;
-    };
-  }, [userId]);
+  const { data: quizzes = [], isLoading, isError } = useQuery({
+    queryKey: ["quizHistory", userId],
+    queryFn: () => quizHistoryApi.getHistory(userId),
+    staleTime: 2 * 60 * 1000,
+    enabled: !!userId,
+  });
 
   const handleSelect = (quizId: string) => {
-    navigate(`/quiz/results/${quizId}`);
+    navigate(`/quiz/${quizId}`);
     closeMenu?.();
   };
 
@@ -58,64 +35,73 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
     closeMenu?.();
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-40 gap-2">
-        <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
-        <span className="text-xs text-zinc-500 font-[Poppins]">
-          Carregando quizzes...
+      <div className="flex h-40 flex-col items-center justify-center gap-2">
+        <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+        <span className="font-[Poppins] text-xs text-zinc-500">
+          Carregando histórico...
         </span>
       </div>
     );
   }
 
-  const hasNoQuizzes = !Array.isArray(quizzes) || quizzes.length === 0;
-
   return (
-    <div className="flex flex-col w-full gap-1">
+    <div className="flex w-full flex-col gap-1">
       <Button
         onClick={handleNewQuiz}
-        className="w-full h-9 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-[Poppins] font-medium rounded-lg border border-indigo-500/30 transition-colors gap-1.5 mb-1"
+        className="mb-1 h-9 w-full gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600 font-[Poppins] text-xs font-medium text-white transition-colors hover:bg-indigo-500"
       >
         <Plus size={14} />
-        Novo quiz
+        Ver quizzes
       </Button>
 
-      {error ? (
-        <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
-          <AlertCircle className="w-5 h-5 text-red-500" />
-          <span className="text-xs text-zinc-500 font-[Poppins]">
+      {isError ? (
+        <div className="flex h-32 flex-col items-center justify-center gap-2 px-4 text-center">
+          <AlertCircle className="h-5 w-5 text-red-500" />
+          <span className="font-[Poppins] text-xs text-zinc-500">
             Erro ao carregar histórico.
           </span>
         </div>
-      ) : hasNoQuizzes ? (
-        <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
-          <GraduationCap className="w-5 h-5 text-zinc-700" />
-          <span className="text-xs text-zinc-500 font-[Poppins]">
-            Nenhum quiz realizado.
+      ) : quizzes.length === 0 ? (
+        <div className="flex h-32 flex-col items-center justify-center gap-2 px-4 text-center">
+          <Brain className="h-5 w-5 text-zinc-700" />
+          <span className="font-[Poppins] text-xs text-zinc-500">
+            Nenhum quiz respondido.
           </span>
         </div>
       ) : (
         <div className="flex flex-col gap-0.5">
           {quizzes.map((quiz, index) => (
             <div
-              key={quiz.quizId || index}
+              key={`${quiz.quizId}-${index}`}
               onClick={() => handleSelect(quiz.quizId)}
-              className="group flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
+              className="group flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-white/5"
             >
               <GraduationCap
                 size={14}
-                className="text-indigo-400 shrink-0 mt-0.5"
+                className="mt-0.5 shrink-0 text-indigo-400"
               />
-              <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-xs font-[Poppins] text-zinc-300 group-hover:text-white truncate leading-snug transition-colors">
-                  {quiz.title || "Quiz Prático"}
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate font-[Poppins] text-xs leading-snug text-zinc-300 transition-colors group-hover:text-white">
+                  {quiz.title || "Quiz"}
                 </span>
                 <div className="flex items-center gap-2 leading-snug">
-                  <span className="text-[11px] text-zinc-600 font-[Poppins]">
+                  <span className="font-[Poppins] text-[10px] text-zinc-600">
+                    {quiz.disciplineName}
+                  </span>
+                  <span className="font-[Poppins] text-[10px] text-zinc-700">
+                    ·
+                  </span>
+                  <span className="font-[Poppins] text-[10px] text-zinc-600">
+                    {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 leading-snug">
+                  <span className="font-[Poppins] text-[11px] text-zinc-600">
                     {formatRelativeTime(new Date(quiz.completedAt))}
                   </span>
-                  <span className="text-[11px] text-emerald-400 font-[Poppins] font-semibold">
+                  <span className="font-[Poppins] text-[11px] font-semibold text-emerald-400">
                     {quiz.score}/{quiz.totalQuestions}
                   </span>
                 </div>

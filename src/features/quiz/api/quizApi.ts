@@ -1,68 +1,124 @@
 import { api } from "@/shared/api/httpClient";
-import { Question } from "@/features/quiz/types";
+import type {
+  ProfessorQuiz,
+  ProfessorQuizResult,
+  QuizAttemptResult,
+  QuizDetail,
+  QuizHistoryItem,
+  QuizQuestionWithAnswer,
+  StudentQuizItem,
+} from "@/features/quiz/types";
 
-interface Button {
-  title: string;
-  payload: string;
-}
-interface LevelResponse {
-  buttons: Button[];
-}
-interface CategoryResponse {
-  message: string;
-  categories: Button[];
-}
-interface SubcategoryResponse {
-  buttons: Button[];
-}
-interface GenerateQuizResponse {
-  success: boolean;
-  assunto: string;
-  nivel: string;
-  questions: Question[];
-}
+// ── Professor ──────────────────────────────────────────────────────────────────
 
-interface ResultDetail {
-  question: string;
-  selected: string;
-  correct: string;
-  isCorrect: boolean;
-  explanation: string;
-  selectedText: string;
-  correctText: string;
-}
-
-export interface VerifyQuizResponse {
-  success: boolean;
-  message: string;
-  totalCorrectAnswers: number;
-  totalWrongAnswers: number;
-  detalhes: ResultDetail[];
-}
-
-export const quizService = {
-  async listLevels(): Promise<LevelResponse> {
-    const response = await api.get("/quiz/levels");
-    return response.data;
+export const professorQuizApi = {
+  async getMyQuizzes(disciplineId?: string): Promise<ProfessorQuiz[]> {
+    const params = disciplineId ? `?disciplineId=${disciplineId}` : "";
+    const res = await api.get(`/quiz/professor${params}`, { withCredentials: true });
+    return res.data;
   },
 
-  async setLevel(nivel: string): Promise<CategoryResponse> {
-    const response = await api.post("/quiz/level", { level: nivel });
-    return response.data;
+  async createQuiz(data: {
+    title: string;
+    disciplineId: string;
+    topic: string;
+    description?: string;
+  }): Promise<ProfessorQuiz> {
+    const res = await api.post("/quiz/professor", data, { withCredentials: true });
+    return res.data;
   },
 
-  async listSubcategories(category: string): Promise<SubcategoryResponse> {
-    const response = await api.post("/quiz/subcategories", { category });
-    return response.data;
+  async updateQuiz(
+    id: string,
+    data: Partial<{ title: string; topic: string; description: string; disciplineId: string }>,
+  ): Promise<ProfessorQuiz> {
+    const res = await api.put(`/quiz/professor/${id}`, data, { withCredentials: true });
+    return res.data;
   },
 
-  async generateQuiz(subtopic: string): Promise<GenerateQuizResponse> {
-    const response = await api.post("/quiz/questions", { subtopic });
-    return response.data;
+  async deleteQuiz(id: string): Promise<void> {
+    await api.delete(`/quiz/professor/${id}`, { withCredentials: true });
   },
 
-  async verifyQuiz(answers: string[]): Promise<VerifyQuizResponse> {
-    const response = await api.post("/quiz/answers", { answers });
-    return response.data;
+  async getQuestions(quizId: string): Promise<QuizQuestionWithAnswer[]> {
+    const res = await api.get(`/quiz/professor/${quizId}/questions`, { withCredentials: true });
+    return res.data;
+  },
+
+  async addQuestion(
+    quizId: string,
+    data: {
+      question: string;
+      options: string[];
+      correctOption: string;
+      explanation?: string;
+    },
+  ): Promise<QuizQuestionWithAnswer> {
+    const res = await api.post(`/quiz/professor/${quizId}/questions`, data, {
+      withCredentials: true,
+    });
+    return res.data;
+  },
+
+  async updateQuestion(
+    quizId: string,
+    questionId: string,
+    data: Partial<{
+      question: string;
+      options: string[];
+      correctOption: string;
+      explanation: string;
+    }>,
+  ): Promise<QuizQuestionWithAnswer> {
+    const res = await api.put(`/quiz/professor/${quizId}/questions/${questionId}`, data, {
+      withCredentials: true,
+    });
+    return res.data;
+  },
+
+  async deleteQuestion(quizId: string, questionId: string): Promise<void> {
+    await api.delete(`/quiz/professor/${quizId}/questions/${questionId}`, {
+      withCredentials: true,
+    });
+  },
+
+  async getResults(quizId: string): Promise<ProfessorQuizResult> {
+    const res = await api.get(`/quiz/professor/${quizId}/results`, { withCredentials: true });
+    return res.data;
+  },
+};
+
+// ── Student ────────────────────────────────────────────────────────────────────
+
+export const studentQuizApi = {
+  async getHub(): Promise<StudentQuizItem[]> {
+    const res = await api.get("/quiz/student/hub", { withCredentials: true });
+    return res.data;
+  },
+
+  async getQuiz(id: string): Promise<QuizDetail> {
+    const res = await api.get(`/quiz/student/${id}`, { withCredentials: true });
+    return res.data;
+  },
+
+  async submitAttempt(
+    id: string,
+    answers: Record<string, string>,
+  ): Promise<QuizAttemptResult> {
+    const res = await api.post(
+      `/quiz/student/${id}/attempt`,
+      { answers },
+      { withCredentials: true },
+    );
+    return res.data;
+  },
+};
+
+// ── Shared ─────────────────────────────────────────────────────────────────────
+
+export const quizHistoryApi = {
+  async getHistory(userId: string): Promise<QuizHistoryItem[]> {
+    const res = await api.get(`/quiz/history/${userId}`, { withCredentials: true });
+    return res.data;
   },
 };

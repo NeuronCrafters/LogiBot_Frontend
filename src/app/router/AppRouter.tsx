@@ -36,6 +36,12 @@ const Feedback = React.lazy(() =>
 const Quiz = React.lazy(() =>
   import("@/features/quiz/pages/QuizPage").then((m) => ({ default: m.Quiz })),
 );
+const QuizAttempt = React.lazy(() =>
+  import("@/features/quiz/pages/QuizAttemptPage").then((m) => ({ default: m.QuizAttempt })),
+);
+const ProfessorQuizPage = React.lazy(() =>
+  import("@/features/quiz/pages/ProfessorQuizPage").then((m) => ({ default: m.ProfessorQuizPage })),
+);
 
 function PageLoader() {
   return (
@@ -72,10 +78,18 @@ export default function AppRouter() {
             }
           />
           <Route
-            path="/quiz/results/:id"
+            path="/quiz/manage"
             element={
               <Suspense fallback={<PageLoader />}>
-                <Quiz />
+                <ProfessorQuizPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/quiz/:id"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <QuizAttempt />
               </Suspense>
             }
           />

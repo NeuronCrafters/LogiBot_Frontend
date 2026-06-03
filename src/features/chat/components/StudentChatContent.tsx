@@ -2,7 +2,7 @@
 import { logger } from "@/shared/lib/logger";
 import { User } from "@/app/providers/AuthContext";
 import { ChatInput } from "@/features/chat/components/ChatInput";
-import { useQuizFlow } from "@/features/quiz/hooks/useQuizFlow";
+import { useChatFlow } from "@/features/chat/hooks/useChatFlow";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { MarkdownMessageBubble } from "./MarkdownMessageBubble";
@@ -28,7 +28,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     setMessages,
     setMode,
     setSessionId,
-  } = useQuizFlow({ userId });
+  } = useChatFlow({ userId });
 
   useEffect(() => {
     if (!sessionIdFromUrl) handleInitialChoice("chat");

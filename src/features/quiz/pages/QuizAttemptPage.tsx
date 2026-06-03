@@ -1,0 +1,338 @@
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  ArrowLeft,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  XCircle,
+} from "lucide-react";
+import { studentQuizApi } from "@/features/quiz/api/quizApi";
+import { QUIZ_TOPICS } from "@/features/quiz/types";
+import type { AttemptDetail, QuizAttemptResult } from "@/features/quiz/types";
+import { toast } from "@/shared/lib/toast";
+
+const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
+  QUIZ_TOPICS.map((t) => [t.value, t.label]),
+);
+
+const LETTERS = ["A", "B", "C", "D", "E"] as const;
+
+// ── Result view ────────────────────────────────────────────────────────────────
+
+function ResultView({
+  result,
+  onRetry,
+  onBack,
+}: {
+  result: QuizAttemptResult;
+  onRetry: () => void;
+  onBack: () => void;
+}) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const pct = Math.round((result.score / result.totalQuestions) * 100);
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="flex flex-col items-center gap-1 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 py-6">
+          <span className="font-[Poppins] text-4xl font-bold text-white">
+            {pct}%
+          </span>
+          <span className="font-[Poppins] text-xs text-indigo-300">
+            Aproveitamento
+          </span>
+        </div>
+        <div className="flex flex-col items-center gap-1 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 py-6">
+          <span className="font-[Poppins] text-4xl font-bold text-emerald-400">
+            {result.score}
+          </span>
+          <span className="font-[Poppins] text-xs text-emerald-400">Acertos</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 rounded-2xl border border-red-500/20 bg-red-500/10 py-6">
+          <span className="font-[Poppins] text-4xl font-bold text-red-400">
+            {result.totalQuestions - result.score}
+          </span>
+          <span className="font-[Poppins] text-xs text-red-400">Erros</span>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {result.detalhes.map((detail: AttemptDetail, i) => (
+          <div
+            key={i}
+            className={`overflow-hidden rounded-xl border ${
+              detail.isCorrect
+                ? "border-emerald-500/20 bg-emerald-500/5"
+                : "border-red-500/20 bg-red-500/5"
+            }`}
+          >
+            <button
+              onClick={() => setOpenIndex(openIndex === i ? null : i)}
+              className="flex w-full items-center gap-3 p-4 text-left"
+            >
+              <div className="shrink-0">
+                {detail.isCorrect ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-400" />
+                )}
+              </div>
+              <span className="flex-1 font-[Poppins] text-sm text-white">
+                {i + 1}. {detail.question}
+              </span>
+              {openIndex === i ? (
+                <ChevronUp className="h-4 w-4 shrink-0 text-zinc-500" />
+              ) : (
+                <ChevronDown className="h-4 w-4 shrink-0 text-zinc-500" />
+              )}
+            </button>
+
+            {openIndex === i && (
+              <div className="space-y-2 border-t border-white/5 px-4 pb-4 pt-3">
+                {!detail.isCorrect && (
+                  <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
+                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+                    <div>
+                      <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-red-400">
+                        Sua resposta ({detail.selected})
+                      </p>
+                      <p className="mt-0.5 font-[Poppins] text-sm text-zinc-300">
+                        {detail.selectedText}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                  <div>
+                    <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-emerald-400">
+                      Resposta correta ({detail.correct})
+                    </p>
+                    <p className="mt-0.5 font-[Poppins] text-sm text-zinc-300">
+                      {detail.correctText}
+                    </p>
+                  </div>
+                </div>
+                {detail.explanation && (
+                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                    <p className="font-[Poppins] text-xs leading-relaxed text-zinc-400">
+                      {detail.explanation}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+        <button
+          onClick={onRetry}
+          className="h-11 flex-1 rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+        >
+          Tentar novamente
+        </button>
+        <button
+          onClick={onBack}
+          className="h-11 flex-1 rounded-lg border border-white/10 bg-white/5 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          Voltar aos quizzes
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ──────────────────────────────────────────────────────────────────
+
+export function QuizAttempt() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [result, setResult] = useState<QuizAttemptResult | null>(null);
+
+  const {
+    data: quiz,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["quizDetail", id],
+    queryFn: () => studentQuizApi.getQuiz(id!),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const submitMutation = useMutation({
+    mutationFn: () => studentQuizApi.submitAttempt(id!, answers),
+    onSuccess: (data) => {
+      setResult(data);
+      queryClient.invalidateQueries({ queryKey: ["studentQuizHub"] });
+    },
+    onError: () => toast.error("Erro ao enviar respostas. Tente novamente."),
+  });
+
+  const handleSelect = (questionId: string, letter: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: letter }));
+  };
+
+  const handleRetry = () => {
+    setAnswers({});
+    setResult(null);
+  };
+
+  const allAnswered = quiz
+    ? Object.keys(answers).length === quiz.questions.length
+    : false;
+
+  if (isLoading) {
+    return (
+      <main className="flex flex-1 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+      </main>
+    );
+  }
+
+  if (error || !quiz) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
+        <AlertCircle className="h-10 w-10 text-red-400" />
+        <p className="font-[Poppins] text-sm text-zinc-400">
+          Quiz não encontrado.
+        </p>
+        <button
+          onClick={() => navigate("/quiz")}
+          className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-[Poppins] text-sm text-zinc-300 hover:bg-white/10"
+        >
+          Voltar
+        </button>
+      </main>
+    );
+  }
+
+  return (
+    <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
+        {/* Header */}
+        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+                <Brain className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="font-[Poppins] text-xl font-semibold text-white">
+                  {quiz.title}
+                </h1>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-xs text-indigo-400">
+                    <BookOpen className="h-3 w-3" />
+                    {quiz.disciplineName}
+                  </span>
+                  <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-xs text-zinc-500">
+                    {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
+                  </span>
+                </div>
+                {quiz.description && (
+                  <p className="mt-2 font-[Poppins] text-xs leading-relaxed text-zinc-500">
+                    {quiz.description}
+                  </p>
+                )}
+              </div>
+            </div>
+            {!result && (
+              <button
+                onClick={() => navigate("/quiz")}
+                className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </button>
+            )}
+          </div>
+        </section>
+
+        {/* Content */}
+        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+          {result ? (
+            <ResultView
+              result={result}
+              onRetry={handleRetry}
+              onBack={() => navigate("/quiz")}
+            />
+          ) : (
+            <div className="space-y-6">
+              {quiz.questions.map((q, qi) => (
+                <div key={q.id} className="space-y-3">
+                  <p className="font-[Poppins] text-sm font-medium text-white">
+                    <span className="mr-2 font-semibold text-indigo-400">
+                      {qi + 1}.
+                    </span>
+                    {q.question}
+                  </p>
+                  <div className="space-y-2">
+                    {q.options.map((opt, oi) => {
+                      const letter = LETTERS[oi];
+                      const selected = answers[q.id] === letter;
+                      return (
+                        <button
+                          key={oi}
+                          onClick={() => handleSelect(q.id, letter)}
+                          className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+                            selected
+                              ? "border-indigo-500/50 bg-indigo-500/15 text-white"
+                              : "border-white/10 bg-neutral-950/60 text-zinc-300 hover:border-white/20 hover:bg-white/5"
+                          }`}
+                        >
+                          <span
+                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-[Poppins] text-[10px] font-bold ${
+                              selected
+                                ? "border-indigo-400 bg-indigo-500 text-white"
+                                : "border-white/20 bg-white/5 text-zinc-500"
+                            }`}
+                          >
+                            {letter}
+                          </span>
+                          <span className="font-[Poppins] text-sm leading-relaxed">
+                            {opt}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              <div className="border-t border-white/5 pt-4">
+                <p className="mb-3 font-[Poppins] text-xs text-zinc-600">
+                  {Object.keys(answers).length}/{quiz.questions.length} questões respondidas
+                </p>
+                <button
+                  onClick={() => submitMutation.mutate()}
+                  disabled={!allAnswered || submitMutation.isPending}
+                  className="h-11 w-full rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {submitMutation.isPending ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Enviando...
+                    </span>
+                  ) : (
+                    "Enviar respostas"
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}

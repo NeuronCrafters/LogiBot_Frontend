@@ -66,6 +66,12 @@ function buildStaffSections(role: Role): NavSection[] {
       icon: <PieChart className="w-4 h-4" />,
       label: "Dashboard",
     });
+  if (["teacher", "course-coordinator", "admin"].includes(role))
+    gestao.push({
+      path: "/quiz/manage",
+      icon: <Brain className="w-4 h-4" />,
+      label: "Quizzes",
+    });
   if (["admin", "course-coordinator"].includes(role))
     gestao.push({
       path: "/entities/manage",
