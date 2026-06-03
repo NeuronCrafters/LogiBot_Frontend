@@ -40,6 +40,16 @@ export const professorQuizApi = {
     await api.delete(`/quiz/professor/${id}`, { withCredentials: true });
   },
 
+  async publishQuiz(id: string): Promise<ProfessorQuiz> {
+    const res = await api.post(`/quiz/professor/${id}/publish`, {}, { withCredentials: true });
+    return res.data;
+  },
+
+  async unpublishQuiz(id: string): Promise<ProfessorQuiz> {
+    const res = await api.post(`/quiz/professor/${id}/unpublish`, {}, { withCredentials: true });
+    return res.data;
+  },
+
   async getQuestions(quizId: string): Promise<QuizQuestionWithAnswer[]> {
     const res = await api.get(`/quiz/professor/${quizId}/questions`, { withCredentials: true });
     return res.data;

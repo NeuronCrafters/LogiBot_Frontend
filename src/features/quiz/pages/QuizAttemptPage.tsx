@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
   BookOpen,
   Brain,
   CheckCircle2,
@@ -158,6 +159,7 @@ export function QuizAttempt() {
   const queryClient = useQueryClient();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const {
     data: quiz,
@@ -186,11 +188,11 @@ export function QuizAttempt() {
   const handleRetry = () => {
     setAnswers({});
     setResult(null);
+    setCurrentIndex(0);
   };
 
-  const allAnswered = quiz
-    ? Object.keys(answers).length === quiz.questions.length
-    : false;
+  // Reset index when quiz loads
+  useEffect(() => { setCurrentIndex(0); }, [id]);
 
   if (isLoading) {
     return (
@@ -267,20 +269,42 @@ export function QuizAttempt() {
               onRetry={handleRetry}
               onBack={() => navigate("/quiz")}
             />
-          ) : (
-            <div className="space-y-6">
-              {quiz.questions.map((q, qi) => (
-                <div key={q.id} className="space-y-3">
-                  <p className="font-[Poppins] text-sm font-medium text-white">
-                    <span className="mr-2 font-semibold text-indigo-400">
-                      {qi + 1}.
+          ) : (() => {
+            const total = quiz.questions.length;
+            const q = quiz.questions[currentIndex];
+            const isLast = currentIndex === total - 1;
+            const currentAnswer = answers[q.id];
+            const answered = !!currentAnswer;
+
+            return (
+              <div className="space-y-5">
+                {/* Progress */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-[Poppins] text-xs text-zinc-500">
+                      Questão {currentIndex + 1} de {total}
                     </span>
+                    <span className="font-[Poppins] text-xs text-zinc-600">
+                      {Object.keys(answers).length}/{total} respondidas
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                    <div
+                      className="h-full rounded-full bg-indigo-500 transition-all duration-300"
+                      style={{ width: `${((currentIndex + 1) / total) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Question */}
+                <div className="space-y-3">
+                  <p className="font-[Poppins] text-base font-medium leading-relaxed text-white">
                     {q.question}
                   </p>
                   <div className="space-y-2">
                     {q.options.map((opt, oi) => {
                       const letter = LETTERS[oi];
-                      const selected = answers[q.id] === letter;
+                      const selected = currentAnswer === letter;
                       return (
                         <button
                           key={oi}
@@ -292,7 +316,7 @@ export function QuizAttempt() {
                           }`}
                         >
                           <span
-                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-[Poppins] text-[10px] font-bold ${
+                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-[Poppins] text-[10px] font-bold transition-colors ${
                               selected
                                 ? "border-indigo-400 bg-indigo-500 text-white"
                                 : "border-white/20 bg-white/5 text-zinc-500"
@@ -308,29 +332,63 @@ export function QuizAttempt() {
                     })}
                   </div>
                 </div>
-              ))}
 
-              <div className="border-t border-white/5 pt-4">
-                <p className="mb-3 font-[Poppins] text-xs text-zinc-600">
-                  {Object.keys(answers).length}/{quiz.questions.length} questões respondidas
-                </p>
-                <button
-                  onClick={() => submitMutation.mutate()}
-                  disabled={!allAnswered || submitMutation.isPending}
-                  className="h-11 w-full rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {submitMutation.isPending ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Enviando...
-                    </span>
+                {/* Navigation */}
+                <div className="flex items-center gap-3 border-t border-white/5 pt-4">
+                  <button
+                    onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+                    disabled={currentIndex === 0}
+                    className="flex h-10 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-4 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Anterior
+                  </button>
+
+                  <div className="flex flex-1 justify-center gap-1">
+                    {quiz.questions.map((_, qi) => (
+                      <button
+                        key={qi}
+                        onClick={() => setCurrentIndex(qi)}
+                        className={`h-2 rounded-full transition-all ${
+                          qi === currentIndex
+                            ? "w-5 bg-indigo-500"
+                            : answers[quiz.questions[qi].id]
+                              ? "w-2 bg-indigo-400/40"
+                              : "w-2 bg-white/10"
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {isLast ? (
+                    <button
+                      onClick={() => submitMutation.mutate()}
+                      disabled={!answered || submitMutation.isPending}
+                      className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {submitMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          Finalizar
+                          <CheckCircle2 className="h-4 w-4" />
+                        </>
+                      )}
+                    </button>
                   ) : (
-                    "Enviar respostas"
+                    <button
+                      onClick={() => setCurrentIndex((i) => Math.min(total - 1, i + 1))}
+                      disabled={!answered}
+                      className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Próxima
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
                   )}
-                </button>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </section>
       </div>
     </main>

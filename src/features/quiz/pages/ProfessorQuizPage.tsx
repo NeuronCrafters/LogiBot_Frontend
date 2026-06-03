@@ -8,9 +8,11 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  EyeOff,
   Loader2,
   Pencil,
   Plus,
+  Send,
   Trash2,
   Users,
   X,
@@ -597,26 +599,50 @@ function QuizCard({
   onEdit,
   onDelete,
   onViewResults,
+  onPublish,
+  onUnpublish,
   isExpanded,
   onToggleExpand,
+  isPublishing,
 }: {
   quiz: ProfessorQuiz;
   onEdit: () => void;
   onDelete: () => void;
   onViewResults: () => void;
+  onPublish: () => void;
+  onUnpublish: () => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
+  isPublishing: boolean;
 }) {
+  const isDraft = quiz.status === "draft";
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-md shadow-black/10 transition-colors hover:border-white/20">
+    <div
+      className={`overflow-hidden rounded-2xl border bg-[#1f1f1f] shadow-md shadow-black/10 transition-colors hover:border-white/20 ${
+        isDraft ? "border-white/10" : "border-emerald-500/20"
+      }`}
+    >
       <div className="flex items-start gap-3 p-5">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
           <Brain className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-[Poppins] text-sm font-semibold leading-snug text-white">
-            {quiz.title}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-[Poppins] text-sm font-semibold leading-snug text-white">
+              {quiz.title}
+            </p>
+            {isDraft ? (
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-amber-400">
+                Rascunho
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-emerald-400">
+                <CheckCircle2 className="h-3 w-3" />
+                Publicado
+              </span>
+            )}
+          </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-indigo-400">
               <BookOpen className="h-3 w-3" />
@@ -658,6 +684,37 @@ function QuizCard({
           <Pencil className="h-3 w-3" />
           Editar
         </button>
+
+        {/* Publish / unpublish */}
+        {isDraft ? (
+          <button
+            onClick={onPublish}
+            disabled={isPublishing || quiz.questionCount === 0}
+            title={quiz.questionCount === 0 ? "Adicione ao menos uma pergunta" : undefined}
+            className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 font-[Poppins] text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {isPublishing ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Send className="h-3 w-3" />
+            )}
+            Publicar
+          </button>
+        ) : (
+          <button
+            onClick={onUnpublish}
+            disabled={isPublishing}
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-400 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40"
+          >
+            {isPublishing ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <EyeOff className="h-3 w-3" />
+            )}
+            Despublicar
+          </button>
+        )}
+
         <button
           onClick={onDelete}
           className="ml-auto flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-1.5 text-zinc-600 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
@@ -758,6 +815,25 @@ export function ProfessorQuizPage() {
     onError: () => toast.error("Erro ao excluir quiz."),
   });
 
+  const publishMutation = useMutation({
+    mutationFn: (id: string) => professorQuizApi.publishQuiz(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
+      toast.success("Quiz publicado! Os alunos já podem respondê-lo.");
+    },
+    onError: (err: any) =>
+      toast.error(err?.response?.data?.message ?? "Erro ao publicar quiz."),
+  });
+
+  const unpublishMutation = useMutation({
+    mutationFn: (id: string) => professorQuizApi.unpublishQuiz(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
+      toast.success("Quiz voltou para rascunho.");
+    },
+    onError: () => toast.error("Erro ao despublicar quiz."),
+  });
+
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
@@ -840,9 +916,15 @@ export function ProfessorQuizPage() {
                 onEdit={() => setEditTarget(quiz)}
                 onDelete={() => setDeleteTarget(quiz)}
                 onViewResults={() => setResultsQuizId(quiz.id)}
+                onPublish={() => publishMutation.mutate(quiz.id)}
+                onUnpublish={() => unpublishMutation.mutate(quiz.id)}
                 isExpanded={expandedId === quiz.id}
                 onToggleExpand={() =>
                   setExpandedId((prev) => (prev === quiz.id ? null : quiz.id))
+                }
+                isPublishing={
+                  (publishMutation.isPending || unpublishMutation.isPending) &&
+                  (publishMutation.variables === quiz.id || unpublishMutation.variables === quiz.id)
                 }
               />
             ))}

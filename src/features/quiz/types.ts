@@ -8,6 +8,8 @@ export const QUIZ_TOPICS = [
 
 export type QuizTopic = (typeof QUIZ_TOPICS)[number]["value"];
 
+export type QuizStatus = "draft" | "published";
+
 export interface ProfessorQuiz {
   id: string;
   title: string;
@@ -16,6 +18,7 @@ export interface ProfessorQuiz {
   disciplineId: string;
   disciplineName: string;
   questionCount: number;
+  status: QuizStatus;
   createdAt: string;
 }
 
