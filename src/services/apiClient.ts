@@ -1,15 +1,16 @@
-import { api } from "@/services/api/api";
+﻿import { api } from "@/shared/api/httpClient";
 import {
   ACADEMIC_ROUTES,
+  CLASS_DISCIPLINE_ROUTES,
+  DISCIPLINE_PROFESSOR_ROUTES,
   RASA_ROUTES,
   ADMIN_ROUTES,
   PROFESSOR_ROUTES,
   COORDINATOR_ROUTES,
   LOG_ROUTES,
   AcademicEntityType,
-
 } from "./api/api_routes";
-import { academicFiltersApi } from "./api/api_academicFilters";
+import { academicFiltersApi } from "@/features/academic/api/academicFiltersApi";
 
 const getRequest = async <T>(url: string): Promise<T> => {
   const response = await api.get<T>(url, { withCredentials: true });
@@ -37,8 +38,14 @@ export const academicApi = {
     return postRequest<T>(url, data);
   },
   async get<T>(entity: AcademicEntityType, id?: string): Promise<T> {
-    const base = ACADEMIC_ROUTES[entity].get;
-    const url = id ? `${base}/${id}` : base;
+    let url = ACADEMIC_ROUTES[entity].get;
+    if (entity === "course" && id) {
+      url = `/academic/universities/${id}/courses`;
+    } else if (entity === "class" && id) {
+      url = `/academic/courses/${id}/classes`;
+    } else if (id) {
+      url = `${url}/${id}`;
+    }
     return getRequest<T>(url);
   },
   async delete<T>(entity: AcademicEntityType, id: string): Promise<T> {
@@ -46,6 +53,49 @@ export const academicApi = {
     const url = `${base}/${id}`;
     return deleteRequest<T>(url);
   },
+  async update<T>(
+    entity: AcademicEntityType,
+    id: string,
+    data: object,
+  ): Promise<T> {
+    const base = ACADEMIC_ROUTES[entity].patch;
+    const url = `${base}/${id}`;
+    return patchRequest<T>(url, data);
+  },
+  attachProfessorToDiscipline: <T>(disciplineId: string, professorId: string) =>
+    postRequest<T>(
+      DISCIPLINE_PROFESSOR_ROUTES.attach.replace(":disciplineId", disciplineId),
+      { professorId },
+    ),
+  detachProfessorFromDiscipline: <T>(
+    disciplineId: string,
+    professorId: string,
+  ) =>
+    deleteRequest<T>(
+      DISCIPLINE_PROFESSOR_ROUTES.detach
+        .replace(":disciplineId", disciplineId)
+        .replace(":professorId", professorId),
+    ),
+  attachDisciplineToClass: <T>(classId: string, disciplineId: string) =>
+    postRequest<T>(
+      CLASS_DISCIPLINE_ROUTES.attach.replace(":classId", classId),
+      { disciplineId },
+    ),
+  detachDisciplineFromClass: <T>(classId: string, disciplineId: string) =>
+    deleteRequest<T>(
+      CLASS_DISCIPLINE_ROUTES.detach
+        .replace(":classId", classId)
+        .replace(":disciplineId", disciplineId),
+    ),
+  regenerateClassRegistrationCode: <T>(classId: string) =>
+    patchRequest<T>(
+      CLASS_DISCIPLINE_ROUTES.regenerateCode.replace(":classId", classId),
+      {},
+    ),
+  enrollStudentInClass: (classId: string, studentId: string) =>
+    postRequest(`/academic/classes/${classId}/students`, { studentId }),
+  removeStudentFromClass: (classId: string, studentId: string) =>
+    deleteRequest(`/academic/classes/${classId}/students/${studentId}`),
 };
 
 export { academicFiltersApi };
@@ -56,40 +106,47 @@ export const adminApi = {
 
   deleteProfessor: <T>(professorId: string) =>
     deleteRequest<T>(
-      ADMIN_ROUTES.deleteProfessor.replace(":professorId", professorId)
+      ADMIN_ROUTES.deleteProfessor.replace(":professorId", professorId),
+    ),
+
+  updateProfessor: <T>(professorId: string, data: object) =>
+    patchRequest<T>(
+      ADMIN_ROUTES.updateProfessor.replace(":professorId", professorId),
+      data,
     ),
 
   listAllProfessors: <T>() => getRequest<T>(ADMIN_ROUTES.listAllProfessors),
 
   listProfessorsByUniversity: <T>(schoolId: string) =>
     getRequest<T>(
-      ADMIN_ROUTES.listProfessorsByUniversity.replace(
-        ":schoolId",
-        schoolId
-      )
+      ADMIN_ROUTES.listProfessorsByUniversity.replace(":schoolId", schoolId),
     ),
 
   listProfessorsByCourse: <T>(courseId: string) =>
     getRequest<T>(
-      ADMIN_ROUTES.listProfessorsByCourse.replace(":courseId", courseId)
+      ADMIN_ROUTES.listProfessorsByCourse.replace(":courseId", courseId),
     ),
 
   updateProfessorRole: <T>(id: string, action: "add" | "remove") =>
-    patchRequest<T>(
-      ADMIN_ROUTES.updateProfessorRole.replace(":id", id),
-      { action }
-    ),
+    patchRequest<T>(ADMIN_ROUTES.updateProfessorRole.replace(":id", id), {
+      action,
+    }),
 
   listStudents: <T>() => getRequest<T>(ADMIN_ROUTES.listStudents),
 
   listStudentsByClass: (
     classId: string,
     courseId?: string,
-    disciplineId?: string
-  ): Promise<Array<{
-    id: any;
-    code: any; _id: string; name: string; email: string
-  }>> => {
+    disciplineId?: string,
+  ): Promise<
+    Array<{
+      id: any;
+      code: any;
+      _id: string;
+      name: string;
+      email: string;
+    }>
+  > => {
     const base = ADMIN_ROUTES.listStudentsByClass.replace(":classId", classId);
 
     const params = new URLSearchParams();
@@ -104,7 +161,9 @@ export const adminApi = {
   },
 
   deleteStudent: <T>(studentId: string): Promise<T> =>
-    deleteRequest<T>(`${ADMIN_ROUTES.deleteStudent}?studentId=${studentId}`),
+    deleteRequest<T>(
+      ADMIN_ROUTES.deleteStudent.replace(":studentId", studentId),
+    ),
 };
 
 export const professorApi = {
@@ -112,23 +171,19 @@ export const professorApi = {
 };
 
 export const coordinatorApi = {
-  listMyProfessors: <T>() =>
-    getRequest<T>(COORDINATOR_ROUTES.listMyProfessors),
+  listMyProfessors: <T>() => getRequest<T>(COORDINATOR_ROUTES.listMyProfessors),
 
-  listMyStudents: <T>() =>
-    getRequest<T>(COORDINATOR_ROUTES.listMyStudents),
+  listMyStudents: <T>() => getRequest<T>(COORDINATOR_ROUTES.listMyStudents),
 
   listStudentsByDiscipline: <T>(disciplineId: string) =>
     getRequest<T>(
       COORDINATOR_ROUTES.listStudentsByDiscipline.replace(
         ":disciplineId",
-        disciplineId
-      )
+        disciplineId,
+      ),
     ),
-  listDisciplines: <T>() =>
-    getRequest<T>(COORDINATOR_ROUTES.listDisciplines),
-  listClasses: <T>() =>
-    getRequest<T>(COORDINATOR_ROUTES.listClasses),
+  listDisciplines: <T>() => getRequest<T>(COORDINATOR_ROUTES.listDisciplines),
+  listClasses: <T>() => getRequest<T>(COORDINATOR_ROUTES.listClasses),
 };
 
 export const rasaApi = {
@@ -186,8 +241,7 @@ export const logApi = {
   getClassAccuracy: <T>(id: string) =>
     getRequest<T>(LOG_ROUTES.class.accuracy(id)),
 
-  getClassUsage: <T>(id: string) =>
-    getRequest<T>(LOG_ROUTES.class.usage(id)),
+  getClassUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.class.usage(id)),
 
   getClassSubjects: <T>(id: string) =>
     getRequest<T>(LOG_ROUTES.class.subjects(id)),
@@ -195,8 +249,7 @@ export const logApi = {
   getCourseAccuracy: <T>(id: string) =>
     getRequest<T>(LOG_ROUTES.course.accuracy(id)),
 
-  getCourseUsage: <T>(id: string) =>
-    getRequest<T>(LOG_ROUTES.course.usage(id)),
+  getCourseUsage: <T>(id: string) => getRequest<T>(LOG_ROUTES.course.usage(id)),
 
   getCourseSubjects: <T>(id: string) =>
     getRequest<T>(LOG_ROUTES.course.subjects(id)),
@@ -227,5 +280,5 @@ export default {
   professorApi,
   coordinatorApi,
   rasaApi,
-  logApi
+  logApi,
 };

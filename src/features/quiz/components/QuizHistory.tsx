@@ -1,0 +1,115 @@
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { AlertCircle, Brain, GraduationCap, Loader2, Plus } from "lucide-react";
+import { quizHistoryApi } from "@/features/quiz/api/quizApi";
+import { QUIZ_TOPICS } from "@/features/quiz/types";
+import { formatRelativeTime } from "@/shared/lib/formatDate";
+import { Button } from "@/components/ui/button";
+
+const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
+  QUIZ_TOPICS.map((t) => [t.value, t.label]),
+);
+
+interface QuizHistoryProps {
+  userId: string;
+  closeMenu?: () => void;
+}
+
+export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
+  const navigate = useNavigate();
+
+  const { data: quizzes = [], isLoading, isError } = useQuery({
+    queryKey: ["quizHistory", userId],
+    queryFn: () => quizHistoryApi.getHistory(userId),
+    staleTime: 2 * 60 * 1000,
+    enabled: !!userId,
+  });
+
+  const handleSelect = (quizId: string) => {
+    navigate(`/quiz/${quizId}`);
+    closeMenu?.();
+  };
+
+  const handleNewQuiz = () => {
+    navigate("/quiz");
+    closeMenu?.();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-40 flex-col items-center justify-center gap-2">
+        <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+        <span className="font-[Poppins] text-xs text-zinc-500">
+          Carregando histórico...
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-full flex-col gap-1">
+      <Button
+        onClick={handleNewQuiz}
+        className="mb-1 h-9 w-full gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600 font-[Poppins] text-xs font-medium text-white transition-colors hover:bg-indigo-500"
+      >
+        <Plus size={14} />
+        Ver quizzes
+      </Button>
+
+      {isError ? (
+        <div className="flex h-32 flex-col items-center justify-center gap-2 px-4 text-center">
+          <AlertCircle className="h-5 w-5 text-red-500" />
+          <span className="font-[Poppins] text-xs text-zinc-500">
+            Erro ao carregar histórico.
+          </span>
+        </div>
+      ) : quizzes.length === 0 ? (
+        <div className="flex h-32 flex-col items-center justify-center gap-2 px-4 text-center">
+          <Brain className="h-5 w-5 text-zinc-700" />
+          <span className="font-[Poppins] text-xs text-zinc-500">
+            Nenhum quiz respondido.
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-0.5">
+          {quizzes.map((quiz, index) => (
+            <div
+              key={`${quiz.quizId}-${index}`}
+              onClick={() => handleSelect(quiz.quizId)}
+              className="group flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-white/5"
+            >
+              <GraduationCap
+                size={14}
+                className="mt-0.5 shrink-0 text-indigo-400"
+              />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate font-[Poppins] text-xs leading-snug text-zinc-300 transition-colors group-hover:text-white">
+                  {quiz.title || "Quiz"}
+                </span>
+                <div className="flex items-center gap-2 leading-snug">
+                  <span className="font-[Poppins] text-[10px] text-zinc-600">
+                    {quiz.disciplineName}
+                  </span>
+                  <span className="font-[Poppins] text-[10px] text-zinc-700">
+                    ·
+                  </span>
+                  <span className="font-[Poppins] text-[10px] text-zinc-600">
+                    {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 leading-snug">
+                  <span className="font-[Poppins] text-[11px] text-zinc-600">
+                    {formatRelativeTime(new Date(quiz.completedAt))}
+                  </span>
+                  <span className="font-[Poppins] text-[11px] font-semibold text-emerald-400">
+                    {quiz.score}/{quiz.totalQuestions}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
