@@ -23,7 +23,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     mode,
     inputText,
     setInputText,
-    handleInitialChoice,
     sendMessage,
     setMessages,
     setMode,
