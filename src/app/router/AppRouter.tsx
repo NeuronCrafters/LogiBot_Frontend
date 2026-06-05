@@ -45,6 +45,9 @@ const ProfessorQuizPage = React.lazy(() =>
 const RagManagementPage = React.lazy(() =>
   import("@/features/rag/pages/RagManagementPage").then((m) => ({ default: m.RagManagementPage })),
 );
+const FeedbackManagement = React.lazy(() =>
+  import("@/features/feedback/pages/FeedbackManagementPage").then((m) => ({ default: m.FeedbackManagementPage })),
+);
 
 function PageLoader() {
   return (
@@ -165,6 +168,14 @@ export default function AppRouter() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <Feedback />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/feedbacks"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <FeedbackManagement />
               </Suspense>
             }
           />

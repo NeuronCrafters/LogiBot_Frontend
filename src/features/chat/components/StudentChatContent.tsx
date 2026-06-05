@@ -3,6 +3,7 @@ import { logger } from "@/shared/lib/logger";
 import { User } from "@/app/providers/AuthContext";
 import { ChatInput } from "@/features/chat/components/ChatInput";
 import { useChatFlow } from "@/features/chat/hooks/useChatFlow";
+import { useChatHistory } from "@/features/chat/hooks/useChatHistory";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { MarkdownMessageBubble } from "./MarkdownMessageBubble";
@@ -30,6 +31,8 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     sessionId,
   } = useChatFlow({ userId });
 
+  const { addSessionToCache } = useChatHistory({ userId });
+
   useEffect(() => {
     if (!sessionIdFromUrl) {
       setMessages([]);
@@ -39,9 +42,15 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   }, [sessionIdFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (sessionId && !sessionIdFromUrl) {
-      setSearchParams({ session: sessionId }, { replace: true });
-    }
+    if (!sessionId) return;
+    if (sessionIdFromUrl) return; // existing session loaded from URL, not new
+
+    setSearchParams({ session: sessionId }, { replace: true });
+
+    const firstUserMsg = messages.find((m) => m.sender === "user");
+    const rawTitle = firstUserMsg?.text.trim().replace(/\s+/g, " ") ?? "";
+    const title = rawTitle.length > 55 ? `${rawTitle.slice(0, 55).trimEnd()}...` : rawTitle || "Nova Conversa";
+    addSessionToCache({ sessionId, title, lastActivityAt: new Date().toISOString() });
   }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
