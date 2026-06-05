@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { chatApi } from "@/features/chat/api/chatApi";
+import { chatApi, type RetrievedChunk } from "@/features/chat/api/chatApi";
 import { logger } from "@/shared/lib/logger";
 
 export type ChatMessage = {
@@ -7,6 +7,7 @@ export type ChatMessage = {
   text: string;
   sender: "user" | "bot";
   type: "text" | "typing";
+  retrievedChunks?: RetrievedChunk[];
 };
 
 type Mode = "none" | "chat";
@@ -62,6 +63,7 @@ export function useChatFlow({ userId }: UseChatFlowOptions) {
           text: botText,
           sender: "bot",
           type: "text",
+          retrievedChunks: response.retrievedChunks?.length ? response.retrievedChunks : undefined,
         };
 
         setMessages((prev) => prev.filter((m) => m.type !== "typing").concat(botMsg));

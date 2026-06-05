@@ -99,20 +99,17 @@ function SettingsPanel({
     ragMode: RagMode;
     topK: number;
     minScore: number;
-    systemPrompt: string | null;
   }) => void;
 }) {
   const [ragMode, setRagMode] = useState<RagMode>("none");
   const [topK, setTopK] = useState(4);
-  const [minScore, setMinScore] = useState(60);
-  const [systemPrompt, setSystemPrompt] = useState("");
+  const [minScore, setMinScore] = useState(40);
 
   useEffect(() => {
     if (!settings) return;
     setRagMode(settings.ragMode);
     setTopK(settings.topK);
     setMinScore(settings.minScore);
-    setSystemPrompt(settings.systemPrompt ?? "");
   }, [settings]);
 
   const canSave = Boolean(settings) && !isSaving;
@@ -177,17 +174,6 @@ function SettingsPanel({
         </div>
       </div>
 
-      <div>
-        <label className={labelCls}>Prompt do sistema</label>
-        <textarea
-          value={systemPrompt}
-          onChange={(event) => setSystemPrompt(event.target.value)}
-          rows={5}
-          placeholder="Instrucao adicional para este chat..."
-          className={textareaCls}
-        />
-      </div>
-
       <button
         type="button"
         disabled={!canSave}
@@ -196,7 +182,6 @@ function SettingsPanel({
             ragMode,
             topK,
             minScore,
-            systemPrompt: systemPrompt.trim() || null,
           })
         }
         className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -493,7 +478,6 @@ export function RagManagementPage() {
               ragMode: settings.ragMode,
               topK: settings.topK,
               minScore: settings.minScore,
-              systemPrompt: settings.systemPrompt,
             }
           : undefined,
       }),

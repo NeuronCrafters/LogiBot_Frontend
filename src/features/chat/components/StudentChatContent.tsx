@@ -169,6 +169,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                   key={msg.id || index}
                   text={msg.text}
                   sender={msg.sender as "user" | "bot"}
+                  retrievedChunks={msg.retrievedChunks}
                 />
               ),
             )}
