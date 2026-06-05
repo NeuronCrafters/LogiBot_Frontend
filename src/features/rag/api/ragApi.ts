@@ -26,7 +26,6 @@ export const ragApi = {
       ragMode: RagMode;
       topK: number;
       minScore: number;
-      systemPrompt: string | null;
     },
   ): Promise<RagSettings> {
     const response = await api.patch<RagSettings>(
