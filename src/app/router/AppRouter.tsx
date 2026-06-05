@@ -42,6 +42,9 @@ const QuizAttempt = React.lazy(() =>
 const ProfessorQuizPage = React.lazy(() =>
   import("@/features/quiz/pages/ProfessorQuizPage").then((m) => ({ default: m.ProfessorQuizPage })),
 );
+const RagManagementPage = React.lazy(() =>
+  import("@/features/rag/pages/RagManagementPage").then((m) => ({ default: m.RagManagementPage })),
+);
 
 function PageLoader() {
   return (
@@ -82,6 +85,14 @@ export default function AppRouter() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <ProfessorQuizPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/rag"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <RagManagementPage />
               </Suspense>
             }
           />

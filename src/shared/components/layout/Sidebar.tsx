@@ -12,6 +12,7 @@ import {
   LogOut,
   X,
   Brain,
+  Database,
   MessageCircle,
   Clock,
 } from "lucide-react";
@@ -71,6 +72,12 @@ function buildStaffSections(role: Role): NavSection[] {
       path: "/quiz/manage",
       icon: <Brain className="w-4 h-4" />,
       label: "Quizzes",
+    });
+  if (["teacher", "course-coordinator", "admin"].includes(role))
+    gestao.push({
+      path: "/rag",
+      icon: <Database className="w-4 h-4" />,
+      label: "Base RAG",
     });
   if (["admin", "course-coordinator"].includes(role))
     gestao.push({
