@@ -15,7 +15,7 @@ interface StudentChatContentProps {
 
 const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   const userId = user?._id || "user";
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const sessionIdFromUrl = searchParams.get("session");
 
   const {
@@ -27,6 +27,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     setMessages,
     setMode,
     setSessionId,
+    sessionId,
   } = useChatFlow({ userId });
 
   useEffect(() => {
@@ -36,6 +37,12 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
       setMode("chat");
     }
   }, [sessionIdFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (sessionId && !sessionIdFromUrl) {
+      setSearchParams({ session: sessionId }, { replace: true });
+    }
+  }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);

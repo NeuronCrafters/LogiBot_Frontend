@@ -94,5 +94,6 @@ export function useChatFlow({ userId }: UseChatFlowOptions) {
     setMessages,
     setMode,
     setSessionId,
+    sessionId,
   };
 }
