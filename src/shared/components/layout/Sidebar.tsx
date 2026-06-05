@@ -166,7 +166,9 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         ? "teacher"
         : "student";
   const isStudent = role === "student";
-  const sections = isStudent ? STUDENT_SECTIONS : buildStaffSections(role);
+  const allSections = isStudent ? STUDENT_SECTIONS : buildStaffSections(role);
+  const contaSection = allSections.find((s) => s.label === "Conta");
+  const sections = allSections.filter((s) => s.label !== "Conta");
 
   const handleLogout = () => {
     logout();
@@ -252,7 +254,22 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
 
       {!isStudent && <div className="flex-1" />}
 
-      <div className="p-3 border-t border-white/5 shrink-0">
+      <div className="px-2 pb-1 pt-3 border-t border-white/5 shrink-0">
+        {contaSection && (
+          <div className="mb-2">
+            <SectionLabel label={contaSection.label} />
+            <div className="space-y-0.5">
+              {contaSection.items.map((item) => (
+                <NavLink
+                  key={item.path}
+                  item={item}
+                  active={location.pathname === item.path}
+                  onClick={onMobileClose}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         <button
           id="header-logout-button"
           onClick={handleLogout}

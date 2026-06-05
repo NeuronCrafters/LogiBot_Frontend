@@ -34,11 +34,26 @@ const inputCls =
 
 /* ── Status badge ── */
 const STATUS_META: Record<string, { label: string; className: string }> = {
-  uploaded: { label: "Na fila", className: "border-blue-500/20 bg-blue-500/10 text-blue-300" },
-  processing: { label: "Processando", className: "border-amber-500/20 bg-amber-500/10 text-amber-300" },
-  ready: { label: "Pronto", className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300" },
-  error: { label: "Erro", className: "border-red-500/20 bg-red-500/10 text-red-300" },
-  deleted: { label: "Removido", className: "border-white/10 bg-white/5 text-zinc-500" },
+  uploaded: {
+    label: "Na fila",
+    className: "border-blue-500/20 bg-blue-500/10 text-blue-300",
+  },
+  processing: {
+    label: "Processando",
+    className: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+  },
+  ready: {
+    label: "Pronto",
+    className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+  },
+  error: {
+    label: "Erro",
+    className: "border-red-500/20 bg-red-500/10 text-red-300",
+  },
+  deleted: {
+    label: "Removido",
+    className: "border-white/10 bg-white/5 text-zinc-500",
+  },
 };
 
 function formatBytes(value: number) {
@@ -60,8 +75,17 @@ function TabBar({
   ragMode?: RagMode;
   onChange: (t: Tab) => void;
 }) {
-  const tabs: { id: Tab; label: string; icon: React.ReactNode; locked?: boolean }[] = [
-    { id: "settings", label: "Configurações", icon: <Settings className="h-4 w-4" /> },
+  const tabs: {
+    id: Tab;
+    label: string;
+    icon: React.ReactNode;
+    locked?: boolean;
+  }[] = [
+    {
+      id: "settings",
+      label: "Configurações",
+      icon: <Settings className="h-4 w-4" />,
+    },
     {
       id: "documents",
       label: "Documentos",
@@ -77,7 +101,7 @@ function TabBar({
   ];
 
   return (
-    <div className="flex gap-1 rounded-2xl border border-white/8 bg-neutral-900 p-1">
+    <div className="flex gap-1 rounded-2xl border border-white/10 bg-neutral-900 p-1">
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -123,10 +147,14 @@ function ModeButton({
           : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/8"
       }`}
     >
-      <span className={`font-[Poppins] text-sm font-semibold ${active ? "text-blue-200" : "text-zinc-300"}`}>
+      <span
+        className={`font-[Poppins] text-sm font-semibold ${active ? "text-blue-200" : "text-zinc-300"}`}
+      >
         {label}
       </span>
-      <span className="font-[Poppins] text-xs text-zinc-500 leading-relaxed">{description}</span>
+      <span className="font-[Poppins] text-xs text-zinc-500 leading-relaxed">
+        {description}
+      </span>
     </button>
   );
 }
@@ -153,9 +181,11 @@ function SettingsTab({
   }, [settings]);
 
   return (
-    <Panel className="space-y-6 max-w-2xl">
+    <Panel className="space-y-6">
       <div>
-        <h2 className="font-[Poppins] text-base font-semibold text-white">Modo RAG</h2>
+        <h2 className="font-[Poppins] text-base font-semibold text-white">
+          Modo RAG
+        </h2>
         <p className="mt-1 font-[Poppins] text-sm text-zinc-500">
           Define como a IA irá recuperar informações dos documentos.
         </p>
@@ -222,7 +252,11 @@ function SettingsTab({
         onClick={() => onSave({ ragMode, topK, minScore })}
         className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        {isSaving ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Save className="h-4 w-4" />
+        )}
         Salvar configurações
       </button>
     </Panel>
@@ -245,17 +279,21 @@ function DocumentRow({
 }) {
   const meta = STATUS_META[document.status] ?? STATUS_META.uploaded;
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-neutral-950/40 p-3 min-w-0">
+    <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-3 min-w-0">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500">
         <FileText className="h-4 w-4" />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate font-[Poppins] text-sm font-medium text-white" title={document.title}>
+        <p
+          className="truncate font-[Poppins] text-sm font-medium text-white"
+          title={document.title}
+        >
           {document.title}
         </p>
         <p className="font-[Poppins] text-xs text-zinc-600 truncate">
-          {document.sourceType.toUpperCase()} · {formatBytes(document.fileSize)} · {new Date(document.createdAt).toLocaleDateString("pt-BR")}
+          {document.sourceType.toUpperCase()} · {formatBytes(document.fileSize)}{" "}
+          · {new Date(document.createdAt).toLocaleDateString("pt-BR")}
         </p>
         {document.errorMessage && (
           <p className="mt-1 line-clamp-1 font-[Poppins] text-xs text-red-400">
@@ -265,7 +303,9 @@ function DocumentRow({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <span className={`hidden sm:inline-flex rounded-full border px-2.5 py-0.5 font-[Poppins] text-xs font-medium ${meta.className}`}>
+        <span
+          className={`hidden sm:inline-flex rounded-full border px-2.5 py-0.5 font-[Poppins] text-xs font-medium ${meta.className}`}
+        >
           {meta.label}
         </span>
         <button
@@ -275,7 +315,11 @@ function DocumentRow({
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           title="Reprocessar"
         >
-          {isReprocessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+          {isReprocessing ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
         </button>
         <button
           type="button"
@@ -284,7 +328,11 @@ function DocumentRow({
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
           title="Remover"
         >
-          {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+          {isDeleting ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Trash2 className="h-3.5 w-3.5" />
+          )}
         </button>
       </div>
     </div>
@@ -337,8 +385,10 @@ function DocumentsTab({
               Documentos desativados
             </p>
             <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
-              Ative o modo <span className="text-blue-400 font-medium">Context</span> ou{" "}
-              <span className="text-blue-400 font-medium">Self</span> na aba de Configurações.
+              Ative o modo{" "}
+              <span className="text-blue-400 font-medium">Context</span> ou{" "}
+              <span className="text-blue-400 font-medium">Self</span> na aba de
+              Configurações.
             </p>
           </div>
         </div>
@@ -347,8 +397,12 @@ function DocumentsTab({
       <Panel className="space-y-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="font-[Poppins] text-base font-semibold text-white">Documentos</h2>
-            <p className="mt-0.5 font-[Poppins] text-sm text-zinc-500">{classLabel}</p>
+            <h2 className="font-[Poppins] text-base font-semibold text-white">
+              Documentos
+            </h2>
+            <p className="mt-0.5 font-[Poppins] text-sm text-zinc-500">
+              {classLabel}
+            </p>
           </div>
           <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 font-[Poppins] text-xs text-zinc-500">
             {documents.length}/30
@@ -358,30 +412,39 @@ function DocumentsTab({
         {/* Upload form */}
         <form
           onSubmit={(e) => { e.preventDefault(); onUpload(); }}
-          className="space-y-3 rounded-xl border border-white/10 bg-neutral-950/30 p-4"
+          className="rounded-xl bg-neutral-950/50 p-4"
         >
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-            <input
-              type="file"
-              accept=".pdf,.txt,.docx"
-              onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
-              className="block w-full cursor-pointer rounded-xl border border-white/10 bg-neutral-950/60 font-[Poppins] text-sm text-zinc-400 file:mr-3 file:h-11 file:border-0 file:bg-white/10 file:px-4 file:font-[Poppins] file:text-sm file:font-semibold file:text-white hover:file:bg-white/15"
-            />
+          <p className="mb-3 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            Novo documento
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <label className="flex h-10 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-xl bg-neutral-800/50 px-4 transition-colors hover:bg-neutral-800/80">
+              <Upload className="h-4 w-4 shrink-0 text-zinc-400" />
+              <span className="truncate font-[Poppins] text-sm text-zinc-400">
+                {uploadFile ? uploadFile.name : "Selecionar arquivo (.pdf, .txt, .docx)"}
+              </span>
+              <input
+                type="file"
+                accept=".pdf,.txt,.docx"
+                onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
+                className="sr-only"
+              />
+            </label>
             <input
               value={uploadTitle}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder="Título (opcional)"
-              className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 sm:w-52"
+              className="h-10 rounded-xl bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:ring-1 focus:ring-blue-500/60 placeholder:text-zinc-600 sm:w-48"
             />
+            <button
+              type="submit"
+              disabled={!uploadFile || isUploading}
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              Enviar
+            </button>
           </div>
-          <button
-            type="submit"
-            disabled={!uploadFile || isUploading}
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Enviar documento
-          </button>
         </form>
 
         {/* Document list */}
@@ -470,7 +533,7 @@ function ChatTab({
   const locked = ragMode === "none";
 
   return (
-    <div className="relative flex h-[600px] flex-col overflow-hidden rounded-2xl border border-white/8 bg-neutral-900">
+    <div className="relative flex h-[600px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-neutral-900">
       {/* Lock overlay */}
       {locked && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-neutral-950/85 backdrop-blur-sm">
@@ -478,20 +541,26 @@ function ChatTab({
             <Lock className="h-6 w-6 text-zinc-400" />
           </div>
           <div className="text-center px-8">
-            <p className="font-[Poppins] text-sm font-semibold text-zinc-200">Chat desativado</p>
+            <p className="font-[Poppins] text-sm font-semibold text-zinc-200">
+              Chat desativado
+            </p>
             <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
-              Ative o modo <span className="text-blue-400 font-medium">Context</span> ou{" "}
-              <span className="text-blue-400 font-medium">Self</span> para testar o RAG.
+              Ative o modo{" "}
+              <span className="text-blue-400 font-medium">Context</span> ou{" "}
+              <span className="text-blue-400 font-medium">Self</span> para
+              testar o RAG.
             </p>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="shrink-0 border-b border-white/8 px-5 py-3">
+      <div className="shrink-0 border-b border-white/10 px-5 py-3">
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-zinc-500" />
-          <span className="font-[Poppins] text-sm font-medium text-zinc-300">Chat de Teste</span>
+          <span className="font-[Poppins] text-sm font-medium text-zinc-300">
+            Chat de Teste
+          </span>
           {settings && (
             <span className="ml-auto rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-500">
               modo: {settings.ragMode}
@@ -549,7 +618,7 @@ function ChatTab({
       </div>
 
       {/* Input */}
-      <div className="shrink-0 border-t border-white/8 p-3">
+      <div className="shrink-0 border-t border-white/10 p-3">
         <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
           <textarea
             ref={textareaRef}
@@ -625,7 +694,9 @@ export function RagManagementPage() {
     mutationFn: (input: Parameters<typeof ragApi.updateSettings>[1]) =>
       ragApi.updateSettings(selectedClassId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ragSettings", selectedClassId] });
+      queryClient.invalidateQueries({
+        queryKey: ["ragSettings", selectedClassId],
+      });
       toast.success("Configuração RAG salva.");
     },
     onError: (error: any) =>
@@ -640,7 +711,9 @@ export function RagManagementPage() {
     onSuccess: () => {
       setUploadFile(null);
       setUploadTitle("");
-      queryClient.invalidateQueries({ queryKey: ["ragDocuments", selectedClassId] });
+      queryClient.invalidateQueries({
+        queryKey: ["ragDocuments", selectedClassId],
+      });
       toast.success("Documento enviado para processamento.");
     },
     onError: (error: any) =>
@@ -650,7 +723,9 @@ export function RagManagementPage() {
   const deleteMutation = useMutation({
     mutationFn: ragApi.deleteDocument,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ragDocuments", selectedClassId] });
+      queryClient.invalidateQueries({
+        queryKey: ["ragDocuments", selectedClassId],
+      });
       toast.success("Documento removido.");
     },
     onError: (error: any) =>
@@ -660,7 +735,9 @@ export function RagManagementPage() {
   const reprocessMutation = useMutation({
     mutationFn: ragApi.reprocessDocument,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ragDocuments", selectedClassId] });
+      queryClient.invalidateQueries({
+        queryKey: ["ragDocuments", selectedClassId],
+      });
       toast.success("Reprocessamento agendado.");
     },
     onError: (error: any) =>
@@ -672,7 +749,11 @@ export function RagManagementPage() {
       ragApi.testChat(selectedClassId, {
         message,
         override: settings
-          ? { ragMode: settings.ragMode, topK: settings.topK, minScore: settings.minScore }
+          ? {
+              ragMode: settings.ragMode,
+              topK: settings.topK,
+              minScore: settings.minScore,
+            }
           : undefined,
       }),
     onSuccess: (result: RagTestChatResponse) => {
@@ -732,7 +813,9 @@ export function RagManagementPage() {
               ))}
             </select>
           ) : (
-            <p className="font-[Poppins] text-sm text-zinc-500">Nenhuma turma disponível.</p>
+            <p className="font-[Poppins] text-sm text-zinc-500">
+              Nenhuma turma disponível.
+            </p>
           )}
         </Panel>
 
@@ -766,8 +849,16 @@ export function RagManagementPage() {
                 onUpload={() => uploadMutation.mutate()}
                 onDelete={(id) => deleteMutation.mutate(id)}
                 onReprocess={(id) => reprocessMutation.mutate(id)}
-                deletingId={deleteMutation.isPending ? (deleteMutation.variables as string) : undefined}
-                reprocessingId={reprocessMutation.isPending ? (reprocessMutation.variables as string) : undefined}
+                deletingId={
+                  deleteMutation.isPending
+                    ? (deleteMutation.variables as string)
+                    : undefined
+                }
+                reprocessingId={
+                  reprocessMutation.isPending
+                    ? (reprocessMutation.variables as string)
+                    : undefined
+                }
               />
             )}
 

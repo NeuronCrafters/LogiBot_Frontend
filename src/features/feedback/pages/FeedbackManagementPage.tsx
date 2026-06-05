@@ -1,7 +1,10 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { feedbackApi, type FeedbackItem } from "@/features/feedback/api/feedbackApi";
+import {
+  feedbackApi,
+  type FeedbackItem,
+} from "@/features/feedback/api/feedbackApi";
 import {
   AlertCircle,
   Bug,
@@ -82,7 +85,7 @@ function formatDate(iso: string) {
 
 function FeedbackCard({ item }: { item: FeedbackItem }) {
   return (
-    <div className="rounded-2xl border border-white/8 bg-neutral-900 p-5 flex flex-col gap-3 hover:border-white/15 transition-colors">
+    <div className="rounded-2xl border border-white/10 bg-neutral-900 p-5 flex flex-col gap-3 hover:border-white/15 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <TypeBadge type={item.type} />
         <span className="flex items-center gap-1.5 text-xs text-zinc-500 font-[Poppins] shrink-0">
@@ -95,7 +98,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
         {item.message}
       </p>
 
-      <div className="flex items-center gap-2 pt-1 border-t border-white/6">
+      <div className="flex items-center gap-2">
         <div className="h-7 w-7 rounded-full bg-white/10 flex items-center justify-center shrink-0">
           <User className="h-3.5 w-3.5 text-zinc-400" />
         </div>
@@ -121,7 +124,11 @@ export function FeedbackManagementPage() {
     ? user.role.includes("admin")
     : user?.role === "admin";
 
-  const { data: feedbacks = [], isLoading, isError } = useQuery<FeedbackItem[]>({
+  const {
+    data: feedbacks = [],
+    isLoading,
+    isError,
+  } = useQuery<FeedbackItem[]>({
     queryKey: ["admin-feedbacks"],
     queryFn: feedbackApi.listAll,
     enabled: !!user && isAdmin,
@@ -160,7 +167,9 @@ export function FeedbackManagementPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 font-[Poppins]">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Feedbacks dos Alunos</h1>
+        <h1 className="text-2xl font-semibold text-white">
+          Feedbacks dos Alunos
+        </h1>
         <p className="mt-1 text-sm text-zinc-400">
           Veja o que os alunos estão reportando sobre a plataforma.
         </p>
@@ -186,7 +195,9 @@ export function FeedbackManagementPage() {
               )}
               {opt === "Todos" ? "Todos" : (TYPE_META[opt]?.label ?? opt)}
               {counts[opt] !== undefined && (
-                <span className="ml-0.5 tabular-nums opacity-70">{counts[opt]}</span>
+                <span className="ml-0.5 tabular-nums opacity-70">
+                  {counts[opt]}
+                </span>
               )}
             </button>
           ))}
