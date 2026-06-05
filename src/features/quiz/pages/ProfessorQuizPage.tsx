@@ -27,6 +27,7 @@ import type {
 } from "@/features/quiz/types";
 import { AppModal } from "@/shared/components/feedback/AppModal";
 import { toast } from "@/shared/lib/toast";
+import { Select } from "@/components/ui/select";
 
 const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
   QUIZ_TOPICS.map((t) => [t.value, t.label]),
@@ -36,8 +37,6 @@ const LETTERS = ["A", "B", "C", "D", "E"] as const;
 
 const inputCls =
   "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-indigo-500/60 placeholder:text-zinc-600";
-const selectCls =
-  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-indigo-500/60";
 const labelCls =
   "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
 
@@ -137,35 +136,21 @@ function QuizForm({
       </div>
       <div>
         <label className={labelCls}>Disciplina</label>
-        <select
+        <Select
           value={disciplineId}
-          onChange={(e) => setDisciplineId(e.target.value)}
-          required
-          className={selectCls}
-        >
-          <option value="">Selecione a disciplina</option>
-          {disciplines.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          onChange={setDisciplineId}
+          placeholder="Selecione a disciplina"
+          options={disciplines.map((d) => ({ value: d.id, label: d.name }))}
+        />
       </div>
       <div>
         <label className={labelCls}>Tópico</label>
-        <select
+        <Select
           value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          required
-          className={selectCls}
-        >
-          <option value="">Selecione o tópico</option>
-          {QUIZ_TOPICS.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
-            </option>
-          ))}
-        </select>
+          onChange={setTopic}
+          placeholder="Selecione o tópico"
+          options={QUIZ_TOPICS.map((t) => ({ value: t.value, label: t.label }))}
+        />
       </div>
       <div>
         <label className={labelCls}>Descrição (opcional)</label>
@@ -275,19 +260,14 @@ function QuestionForm({
       </div>
       <div>
         <label className={labelCls}>Resposta correta</label>
-        <select
+        <Select
           value={correctOption}
-          onChange={(e) => setCorrectOption(e.target.value)}
-          className={selectCls}
-        >
-          {options.map((opt, i) =>
-            opt.trim() ? (
-              <option key={i} value={LETTERS[i]}>
-                {LETTERS[i]} — {opt}
-              </option>
-            ) : null,
-          )}
-        </select>
+          onChange={setCorrectOption}
+          placeholder="Selecione a resposta correta"
+          options={options
+            .map((opt, i) => (opt.trim() ? { value: LETTERS[i], label: `${LETTERS[i]} — ${opt}` } : null))
+            .filter((o): o is NonNullable<typeof o> => o !== null)}
+        />
       </div>
       <div>
         <label className={labelCls}>Explicação (opcional)</label>

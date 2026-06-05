@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/AppUI/PageHeader";
 import { Panel } from "@/components/AppUI/Panel";
+import { Select } from "@/components/ui/select";
 import { toast } from "@/shared/lib/toast";
 import { ragApi } from "@/features/rag/api/ragApi";
 import type {
@@ -418,7 +419,7 @@ function DocumentsTab({
             Novo documento
           </p>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <label className="flex h-10 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-xl bg-neutral-800/50 px-4 transition-colors hover:bg-neutral-800/80">
+            <label className="flex h-10 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-xl border border-white/10 bg-neutral-800/50 px-4 transition-colors hover:bg-neutral-800/80">
               <Upload className="h-4 w-4 shrink-0 text-zinc-400" />
               <span className="truncate font-[Poppins] text-sm text-zinc-400">
                 {uploadFile ? uploadFile.name : "Selecionar arquivo (.pdf, .txt, .docx)"}
@@ -434,7 +435,7 @@ function DocumentsTab({
               value={uploadTitle}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder="Título (opcional)"
-              className="h-10 rounded-xl bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:ring-1 focus:ring-blue-500/60 placeholder:text-zinc-600 sm:w-48"
+              className="h-10 rounded-xl border border-white/10 bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 sm:w-48"
             />
             <button
               type="submit"
@@ -801,17 +802,11 @@ export function RagManagementPage() {
               <Loader2 className="h-4 w-4 animate-spin" /> Carregando turmas...
             </div>
           ) : classes.length ? (
-            <select
+            <Select
               value={selectedClassId}
-              onChange={(e) => setSelectedClassId(e.target.value)}
-              className={inputCls}
-            >
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.courseName} — {c.name}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedClassId}
+              options={classes.map((c) => ({ value: c.id, label: `${c.courseName} — ${c.name}` }))}
+            />
           ) : (
             <p className="font-[Poppins] text-sm text-zinc-500">
               Nenhuma turma disponível.

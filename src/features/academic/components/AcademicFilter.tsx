@@ -1,7 +1,7 @@
 ﻿import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { cn } from "@/shared/lib/cn";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Select } from "@/components/ui/select";
 import { academicFiltersApi } from "@/services/apiClient";
 import { LogEntityType } from "@/services/api/api_routes";
 import { AcademicDataResponse, Student } from "@/features/academic/types";
@@ -300,153 +300,74 @@ export function AcademicFilter({
 
   if (error) return <div className="text-red-500">Erro ao carregar dados</div>;
 
-  const selectClass = cn(
-    "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60",
-  );
-
   return (
     <div className="w-full">
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-4">
         {showUniversitySelect && (
-          <select
-            className={cn(
-              selectClass,
-              !isUniversityEnabled && "opacity-50 cursor-not-allowed",
-            )}
+          <Select
             disabled={!isUniversityEnabled || isLoading}
             value={selectedUniversity}
-            onChange={(e) => {
-              setSelectedUniversity(e.target.value);
+            onChange={(v) => {
+              setSelectedUniversity(v);
               setSelectedCourse("");
               setSelectedClass("");
               setSelectedDiscipline("");
               setSelectedIds([]);
-              onSelect([], { universityId: e.target.value });
+              onSelect([], { universityId: v });
             }}
-          >
-            <option value="" className="bg-[#1f1f1f]">
-              {isAdmin
-                ? "Selecione a Universidade"
-                : universities[0]?.name || "Universidade"}
-            </option>
-            {universities.map((u) => (
-              <option key={u._id} value={u._id} className="bg-[#1f1f1f]">
-                {u.name}
-              </option>
-            ))}
-          </select>
+            placeholder={isAdmin ? "Selecione a Universidade" : universities[0]?.name || "Universidade"}
+            options={universities.map((u) => ({ value: u._id, label: u.name }))}
+          />
         )}
 
         {showCourseSelect && (
-          <select
-            className={cn(
-              selectClass,
-              !isCourseEnabled && "opacity-50 cursor-not-allowed",
-            )}
+          <Select
             disabled={!isCourseEnabled || isLoading}
             value={selectedCourse}
-            onChange={(e) => {
-              setSelectedCourse(e.target.value);
+            onChange={(v) => {
+              setSelectedCourse(v);
               setSelectedClass("");
               setSelectedDiscipline("");
               setSelectedIds([]);
-              onSelect([], {
-                universityId: selectedUniversity,
-                courseId: e.target.value,
-              });
+              onSelect([], { universityId: selectedUniversity, courseId: v });
             }}
-          >
-            <option value="" className="bg-[#1f1f1f]">
-              {!selectedUniversity
-                ? "Selecione a Universidade..."
-                : courses.length === 0
-                  ? "Nenhum curso disponível"
-                  : "Selecione o Curso"}
-            </option>
-            {courses.map((c) => (
-              <option key={c._id} value={c._id} className="bg-[#1f1f1f]">
-                {c.name}
-              </option>
-            ))}
-          </select>
+            placeholder={!selectedUniversity ? "Selecione a Universidade..." : courses.length === 0 ? "Nenhum curso disponível" : "Selecione o Curso"}
+            options={courses.map((c) => ({ value: c._id, label: c.name }))}
+          />
         )}
 
         {isProfessor && entityType === "student" && (
-          <select
-            className={cn(
-              selectClass,
-              !isCourseEnabled && "opacity-50 cursor-not-allowed",
-            )}
+          <Select
             disabled={!isCourseEnabled || isLoading}
             value={selectedDiscipline}
-            onChange={(e) => handleDisciplineChange(e.target.value)}
-          >
-            <option value="" className="bg-[#1f1f1f]">
-              Selecione a Disciplina
-            </option>
-            {disciplines.map((d) => (
-              <option key={d._id} value={d._id} className="bg-[#1f1f1f]">
-                {d.name}
-              </option>
-            ))}
-          </select>
+            onChange={handleDisciplineChange}
+            placeholder="Selecione a Disciplina"
+            options={disciplines.map((d) => ({ value: d._id, label: d.name }))}
+          />
         )}
 
         {showClassSelect && (
-          <select
-            className={cn(
-              selectClass,
-              !isClassEnabled && "opacity-50 cursor-not-allowed",
-            )}
+          <Select
             disabled={!isClassEnabled || isLoading}
             value={selectedClass}
-            onChange={(e) => {
-              setSelectedClass(e.target.value);
+            onChange={(v) => {
+              setSelectedClass(v);
               setSelectedIds([]);
-              onSelect([], {
-                universityId: selectedUniversity,
-                courseId: selectedCourse,
-                classId: e.target.value,
-              });
+              onSelect([], { universityId: selectedUniversity, courseId: selectedCourse, classId: v });
             }}
-          >
-            <option value="" className="bg-[#1f1f1f]">
-              {!selectedCourse
-                ? "Selecione o Curso..."
-                : classes.length === 0
-                  ? "Nenhuma turma disponível"
-                  : "Selecione a Turma"}
-            </option>
-            {classes.map((c) => (
-              <option key={c._id} value={c._id} className="bg-[#1f1f1f]">
-                {c.name}
-              </option>
-            ))}
-          </select>
+            placeholder={!selectedCourse ? "Selecione o Curso..." : classes.length === 0 ? "Nenhuma turma disponível" : "Selecione a Turma"}
+            options={classes.map((c) => ({ value: c._id, label: c.name }))}
+          />
         )}
 
         {canShowEntitySelector() && (
-          <select
-            className={cn(
-              selectClass,
-              (!canShowEntitySelector() || isLoading) &&
-                "opacity-50 cursor-not-allowed",
-            )}
+          <Select
             disabled={!canShowEntitySelector() || isLoading}
             value={selectedIds[0] ?? ""}
-            onChange={(e) => toggleItem(e.target.value)}
-          >
-            <option value="" className="bg-[#1f1f1f]">
-              {isLoading
-                ? "Carregando..."
-                : `Selecione ${entityType === "student" ? "o aluno" : entityType === "discipline" ? "a disciplina" : entityType === "class" ? "a turma" : entityType === "course" ? "o curso" : "a universidade"}`}
-            </option>
-            {filteredEntities.map((item) => (
-              <option key={item._id} value={item._id} className="bg-[#1f1f1f]">
-                {item.name}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => { if (v) toggleItem(v); }}
+            placeholder={isLoading ? "Carregando..." : `Selecione ${entityType === "student" ? "o aluno" : entityType === "discipline" ? "a disciplina" : entityType === "class" ? "a turma" : entityType === "course" ? "o curso" : "a universidade"}`}
+            options={filteredEntities.map((item) => ({ value: item._id, label: item.name }))}
+          />
         )}
       </div>
 

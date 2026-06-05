@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Select } from "@/components/ui/select";
 import { UniversityForm } from "./UniversityForm";
 import { CourseForm } from "./CourseForm";
 import { ProfessorForm } from "./ProfessorForm";
@@ -108,18 +109,12 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
           <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
             Tipo de entidade
           </label>
-          <select
+          <Select
             value={selectedEntity}
-            onChange={(e) => setSelectedEntity(e.target.value as EntityType)}
-            className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
-          >
-            <option value="">Selecione o tipo</option>
-            {allowedEntities.map((ent) => (
-              <option key={ent} value={ent}>
-                {ENTITY_LABELS[ent]}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setSelectedEntity(v as EntityType)}
+            options={allowedEntities.map((ent) => ({ value: ent, label: ENTITY_LABELS[ent] }))}
+            placeholder="Selecione o tipo"
+          />
         </div>
       )}
 

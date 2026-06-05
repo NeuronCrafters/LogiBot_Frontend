@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from "react";
 import { logger } from "@/shared/lib/logger";
+import { Select } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { academicFiltersApi } from "@/services/apiClient";
@@ -266,29 +267,16 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
           <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
             Tipo de filtro
           </label>
-          <select
+          <Select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
+            onChange={(v) => setFilterType(v as FilterType)}
             disabled={loading}
-          >
-            <option value="">Selecione</option>
-            {allowedFilters.map((ft) => (
-              <option key={ft} value={ft}>
-                {{
-                  universities: "Universidades",
-                  courses: "Cursos",
-                  disciplines: "Disciplinas",
-                  classes: "Turmas",
-                  professors: "Professores",
-                  students: "Alunos do Sistema",
-                  "students-course": "Alunos por Curso",
-                  "students-discipline": "Alunos por Disciplina",
-                  "students-class": "Alunos por Turma",
-                }[ft] || ft}
-              </option>
-            ))}
-          </select>
+            placeholder="Selecione"
+            options={allowedFilters.map((ft) => ({
+              value: ft,
+              label: ({ universities: "Universidades", courses: "Cursos", disciplines: "Disciplinas", classes: "Turmas", professors: "Professores", students: "Alunos do Sistema", "students-course": "Alunos por Curso", "students-discipline": "Alunos por Disciplina", "students-class": "Alunos por Turma" } as Record<string, string>)[ft] || ft,
+            }))}
+          />
         </div>
 
         {showUniversitySelect && (
@@ -296,24 +284,13 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Universidade
             </label>
-            <select
+            <Select
               value={selectedUniversity}
-              onChange={(e) => {
-                setSelectedUniversity(e.target.value);
-                setSelectedCourse("");
-                setSelectedDiscipline("");
-                setSelectedClass("");
-              }}
-              className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
+              onChange={(v) => { setSelectedUniversity(v); setSelectedCourse(""); setSelectedDiscipline(""); setSelectedClass(""); }}
               disabled={loading}
-            >
-              <option value="">Selecione a universidade</option>
-              {universities.map((u) => (
-                <option key={u._id} value={u._id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Selecione a universidade"
+              options={universities.map((u) => ({ value: u._id, label: u.name }))}
+            />
           </div>
         )}
 
@@ -322,23 +299,13 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Curso
             </label>
-            <select
+            <Select
               value={selectedCourse}
-              onChange={(e) => {
-                setSelectedCourse(e.target.value);
-                setSelectedDiscipline("");
-                setSelectedClass("");
-              }}
-              className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
+              onChange={(v) => { setSelectedCourse(v); setSelectedDiscipline(""); setSelectedClass(""); }}
               disabled={loading || courses.length === 0}
-            >
-              <option value="">Selecione o curso</option>
-              {courses.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Selecione o curso"
+              options={courses.map((c) => ({ value: c._id, label: c.name }))}
+            />
           </div>
         )}
 
@@ -347,19 +314,13 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Disciplina
             </label>
-            <select
+            <Select
               value={selectedDiscipline}
-              onChange={(e) => setSelectedDiscipline(e.target.value)}
-              className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
+              onChange={setSelectedDiscipline}
               disabled={loading || disciplines.length === 0}
-            >
-              <option value="">Selecione a disciplina</option>
-              {disciplines.map((d) => (
-                <option key={d._id} value={d._id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Selecione a disciplina"
+              options={disciplines.map((d) => ({ value: d._id, label: d.name }))}
+            />
           </div>
         )}
 
@@ -368,19 +329,13 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Turma
             </label>
-            <select
+            <Select
               value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
-              className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
+              onChange={setSelectedClass}
               disabled={loading || classes.length === 0}
-            >
-              <option value="">Selecione a turma</option>
-              {classes.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Selecione a turma"
+              options={classes.map((c) => ({ value: c._id, label: c.name }))}
+            />
           </div>
         )}
       </div>

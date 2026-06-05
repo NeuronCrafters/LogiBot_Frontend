@@ -5,6 +5,7 @@ import { academicFiltersApi } from "@/services/apiClient";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { ProfessorData } from "@/features/admin/types";
 import { EntityActionButton } from "@/features/admin/components/EntityActionButton";
+import { Select } from "@/components/ui/select";
 
 export interface ProfessorFormProps {
   onSubmit: (data: ProfessorData) => void;
@@ -15,8 +16,6 @@ const labelCls =
   "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
 const inputCls =
   "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
-const selectCls =
-  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60";
 
 function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
   const { user } = useAuth();
@@ -202,37 +201,23 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       </div>
       <div>
         <label className={labelCls}>Universidade</label>
-        <select
+        <Select
           value={school}
-          onChange={(e) => handleUniversityChange(e.target.value)}
-          required
+          onChange={(v) => handleUniversityChange(v)}
+          options={(academicData?.universities ?? []).map((uni) => ({ value: uni._id, label: uni.name }))}
+          placeholder="Selecione a universidade"
           disabled={isCoordinator}
-          className={selectCls}
-        >
-          <option value="">Selecione a universidade</option>
-          {academicData?.universities.map((uni) => (
-            <option key={uni._id} value={uni._id}>
-              {uni.name}
-            </option>
-          ))}
-        </select>
+        />
       </div>
       {school && availableCourses.length > 0 && (
         <div>
           <label className={labelCls}>Curso</label>
-          <select
+          <Select
             value={courses[0] ?? ""}
-            onChange={(e) => setCourses(e.target.value ? [e.target.value] : [])}
-            required
-            className={selectCls}
-          >
-            <option value="">Selecione o curso</option>
-            {availableCourses.map((course) => (
-              <option key={course._id} value={course._id}>
-                {course.name}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setCourses(v ? [v] : [])}
+            options={availableCourses.map((course) => ({ value: course._id, label: course.name }))}
+            placeholder="Selecione o curso"
+          />
         </div>
       )}
       {school && availableCourses.length === 0 && (

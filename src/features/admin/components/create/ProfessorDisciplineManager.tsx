@@ -4,9 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Search, UserMinus, Users } from "lucide-react";
 import { academicApi, academicFiltersApi } from "@/services/apiClient";
 import { toast } from "@/shared/lib/toast";
+import { Select } from "@/components/ui/select";
 
-const selectCls =
-  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60";
 const inputCls =
   "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 pl-10 pr-3 font-[Poppins] text-sm text-white outline-none transition-colors placeholder:text-zinc-600 focus:border-blue-500/60";
 
@@ -246,54 +245,36 @@ export function ProfessorDisciplineManager({
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Universidade
             </label>
-            <select
+            <Select
               value={selectedUniversity}
-              onChange={(event) => resetAfterUniversity(event.target.value)}
-              className={selectCls}
-            >
-              <option value="">Selecione</option>
-              {academicData?.universities.map((university) => (
-                <option key={university._id} value={university._id}>
-                  {university.name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => resetAfterUniversity(v)}
+              options={(academicData?.universities ?? []).map((university) => ({ value: university._id, label: university.name }))}
+              placeholder="Selecione"
+            />
           </div>
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Curso
             </label>
-            <select
+            <Select
               value={selectedCourse}
-              onChange={(event) => resetAfterCourse(event.target.value)}
-              className={selectCls}
+              onChange={(v) => resetAfterCourse(v)}
+              options={courses.map((item) => ({ value: item._id, label: item.name }))}
+              placeholder="Selecione"
               disabled={!selectedUniversity}
-            >
-              <option value="">Selecione</option>
-              {courses.map((item) => (
-                <option key={item._id} value={item._id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Disciplina
             </label>
-            <select
+            <Select
               value={selectedDiscipline}
-              onChange={(event) => resetAfterDiscipline(event.target.value)}
-              className={selectCls}
+              onChange={(v) => resetAfterDiscipline(v)}
+              options={(course?.disciplines ?? []).map((item) => ({ value: item._id, label: item.name }))}
+              placeholder="Selecione"
               disabled={!selectedCourse}
-            >
-              <option value="">Selecione</option>
-              {course?.disciplines.map((item) => (
-                <option key={item._id} value={item._id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
         </div>
       )}
