@@ -31,8 +31,12 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   } = useChatFlow({ userId });
 
   useEffect(() => {
-    if (!sessionIdFromUrl) handleInitialChoice("chat");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!sessionIdFromUrl) {
+      setMessages([]);
+      setSessionId(undefined);
+      setMode("chat");
+    }
+  }, [sessionIdFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -75,6 +79,9 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
             text: m.content || "",
             sender: (m.role === "assistant" ? "bot" : "user") as "user" | "bot",
             type: "text" as const,
+            retrievedChunks: m.metadata?.retrievedChunks?.length
+              ? m.metadata.retrievedChunks
+              : undefined,
           }));
 
           setMessages(formatted);

@@ -4,6 +4,7 @@ import {
   Database,
   FileText,
   Loader2,
+  Lock,
   MessageSquare,
   RefreshCw,
   Save,
@@ -529,6 +530,23 @@ export function RagManagementPage() {
               onSave={(input) => settingsMutation.mutate(input)}
             />
 
+            <div className="relative rounded-2xl">
+              {settings && settings.ragMode === "none" && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-2xl bg-neutral-950/80 backdrop-blur-sm">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                    <Lock className="h-6 w-6 text-zinc-400" />
+                  </div>
+                  <div className="text-center px-6">
+                    <p className="font-[Poppins] text-sm font-semibold text-zinc-200">
+                      Documentos desativados
+                    </p>
+                    <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
+                      Selecione o modo <span className="text-blue-400 font-medium">Context</span> ou <span className="text-blue-400 font-medium">Self</span> nas configuracoes para gerenciar documentos e testar o RAG.
+                    </p>
+                  </div>
+                </div>
+              )}
+
             <Panel className="space-y-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -616,6 +634,7 @@ export function RagManagementPage() {
                 </div>
               )}
             </Panel>
+            </div>
 
             <div className="xl:col-span-2">
               <TestChatPanel
