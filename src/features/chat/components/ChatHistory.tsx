@@ -1,4 +1,4 @@
-﻿import { useNavigate } from "react-router-dom";
+﻿import { useNavigate, useSearchParams } from "react-router-dom";
 import { MessageSquare, Loader2, AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime } from "@/shared/lib/formatDate";
@@ -11,6 +11,8 @@ interface ChatHistoryProps {
 
 function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const activeSessionId = searchParams.get("session") ?? "";
 
   const {
     sessions = [],
@@ -74,14 +76,18 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
             <div
               key={session.sessionId}
               onClick={() => handleSelect(session.sessionId)}
-              className="group flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
+              className={`group flex items-start gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                session.sessionId === activeSessionId
+                  ? "bg-white/10 border border-white/10"
+                  : "hover:bg-white/5"
+              }`}
             >
               <MessageSquare
                 size={14}
                 className="text-blue-400 shrink-0 mt-0.5"
               />
               <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-xs font-[Poppins] text-zinc-300 group-hover:text-white truncate leading-snug transition-colors">
+                <span className={`text-xs font-[Poppins] truncate leading-snug transition-colors ${session.sessionId === activeSessionId ? "text-white" : "text-zinc-300 group-hover:text-white"}`}>
                   {session.title || "Nova Interação"}
                 </span>
                 <span className="text-[11px] text-zinc-600 font-[Poppins] leading-snug">

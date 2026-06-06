@@ -23,6 +23,13 @@ input:-webkit-autofill:focus {
   scrollbar-width: thin;
   scrollbar-color: #404040 transparent;
 }
+
+.overflow-y-auto,
+.overflow-y-scroll,
+.overflow-auto,
+.overflow-scroll {
+  scrollbar-gutter: stable;
+}
 *::-webkit-scrollbar {
   width: 6px;
   height: 6px;

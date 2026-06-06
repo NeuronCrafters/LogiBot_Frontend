@@ -12,8 +12,10 @@ import {
   LogOut,
   X,
   Brain,
+  Database,
   MessageCircle,
   Clock,
+  Inbox,
 } from "lucide-react";
 import logoMascote from "@/assets/logo.svg";
 
@@ -72,11 +74,23 @@ function buildStaffSections(role: Role): NavSection[] {
       icon: <Brain className="w-4 h-4" />,
       label: "Quizzes",
     });
+  if (["teacher", "course-coordinator", "admin"].includes(role))
+    gestao.push({
+      path: "/rag",
+      icon: <Database className="w-4 h-4" />,
+      label: "Base RAG",
+    });
   if (["admin", "course-coordinator"].includes(role))
     gestao.push({
       path: "/entities/manage",
       icon: <Settings className="w-4 h-4" />,
       label: "Gestão Acadêmica",
+    });
+  if (role === "admin")
+    gestao.push({
+      path: "/admin/feedbacks",
+      icon: <Inbox className="w-4 h-4" />,
+      label: "Feedbacks",
     });
   if (["admin", "teacher", "course-coordinator"].includes(role))
     gestao.push({
@@ -152,7 +166,9 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         ? "teacher"
         : "student";
   const isStudent = role === "student";
-  const sections = isStudent ? STUDENT_SECTIONS : buildStaffSections(role);
+  const allSections = isStudent ? STUDENT_SECTIONS : buildStaffSections(role);
+  const contaSection = allSections.find((s) => s.label === "Conta");
+  const sections = allSections.filter((s) => s.label !== "Conta");
 
   const handleLogout = () => {
     logout();
@@ -238,7 +254,22 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
 
       {!isStudent && <div className="flex-1" />}
 
-      <div className="p-3 border-t border-white/5 shrink-0">
+      <div className="px-2 pb-1 pt-3 border-t border-white/5 shrink-0">
+        {contaSection && (
+          <div className="mb-2">
+            <SectionLabel label={contaSection.label} />
+            <div className="space-y-0.5">
+              {contaSection.items.map((item) => (
+                <NavLink
+                  key={item.path}
+                  item={item}
+                  active={location.pathname === item.path}
+                  onClick={onMobileClose}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         <button
           id="header-logout-button"
           onClick={handleLogout}

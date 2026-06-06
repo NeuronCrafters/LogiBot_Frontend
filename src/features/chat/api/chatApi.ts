@@ -1,8 +1,18 @@
 import { api } from "@/shared/api/httpClient";
 
+export interface RetrievedChunk {
+  chromaId: string;
+  documentId: string;
+  documentTitle: string;
+  chunkIndex: number;
+  score: number;
+  content: string;
+}
+
 interface ChatActionResponse {
   responses: { text: string }[];
   sessionId?: string;
+  retrievedChunks?: RetrievedChunk[];
 }
 
 export const chatApi = {

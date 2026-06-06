@@ -3,6 +3,7 @@ import { logger } from "@/shared/lib/logger";
 import { User } from "@/app/providers/AuthContext";
 import { ChatInput } from "@/features/chat/components/ChatInput";
 import { useChatFlow } from "@/features/chat/hooks/useChatFlow";
+import { useChatHistory } from "@/features/chat/hooks/useChatHistory";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { MarkdownMessageBubble } from "./MarkdownMessageBubble";
@@ -15,7 +16,7 @@ interface StudentChatContentProps {
 
 const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   const userId = user?._id || "user";
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const sessionIdFromUrl = searchParams.get("session");
 
   const {
@@ -23,16 +24,34 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     mode,
     inputText,
     setInputText,
-    handleInitialChoice,
     sendMessage,
     setMessages,
     setMode,
     setSessionId,
+    sessionId,
   } = useChatFlow({ userId });
 
+  const { addSessionToCache } = useChatHistory({ userId });
+
   useEffect(() => {
-    if (!sessionIdFromUrl) handleInitialChoice("chat");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!sessionIdFromUrl) {
+      setMessages([]);
+      setSessionId(undefined);
+      setMode("chat");
+    }
+  }, [sessionIdFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!sessionId) return;
+    if (sessionIdFromUrl) return; // existing session loaded from URL, not new
+
+    setSearchParams({ session: sessionId }, { replace: true });
+
+    const firstUserMsg = messages.find((m) => m.sender === "user");
+    const rawTitle = firstUserMsg?.text.trim().replace(/\s+/g, " ") ?? "";
+    const title = rawTitle.length > 55 ? `${rawTitle.slice(0, 55).trimEnd()}...` : rawTitle || "Nova Conversa";
+    addSessionToCache({ sessionId, title, lastActivityAt: new Date().toISOString() });
+  }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -75,6 +94,9 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
             text: m.content || "",
             sender: (m.role === "assistant" ? "bot" : "user") as "user" | "bot",
             type: "text" as const,
+            retrievedChunks: m.metadata?.retrievedChunks?.length
+              ? m.metadata.retrievedChunks
+              : undefined,
           }));
 
           setMessages(formatted);
@@ -169,6 +191,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                   key={msg.id || index}
                   text={msg.text}
                   sender={msg.sender as "user" | "bot"}
+                  retrievedChunks={msg.retrievedChunks}
                 />
               ),
             )}

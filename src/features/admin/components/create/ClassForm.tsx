@@ -4,6 +4,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { academicFiltersApi } from "@/services/apiClient";
 import { EntityActionButton } from "@/features/admin/components/EntityActionButton";
+import { Select } from "@/components/ui/select";
 
 export interface ClassData {
   id?: string | number;
@@ -23,8 +24,6 @@ const labelCls =
   "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
 const inputCls =
   "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
-const selectCls =
-  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60";
 
 function CheckboxList({
   items,
@@ -224,43 +223,29 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
       </div>
       <div>
         <label className={labelCls}>Universidade</label>
-        <select
+        <Select
           value={selectedUniversity}
-          onChange={(e) => {
-            setSelectedUniversity(e.target.value);
+          onChange={(v) => {
+            setSelectedUniversity(v);
             setSelectedCourse("");
             setSelectedDisciplineIds([]);
           }}
-          required
-          className={selectCls}
-        >
-          <option value="">Selecione a universidade</option>
-          {filteredUniversities.map((uni) => (
-            <option key={uni._id} value={uni._id}>
-              {uni.name}
-            </option>
-          ))}
-        </select>
+          options={filteredUniversities.map((uni) => ({ value: uni._id, label: uni.name }))}
+          placeholder="Selecione a universidade"
+        />
       </div>
       {selectedUniversity && (
         <div>
           <label className={labelCls}>Curso</label>
-          <select
+          <Select
             value={selectedCourse}
-            onChange={(e) => {
-              setSelectedCourse(e.target.value);
+            onChange={(v) => {
+              setSelectedCourse(v);
               setSelectedDisciplineIds([]);
             }}
-            required
-            className={selectCls}
-          >
-            <option value="">Selecione o curso</option>
-            {availableCourses.map((course) => (
-              <option key={course._id} value={course._id}>
-                {course.name}
-              </option>
-            ))}
-          </select>
+            options={availableCourses.map((course) => ({ value: course._id, label: course.name }))}
+            placeholder="Selecione o curso"
+          />
         </div>
       )}
       {selectedCourse && (

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/shared/lib/toast";
 import { AppModal } from "@/shared/components/feedback/AppModal";
+import { Select } from "@/components/ui/select";
 import { ClassForm } from "@/features/admin/components/create/ClassForm";
 import { DisciplineForm } from "@/features/admin/components/create/DisciplineForm";
 import { ProfessorForm } from "@/features/admin/components/create/ProfessorForm";
@@ -40,8 +41,6 @@ type LinksModal = {
   label: string;
 };
 
-const selectCls =
-  "h-10 rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 min-w-[180px]";
 
 const MODAL_META: Record<
   Tab,
@@ -504,39 +503,26 @@ export function ManageEntities() {
                 <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Universidade
                 </label>
-                <select
+                <Select
                   value={adminUniversityId}
-                  onChange={(e) => {
-                    setAdminUniversityId(e.target.value);
-                    setAdminCourseId("");
-                  }}
-                  className={selectCls}
-                >
-                  <option value="">Selecione</option>
-                  {universities.map((u: any) => (
-                    <option key={u._id} value={u._id}>
-                      {u.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => { setAdminUniversityId(v); setAdminCourseId(""); }}
+                  placeholder="Selecione"
+                  options={universities.map((u: any) => ({ value: u._id, label: u.name }))}
+                  className="min-w-[180px]"
+                />
               </div>
               {adminUniversityId && (
                 <div className="flex flex-col gap-1">
                   <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
                     Curso
                   </label>
-                  <select
+                  <Select
                     value={adminCourseId}
-                    onChange={(e) => setAdminCourseId(e.target.value)}
-                    className={selectCls}
-                  >
-                    <option value="">Selecione</option>
-                    {adminCourses.map((c: any) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setAdminCourseId}
+                    placeholder="Selecione"
+                    options={adminCourses.map((c: any) => ({ value: c._id, label: c.name }))}
+                    className="min-w-[180px]"
+                  />
                 </div>
               )}
             </div>

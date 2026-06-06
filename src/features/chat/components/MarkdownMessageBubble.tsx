@@ -1,10 +1,11 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import type { RetrievedChunk } from "@/features/chat/api/chatApi";
 
 const CodeBlock = ({
   language,
@@ -143,11 +144,69 @@ const markdownComponents = {
 interface MarkdownMessageBubbleProps {
   text: string;
   sender: "user" | "bot";
+  retrievedChunks?: RetrievedChunk[];
+}
+
+function SourcesPanel({ chunks }: { chunks: RetrievedChunk[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <div className="mt-3 border-t border-neutral-800 pt-3">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-[Poppins]"
+      >
+        <BookOpen size={13} />
+        {chunks.length} {chunks.length === 1 ? "fonte usada" : "fontes usadas"}
+        {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      </button>
+
+      {expanded && (
+        <div className="mt-2 space-y-2">
+          {chunks.map((chunk, index) => (
+            <div
+              key={chunk.chromaId}
+              className="rounded-lg border border-neutral-800 bg-neutral-950/60 overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-neutral-800/40 transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="flex-shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold font-[Poppins] bg-blue-500/15 text-blue-300 border border-blue-500/20">
+                    {chunk.score}%
+                  </span>
+                  <span className="truncate text-xs text-zinc-400 font-[Poppins]">
+                    {chunk.documentTitle} · trecho {chunk.chunkIndex + 1}
+                  </span>
+                </div>
+                {openIndex === index ? (
+                  <ChevronUp size={13} className="flex-shrink-0 text-zinc-600" />
+                ) : (
+                  <ChevronDown size={13} className="flex-shrink-0 text-zinc-600" />
+                )}
+              </button>
+
+              {openIndex === index && (
+                <div className="px-3 pb-3 pt-1 text-xs text-zinc-400 font-[Poppins] leading-relaxed border-t border-neutral-800/60 whitespace-pre-wrap">
+                  {chunk.content}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function MarkdownMessageBubble({
   text,
   sender,
+  retrievedChunks,
 }: MarkdownMessageBubbleProps) {
   const isUser = sender === "user";
 
@@ -174,6 +233,9 @@ export function MarkdownMessageBubble({
         <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
           {text}
         </Markdown>
+        {retrievedChunks && retrievedChunks.length > 0 && (
+          <SourcesPanel chunks={retrievedChunks} />
+        )}
       </div>
     </div>
   );

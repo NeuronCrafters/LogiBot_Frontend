@@ -1,6 +1,7 @@
 ﻿import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { addDays, formatISODate } from "@/shared/lib/formatDate";
 import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
 import { DashboardFilterParams } from "@/features/dashboard/api/dashboardApi";
@@ -136,19 +137,15 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
             >
               Analisar por
             </Label>
-            <select
-              id="entity-type"
+            <Select
               value={entityType}
-              onChange={(e) => handleEntityTypeChange(e.target.value)}
-              className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60"
-            >
-              <option value="">Selecione uma Entidade</option>
-              {allowedEntityTypes.map((type) => (
-                <option key={type} value={type} className="bg-[#1f1f1f] py-2">
-                  {getEntityTypeTitle(type)}
-                </option>
-              ))}
-            </select>
+              onChange={handleEntityTypeChange}
+              placeholder="Selecione uma Entidade"
+              options={allowedEntityTypes.map((type) => ({
+                value: type,
+                label: getEntityTypeTitle(type),
+              }))}
+            />
           </div>
         </div>
 
