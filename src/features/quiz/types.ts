@@ -10,6 +10,8 @@ export type QuizTopic = (typeof QUIZ_TOPICS)[number]["value"];
 
 export type QuizStatus = "draft" | "published";
 
+export type GenerationSource = "manual" | "ai";
+
 export interface ProfessorQuiz {
   id: string;
   title: string;
@@ -17,9 +19,29 @@ export interface ProfessorQuiz {
   description: string | null;
   disciplineId: string;
   disciplineName: string;
+  classId?: string | null;
+  generationSource?: GenerationSource;
   questionCount: number;
   status: QuizStatus;
   createdAt: string;
+}
+
+export interface AiQuizGenerationInput {
+  disciplineId: string;
+  theme: string;
+  questionCount: number;
+  documentIds: string[];
+  title?: string;
+  description?: string;
+}
+
+export interface AiQuizGenerationResult {
+  quiz: ProfessorQuiz;
+  questions: QuizQuestionWithAnswer[];
+  sourceSummary: {
+    documentCount: number;
+    retrievedChunkCount: number;
+  };
 }
 
 export interface StudentQuizItem extends ProfessorQuiz {
