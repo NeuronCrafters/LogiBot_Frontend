@@ -61,12 +61,12 @@ export function AppLayout({ children, pageTitle, pageIcon }: AppLayoutProps) {
 
   return (
     <div className="flex h-screen bg-neutral-950">
-      <aside className="hidden md:flex flex-col w-56 flex-shrink-0">
+      <aside className="hidden md:flex flex-col flex-shrink-0">
         <Sidebar />
       </aside>
 
       <div className="flex-1 md:my-3 md:mr-3 md:rounded-2xl bg-neutral-900 overflow-hidden flex flex-col min-w-0">
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-white/5 shrink-0">
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-[rgba(255,255,255,0.05)] shrink-0">
           <button
             id="chat-header-menu-button"
             className="text-zinc-400 hover:text-white transition-colors"

@@ -19,7 +19,6 @@ interface UseChatFlowOptions {
 export function useChatFlow({ userId }: UseChatFlowOptions) {
   const [mode, setMode] = useState<Mode>("none");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputText, setInputText] = useState("");
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
 
   const handleInitialChoice = useCallback(
@@ -47,7 +46,6 @@ export function useChatFlow({ userId }: UseChatFlowOptions) {
       };
 
       setMessages((prev) => [...prev, userMsg, typingMsg]);
-      setInputText("");
 
       try {
         const response = await chatApi.askTutor(text.trim(), userId, sessionId);
@@ -87,8 +85,6 @@ export function useChatFlow({ userId }: UseChatFlowOptions) {
   return {
     mode,
     messages,
-    inputText,
-    setInputText,
     handleInitialChoice,
     sendMessage,
     setMessages,

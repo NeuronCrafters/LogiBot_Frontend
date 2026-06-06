@@ -1,49 +1,46 @@
 ﻿import { ArrowUp, Loader2 } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
 import { userAnalysisApi } from "@/features/chat/api/chatAnalyticsApi";
-import { useState, useRef, useEffect } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 interface ChatInputProps {
-  inputText: string;
-  setInputText: (text: string) => void;
-  sendMessage: (message: string) => void;
+  sendMessage: (message: string) => void | Promise<void>;
   isWaitingResponse?: boolean;
 }
 
-export function ChatInput({
-  inputText,
-  setInputText,
+export const ChatInput = memo(function ChatInput({
   sendMessage,
   isWaitingResponse = false,
 }: ChatInputProps) {
+  const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isLocked = isSending || isWaitingResponse;
   const canSend = !isLocked && inputText.trim().length > 0;
 
-  const adjustHeight = () => {
+  const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
       textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
     }
-  };
+  }, []);
 
   useEffect(() => {
     adjustHeight();
-  }, [inputText]);
+  }, [adjustHeight, inputText]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = inputText.trim();
     if (!text || isLocked) return;
 
     setIsSending(true);
     try {
       userAnalysisApi.addInteraction(text).catch(() => {});
-      sendMessage(text);
       setInputText("");
       if (textareaRef.current) textareaRef.current.style.height = "auto";
+      await Promise.resolve(sendMessage(text));
     } catch (err) {
       logger.error("Chat", "Erro ao enviar mensagem.", err);
     } finally {
@@ -103,4 +100,4 @@ export function ChatInput({
       </div>
     </div>
   );
-}
+});
