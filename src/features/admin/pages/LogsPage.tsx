@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   useAdminLogsSocket,
@@ -60,6 +60,123 @@ function formatTime(iso: string) {
   });
 }
 
+const SCOPE_PALETTE = [
+  "text-sky-300",
+  "text-emerald-300",
+  "text-amber-300",
+  "text-fuchsia-300",
+  "text-violet-300",
+  "text-rose-300",
+  "text-teal-300",
+  "text-orange-300",
+];
+
+function scopeColor(scope: string) {
+  let hash = 0;
+  for (let i = 0; i < scope.length; i += 1) {
+    hash = (hash * 31 + scope.charCodeAt(i)) | 0;
+  }
+  return SCOPE_PALETTE[Math.abs(hash) % SCOPE_PALETTE.length];
+}
+
+function HighlightMatch({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+
+  const lower = text.toLowerCase();
+  const q = query.toLowerCase();
+  const parts: ReactNode[] = [];
+  let cursor = 0;
+  let matchAt = lower.indexOf(q);
+
+  while (matchAt !== -1) {
+    if (matchAt > cursor) parts.push(text.slice(cursor, matchAt));
+    parts.push(
+      <mark key={matchAt} className="rounded bg-amber-400/30 text-amber-200 px-0.5">
+        {text.slice(matchAt, matchAt + q.length)}
+      </mark>,
+    );
+    cursor = matchAt + q.length;
+    matchAt = lower.indexOf(q, cursor);
+  }
+  if (cursor < text.length) parts.push(text.slice(cursor));
+
+  return <>{parts}</>;
+}
+
+const DURATION_KEYS = new Set(["durationMs", "elapsedMs", "queuedMs", "totalMs", "ms"]);
+
+function durationTone(ms: number) {
+  if (ms < 300) return "text-emerald-400";
+  if (ms < 1500) return "text-amber-400";
+  return "text-red-400";
+}
+
+function statusTone(code: number) {
+  if (code < 300) return "text-emerald-400";
+  if (code < 400) return "text-sky-400";
+  if (code < 500) return "text-amber-400";
+  return "text-red-400";
+}
+
+function JsonPrimitive({ keyName, value }: { keyName?: string; value: unknown }) {
+  if (value === null || value === undefined) {
+    return <span className="text-zinc-500 italic">null</span>;
+  }
+  if (typeof value === "number") {
+    if (keyName === "statusCode" || keyName === "status") {
+      return <span className={`font-semibold ${statusTone(value)}`}>{value}</span>;
+    }
+    if (keyName && DURATION_KEYS.has(keyName)) {
+      return <span className={`font-semibold ${durationTone(value)}`}>{value}ms</span>;
+    }
+    return <span className="text-cyan-300">{value}</span>;
+  }
+  if (typeof value === "boolean") {
+    return <span className="text-purple-300">{String(value)}</span>;
+  }
+  return <span className="text-emerald-300">"{String(value)}"</span>;
+}
+
+function JsonValue({ value, keyName }: { value: unknown; keyName?: string }) {
+  if (value === null || value === undefined || typeof value !== "object") {
+    return <JsonPrimitive keyName={keyName} value={value} />;
+  }
+
+  if (Array.isArray(value)) {
+    if (!value.length) return <span className="text-zinc-500">[]</span>;
+    return (
+      <span>
+        {"["}
+        {value.map((item, index) => (
+          <span key={index} className="block pl-4">
+            <JsonValue value={item} />
+            {index < value.length - 1 ? "," : ""}
+          </span>
+        ))}
+        {"]"}
+      </span>
+    );
+  }
+
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (!entries.length) return <span className="text-zinc-500">{"{}"}</span>;
+
+  return (
+    <span>
+      {"{"}
+      {entries.map(([key, val], index) => (
+        <span key={key} className="block pl-4">
+          <span className="text-sky-300">{key}</span>
+          <span className="text-zinc-500">: </span>
+          <JsonValue value={val} keyName={key} />
+          {index < entries.length - 1 ? "," : ""}
+        </span>
+      ))}
+      {"}"}
+    </span>
+  );
+}
+
 function LevelBadge({ level }: { level: AdminLogLevel }) {
   const meta = LEVEL_META[level];
   return (
@@ -81,22 +198,37 @@ function SourceBadge({ source }: { source: AdminLogSource }) {
   );
 }
 
-function LogRow({ entry }: { entry: AdminLogEntry }) {
+function LogRow({ entry, search }: { entry: AdminLogEntry; search: string }) {
+  const accent =
+    entry.level === "ERROR"
+      ? "border-l-2 border-l-red-500/60 bg-red-500/[0.03]"
+      : entry.level === "WARN"
+        ? "border-l-2 border-l-yellow-500/50 bg-yellow-500/[0.03]"
+        : "border-l-2 border-l-transparent";
+
   return (
-    <div className="flex items-start gap-2.5 rounded-lg border border-white/5 bg-neutral-900/60 px-3 py-2 hover:border-white/10 transition-colors">
+    <div
+      className={`flex items-start gap-2.5 rounded-lg border border-white/5 px-3 py-2 hover:border-white/10 transition-colors ${accent} bg-neutral-900/60`}
+    >
       <span className="mt-0.5 text-[11px] text-zinc-500 font-mono shrink-0 w-[78px]">
         {formatTime(entry.timestamp)}
       </span>
       <LevelBadge level={entry.level} />
       <SourceBadge source={entry.source} />
-      <span className="text-[11px] text-zinc-400 font-mono shrink-0">[{entry.scope}]</span>
+      <span className={`text-[11px] font-mono font-medium shrink-0 ${scopeColor(entry.scope)}`}>
+        [{entry.scope}]
+      </span>
       <div className="min-w-0 flex-1">
-        <p className="text-xs text-zinc-200 font-[Poppins] break-words">{entry.message}</p>
+        <p className="text-xs text-zinc-200 font-[Poppins] break-words">
+          <HighlightMatch text={entry.message} query={search} />
+        </p>
         {entry.details !== undefined && entry.details !== null && (
-          <pre className="mt-1 max-h-40 overflow-auto rounded-md bg-black/30 p-2 text-[11px] text-zinc-400 font-mono whitespace-pre-wrap break-words">
-            {typeof entry.details === "string"
-              ? entry.details
-              : JSON.stringify(entry.details, null, 2)}
+          <pre className="mt-1.5 max-h-48 overflow-auto rounded-md bg-black/30 p-2.5 text-[11px] font-mono leading-relaxed whitespace-pre-wrap break-words text-zinc-300">
+            {typeof entry.details === "string" ? (
+              entry.details
+            ) : (
+              <JsonValue value={entry.details} />
+            )}
           </pre>
         )}
       </div>
@@ -266,7 +398,9 @@ export function LogsPage() {
             </p>
           </div>
         ) : (
-          filtered.map((entry) => <LogRow key={entry.id} entry={entry} />)
+          filtered.map((entry) => (
+            <LogRow key={entry.id} entry={entry} search={search.trim()} />
+          ))
         )}
       </div>
 
