@@ -1,7 +1,7 @@
 ﻿import axios from "axios";
 import { logger } from "@/shared/lib/logger";
 
-const API_KEY =
+export const apiKey =
   import.meta.env.VITE_API_KEY || "YCQHmf3Zvti8FIi4PC38T4ert4v8zIOp";
 const configuredBaseURL = import.meta.env.VITE_API_BASE_URL?.trim();
 export const baseURL =
@@ -13,13 +13,13 @@ export const baseURL =
 export const api = axios.create({
   baseURL,
   withCredentials: true,
-  headers: { "x-api-key": API_KEY },
+  headers: { "x-api-key": apiKey },
 });
 
 export const publicApi = axios.create({
   baseURL,
   withCredentials: false,
-  headers: { "x-api-key": API_KEY },
+  headers: { "x-api-key": apiKey },
 });
 
 api.interceptors.response.use(

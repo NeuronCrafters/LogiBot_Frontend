@@ -1,19 +1,28 @@
 import logo from "@/assets/logo.svg";
+import type { ChatStreamStage } from "@/features/chat/api/chatApi";
 
 interface ChatTypingDotsProps {
-  jobStatus?: "queued" | "running";
-  queuePosition?: number | null;
+  streamStage?: ChatStreamStage;
 }
 
-function getQueueLabel({ jobStatus, queuePosition }: ChatTypingDotsProps) {
-  if (jobStatus === "queued" && queuePosition && queuePosition > 1) {
-    return `Aguardando na fila (posição ${queuePosition})`;
+function getStageLabel(streamStage?: ChatStreamStage) {
+  if (streamStage === "queued") {
+    return "Aguardando na fila";
+  }
+  if (streamStage === "history") {
+    return "Carregando contexto";
+  }
+  if (streamStage === "rag") {
+    return "Consultando materiais";
+  }
+  if (streamStage === "agent") {
+    return "Gerando resposta";
   }
   return null;
 }
 
-export function ChatTypingDots({ jobStatus, queuePosition }: ChatTypingDotsProps) {
-  const queueLabel = getQueueLabel({ jobStatus, queuePosition });
+export function ChatTypingDots({ streamStage }: ChatTypingDotsProps) {
+  const stageLabel = getStageLabel(streamStage);
 
   return (
     <div className="flex gap-3 mb-6 px-2">
@@ -24,9 +33,9 @@ export function ChatTypingDots({ jobStatus, queuePosition }: ChatTypingDotsProps
       </div>
       <div className="bg-[#2a2a2a] border border-neutral-700 px-4 py-3 rounded-2xl rounded-bl-sm">
         <div className="flex items-center gap-3 min-h-5">
-          {queueLabel && (
+          {stageLabel && (
             <span className="font-[Poppins] text-xs text-zinc-300">
-              {queueLabel}
+              {stageLabel}
             </span>
           )}
           <span
