@@ -53,6 +53,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   const {
     messages,
     mode,
+    resumeOpenJobs,
     sendMessage,
     setMessages,
     setMode,
@@ -135,6 +136,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
           setMessages(formatted);
           setMode("chat");
           setSessionId(sessionIdFromUrl);
+          void resumeOpenJobs(sessionIdFromUrl);
 
           setTimeout(() => scrollToBottom(false), 100);
         }
@@ -154,6 +156,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     setMessages,
     setMode,
     setSessionId,
+    resumeOpenJobs,
     scrollToBottom,
   ]);
 
