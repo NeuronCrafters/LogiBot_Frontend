@@ -111,6 +111,15 @@ const markdownComponents = {
   h3: ({ node, ...props }: any) => (
     <h3 className="text-base font-bold text-white mt-2 mb-1" {...props} />
   ),
+  h4: ({ node, ...props }: any) => (
+    <h4 className="text-sm font-bold text-white mt-2 mb-1" {...props} />
+  ),
+  h5: ({ node, ...props }: any) => (
+    <h5 className="text-sm font-semibold text-white mt-2 mb-1" {...props} />
+  ),
+  h6: ({ node, ...props }: any) => (
+    <h6 className="text-sm font-semibold text-gray-200 mt-2 mb-1" {...props} />
+  ),
   hr: () => null,
   blockquote: ({ node, ...props }: any) => (
     <blockquote
