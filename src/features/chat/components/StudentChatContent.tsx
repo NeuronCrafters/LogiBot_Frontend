@@ -4,7 +4,14 @@ import { User } from "@/app/providers/AuthContext";
 import { ChatInput } from "@/features/chat/components/ChatInput";
 import { useChatFlow, type ChatMessage } from "@/features/chat/hooks/useChatFlow";
 import { useChatHistory } from "@/features/chat/hooks/useChatHistory";
-import { memo, useState, useRef, useEffect, useCallback } from "react";
+import {
+  memo,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { MarkdownMessageBubble } from "./MarkdownMessageBubble";
 import { ChatTypingDots } from "./ChatTypingDots";
@@ -91,14 +98,19 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const shouldJumpToHistoryBottomRef = useRef(false);
 
   const scrollToBottom = useCallback((smooth = true) => {
     const container = containerRef.current;
     if (container) {
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: smooth ? "smooth" : "auto",
-      });
+      if (smooth) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: "smooth",
+        });
+      } else {
+        container.scrollTop = container.scrollHeight;
+      }
       setShowScrollButton(false);
     }
   }, []);
@@ -135,11 +147,10 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
               : undefined,
           }));
 
+          shouldJumpToHistoryBottomRef.current = true;
           setMessages(formatted);
           setMode("chat");
           setSessionId(sessionIdFromUrl);
-
-          setTimeout(() => scrollToBottom(false), 100);
         }
       } catch (error) {
         logger.error("Chat", "Erro ao carregar histórico.", error);
@@ -157,7 +168,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     setMessages,
     setMode,
     setSessionId,
-    scrollToBottom,
   ]);
 
   const checkScrollPosition = useCallback(() => {
@@ -168,8 +178,14 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     }
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (mode !== "chat" && !sessionIdFromUrl) return;
+
+    if (shouldJumpToHistoryBottomRef.current) {
+      shouldJumpToHistoryBottomRef.current = false;
+      scrollToBottom(false);
+      return;
+    }
 
     const frameId = window.requestAnimationFrame(() => scrollToBottom(true));
     const timeoutId = window.setTimeout(() => scrollToBottom(true), 50);
@@ -211,7 +227,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         id="chat-container"
         ref={containerRef}
         onScroll={checkScrollPosition}
-        className="absolute inset-0 overflow-y-auto scroll-smooth"
+        className="absolute inset-0 overflow-y-auto"
       >
         {(mode === "chat" || sessionIdFromUrl) && (
           <div className="w-full max-w-3xl mx-auto px-4 pt-6 pb-44 flex flex-col">
