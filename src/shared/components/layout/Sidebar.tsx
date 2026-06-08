@@ -16,7 +16,6 @@ import {
   MessageCircle,
   Clock,
   Inbox,
-  ScrollText,
 } from "lucide-react";
 import logoMascote from "@/assets/logo.svg";
 
@@ -92,12 +91,6 @@ function buildStaffSections(role: Role): NavSection[] {
       path: "/admin/feedbacks",
       icon: <Inbox className="w-4 h-4" />,
       label: "Feedbacks",
-    });
-  if (role === "admin")
-    gestao.push({
-      path: "/admin/logs",
-      icon: <ScrollText className="w-4 h-4" />,
-      label: "Logs",
     });
   if (["admin", "teacher", "course-coordinator"].includes(role))
     gestao.push({
