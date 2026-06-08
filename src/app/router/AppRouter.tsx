@@ -48,6 +48,9 @@ const RagManagementPage = React.lazy(() =>
 const FeedbackManagement = React.lazy(() =>
   import("@/features/feedback/pages/FeedbackManagementPage").then((m) => ({ default: m.FeedbackManagementPage })),
 );
+const Logs = React.lazy(() =>
+  import("@/features/admin/pages/LogsPage").then((m) => ({ default: m.LogsPage })),
+);
 
 function PageLoader() {
   return (
@@ -176,6 +179,14 @@ export default function AppRouter() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <FeedbackManagement />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/logs"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Logs />
               </Suspense>
             }
           />

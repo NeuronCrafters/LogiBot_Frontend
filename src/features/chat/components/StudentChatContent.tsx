@@ -31,7 +31,11 @@ const ChatMessageList = memo(function ChatMessageList({
 
       {messages.map((msg, index) =>
         msg.type === "typing" ? (
-          <ChatTypingDots key={msg.id || index} />
+          <ChatTypingDots
+            key={msg.id || index}
+            jobStatus={msg.jobStatus}
+            queuePosition={msg.queuePosition}
+          />
         ) : (
           <MarkdownMessageBubble
             key={msg.id || index}

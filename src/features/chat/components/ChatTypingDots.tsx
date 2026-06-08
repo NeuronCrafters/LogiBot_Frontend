@@ -1,6 +1,18 @@
 import logo from "@/assets/logo.svg";
 
-export function ChatTypingDots() {
+interface ChatTypingDotsProps {
+  jobStatus?: "queued" | "running";
+  queuePosition?: number | null;
+}
+
+function getStatusLabel({ jobStatus, queuePosition }: ChatTypingDotsProps) {
+  if (jobStatus === "queued" && queuePosition && queuePosition > 1) {
+    return `Aguardando na fila (posição ${queuePosition})`;
+  }
+  return "Gerando resposta";
+}
+
+export function ChatTypingDots({ jobStatus, queuePosition }: ChatTypingDotsProps) {
   return (
     <div className="flex gap-3 mb-6 px-2">
       <div className="flex-shrink-0 mt-1">
@@ -11,7 +23,7 @@ export function ChatTypingDots() {
       <div className="bg-[#2a2a2a] border border-neutral-700 px-4 py-3 rounded-2xl rounded-bl-sm">
         <div className="flex items-center gap-3 min-h-5">
           <span className="font-[Poppins] text-xs text-zinc-300">
-            Aguardando na fila
+            {getStatusLabel({ jobStatus, queuePosition })}
           </span>
           <span
             className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce"

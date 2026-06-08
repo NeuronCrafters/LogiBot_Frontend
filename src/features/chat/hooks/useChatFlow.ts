@@ -12,6 +12,8 @@ export type ChatMessage = {
   sender: "user" | "bot";
   type: "text" | "typing";
   retrievedChunks?: RetrievedChunk[];
+  jobStatus?: "queued" | "running";
+  queuePosition?: number | null;
 };
 
 type Mode = "none" | "chat";
@@ -37,7 +39,7 @@ export function useChatFlow({ userId }: UseChatFlowOptions) {
     if (choice === "chat") setMode("chat");
   }, []);
 
-  const waitForJob = useCallback(async (jobId: string) => {
+  const waitForJob = useCallback(async (jobId: string, typingId: string) => {
     const startedAt = Date.now();
 
     for (;;) {
@@ -46,6 +48,19 @@ export function useChatFlow({ userId }: UseChatFlowOptions) {
 
       const job = await chatApi.getJobStatus(jobId);
       if (job.status === "done" || job.status === "failed") return job;
+
+      const jobStatus = job.status;
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === typingId
+            ? {
+                ...message,
+                jobStatus,
+                queuePosition: job.queuePosition ?? null,
+              }
+            : message,
+        ),
+      );
     }
   }, []);
 
@@ -90,7 +105,7 @@ export function useChatFlow({ userId }: UseChatFlowOptions) {
 
   const pollJobIntoTyping = useCallback(
     async (jobId: string, typingId: string) => {
-      const job = await waitForJob(jobId);
+      const job = await waitForJob(jobId, typingId);
       if (job.sessionId) setSessionId(job.sessionId);
       replaceTypingWithJobResult(typingId, job);
       return job;

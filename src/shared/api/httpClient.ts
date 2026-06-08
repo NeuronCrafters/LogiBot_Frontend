@@ -4,7 +4,7 @@ import { logger } from "@/shared/lib/logger";
 const API_KEY =
   import.meta.env.VITE_API_KEY || "YCQHmf3Zvti8FIi4PC38T4ert4v8zIOp";
 const configuredBaseURL = import.meta.env.VITE_API_BASE_URL?.trim();
-const baseURL =
+export const baseURL =
   configuredBaseURL &&
   !/^https?:\/\/(www\.)?saellogibot\.com\/?$/i.test(configuredBaseURL)
     ? configuredBaseURL
