@@ -176,7 +176,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
   };
 
   return (
-    <div className="flex flex-col h-full w-56">
+    <div className="flex flex-col h-full w-60">
       <div className="flex items-center gap-2.5 px-4 py-4 shrink-0">
         <img
           src={logoMascote}
@@ -215,7 +215,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
       </nav>
 
       {isStudent && (
-        <div className="flex-1 flex flex-col min-h-0 mt-4 border-t border-white/5">
+        <div className="flex-1 flex flex-col min-h-0 mt-4 border-t border-[rgba(255,255,255,0.05)]">
           <div className="px-2 pt-4 pb-2 shrink-0">
             <div className="flex items-center justify-between px-1 mb-2">
               <div className="flex items-center gap-1.5">
@@ -242,7 +242,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
               </button>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-2 pb-2 [&::-webkit-scrollbar]:hidden">
+          <div className="flex-1 overflow-y-auto pl-2 pb-2 [&::-webkit-scrollbar]:hidden">
             {historyFilter === "chat" ? (
               <ChatHistory userId={user._id} closeMenu={onMobileClose} />
             ) : (
@@ -254,7 +254,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
 
       {!isStudent && <div className="flex-1" />}
 
-      <div className="px-2 pb-1 pt-3 border-t border-white/5 shrink-0">
+      <div className="px-2 pb-1 pt-3 border-t border-[rgba(255,255,255,0.05)] shrink-0">
         {contaSection && (
           <div className="mb-2">
             <SectionLabel label={contaSection.label} />

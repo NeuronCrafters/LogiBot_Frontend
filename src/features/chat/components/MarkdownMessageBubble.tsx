@@ -2,18 +2,20 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Copy, Check, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import logo from "@/assets/logo.svg";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import type { RetrievedChunk } from "@/features/chat/api/chatApi";
 
-const CodeBlock = ({
+const remarkPlugins = [remarkGfm];
+
+const CodeBlock = memo(function CodeBlock({
   language,
   children,
 }: {
   language: string;
   children: string;
-}) => {
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -62,7 +64,7 @@ const CodeBlock = ({
       </SyntaxHighlighter>
     </div>
   );
-};
+});
 
 const markdownComponents = {
   code: ({ node, inline, className, children, ...props }: any) => {
@@ -147,7 +149,7 @@ interface MarkdownMessageBubbleProps {
   retrievedChunks?: RetrievedChunk[];
 }
 
-function SourcesPanel({ chunks }: { chunks: RetrievedChunk[] }) {
+const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedChunk[] }) {
   const [expanded, setExpanded] = useState(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -201,9 +203,9 @@ function SourcesPanel({ chunks }: { chunks: RetrievedChunk[] }) {
       )}
     </div>
   );
-}
+});
 
-export function MarkdownMessageBubble({
+export const MarkdownMessageBubble = memo(function MarkdownMessageBubble({
   text,
   sender,
   retrievedChunks,
@@ -230,7 +232,7 @@ export function MarkdownMessageBubble({
         </div>
       </div>
       <div className="flex-1 min-w-0 text-sm font-[Poppins]">
-        <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+        <Markdown remarkPlugins={remarkPlugins} components={markdownComponents}>
           {text}
         </Markdown>
         {retrievedChunks && retrievedChunks.length > 0 && (
@@ -239,4 +241,4 @@ export function MarkdownMessageBubble({
       </div>
     </div>
   );
-}
+});

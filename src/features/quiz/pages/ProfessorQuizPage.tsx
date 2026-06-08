@@ -13,6 +13,7 @@ import {
   Pencil,
   Plus,
   Send,
+  Sparkles,
   Trash2,
   Users,
   X,
@@ -25,6 +26,7 @@ import type {
   ProfessorQuiz,
   QuizQuestionWithAnswer,
 } from "@/features/quiz/types";
+import { AiQuizForm } from "@/features/quiz/components/AiQuizForm";
 import { AppModal } from "@/shared/components/feedback/AppModal";
 import { toast } from "@/shared/lib/toast";
 import { Select } from "@/components/ui/select";
@@ -404,6 +406,12 @@ function QuestionsPanel({ quizId }: { quizId: string }) {
                   </span>
                 ))}
               </div>
+              {q.explanation && (
+                <p className="mt-2 font-[Poppins] text-[11px] leading-relaxed text-zinc-500">
+                  <span className="font-semibold text-zinc-400">Explicação: </span>
+                  {q.explanation}
+                </p>
+              )}
             </div>
             <div className="flex gap-1 shrink-0">
               <button
@@ -631,6 +639,12 @@ function QuizCard({
             <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-[10px] text-zinc-500">
               {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
             </span>
+            {quiz.generationSource === "ai" && (
+              <span className="flex items-center gap-1 rounded-md border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-purple-400">
+                <Sparkles className="h-2.5 w-2.5" />
+                IA
+              </span>
+            )}
             <span className="font-[Poppins] text-[10px] text-zinc-600">
               {quiz.questionCount} {quiz.questionCount === 1 ? "questão" : "questões"}
             </span>
@@ -719,6 +733,7 @@ export function ProfessorQuizPage() {
   const queryClient = useQueryClient();
 
   const [createModal, setCreateModal] = useState(false);
+  const [aiModal, setAiModal] = useState(false);
   const [editTarget, setEditTarget] = useState<ProfessorQuiz | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ProfessorQuiz | null>(null);
   const [resultsQuizId, setResultsQuizId] = useState<string | null>(null);
@@ -833,13 +848,22 @@ export function ProfessorQuizPage() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setCreateModal(true)}
-              className="flex items-center gap-1.5 self-start rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 sm:self-auto"
-            >
-              <Plus className="h-4 w-4" />
-              Criar Quiz
-            </button>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <button
+                onClick={() => setAiModal(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 font-[Poppins] text-sm font-semibold text-indigo-300 transition-colors hover:border-indigo-500/60 hover:bg-indigo-500/20"
+              >
+                <Sparkles className="h-4 w-4" />
+                Criar com IA
+              </button>
+              <button
+                onClick={() => setCreateModal(true)}
+                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+              >
+                <Plus className="h-4 w-4" />
+                Criar Quiz
+              </button>
+            </div>
           </div>
         </section>
 
@@ -877,13 +901,22 @@ export function ProfessorQuizPage() {
                 Crie seu primeiro quiz para os alunos das suas disciplinas.
               </p>
             </div>
-            <button
-              onClick={() => setCreateModal(true)}
-              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white hover:bg-indigo-700"
-            >
-              <Plus className="h-4 w-4" />
-              Criar Quiz
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setAiModal(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 font-[Poppins] text-sm font-semibold text-indigo-300 hover:border-indigo-500/60 hover:bg-indigo-500/20"
+              >
+                <Sparkles className="h-4 w-4" />
+                Criar com IA
+              </button>
+              <button
+                onClick={() => setCreateModal(true)}
+                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white hover:bg-indigo-700"
+              >
+                <Plus className="h-4 w-4" />
+                Criar Quiz
+              </button>
+            </div>
           </div>
         )}
 
@@ -911,6 +944,18 @@ export function ProfessorQuizPage() {
           </div>
         )}
       </div>
+
+      {/* AI generate modal */}
+      {aiModal && (
+        <Modal
+          title="Criar Quiz com IA"
+          icon={<Sparkles className="h-5 w-5" />}
+          onClose={() => setAiModal(false)}
+          wide
+        >
+          <AiQuizForm onClose={() => setAiModal(false)} />
+        </Modal>
+      )}
 
       {/* Create modal */}
       {createModal && (

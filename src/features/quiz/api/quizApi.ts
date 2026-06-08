@@ -1,5 +1,7 @@
 import { api } from "@/shared/api/httpClient";
 import type {
+  AiQuizGenerationInput,
+  AiQuizGenerationResult,
   ProfessorQuiz,
   ProfessorQuizResult,
   QuizAttemptResult,
@@ -94,6 +96,15 @@ export const professorQuizApi = {
 
   async getResults(quizId: string): Promise<ProfessorQuizResult> {
     const res = await api.get(`/quiz/professor/${quizId}/results`, { withCredentials: true });
+    return res.data;
+  },
+
+  async generateAiQuiz(
+    data: AiQuizGenerationInput,
+  ): Promise<AiQuizGenerationResult> {
+    const res = await api.post("/quiz/professor/generate-ai", data, {
+      withCredentials: true,
+    });
     return res.data;
   },
 };

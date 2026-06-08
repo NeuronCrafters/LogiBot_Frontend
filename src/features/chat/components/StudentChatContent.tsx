@@ -2,9 +2,9 @@
 import { logger } from "@/shared/lib/logger";
 import { User } from "@/app/providers/AuthContext";
 import { ChatInput } from "@/features/chat/components/ChatInput";
-import { useChatFlow } from "@/features/chat/hooks/useChatFlow";
+import { useChatFlow, type ChatMessage } from "@/features/chat/hooks/useChatFlow";
 import { useChatHistory } from "@/features/chat/hooks/useChatHistory";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { memo, useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { MarkdownMessageBubble } from "./MarkdownMessageBubble";
 import { ChatTypingDots } from "./ChatTypingDots";
@@ -14,6 +14,37 @@ interface StudentChatContentProps {
   user: User;
 }
 
+const ChatMessageList = memo(function ChatMessageList({
+  messages,
+  loadingHistory,
+}: {
+  messages: ChatMessage[];
+  loadingHistory: boolean;
+}) {
+  return (
+    <>
+      {messages.length === 0 && !loadingHistory && (
+        <div className="text-center text-neutral-500 py-10 font-[Poppins] text-sm">
+          Inicie a conversa abaixo...
+        </div>
+      )}
+
+      {messages.map((msg, index) =>
+        msg.type === "typing" ? (
+          <ChatTypingDots key={msg.id || index} />
+        ) : (
+          <MarkdownMessageBubble
+            key={msg.id || index}
+            text={msg.text}
+            sender={msg.sender}
+            retrievedChunks={msg.retrievedChunks}
+          />
+        ),
+      )}
+    </>
+  );
+});
+
 const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   const userId = user?._id || "user";
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,8 +53,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   const {
     messages,
     mode,
-    inputText,
-    setInputText,
     sendMessage,
     setMessages,
     setMode,
@@ -74,6 +103,10 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   useEffect(() => {
     async function loadHistory() {
       if (!sessionIdFromUrl) return;
+      if (sessionIdFromUrl === sessionId && messages.length > 0) {
+        setMode("chat");
+        return;
+      }
 
       setLoadingHistory(true);
 
@@ -115,7 +148,9 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     loadHistory();
   }, [
     sessionIdFromUrl,
+    sessionId,
     userId,
+    messages.length,
     setMessages,
     setMode,
     setSessionId,
@@ -142,7 +177,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     };
   }, [messages, mode, sessionIdFromUrl, scrollToBottom]);
 
-  const handleSendWrapper = async (text: string) => {
+  const handleSendWrapper = useCallback(async (text: string) => {
     scrollToBottom();
     setIsWaitingResponse(true);
     try {
@@ -152,7 +187,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     } finally {
       setIsWaitingResponse(false);
     }
-  };
+  }, [scrollToBottom, sendMessage]);
 
   if (loadingHistory) {
     return (
@@ -177,24 +212,10 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
       >
         {(mode === "chat" || sessionIdFromUrl) && (
           <div className="w-full max-w-3xl mx-auto px-4 pt-6 pb-44 flex flex-col">
-            {messages.length === 0 && !loadingHistory && (
-              <div className="text-center text-neutral-500 py-10 font-[Poppins] text-sm">
-                Inicie a conversa abaixo...
-              </div>
-            )}
-
-            {messages.map((msg, index) =>
-              msg.type === "typing" ? (
-                <ChatTypingDots key={msg.id || index} />
-              ) : (
-                <MarkdownMessageBubble
-                  key={msg.id || index}
-                  text={msg.text}
-                  sender={msg.sender as "user" | "bot"}
-                  retrievedChunks={msg.retrievedChunks}
-                />
-              ),
-            )}
+            <ChatMessageList
+              messages={messages}
+              loadingHistory={loadingHistory}
+            />
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -203,8 +224,6 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
       {(mode === "chat" || sessionIdFromUrl) && (
         <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-neutral-900 via-neutral-900/80 to-transparent pt-10">
           <ChatInput
-            inputText={inputText}
-            setInputText={setInputText}
             sendMessage={handleSendWrapper}
             isWaitingResponse={isWaitingResponse}
           />

@@ -24,6 +24,11 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
   });
 
   const handleSelect = (sessionId: string) => {
+    if (sessionId === activeSessionId) {
+      closeMenu?.();
+      return;
+    }
+
     navigate(`/chat?session=${sessionId}`);
     closeMenu?.();
   };
@@ -76,10 +81,10 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
             <div
               key={session.sessionId}
               onClick={() => handleSelect(session.sessionId)}
-              className={`group flex items-start gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+              className={`group flex items-start gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
                 session.sessionId === activeSessionId
-                  ? "bg-white/10 border border-white/10"
-                  : "hover:bg-white/5"
+                  ? "border-[rgba(255,255,255,0.10)] bg-white/[0.08]"
+                  : "border-transparent hover:border-[rgba(255,255,255,0.06)] hover:bg-white/[0.04]"
               }`}
             >
               <MessageSquare
