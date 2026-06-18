@@ -2,13 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, Brain, GraduationCap, Loader2, Plus } from "lucide-react";
 import { quizHistoryApi } from "@/features/quiz/api/quizApi";
-import { QUIZ_TOPICS } from "@/features/quiz/types";
 import { formatRelativeTime } from "@/shared/lib/formatDate";
 import { Button } from "@/components/ui/button";
-
-const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
-  QUIZ_TOPICS.map((t) => [t.value, t.label]),
-);
 
 interface QuizHistoryProps {
   userId: string;
@@ -50,7 +45,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
     <div className="flex w-full flex-col gap-1">
       <Button
         onClick={handleNewQuiz}
-        className="mb-1 h-9 w-full gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600 font-[Poppins] text-xs font-medium text-white transition-colors hover:bg-indigo-500"
+        className="mb-1 h-9 w-full px-3 gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600 font-[Poppins] text-xs font-medium text-white transition-colors hover:bg-indigo-500"
       >
         <Plus size={14} />
         Ver quizzes
@@ -86,17 +81,6 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
                 <span className="truncate font-[Poppins] text-xs leading-snug text-zinc-300 transition-colors group-hover:text-white">
                   {quiz.title || "Quiz"}
                 </span>
-                <div className="flex items-center gap-2 leading-snug">
-                  <span className="font-[Poppins] text-[10px] text-zinc-600">
-                    {quiz.disciplineName}
-                  </span>
-                  <span className="font-[Poppins] text-[10px] text-zinc-700">
-                    ·
-                  </span>
-                  <span className="font-[Poppins] text-[10px] text-zinc-600">
-                    {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
-                  </span>
-                </div>
                 <div className="flex items-center gap-2 leading-snug">
                   <span className="font-[Poppins] text-[11px] text-zinc-600">
                     {formatRelativeTime(new Date(quiz.completedAt))}

@@ -105,7 +105,7 @@ export function AuthPage({ mode }: AuthPageProps) {
         isOpen={showConsent}
         type="consent"
         title="Consentimento para coleta de dados"
-        description="O LogiBots.AI coleta dados de uso com finalidade educacional e para melhorar a sua experiência, tudo em conformidade com a LGPD."
+        description="O LogiBot.AI coleta dados de uso com finalidade educacional e para melhorar a sua experiência, tudo em conformidade com a LGPD."
         onConfirm={handleAcceptConsent}
         onClose={() => setShowConsent(false)}
       />
@@ -119,7 +119,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               className="absolute left-8 top-8 flex items-center gap-2"
             >
               <span className="font-[Poppins] text-lg font-bold text-white">
-                LogiBots.AI
+                LogiBot.AI
               </span>
             </Link>
             <div className="relative flex flex-col items-center text-center">
@@ -130,7 +130,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                 Aprenda lógica com apoio inteligente.
               </h1>
               <p className="mt-3 max-w-xs text-sm leading-relaxed text-zinc-500">
-                Entre para continuar sua jornada no LogiBots.AI.
+                Entre para continuar sua jornada no LogiBot.AI.
               </p>
             </div>
           </section>
@@ -142,7 +142,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                   to="/"
                   className="mx-auto flex w-fit items-center gap-2 text-lg font-bold text-white"
                 >
-                  LogiBots.AI
+                  LogiBot.AI
                 </Link>
               </div>
 
@@ -153,7 +153,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">
                   {isSignup
                     ? "Preencha seus dados de acesso."
-                    : "Acesse sua conta do LogiBots.AI."}
+                    : "Acesse sua conta do LogiBot.AI."}
                 </p>
               </div>
 

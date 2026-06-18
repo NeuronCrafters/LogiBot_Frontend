@@ -14,7 +14,6 @@ import {
   Brain,
   Database,
   MessageCircle,
-  Clock,
   Inbox,
 } from "lucide-react";
 import logoMascote from "@/assets/logo.svg";
@@ -180,11 +179,11 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
       <div className="flex items-center gap-2.5 px-4 py-4 shrink-0">
         <img
           src={logoMascote}
-          alt="LogiBots"
+          alt="LogiBot"
           className="h-7 w-7 object-contain"
         />
         <span className="font-[Poppins] font-bold text-[16px] text-white leading-none">
-          LogiBots.AI
+          LogiBot.AI
         </span>
         {onMobileClose && (
           <button
@@ -215,16 +214,9 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
       </nav>
 
       {isStudent && (
-        <div className="flex-1 flex flex-col min-h-0 mt-4 border-t border-[rgba(255,255,255,0.05)]">
-          <div className="px-2 pt-4 pb-2 shrink-0">
-            <div className="flex items-center justify-between px-1 mb-2">
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-zinc-600" />
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600 font-[Poppins]">
-                  Histórico
-                </p>
-              </div>
-            </div>
+        <div className="flex-1 flex flex-col min-h-0 mt-4 border-t border-white/5">
+          <div className="px-2 pt-3 pb-2 shrink-0 space-y-2">
+            <SectionLabel label="Histórico" />
             <div className="flex bg-white/5 rounded-lg p-1 gap-1">
               <button
                 onClick={() => setHistoryFilter("chat")}
@@ -242,7 +234,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
               </button>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto pl-2 pb-2 [&::-webkit-scrollbar]:hidden">
+          <div className="flex-1 overflow-y-auto px-2 pb-2 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
             {historyFilter === "chat" ? (
               <ChatHistory userId={user._id} closeMenu={onMobileClose} />
             ) : (
@@ -254,7 +246,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
 
       {!isStudent && <div className="flex-1" />}
 
-      <div className="px-2 pb-1 pt-3 border-t border-[rgba(255,255,255,0.05)] shrink-0">
+      <div className="px-2 pb-3 pt-3 border-t border-white/5 shrink-0">
         {contaSection && (
           <div className="mb-2">
             <SectionLabel label={contaSection.label} />

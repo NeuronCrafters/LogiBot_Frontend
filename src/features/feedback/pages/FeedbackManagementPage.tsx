@@ -165,7 +165,8 @@ export function FeedbackManagementPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 font-[Poppins]">
+    <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto w-full max-w-5xl font-[Poppins]">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">
           Feedbacks dos Alunos
@@ -248,5 +249,6 @@ export function FeedbackManagementPage() {
         </div>
       )}
     </div>
+    </main>
   );
 }

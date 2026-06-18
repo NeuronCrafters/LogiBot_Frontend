@@ -55,7 +55,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
     <div className="flex flex-col w-full gap-1">
       <Button
         onClick={handleNewChat}
-        className="w-full h-9 bg-blue-600 hover:bg-blue-500 text-white text-xs font-[Poppins] font-medium rounded-lg border border-blue-500/30 transition-colors gap-1.5 mb-1"
+        className="w-full h-9 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-[Poppins] font-medium rounded-lg border border-blue-500/30 transition-colors gap-1.5 mb-1"
       >
         <Plus size={14} />
         Nova conversa
@@ -83,8 +83,8 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
               onClick={() => handleSelect(session.sessionId)}
               className={`group flex items-start gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
                 session.sessionId === activeSessionId
-                  ? "border-[rgba(255,255,255,0.10)] bg-white/[0.08]"
-                  : "border-transparent hover:border-[rgba(255,255,255,0.06)] hover:bg-white/[0.04]"
+                  ? "border-white/10 bg-white/[0.08]"
+                  : "border-transparent hover:border-white/5 hover:bg-white/[0.04]"
               }`}
             >
               <MessageSquare
