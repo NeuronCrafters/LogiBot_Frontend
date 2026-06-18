@@ -11,10 +11,9 @@ import { BarChart, Bar, CartesianGrid, XAxis } from "recharts";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { api } from "@/shared/api/httpClient";
 import type { DashboardFilterState } from "@/features/dashboard/filterTypes";
-import logApiSmart from "@/features/dashboard/api/logsSmartApi";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
+import { dashboardFiltersFromLegacy } from "../../insightFilters";
 
 export function formatTimeWithDays(seconds: number): string {
   const totalSeconds = Math.floor(seconds);
@@ -37,12 +36,6 @@ interface UsageChartProps {
 }
 
 function useUsageData(filter: UsageChartProps["filter"]) {
-  const { user } = useAuth();
-  const userRoles: string[] = Array.isArray(user?.role)
-    ? user.role
-    : user?.role
-      ? [user.role]
-      : [];
   const validIds = Array.isArray(filter.ids)
     ? filter.ids.filter((id) => typeof id === "string" && id.trim() !== "")
     : [];
@@ -61,40 +54,10 @@ function useUsageData(filter: UsageChartProps["filter"]) {
       courseId,
       classId,
       disciplineId,
-      userRoles,
     ],
     queryFn: async () => {
       if (!mainId)
         throw new Error(`IDs insuficientes para tipo: ${filter.type}`);
-      const isProfessor = userRoles.includes("professor");
-      const isCoordinator = userRoles.includes("course-coordinator");
-      const isAdmin = userRoles.includes("admin");
-      const useSmartApi =
-        !isCoordinator &&
-        !isAdmin &&
-        isProfessor &&
-        (filter.type === "discipline" ||
-          (filter.type === "student" && !!disciplineId));
-      if (useSmartApi) {
-        const response = await logApiSmart.fetchSummary(
-          userRoles,
-          filter.type,
-          mainId,
-          {
-            universityId,
-            courseId,
-            classId,
-            studentId: isStudent ? mainId : undefined,
-            disciplineId: filter.type === "discipline" ? mainId : disciplineId,
-          },
-        );
-        return {
-          totalUsageTime: response.usageTimeInSeconds,
-          usageTime: response.usageTime,
-          dailyUsage: response.dailyUsage || [],
-          sessions: response.sessions || [],
-        };
-      }
       if (isStudent) {
         const response = await api.post("/logs/students/summary", {
           universityId,
@@ -171,7 +134,7 @@ export function UsageChart({ filter }: UsageChartProps) {
       className="bg-[#1f1f1f] border-white/10 flex flex-col"
     >
       <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-28">
+        <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               Tempo de Uso Diário
@@ -194,6 +157,12 @@ export function UsageChart({ filter }: UsageChartProps) {
             containerId="usage-chart"
             fileName="tempo_de_uso"
             info="Exibe o tempo de uso diário em minutos para o período analisado."
+            insight={{
+              chart: "usage",
+              title: "Tempo de uso diário",
+              filters: dashboardFiltersFromLegacy(filter),
+              disabled: isLoading || !hasData,
+            }}
           />
         </div>
       </CardHeader>

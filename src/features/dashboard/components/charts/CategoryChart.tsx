@@ -21,11 +21,10 @@ import {
   ChartTooltip,
 } from "@/components/ui/chart";
 import { logApi } from "@/services/apiClient";
-import logApiSmart from "@/features/dashboard/api/logsSmartApi";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { DashboardFilterState } from "@/features/dashboard/filterTypes";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
+import { dashboardFiltersFromLegacy } from "../../insightFilters";
 
 const CHART_INFO =
   "Frequência de acesso por categoria de conteúdo no chat (Variáveis, Funções, Listas…). Indica quais assuntos de lógica de programação geram mais dúvidas entre os estudantes.";
@@ -46,12 +45,6 @@ interface CategoryChartProps {
 }
 
 function useSubjectsData(filter: CategoryChartProps["filter"]) {
-  const { user } = useAuth();
-  const userRoles: string[] = Array.isArray(user?.role)
-    ? user.role
-    : user?.role
-      ? [user.role]
-      : [];
   const validIds = Array.isArray(filter.ids)
     ? filter.ids.filter((id) => typeof id === "string" && id.trim() !== "")
     : [];
@@ -69,27 +62,10 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
       courseId,
       classId,
       disciplineId,
-      userRoles,
     ],
     queryFn: async () => {
       if (!targetId)
         throw new Error("Selecione todos os filtros para visualizar");
-      const isProfessor = userRoles.includes("professor");
-      const isCoordinator = userRoles.includes("course-coordinator");
-      const isAdmin = userRoles.includes("admin");
-      const useSmartApi =
-        !isCoordinator &&
-        !isAdmin &&
-        isProfessor &&
-        (filter.type === "discipline" ||
-          (filter.type === "student" && !!disciplineId));
-      if (useSmartApi)
-        return logApiSmart.fetchSummary(userRoles, filter.type, targetId, {
-          universityId,
-          courseId,
-          classId,
-          disciplineId,
-        });
       if (filter.type === "student")
         return logApi.getFilteredStudentSummary({
           universityId: universityId!,
@@ -157,7 +133,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
       className="bg-[#1f1f1f] border-white/10 flex flex-col h-full"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-28">
+        <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               Assuntos Mais Acessados: Chat
@@ -172,6 +148,12 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             containerId="category-chart"
             fileName="assuntos_acessados"
             info={CHART_INFO}
+            insight={{
+              chart: "chat-topics",
+              title: "Assuntos mais acessados no chat",
+              filters: dashboardFiltersFromLegacy(filter),
+              disabled: isLoading || !hasData,
+            }}
           />
         </div>
       </CardHeader>

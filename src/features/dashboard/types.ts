@@ -35,3 +35,20 @@ export interface SessionDetailsData {
   startTime: string;
   endTime: string;
 }
+
+export type DashboardInsightChart =
+  | "usage"
+  | "accuracy"
+  | "chat-topics"
+  | "general-score"
+  | "proficiency-radar"
+  | "effort-matrix"
+  | "learning-journey"
+  | "access-pattern";
+
+export interface DashboardInsightResponse {
+  insight: string;
+  generatedAt: string;
+  cached: boolean;
+  chart?: DashboardInsightChart;
+}

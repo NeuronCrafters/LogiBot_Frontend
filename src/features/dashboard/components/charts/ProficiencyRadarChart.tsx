@@ -113,7 +113,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
       className="bg-[#1f1f1f] border-white/10 flex flex-col h-full"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-28">
+        <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               Proficiência por Assunto: Quiz
@@ -128,6 +128,12 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
             containerId="proficiency-radar-chart"
             fileName="proficiencia_radar"
             info={CHART_INFO}
+            insight={{
+              chart: "proficiency-radar",
+              title: "Proficiência por assunto",
+              filters,
+              disabled: isLoading || !hasData,
+            }}
           />
         </div>
       </CardHeader>
