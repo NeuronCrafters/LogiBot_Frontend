@@ -18,12 +18,15 @@ export const ChatInput = memo(function ChatInput({
 
   const isLocked = isSending || isWaitingResponse;
   const canSend = !isLocked && inputText.trim().length > 0;
+  const [isMultiline, setIsMultiline] = useState(false);
 
   const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+      const scrollHeight = textarea.scrollHeight;
+      textarea.style.height = `${Math.min(scrollHeight, 200)}px`;
+      setIsMultiline(scrollHeight > 40);
     }
   }, []);
 
@@ -58,7 +61,7 @@ export const ChatInput = memo(function ChatInput({
   return (
     <div className="w-full px-4 pb-4 pt-2 flex justify-center">
       <div
-        className={`flex items-end gap-2 w-full max-w-3xl bg-neutral-800 border border-neutral-700 rounded-full pl-5 pr-2 py-2 shadow-lg transition-opacity ${isLocked ? "bg-neutral-700 border-neutral-600" : ""}`}
+        className={`flex items-end gap-2 w-full max-w-3xl bg-neutral-800 border border-neutral-700 ${isMultiline ? "rounded-3xl" : "rounded-full"} pl-5 pr-2 py-2 shadow-lg transition-opacity ${isLocked ? "bg-neutral-700 border-neutral-600" : ""}`}
       >
         <textarea
           ref={textareaRef}
@@ -67,7 +70,7 @@ export const ChatInput = memo(function ChatInput({
               ? "LogiBot está digitando..."
               : "Mensagem para o LogiBot"
           }
-          className="flex-1 bg-transparent text-gray-200 text-sm outline-none resize-none overflow-hidden max-h-[200px] min-h-[24px] py-1 leading-normal placeholder-neutral-500 font-[Poppins] disabled:cursor-not-allowed"
+          className="flex-1 bg-transparent text-gray-200 text-sm outline-none resize-none overflow-y-auto max-h-[200px] min-h-[24px] py-1 leading-normal placeholder-neutral-500 font-[Poppins] disabled:cursor-not-allowed"
           rows={1}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
