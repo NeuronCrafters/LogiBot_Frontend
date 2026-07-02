@@ -18,12 +18,15 @@ export const ChatInput = memo(function ChatInput({
 
   const isLocked = isSending || isWaitingResponse;
   const canSend = !isLocked && inputText.trim().length > 0;
+  const [isMultiline, setIsMultiline] = useState(false);
 
   const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+      const scrollHeight = textarea.scrollHeight;
+      textarea.style.height = `${Math.min(scrollHeight, 200)}px`;
+      setIsMultiline(scrollHeight > 40);
     }
   }, []);
 
@@ -58,7 +61,7 @@ export const ChatInput = memo(function ChatInput({
   return (
     <div className="w-full px-4 pb-4 pt-2 flex justify-center">
       <div
-        className={`w-full max-w-3xl bg-neutral-800 border border-neutral-700 rounded-2xl shadow-lg transition-opacity ${isLocked ? "bg-neutral-700 border-neutral-600" : ""}`}
+        className={`flex items-end gap-2 w-full max-w-3xl bg-neutral-800 border border-neutral-700 ${isMultiline ? "rounded-3xl" : "rounded-full"} pl-5 pr-2 py-2 shadow-lg transition-opacity ${isLocked ? "bg-neutral-700 border-neutral-600" : ""}`}
       >
         <textarea
           ref={textareaRef}
@@ -67,36 +70,31 @@ export const ChatInput = memo(function ChatInput({
               ? "LogiBot está digitando..."
               : "Mensagem para o LogiBot"
           }
-          className="w-full bg-transparent text-gray-200 text-sm outline-none pt-4 px-4 resize-none overflow-hidden max-h-[200px] min-h-[56px] leading-relaxed placeholder-neutral-500 font-[Poppins] disabled:cursor-not-allowed"
+          className="flex-1 bg-transparent text-gray-200 text-sm outline-none resize-none overflow-y-auto max-h-[200px] min-h-[24px] py-1 leading-normal placeholder-neutral-500 font-[Poppins] disabled:cursor-not-allowed"
           rows={1}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isLocked}
         />
-        <div className="flex items-center justify-between px-3 pb-3 pt-1">
-          <span className="text-[11px] text-neutral-600 font-[Poppins] select-none">
-            Enter para enviar · Shift+Enter para nova linha
-          </span>
-          <button
-            onClick={handleSend}
-            disabled={!canSend}
-            aria-label="Enviar mensagem"
-            className={`p-2 rounded-lg transition-all ${
-              isLocked
-                ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"
-                : canSend
-                  ? "bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"
-                  : "bg-neutral-700 text-neutral-500 cursor-not-allowed"
-            }`}
-          >
-            {isLocked ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <ArrowUp size={18} strokeWidth={2} />
-            )}
-          </button>
-        </div>
+        <button
+          onClick={handleSend}
+          disabled={!canSend}
+          aria-label="Enviar mensagem"
+          className={`shrink-0 h-8 w-8 flex items-center justify-center rounded-full transition-all ${
+            isLocked
+              ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"
+              : canSend
+                ? "bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"
+                : "bg-neutral-700 text-neutral-500 cursor-not-allowed"
+          }`}
+        >
+          {isLocked ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <ArrowUp size={16} strokeWidth={2.5} />
+          )}
+        </button>
       </div>
     </div>
   );

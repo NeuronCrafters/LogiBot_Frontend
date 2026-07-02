@@ -6,6 +6,8 @@ import type {
   LearningJourneyData,
   AccessPatternData,
   SessionDetailsData,
+  DashboardInsightChart,
+  DashboardInsightResponse,
 } from "@/features/dashboard/types";
 
 export interface DashboardFilterParams {
@@ -36,4 +38,21 @@ export const dashboardApi = {
 
   getSessionDetails: (filters: DashboardFilterParams) =>
     api.post<SessionDetailsData[]>("/dashboard/session-details", filters),
+
+  getChartInsight: (
+    chart: DashboardInsightChart,
+    filters: DashboardFilterParams,
+    force = false,
+  ) =>
+    api.post<DashboardInsightResponse>("/dashboard/insights/chart", {
+      chart,
+      filters,
+      force,
+    }),
+
+  getOverviewInsight: (filters: DashboardFilterParams, force = false) =>
+    api.post<DashboardInsightResponse>("/dashboard/insights/overview", {
+      filters,
+      force,
+    }),
 };

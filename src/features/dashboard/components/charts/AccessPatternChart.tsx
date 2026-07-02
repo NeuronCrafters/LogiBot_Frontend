@@ -114,7 +114,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
       className="bg-[#1f1f1f] border-white/10 flex flex-col"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-28">
+        <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               Detalhes de Acesso por Sessão
@@ -129,6 +129,12 @@ export function AccessPatternChart({ filters }: ChartProps) {
             containerId="access-pattern-chart"
             fileName="padrao_acesso"
             info={CHART_INFO}
+            insight={{
+              chart: "access-pattern",
+              title: "Padrão de acesso",
+              filters,
+              disabled: isLoading || !hasData,
+            }}
           />
         </div>
       </CardHeader>

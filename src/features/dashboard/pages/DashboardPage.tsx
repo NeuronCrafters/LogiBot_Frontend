@@ -1,6 +1,6 @@
 ﻿import { useCallback, useEffect, useState } from "react";
 import { addDays, formatISODate } from "@/shared/lib/formatDate";
-import { BarChart2, Filter, MousePointer2 } from "lucide-react";
+import { BarChart2, Filter, MousePointer2, Sparkles } from "lucide-react";
 import { Typograph } from "@/shared/components/Typography";
 import { DashboardFilter } from "@/features/dashboard/components/DashboardFilter";
 import type { DashboardFilterState } from "@/features/dashboard/filterTypes";
@@ -14,10 +14,15 @@ import { ProficiencyRadarChart } from "@/features/dashboard/components/charts/Pr
 import { LearningJourneyChart } from "@/features/dashboard/components/charts/LearningJourneyChart";
 import { AccessPatternChart } from "@/features/dashboard/components/charts/AccessPatternChart";
 import { GeneralScoreChart } from "@/features/dashboard/components/charts/GeneralScoreChart";
+import {
+  DashboardInsightProvider,
+  useDashboardInsights,
+} from "@/features/dashboard/components/DashboardInsightProvider";
 
 type DateRange = { from?: Date; to?: Date };
 
-export function Dashboard() {
+function DashboardContent() {
+  const insights = useDashboardInsights();
   const [dashboardFilters, setDashboardFilters] =
     useState<DashboardFilterParams>({});
   const [legacyFilter, setLegacyFilter] = useState<
@@ -105,9 +110,21 @@ export function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 font-[Poppins] text-xs font-medium text-zinc-400">
-              <Filter className="h-4 w-4 text-blue-400" />
-              Filtros obrigatórios
+            <div className="flex flex-wrap items-center gap-2">
+              {hasSelection && (
+                <button
+                  type="button"
+                  onClick={() => insights.openOverview(dashboardFilters)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-violet-500/25 bg-violet-500/10 px-3 py-2 font-[Poppins] text-xs font-semibold text-violet-300 transition-colors hover:border-violet-500/40 hover:bg-violet-500/15"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Gerar análise geral
+                </button>
+              )}
+              <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 font-[Poppins] text-xs font-medium text-zinc-400">
+                <Filter className="h-4 w-4 text-blue-400" />
+                Filtros obrigatórios
+              </div>
             </div>
           </div>
         </section>
@@ -153,5 +170,13 @@ export function Dashboard() {
         )}
       </div>
     </main>
+  );
+}
+
+export function Dashboard() {
+  return (
+    <DashboardInsightProvider>
+      <DashboardContent />
+    </DashboardInsightProvider>
   );
 }

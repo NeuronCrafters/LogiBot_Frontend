@@ -2,11 +2,10 @@
 import { Pie, PieChart, Cell, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { logApi } from "@/services/apiClient";
-import logApiSmart from "@/features/dashboard/api/logsSmartApi";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { DashboardFilterState } from "@/features/dashboard/filterTypes";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
+import { dashboardFiltersFromLegacy } from "../../insightFilters";
 
 const COLORS = ["#10b981", "#ef4444"];
 const CHART_INFO = "Proporção de acertos e erros nos quizzes. A fatia verde representa respostas corretas; a vermelha, os erros. Indica a taxa de acerto geral da entidade selecionada.";
@@ -18,8 +17,6 @@ interface CorrectWrongChartProps {
 }
 
 function useAccuracyData(filter: CorrectWrongChartProps["filter"]) {
-  const { user } = useAuth();
-  const userRoles: string[] = Array.isArray(user?.role) ? user.role : user?.role ? [user.role] : [];
   const validIds = Array.isArray(filter.ids) ? filter.ids.filter((id) => typeof id === "string" && id.trim() !== "") : [];
   const targetId = validIds[0] || "";
   const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
@@ -27,14 +24,9 @@ function useAccuracyData(filter: CorrectWrongChartProps["filter"]) {
   const hasRequired = !!universityId;
 
   return useQuery({
-    queryKey: ["accuracy", filter.type, targetId, universityId, courseId, classId, disciplineId, userRoles],
+    queryKey: ["accuracy", filter.type, targetId, universityId, courseId, classId, disciplineId],
     queryFn: async () => {
       if (!targetId) throw new Error("Filtros incompletos.");
-      const isProfessor = userRoles.includes("professor");
-      const isCoordinator = userRoles.includes("course-coordinator");
-      const isAdmin = userRoles.includes("admin");
-      const useSmartApi = !isCoordinator && !isAdmin && isProfessor && (filter.type === "discipline" || (filter.type === "student" && !!disciplineId));
-      if (useSmartApi) return logApiSmart.fetchSummary(userRoles, filter.type, targetId, { universityId, courseId, classId, disciplineId });
       if (isStudent) return logApi.getFilteredStudentSummary({ universityId: universityId!, courseId, classId, studentId: targetId, disciplineId } as any);
       const calls: Record<string, () => Promise<any>> = {
         university: () => logApi.getUniversitySummary(targetId),
@@ -69,14 +61,24 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
   return (
     <Card id="correct-wrong-chart" className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-28">
+        <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">Desempenho por Tópico Geral</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">Acertos e Erros com base na interação do Quiz</CardDescription>
           </div>
         </div>
         <div className="absolute top-5 right-4 z-40">
-          <ChartDownloadButton containerId="correct-wrong-chart" fileName="acertos_erros" info={CHART_INFO} />
+          <ChartDownloadButton
+            containerId="correct-wrong-chart"
+            fileName="acertos_erros"
+            info={CHART_INFO}
+            insight={{
+              chart: "accuracy",
+              title: "Acertos e erros",
+              filters: dashboardFiltersFromLegacy(filter),
+              disabled: isLoading || !hasData,
+            }}
+          />
         </div>
       </CardHeader>
 

@@ -80,12 +80,12 @@ export function Home() {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5">
               <img
                 src={logoMascote}
-                alt="LogiBots"
+                alt="LogiBot"
                 className="h-6 w-6 object-contain"
               />
             </span>
             <span className="font-[Poppins] text-base font-bold text-white">
-              LogiBots.AI
+              LogiBot.AI
             </span>
           </a>
           <nav className="hidden items-center gap-6 font-[Poppins] text-sm text-zinc-400 md:flex">
@@ -129,7 +129,7 @@ export function Home() {
                 id="welcome-title"
                 className="mt-5 max-w-4xl font-[Poppins] text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl"
               >
-                Aprenda, pratique e acompanhe evolução com o LogiBots.AI
+                Aprenda, pratique e acompanhe evolução com o LogiBot.AI
               </h1>
               <p className="mt-5 max-w-2xl font-[Poppins] text-base leading-relaxed text-zinc-400 sm:text-lg">
                 Um ambiente educacional com chat inteligente, quizzes guiados e
@@ -225,7 +225,7 @@ export function Home() {
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="max-w-2xl">
                 <h2 className="font-[Poppins] text-2xl font-semibold text-white sm:text-3xl">
-                  Comece a usar o LogiBots.AI hoje
+                  Comece a usar o LogiBot.AI hoje
                 </h2>
                 <p className="mt-3 font-[Poppins] text-sm leading-relaxed text-zinc-400">
                   Crie sua conta para acessar o chat, praticar com quizzes e

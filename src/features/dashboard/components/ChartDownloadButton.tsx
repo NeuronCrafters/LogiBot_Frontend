@@ -1,13 +1,22 @@
 ﻿import { toPng } from "html-to-image";
-import { Download, Info, X } from "lucide-react";
+import { Download, Info, Sparkles, X } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
 import { useState, useRef, useEffect } from "react";
+import type { DashboardFilterParams } from "../api/dashboardApi";
+import type { DashboardInsightChart } from "../types";
+import { useDashboardInsights } from "./DashboardInsightProvider";
 
 interface ChartDownloadButtonProps {
   containerId: string;
   fileName: string;
   info?: string;
   className?: string;
+  insight?: {
+    chart: DashboardInsightChart;
+    title: string;
+    filters: DashboardFilterParams;
+    disabled?: boolean;
+  };
 }
 
 async function downloadChartAsPng(
@@ -36,7 +45,9 @@ export function ChartDownloadButton({
   fileName,
   info,
   className,
+  insight,
 }: ChartDownloadButtonProps) {
+  const dashboardInsights = useDashboardInsights();
   const [downloading, setDownloading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
@@ -100,6 +111,25 @@ export function ChartDownloadButton({
             </div>
           )}
         </div>
+      )}
+
+      {insight && (
+        <button
+          type="button"
+          aria-label={`Gerar insight de IA para ${insight.title}`}
+          title="Analisar com IA"
+          disabled={insight.disabled}
+          onClick={() =>
+            dashboardInsights.openChart(
+              insight.chart,
+              insight.title,
+              insight.filters,
+            )
+          }
+          className="rounded-lg border border-violet-500/20 bg-violet-500/10 p-2 text-violet-400 transition-colors hover:border-violet-500/40 hover:bg-violet-500/15 hover:text-violet-300 disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <Sparkles className="h-4 w-4" />
+        </button>
       )}
 
       <button

@@ -1,5 +1,9 @@
 import { useState, useCallback } from "react";
-import { chatApi, type RetrievedChunk } from "@/features/chat/api/chatApi";
+import {
+  chatApi,
+  type ChatStreamStage,
+  type RetrievedChunk,
+} from "@/features/chat/api/chatApi";
 import { logger } from "@/shared/lib/logger";
 
 export type ChatMessage = {
@@ -8,6 +12,7 @@ export type ChatMessage = {
   sender: "user" | "bot";
   type: "text" | "typing";
   retrievedChunks?: RetrievedChunk[];
+  streamStage?: ChatStreamStage;
 };
 
 type Mode = "none" | "chat";
@@ -16,60 +21,127 @@ interface UseChatFlowOptions {
   userId: string;
 }
 
-export function useChatFlow({ userId }: UseChatFlowOptions) {
+export function useChatFlow(_options: UseChatFlowOptions) {
   const [mode, setMode] = useState<Mode>("none");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
 
-  const handleInitialChoice = useCallback(
-    (choice: "chat") => {
-      if (choice === "chat") setMode("chat");
-    },
-    [],
-  );
+  const handleInitialChoice = useCallback((choice: "chat") => {
+    if (choice === "chat") setMode("chat");
+  }, []);
 
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim()) return;
 
+      const now = Date.now();
       const userMsg: ChatMessage = {
-        id: `user-${Date.now()}`,
+        id: `user-${now}`,
         text: text.trim(),
         sender: "user",
         type: "text",
       };
       const typingMsg: ChatMessage = {
-        id: `typing-${Date.now()}`,
+        id: `typing-${now}`,
         text: "",
         sender: "bot",
         type: "typing",
+        streamStage: "queued",
       };
 
       setMessages((prev) => [...prev, userMsg, typingMsg]);
 
       try {
-        const response = await chatApi.askTutor(text.trim(), userId, sessionId);
+        let streamedText = "";
+        let receivedToken = false;
 
-        if (response.sessionId) setSessionId(response.sessionId);
+        const result = await chatApi.streamTutor(text.trim(), sessionId, {
+          onSession: (event) => {
+            if (event.sessionId) setSessionId(event.sessionId);
+          },
+          onStatus: (event) => {
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === typingMsg.id
+                  ? { ...message, streamStage: event.stage }
+                  : message,
+              ),
+            );
+          },
+          onRetrieval: (event) => {
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === typingMsg.id
+                  ? {
+                      ...message,
+                      retrievedChunks: event.retrievedChunks?.length
+                        ? event.retrievedChunks
+                        : undefined,
+                    }
+                  : message,
+              ),
+            );
+          },
+          onToken: (token) => {
+            streamedText += token;
+            receivedToken = true;
 
-        const botText =
-          response.responses?.map((r) => r.text).join("\n") ||
-          "Não consegui processar sua mensagem.";
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === typingMsg.id
+                  ? {
+                      ...message,
+                      text: streamedText,
+                      type: "text",
+                      streamStage: undefined,
+                    }
+                  : message,
+              ),
+            );
+          },
+          onDone: (event) => {
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === typingMsg.id
+                  ? {
+                      ...message,
+                      type: "text",
+                      text: streamedText || message.text,
+                      streamStage: undefined,
+                      retrievedChunks: event.retrievedChunks?.length
+                        ? event.retrievedChunks
+                        : message.retrievedChunks,
+                    }
+                  : message,
+              ),
+            );
+          },
+        });
 
-        const botMsg: ChatMessage = {
-          id: `bot-${Date.now()}`,
-          text: botText,
-          sender: "bot",
-          type: "text",
-          retrievedChunks: response.retrievedChunks?.length ? response.retrievedChunks : undefined,
-        };
+        if (result.sessionId) setSessionId(result.sessionId);
 
-        setMessages((prev) => prev.filter((m) => m.type !== "typing").concat(botMsg));
+        if (!receivedToken) {
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === typingMsg.id
+                ? {
+                    ...message,
+                    type: "text",
+                    text: streamedText || "Resposta concluida.",
+                    streamStage: undefined,
+                    retrievedChunks: result.retrievedChunks?.length
+                      ? result.retrievedChunks
+                      : message.retrievedChunks,
+                  }
+                : message,
+            ),
+          );
+        }
       } catch (error) {
         logger.error("Chat", "Erro ao enviar mensagem.", error);
         setMessages((prev) =>
           prev
-            .filter((m) => m.type !== "typing")
+            .filter((m) => m.id !== typingMsg.id)
             .concat({
               id: `error-${Date.now()}`,
               text: "Erro ao processar mensagem. Tente novamente.",
@@ -79,7 +151,7 @@ export function useChatFlow({ userId }: UseChatFlowOptions) {
         );
       }
     },
-    [userId, sessionId],
+    [sessionId],
   );
 
   return {

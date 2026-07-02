@@ -216,7 +216,8 @@ function SettingsTab({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      {ragMode !== "none" && (
+        <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className={labelCls}>Top K</label>
           <input
@@ -245,7 +246,8 @@ function SettingsTab({
             Relevância mínima para aceitar um trecho (0–100).
           </p>
         </div>
-      </div>
+        </div>
+      )}
 
       <button
         type="button"

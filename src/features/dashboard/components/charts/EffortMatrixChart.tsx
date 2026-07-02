@@ -121,7 +121,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
       className="bg-[#1f1f1f] border-white/10 flex flex-col"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-28">
+        <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               Matriz Desempenho vs. Esforco
@@ -136,6 +136,12 @@ export function EffortMatrixChart({ filters }: ChartProps) {
             containerId="effort-matrix-chart"
             fileName="matriz_esforco"
             info={CHART_INFO}
+            insight={{
+              chart: "effort-matrix",
+              title: "Matriz desempenho versus esforço",
+              filters,
+              disabled: isLoading || !hasData,
+            }}
           />
         </div>
       </CardHeader>
