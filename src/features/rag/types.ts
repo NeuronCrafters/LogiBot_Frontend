@@ -1,4 +1,4 @@
-export type RagMode = "none" | "context" | "self";
+export type RagMode = "none" | "context" | "self" | "hybrid";
 
 export interface RagClass {
   id: string;
