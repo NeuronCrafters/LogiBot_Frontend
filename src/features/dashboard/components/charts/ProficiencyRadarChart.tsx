@@ -30,6 +30,15 @@ const chartConfig = {
   score: { label: "Acerto", color: "#3b82f6" },
 } satisfies ChartConfig;
 
+// Tópicos vêm de texto livre digitado pelo professor ao criar o quiz, sem
+// capitalização garantida — só a primeira letra é ajustada, o resto do
+// texto fica como o professor escreveu (evita mexer em preposições/artigos
+// no meio da frase).
+function capitalizeSubject(text: string) {
+  if (!text) return text;
+  return text.charAt(0).toLocaleUpperCase("pt-BR") + text.slice(1);
+}
+
 interface ChartProps {
   filters: {
     universityId?: string;
@@ -50,7 +59,7 @@ function useProficiencyData(filters: ChartProps["filters"]) {
       const apiData = response.data;
       const chartData = (apiData.labels ?? []).map(
         (label: string, index: number) => ({
-          subject: label,
+          subject: capitalizeSubject(label),
           score: apiData.data?.[index] ?? 0,
         }),
       );
