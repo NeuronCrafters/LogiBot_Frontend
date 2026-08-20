@@ -91,14 +91,10 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
       const counts = raw.subjectCounts ?? {};
       const chartData = [
         { category: "Variáveis", acessos: counts.variaveis ?? 0 },
-        { category: "Listas", acessos: counts.listas ?? 0 },
-        {
-          category: "Condicionais",
-          acessos: (counts.condicionais ?? 0) + (counts.verificacoes ?? 0),
-        },
-        { category: "Op. Lógicos", acessos: counts.operadores_logicos ?? 0 },
+        { category: "Tipos de Dados", acessos: counts.tipos ?? 0 },
+        { category: "Condicionais", acessos: counts.verificacoes ?? 0 },
+        { category: "Repetição", acessos: counts.loops ?? 0 },
         { category: "Funções", acessos: counts.funcoes ?? 0 },
-        { category: "Repetição", acessos: counts.repeticao ?? 0 },
       ];
       const totalAccesses = chartData.reduce((s, d) => s + d.acessos, 0);
       return { chartData, totalAccesses };

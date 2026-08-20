@@ -48,28 +48,13 @@ function useProficiencyData(filters: ChartProps["filters"]) {
     staleTime: 1000 * 60 * 5,
     select: (response) => {
       const apiData = response.data;
-      const subjectMap: Record<string, string[]> = {
-        Variáveis: ["variáveis", "variaveis"],
-        Listas: ["listas"],
-        Condicionais: [
-          "condicionais",
-          "o_que_são_condicionais",
-          "verificacoes",
-        ],
-        Funções: ["funções", "funcoes"],
-        "Op. Lógicos": ["operadores_lógicos", "operadores_logicos"],
-      };
-      const chartData = Object.entries(subjectMap).map(([label, keys]) => {
-        const index =
-          apiData.labels?.findIndex((l: string) =>
-            keys.some((k) => l.toLowerCase() === k.toLowerCase()),
-          ) ?? -1;
-        return {
+      const chartData = (apiData.labels ?? []).map(
+        (label: string, index: number) => ({
           subject: label,
-          score: index !== -1 ? (apiData.data?.[index] ?? 0) : 0,
-        };
-      });
-      const hasPerformanceData = chartData.some((d) => d.score > 0);
+          score: apiData.data?.[index] ?? 0,
+        }),
+      );
+      const hasPerformanceData = chartData.length > 0;
       const interacted = chartData.filter((d) => d.score > 0);
       const avg =
         interacted.length > 0
