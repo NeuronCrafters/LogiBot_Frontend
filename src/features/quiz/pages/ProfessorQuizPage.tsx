@@ -670,10 +670,18 @@ function QuizCard({
             )}
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-indigo-400">
-              <BookOpen className="h-3 w-3" />
-              {quiz.disciplineName}
-            </span>
+            {(quiz.disciplines?.length
+              ? quiz.disciplines
+              : [{ id: quiz.disciplineId, name: quiz.disciplineName }]
+            ).map((discipline) => (
+              <span
+                key={discipline.id}
+                className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-indigo-400"
+              >
+                <BookOpen className="h-3 w-3" />
+                {discipline.name}
+              </span>
+            ))}
             <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-[10px] text-zinc-500">
               {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
             </span>

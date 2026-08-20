@@ -19,6 +19,8 @@ export interface ProfessorQuiz {
   description: string | null;
   disciplineId: string;
   disciplineName: string;
+  /** Todas as disciplinas vinculadas ao quiz (inclui a "dona" acima). */
+  disciplines: { id: string; name: string }[];
   classId?: string | null;
   generationSource?: GenerationSource;
   questionCount: number;
