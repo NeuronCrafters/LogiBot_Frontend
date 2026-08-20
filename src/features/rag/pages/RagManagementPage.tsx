@@ -192,7 +192,7 @@ function SettingsTab({
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <ModeButton
           value="none"
           current={ragMode}
@@ -212,6 +212,13 @@ function SettingsTab({
           current={ragMode}
           label="Self"
           description="IA decide se precisa buscar antes de responder."
+          onClick={setRagMode}
+        />
+        <ModeButton
+          value="hybrid"
+          current={ragMode}
+          label="Hybrid"
+          description="Busca por significado e por palavras-chave ao mesmo tempo."
           onClick={setRagMode}
         />
       </div>
@@ -389,9 +396,10 @@ function DocumentsTab({
             </p>
             <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
               Ative o modo{" "}
-              <span className="text-blue-400 font-medium">Context</span> ou{" "}
-              <span className="text-blue-400 font-medium">Self</span> na aba de
-              Configurações.
+              <span className="text-blue-400 font-medium">Context</span>,{" "}
+              <span className="text-blue-400 font-medium">Self</span> ou{" "}
+              <span className="text-blue-400 font-medium">Hybrid</span> na aba
+              de Configurações.
             </p>
           </div>
         </div>
@@ -549,8 +557,9 @@ function ChatTab({
             </p>
             <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
               Ative o modo{" "}
-              <span className="text-blue-400 font-medium">Context</span> ou{" "}
-              <span className="text-blue-400 font-medium">Self</span> para
+              <span className="text-blue-400 font-medium">Context</span>,{" "}
+              <span className="text-blue-400 font-medium">Self</span> ou{" "}
+              <span className="text-blue-400 font-medium">Hybrid</span> para
               testar o RAG.
             </p>
           </div>
