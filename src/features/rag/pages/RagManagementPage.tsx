@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Check,
   Database,
   FileText,
   Link2,
@@ -311,6 +312,13 @@ function DocumentRow({
   const meta = STATUS_META[document.status] ?? STATUS_META.uploaded;
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
 
+  const { data: linkedClassIds = [] } = useQuery({
+    queryKey: ["ragDocumentLinkedClasses", document.id],
+    queryFn: () => ragApi.getLinkedClassIds(document.id),
+    enabled: document.status === "ready",
+    staleTime: 30 * 1000,
+  });
+
   const toggleSelected = (classId: string) => {
     setSelectedClassIds((prev) =>
       prev.includes(classId)
@@ -395,22 +403,49 @@ function DocumentRow({
 
               {otherClasses.length ? (
                 <div className="max-h-64 space-y-1 overflow-y-auto">
-                  {otherClasses.map((cls) => (
+                  {otherClasses.map((cls) => {
+                    const alreadyLinked = linkedClassIds.includes(cls.id);
+                    const checked = alreadyLinked || selectedClassIds.includes(cls.id);
+                    return (
                     <label
                       key={cls.id}
-                      className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-white/5"
+                      className={`flex items-center gap-2.5 rounded-lg px-2 py-2 ${
+                        alreadyLinked ? "cursor-default" : "cursor-pointer hover:bg-white/5"
+                      }`}
                     >
                       <input
                         type="checkbox"
-                        checked={selectedClassIds.includes(cls.id)}
+                        checked={checked}
+                        disabled={alreadyLinked}
                         onChange={() => toggleSelected(cls.id)}
-                        className="h-4 w-4 rounded border-white/20 bg-transparent"
+                        className="sr-only"
                       />
-                      <span className="font-[Poppins] text-sm text-zinc-200">
+                      <span
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                          checked
+                            ? alreadyLinked
+                              ? "border-emerald-600/60 bg-emerald-600/40"
+                              : "border-blue-500 bg-blue-600"
+                            : "border-white/20 bg-transparent"
+                        }`}
+                      >
+                        {checked && (
+                          <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                        )}
+                      </span>
+                      <span
+                        className={`font-[Poppins] text-sm ${alreadyLinked ? "text-zinc-500" : "text-zinc-200"}`}
+                      >
                         {cls.courseName} — {cls.name}
                       </span>
+                      {alreadyLinked && (
+                        <span className="ml-auto shrink-0 font-[Poppins] text-xs text-emerald-500">
+                          Já vinculado
+                        </span>
+                      )}
                     </label>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="font-[Poppins] text-sm text-zinc-500">
@@ -422,10 +457,7 @@ function DocumentRow({
                 <button
                   type="button"
                   disabled={!selectedClassIds.length || isLinking}
-                  onClick={() => {
-                    onLinkToClasses(document.id, selectedClassIds);
-                    setSelectedClassIds([]);
-                  }}
+                  onClick={() => onLinkToClasses(document.id, selectedClassIds)}
                   className="inline-flex h-9 items-center gap-2 rounded-lg bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isLinking ? (
@@ -897,8 +929,11 @@ export function RagManagementPage() {
   const linkMutation = useMutation({
     mutationFn: ({ documentId, classIds }: { documentId: string; classIds: string[] }) =>
       ragApi.linkDocumentToClasses(documentId, classIds),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["ragDocuments"] });
+      queryClient.invalidateQueries({
+        queryKey: ["ragDocumentLinkedClasses", variables.documentId],
+      });
       toast.success("Documento vinculado.");
     },
     onError: (error: any) =>

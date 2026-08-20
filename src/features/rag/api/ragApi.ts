@@ -79,6 +79,13 @@ export const ragApi = {
     return response.data;
   },
 
+  async getLinkedClassIds(documentId: string): Promise<string[]> {
+    const response = await api.get<{ classIds: string[] }>(
+      `/rag/documents/${documentId}/classes`,
+    );
+    return response.data.classIds;
+  },
+
   async reprocessDocument(documentId: string) {
     const response = await api.post(`/rag/documents/${documentId}/reprocess`);
     return response.data;
