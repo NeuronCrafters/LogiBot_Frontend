@@ -32,10 +32,38 @@ export const professorQuizApi = {
 
   async updateQuiz(
     id: string,
-    data: Partial<{ title: string; topic: string; description: string; disciplineId: string }>,
+    data: Partial<{ title: string; topic: string; description: string }>,
   ): Promise<ProfessorQuiz> {
     const res = await api.put(`/quiz/professor/${id}`, data, { withCredentials: true });
     return res.data;
+  },
+
+  async getLinkedDisciplineIds(quizId: string): Promise<string[]> {
+    const res = await api.get<{ disciplineIds: string[] }>(
+      `/quiz/professor/${quizId}/disciplines`,
+      { withCredentials: true },
+    );
+    return res.data.disciplineIds;
+  },
+
+  async linkQuizToDisciplines(
+    quizId: string,
+    disciplineIds: string[],
+  ): Promise<void> {
+    await api.post(
+      `/quiz/professor/${quizId}/disciplines`,
+      { disciplineIds },
+      { withCredentials: true },
+    );
+  },
+
+  async unlinkQuizFromDiscipline(
+    quizId: string,
+    disciplineId: string,
+  ): Promise<void> {
+    await api.delete(`/quiz/professor/${quizId}/disciplines/${disciplineId}`, {
+      withCredentials: true,
+    });
   },
 
   async deleteQuiz(id: string): Promise<void> {

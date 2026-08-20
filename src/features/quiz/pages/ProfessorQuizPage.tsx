@@ -5,10 +5,12 @@ import {
   AlertCircle,
   BookOpen,
   Brain,
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   EyeOff,
+  Link2,
   Loader2,
   Pencil,
   Plus,
@@ -30,6 +32,15 @@ import { AiQuizForm } from "@/features/quiz/components/AiQuizForm";
 import { AppModal } from "@/shared/components/feedback/AppModal";
 import { toast } from "@/shared/lib/toast";
 import { Select } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
   QUIZ_TOPICS.map((t) => [t.value, t.label]),
@@ -584,26 +595,53 @@ function ResultsModal({
 
 function QuizCard({
   quiz,
+  myDisciplines,
   onEdit,
   onDelete,
   onViewResults,
   onPublish,
   onUnpublish,
+  onLinkToDisciplines,
+  onUnlinkFromDiscipline,
   isExpanded,
   onToggleExpand,
   isPublishing,
+  isLinking,
+  isUnlinking,
 }: {
   quiz: ProfessorQuiz;
+  myDisciplines: { id: string; name: string }[];
   onEdit: () => void;
   onDelete: () => void;
   onViewResults: () => void;
   onPublish: () => void;
   onUnpublish: () => void;
+  onLinkToDisciplines: (quizId: string, disciplineIds: string[]) => void;
+  onUnlinkFromDiscipline: (quizId: string, disciplineId: string) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
   isPublishing: boolean;
+  isLinking: boolean;
+  isUnlinking: boolean;
 }) {
   const isDraft = quiz.status === "draft";
+  const [selectedDisciplineIds, setSelectedDisciplineIds] = useState<string[]>(
+    [],
+  );
+
+  const { data: linkedDisciplineIds = [] } = useQuery({
+    queryKey: ["quizLinkedDisciplines", quiz.id],
+    queryFn: () => professorQuizApi.getLinkedDisciplineIds(quiz.id),
+    staleTime: 30 * 1000,
+  });
+
+  const toggleSelected = (disciplineId: string) => {
+    setSelectedDisciplineIds((prev) =>
+      prev.includes(disciplineId)
+        ? prev.filter((id) => id !== disciplineId)
+        : [...prev, disciplineId],
+    );
+  };
 
   return (
     <div
@@ -678,6 +716,122 @@ function QuizCard({
           <Pencil className="h-3 w-3" />
           Editar
         </button>
+
+        <Dialog>
+          <DialogTrigger>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <Link2 className="h-3 w-3" />
+              Matérias
+            </button>
+          </DialogTrigger>
+          <DialogContent className="border-white/10 bg-neutral-900 text-white">
+            <DialogHeader>
+              <DialogTitle className="font-[Poppins] text-white">
+                Vincular a outra matéria
+              </DialogTitle>
+              <DialogDescription className="font-[Poppins] text-zinc-400">
+                Usa esse mesmo quiz em outra disciplina, sem duplicar
+                perguntas.
+              </DialogDescription>
+            </DialogHeader>
+
+            {myDisciplines.length ? (
+              <div className="max-h-64 space-y-1 overflow-y-auto">
+                {myDisciplines.map((discipline) => {
+                  const alreadyLinked = linkedDisciplineIds.includes(
+                    discipline.id,
+                  );
+                  const checked =
+                    alreadyLinked || selectedDisciplineIds.includes(discipline.id);
+                  const isLastLink =
+                    alreadyLinked && linkedDisciplineIds.length <= 1;
+                  return (
+                    <div
+                      key={discipline.id}
+                      className="flex items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-white/5"
+                    >
+                      <label
+                        className={`flex flex-1 items-center gap-2.5 ${
+                          alreadyLinked ? "cursor-default" : "cursor-pointer"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={alreadyLinked}
+                          onChange={() => toggleSelected(discipline.id)}
+                          className="sr-only"
+                        />
+                        <span
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                            checked
+                              ? alreadyLinked
+                                ? "border-emerald-600/60 bg-emerald-600/40"
+                                : "border-indigo-500 bg-indigo-600"
+                              : "border-white/20 bg-transparent"
+                          }`}
+                        >
+                          {checked && (
+                            <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                          )}
+                        </span>
+                        <span
+                          className={`font-[Poppins] text-sm ${
+                            alreadyLinked ? "text-zinc-500" : "text-zinc-200"
+                          }`}
+                        >
+                          {discipline.name}
+                        </span>
+                      </label>
+                      {alreadyLinked && (
+                        <button
+                          type="button"
+                          disabled={isLastLink || isUnlinking}
+                          title={
+                            isLastLink
+                              ? "Um quiz precisa de pelo menos uma matéria"
+                              : "Desvincular"
+                          }
+                          onClick={() =>
+                            onUnlinkFromDiscipline(quiz.id, discipline.id)
+                          }
+                          className="shrink-0 rounded-lg p-1 text-zinc-600 transition-colors hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="font-[Poppins] text-sm text-zinc-500">
+                Nenhuma disciplina disponível.
+              </p>
+            )}
+
+            <DialogFooter>
+              <button
+                type="button"
+                disabled={!selectedDisciplineIds.length || isLinking}
+                onClick={() =>
+                  onLinkToDisciplines(quiz.id, selectedDisciplineIds)
+                }
+                className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isLinking ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Link2 className="h-4 w-4" />
+                )}
+                Vincular
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Publish / unpublish */}
         {isDraft ? (
@@ -829,6 +983,34 @@ export function ProfessorQuizPage() {
     onError: () => toast.error("Erro ao despublicar quiz."),
   });
 
+  const linkDisciplinesMutation = useMutation({
+    mutationFn: ({ quizId, disciplineIds }: { quizId: string; disciplineIds: string[] }) =>
+      professorQuizApi.linkQuizToDisciplines(quizId, disciplineIds),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["quizLinkedDisciplines", variables.quizId],
+      });
+      toast.success("Quiz vinculado à matéria.");
+    },
+    onError: (err: any) =>
+      toast.error(err?.response?.data?.message ?? "Erro ao vincular quiz."),
+  });
+
+  const unlinkDisciplineMutation = useMutation({
+    mutationFn: ({ quizId, disciplineId }: { quizId: string; disciplineId: string }) =>
+      professorQuizApi.unlinkQuizFromDiscipline(quizId, disciplineId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["quizLinkedDisciplines", variables.quizId],
+      });
+      toast.success("Quiz desvinculado da matéria.");
+    },
+    onError: (err: any) =>
+      toast.error(err?.response?.data?.message ?? "Erro ao desvincular quiz."),
+  });
+
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
@@ -926,11 +1108,18 @@ export function ProfessorQuizPage() {
               <QuizCard
                 key={quiz.id}
                 quiz={quiz}
+                myDisciplines={myDisciplines}
                 onEdit={() => setEditTarget(quiz)}
                 onDelete={() => setDeleteTarget(quiz)}
                 onViewResults={() => setResultsQuizId(quiz.id)}
                 onPublish={() => publishMutation.mutate(quiz.id)}
                 onUnpublish={() => unpublishMutation.mutate(quiz.id)}
+                onLinkToDisciplines={(quizId, disciplineIds) =>
+                  linkDisciplinesMutation.mutate({ quizId, disciplineIds })
+                }
+                onUnlinkFromDiscipline={(quizId, disciplineId) =>
+                  unlinkDisciplineMutation.mutate({ quizId, disciplineId })
+                }
                 isExpanded={expandedId === quiz.id}
                 onToggleExpand={() =>
                   setExpandedId((prev) => (prev === quiz.id ? null : quiz.id))
@@ -938,6 +1127,14 @@ export function ProfessorQuizPage() {
                 isPublishing={
                   (publishMutation.isPending || unpublishMutation.isPending) &&
                   (publishMutation.variables === quiz.id || unpublishMutation.variables === quiz.id)
+                }
+                isLinking={
+                  linkDisciplinesMutation.isPending &&
+                  linkDisciplinesMutation.variables?.quizId === quiz.id
+                }
+                isUnlinking={
+                  unlinkDisciplineMutation.isPending &&
+                  unlinkDisciplineMutation.variables?.quizId === quiz.id
                 }
               />
             ))}
