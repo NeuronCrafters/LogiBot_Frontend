@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Database,
   FileText,
+  Link2,
   Loader2,
   Lock,
   MessageSquare,
@@ -16,9 +17,19 @@ import {
 import { PageHeader } from "@/components/AppUI/PageHeader";
 import { Panel } from "@/components/AppUI/Panel";
 import { Select } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "@/shared/lib/toast";
 import { ragApi } from "@/features/rag/api/ragApi";
 import type {
+  RagClass,
   RagDocument,
   RagMode,
   RagSettings,
@@ -276,18 +287,38 @@ function SettingsTab({
 /* ── Document row ── */
 function DocumentRow({
   document,
+  otherClasses,
   onDelete,
   onReprocess,
+  onToggleEnabled,
+  onLinkToClasses,
   isDeleting,
   isReprocessing,
+  isTogglingEnabled,
+  isLinking,
 }: {
   document: RagDocument;
+  otherClasses: RagClass[];
   onDelete: (id: string) => void;
   onReprocess: (id: string) => void;
+  onToggleEnabled: (id: string, enabled: boolean) => void;
+  onLinkToClasses: (id: string, classIds: string[]) => void;
   isDeleting: boolean;
   isReprocessing: boolean;
+  isTogglingEnabled: boolean;
+  isLinking: boolean;
 }) {
   const meta = STATUS_META[document.status] ?? STATUS_META.uploaded;
+  const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
+
+  const toggleSelected = (classId: string) => {
+    setSelectedClassIds((prev) =>
+      prev.includes(classId)
+        ? prev.filter((id) => id !== classId)
+        : [...prev, classId],
+    );
+  };
+
   return (
     <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-3 min-w-0">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500">
@@ -295,12 +326,19 @@ function DocumentRow({
       </div>
 
       <div className="min-w-0 flex-1">
-        <p
-          className="truncate font-[Poppins] text-sm font-medium text-white"
-          title={document.title}
-        >
-          {document.title}
-        </p>
+        <div className="flex items-center gap-2">
+          <p
+            className="truncate font-[Poppins] text-sm font-medium text-white"
+            title={document.title}
+          >
+            {document.title}
+          </p>
+          {!document.isOwner && (
+            <span className="shrink-0 rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-blue-300">
+              Compartilhado
+            </span>
+          )}
+        </div>
         <p className="font-[Poppins] text-xs text-zinc-600 truncate">
           {document.sourceType.toUpperCase()} · {formatBytes(document.fileSize)}{" "}
           · {new Date(document.createdAt).toLocaleDateString("pt-BR")}
@@ -318,6 +356,90 @@ function DocumentRow({
         >
           {meta.label}
         </span>
+
+        <button
+          type="button"
+          onClick={() => onToggleEnabled(document.id, !document.enabled)}
+          disabled={isTogglingEnabled}
+          className={`hidden h-8 shrink-0 items-center rounded-full border px-3 font-[Poppins] text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:inline-flex ${
+            document.enabled
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+              : "border-white/10 bg-white/5 text-zinc-500 hover:bg-white/10"
+          }`}
+          title={document.enabled ? "Desativar nesta turma" : "Ativar nesta turma"}
+        >
+          {document.enabled ? "Ativo" : "Inativo"}
+        </button>
+
+        {document.status === "ready" && (
+          <Dialog>
+            <DialogTrigger>
+              <button
+                type="button"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
+                title="Vincular a outra turma"
+              >
+                <Link2 className="h-3.5 w-3.5" />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="border-white/10 bg-neutral-900 text-white">
+              <DialogHeader>
+                <DialogTitle className="font-[Poppins] text-white">
+                  Vincular a outra turma
+                </DialogTitle>
+                <DialogDescription className="font-[Poppins] text-zinc-400">
+                  Reaproveita esse documento já processado em outra turma, sem
+                  reenviar o arquivo.
+                </DialogDescription>
+              </DialogHeader>
+
+              {otherClasses.length ? (
+                <div className="max-h-64 space-y-1 overflow-y-auto">
+                  {otherClasses.map((cls) => (
+                    <label
+                      key={cls.id}
+                      className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-white/5"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedClassIds.includes(cls.id)}
+                        onChange={() => toggleSelected(cls.id)}
+                        className="h-4 w-4 rounded border-white/20 bg-transparent"
+                      />
+                      <span className="font-[Poppins] text-sm text-zinc-200">
+                        {cls.courseName} — {cls.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <p className="font-[Poppins] text-sm text-zinc-500">
+                  Nenhuma outra turma disponível.
+                </p>
+              )}
+
+              <DialogFooter>
+                <button
+                  type="button"
+                  disabled={!selectedClassIds.length || isLinking}
+                  onClick={() => {
+                    onLinkToClasses(document.id, selectedClassIds);
+                    setSelectedClassIds([]);
+                  }}
+                  className="inline-flex h-9 items-center gap-2 rounded-lg bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isLinking ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Link2 className="h-4 w-4" />
+                  )}
+                  Vincular
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
         <button
           type="button"
           onClick={() => onReprocess(document.id)}
@@ -336,7 +458,7 @@ function DocumentRow({
           onClick={() => onDelete(document.id)}
           disabled={isDeleting}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
-          title="Remover"
+          title={document.isOwner ? "Remover" : "Remover desta turma"}
         >
           {isDeleting ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -355,6 +477,7 @@ function DocumentsTab({
   documents,
   documentsLoading,
   ragMode,
+  otherClasses,
   uploadFile,
   uploadTitle,
   isUploading,
@@ -363,13 +486,18 @@ function DocumentsTab({
   onUpload,
   onDelete,
   onReprocess,
+  onToggleEnabled,
+  onLinkToClasses,
   deletingId,
   reprocessingId,
+  togglingId,
+  linkingId,
 }: {
   classLabel: string;
   documents: RagDocument[];
   documentsLoading: boolean;
   ragMode?: RagMode;
+  otherClasses: RagClass[];
   uploadFile: File | null;
   uploadTitle: string;
   isUploading: boolean;
@@ -378,8 +506,12 @@ function DocumentsTab({
   onUpload: () => void;
   onDelete: (id: string) => void;
   onReprocess: (id: string) => void;
+  onToggleEnabled: (id: string, enabled: boolean) => void;
+  onLinkToClasses: (id: string, classIds: string[]) => void;
   deletingId?: string;
   reprocessingId?: string;
+  togglingId?: string;
+  linkingId?: string;
 }) {
   const locked = ragMode === "none";
 
@@ -469,10 +601,15 @@ function DocumentsTab({
               <DocumentRow
                 key={doc.id}
                 document={doc}
+                otherClasses={otherClasses}
                 onDelete={onDelete}
                 onReprocess={onReprocess}
+                onToggleEnabled={onToggleEnabled}
+                onLinkToClasses={onLinkToClasses}
                 isDeleting={deletingId === doc.id}
                 isReprocessing={reprocessingId === doc.id}
+                isTogglingEnabled={togglingId === doc.id}
+                isLinking={linkingId === doc.id}
               />
             ))}
           </div>
@@ -733,15 +870,39 @@ export function RagManagementPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: ragApi.deleteDocument,
+    mutationFn: (documentId: string) =>
+      ragApi.deleteDocument(selectedClassId, documentId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["ragDocuments", selectedClassId],
       });
-      toast.success("Documento removido.");
+      toast.success("Documento removido desta turma.");
     },
     onError: (error: any) =>
       toast.error(error?.response?.data?.message ?? "Erro ao remover."),
+  });
+
+  const toggleEnabledMutation = useMutation({
+    mutationFn: ({ documentId, enabled }: { documentId: string; enabled: boolean }) =>
+      ragApi.setDocumentEnabled(selectedClassId, documentId, enabled),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["ragDocuments", selectedClassId],
+      });
+    },
+    onError: (error: any) =>
+      toast.error(error?.response?.data?.message ?? "Erro ao atualizar documento."),
+  });
+
+  const linkMutation = useMutation({
+    mutationFn: ({ documentId, classIds }: { documentId: string; classIds: string[] }) =>
+      ragApi.linkDocumentToClasses(documentId, classIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ragDocuments"] });
+      toast.success("Documento vinculado.");
+    },
+    onError: (error: any) =>
+      toast.error(error?.response?.data?.message ?? "Erro ao vincular documento."),
   });
 
   const reprocessMutation = useMutation({
@@ -847,6 +1008,7 @@ export function RagManagementPage() {
                 documents={documents}
                 documentsLoading={documentsLoading}
                 ragMode={settings?.ragMode}
+                otherClasses={classes.filter((c) => c.id !== selectedClassId)}
                 uploadFile={uploadFile}
                 uploadTitle={uploadTitle}
                 isUploading={uploadMutation.isPending}
@@ -855,6 +1017,22 @@ export function RagManagementPage() {
                 onUpload={() => uploadMutation.mutate()}
                 onDelete={(id) => deleteMutation.mutate(id)}
                 onReprocess={(id) => reprocessMutation.mutate(id)}
+                onToggleEnabled={(documentId, enabled) =>
+                  toggleEnabledMutation.mutate({ documentId, enabled })
+                }
+                onLinkToClasses={(documentId, classIds) =>
+                  linkMutation.mutate({ documentId, classIds })
+                }
+                togglingId={
+                  toggleEnabledMutation.isPending
+                    ? toggleEnabledMutation.variables?.documentId
+                    : undefined
+                }
+                linkingId={
+                  linkMutation.isPending
+                    ? linkMutation.variables?.documentId
+                    : undefined
+                }
                 deletingId={
                   deleteMutation.isPending
                     ? (deleteMutation.variables as string)

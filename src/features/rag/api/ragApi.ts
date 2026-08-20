@@ -53,8 +53,29 @@ export const ragApi = {
     return response.data;
   },
 
-  async deleteDocument(documentId: string) {
-    const response = await api.delete(`/rag/documents/${documentId}`);
+  async deleteDocument(classId: string, documentId: string) {
+    const response = await api.delete(
+      `/rag/classes/${classId}/documents/${documentId}`,
+    );
+    return response.data;
+  },
+
+  async setDocumentEnabled(
+    classId: string,
+    documentId: string,
+    enabled: boolean,
+  ) {
+    const response = await api.patch(
+      `/rag/classes/${classId}/documents/${documentId}`,
+      { enabled },
+    );
+    return response.data;
+  },
+
+  async linkDocumentToClasses(documentId: string, classIds: string[]) {
+    const response = await api.post(`/rag/documents/${documentId}/classes`, {
+      classIds,
+    });
     return response.data;
   },
 

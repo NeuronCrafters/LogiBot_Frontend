@@ -44,6 +44,10 @@ export interface RagDocument {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  /** Ativo/desativado nesta turma especificamente (nao apaga o conteudo). */
+  enabled: boolean;
+  /** Se esta turma foi onde o documento foi originalmente enviado. */
+  isOwner: boolean;
 }
 
 export interface RagRetrievedChunk {
