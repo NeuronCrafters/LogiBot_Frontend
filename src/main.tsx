@@ -8,14 +8,22 @@ import { AuthProvider } from "@/app/providers/AuthProvider";
 
 const queryClient = new QueryClient();
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
-  </React.StrictMode>,
-);
+async function enableMocksIfNeeded() {
+  if (import.meta.env.VITE_MOCK_MODE !== "true") return;
+  const { worker } = await import("./mocks/browser");
+  await worker.start({ onUnhandledFrame: "bypass" });
+}
+
+enableMocksIfNeeded().then(() => {
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </React.StrictMode>,
+  );
+});
