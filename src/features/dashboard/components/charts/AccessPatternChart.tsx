@@ -24,7 +24,7 @@ import { formatDateTime, formatDuration } from "@/shared/lib/formatDate";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Cada ponto representa uma sessão de uso. O eixo horizontal mostra o horário do dia e o eixo vertical o dia da semana — revela quando os usuários estão mais ativos.";
+  "Each point represents a usage session. The horizontal axis shows the time of day and the vertical axis the day of the week — it reveals when users are most active.";
 
 interface SessionData {
   startTime: string;
@@ -41,7 +41,7 @@ interface ChartProps {
   filters: DashboardFilterParams;
 }
 
-const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -49,19 +49,19 @@ const CustomTooltip = ({ active, payload }: any) => {
   return (
     <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl space-y-1">
       <p className="font-[Poppins] text-zinc-400">
-        Entrada:{" "}
+        Entry:{" "}
         <span className="font-medium text-white">
           {formatDateTime(d.startTime)}
         </span>
       </p>
       <p className="font-[Poppins] text-zinc-400">
-        Saída:{" "}
+        Exit:{" "}
         <span className="font-medium text-white">
           {formatDateTime(d.endTime)}
         </span>
       </p>
       <p className="border-t border-white/10 pt-1 font-[Poppins] text-zinc-400">
-        Duração: <span className="font-medium text-white">{d.duration}</span>
+        Duration: <span className="font-medium text-white">{d.duration}</span>
       </p>
     </div>
   );
@@ -117,10 +117,10 @@ export function AccessPatternChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Detalhes de Acesso por Sessão
+              Access Details by Session
             </CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Cada ponto é uma sessão — passe o mouse para ver os detalhes
+              Each point is a session — hover to see the details
             </CardDescription>
           </div>
         </div>
@@ -131,7 +131,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
             info={CHART_INFO}
             insight={{
               chart: "access-pattern",
-              title: "Padrão de acesso",
+              title: "Access pattern",
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -143,13 +143,12 @@ export function AccessPatternChart({ filters }: ChartProps) {
         {!hasRequiredIds && (
           <NoData onRetry={refetch}>
             <p>
-              Selecione um aluno, turma ou curso para visualizar os detalhes de
-              acesso.
+              Select a student, class or program to view the access details.
             </p>
           </NoData>
         )}
         {hasRequiredIds && isLoading && (
-          <ChartLoader text="Carregando dados..." />
+          <ChartLoader text="Loading data..." />
         )}
         {hasRequiredIds && isError && (
           <ChartError message={(error as Error)?.message} onRetry={refetch} />
@@ -164,7 +163,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
                 <XAxis
                   type="number"
                   dataKey="hour"
-                  name="Hora"
+                  name="Hour"
                   domain={[0, 24]}
                   ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
                   tickFormatter={(h) => `${Math.floor(h)}h`}
@@ -174,7 +173,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
                 <YAxis
                   type="number"
                   dataKey="day"
-                  name="Dia"
+                  name="Day"
                   domain={[-0.5, 6.5]}
                   ticks={[0, 1, 2, 3, 4, 5, 6]}
                   tickFormatter={(d) => DAYS[d]}
@@ -197,7 +196,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
-            <p>Nenhum dado de sessão disponível para esta entidade.</p>
+            <p>No session data available for this entity.</p>
           </NoData>
         )}
       </CardContent>

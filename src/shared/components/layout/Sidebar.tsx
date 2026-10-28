@@ -36,7 +36,7 @@ interface NavSection {
 
 const STUDENT_SECTIONS: NavSection[] = [
   {
-    label: "Aprendizado",
+    label: "Learning",
     items: [
       {
         path: "/chat",
@@ -47,9 +47,9 @@ const STUDENT_SECTIONS: NavSection[] = [
     ],
   },
   {
-    label: "Conta",
+    label: "Account",
     items: [
-      { path: "/profile", icon: <User className="w-4 h-4" />, label: "Perfil" },
+      { path: "/profile", icon: <User className="w-4 h-4" />, label: "Profile" },
       {
         path: "/feedback",
         icon: <Send className="w-4 h-4" />,
@@ -77,35 +77,35 @@ function buildStaffSections(role: Role): NavSection[] {
     gestao.push({
       path: "/rag",
       icon: <Database className="w-4 h-4" />,
-      label: "Base RAG",
+      label: "RAG Base",
     });
   if (["admin", "course-coordinator"].includes(role))
     gestao.push({
       path: "/entities/manage",
       icon: <Settings className="w-4 h-4" />,
-      label: "Gestão Acadêmica",
+      label: "Academic Management",
     });
   if (role === "admin")
     gestao.push({
       path: "/admin/feedbacks",
       icon: <Inbox className="w-4 h-4" />,
-      label: "Feedbacks",
+      label: "Feedback",
     });
   if (["admin", "teacher", "course-coordinator"].includes(role))
     gestao.push({
       path: "/entities",
       icon: <TableProperties className="w-4 h-4" />,
-      label: "Listar Entidades",
+      label: "List Entities",
     });
   return [
-    { label: "Gestão", items: gestao },
+    { label: "Management", items: gestao },
     {
-      label: "Conta",
+      label: "Account",
       items: [
         {
           path: "/profile",
           icon: <User className="w-4 h-4" />,
-          label: "Perfil",
+          label: "Profile",
         },
         {
           path: "/feedback",
@@ -166,8 +166,8 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         : "student";
   const isStudent = role === "student";
   const allSections = isStudent ? STUDENT_SECTIONS : buildStaffSections(role);
-  const contaSection = allSections.find((s) => s.label === "Conta");
-  const sections = allSections.filter((s) => s.label !== "Conta");
+  const contaSection = allSections.find((s) => s.label === "Account");
+  const sections = allSections.filter((s) => s.label !== "Account");
 
   const handleLogout = () => {
     logout();
@@ -216,7 +216,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
       {isStudent && (
         <div className="flex-1 flex flex-col min-h-0 mt-4 border-t border-white/5">
           <div className="px-2 pt-3 pb-2 shrink-0 space-y-2">
-            <SectionLabel label="Histórico" />
+            <SectionLabel label="History" />
             <div className="flex bg-white/5 rounded-lg p-1 gap-1">
               <button
                 onClick={() => setHistoryFilter("chat")}
@@ -268,7 +268,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
           className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-zinc-500 hover:text-red-400 hover:bg-red-950/20 rounded-lg transition-colors font-[Poppins]"
         >
           <LogOut size={15} />
-          Sair da conta
+          Sign out
         </button>
       </div>
     </div>

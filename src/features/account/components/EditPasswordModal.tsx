@@ -24,15 +24,15 @@ export function EditPasswordModal({
   const handleSubmit = async () => {
     setError(null);
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setError("Preencha todos os campos.");
+      setError("Fill in all fields.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("As novas senhas não coincidem.");
+      setError("The new passwords do not match.");
       return;
     }
     if (newPassword.length < 6) {
-      setError("A nova senha deve ter no mínimo 6 caracteres.");
+      setError("The new password must be at least 6 characters long.");
       return;
     }
     try {
@@ -43,7 +43,7 @@ export function EditPasswordModal({
       setConfirmPassword("");
       onClose();
     } catch (err) {
-      setError("Erro ao alterar senha. Verifique sua senha atual.");
+      setError("Failed to change password. Check your current password.");
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +58,7 @@ export function EditPasswordModal({
               <div className="flex items-center gap-2">
                 <KeyRound size={18} className="text-orange-400" />
                 <Typograph
-                  text="Alterar Senha"
+                  text="Change Password"
                   colorText="text-white"
                   variant="text4"
                   weight="semibold"
@@ -82,35 +82,35 @@ export function EditPasswordModal({
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
-                    Senha Atual
+                    Current Password
                   </label>
                   <PasswordInput
                     value={currentPassword}
                     onChange={setCurrentPassword}
                     show={showPassword}
-                    placeholder="Digite sua senha atual"
+                    placeholder="Enter your current password"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
-                    Nova Senha
+                    New Password
                   </label>
                   <PasswordInput
                     value={newPassword}
                     onChange={setNewPassword}
                     show={showPassword}
-                    placeholder="Digite a nova senha"
+                    placeholder="Enter the new password"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
-                    Confirmar Nova Senha
+                    Confirm New Password
                   </label>
                   <PasswordInput
                     value={confirmPassword}
                     onChange={setConfirmPassword}
                     show={showPassword}
-                    placeholder="Confirme a nova senha"
+                    placeholder="Confirm the new password"
                   />
                 </div>
               </div>
@@ -120,7 +120,7 @@ export function EditPasswordModal({
                 className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-300 transition-colors mt-2"
               >
                 {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                {showPassword ? "Ocultar senhas" : "Mostrar senhas"}
+                {showPassword ? "Hide passwords" : "Show passwords"}
               </button>
             </div>
             <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-[#1a1a1a]">
@@ -130,7 +130,7 @@ export function EditPasswordModal({
                 disabled={isLoading}
                 className="text-zinc-400 hover:bg-red-600 hover:text-white transition-colors"
               >
-                Cancelar
+                Cancel
               </Button>
               <Button
                 onClick={handleSubmit}
@@ -142,7 +142,7 @@ export function EditPasswordModal({
                 ) : (
                   <Save size={16} />
                 )}
-                Salvar
+                Save
               </Button>
             </div>
           </div>

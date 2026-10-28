@@ -200,7 +200,7 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         : showUniversitySelect
           ? selectedUniversity
           : undefined;
-    logger.info("Admin", "Iniciando busca.", {
+    logger.info("Admin", "Starting search.", {
       filterType,
       universityId,
       courseId: showCourseSelect ? selectedCourse : undefined,
@@ -232,12 +232,12 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
   if (error)
     return (
       <div className="p-4 mb-4 border rounded-xl bg-red-600/20 border-red-600/50">
-        <p className="mb-2 text-red-300">Erro ao carregar filtros</p>
+        <p className="mb-2 text-red-300">Failed to load filters</p>
         <button
           onClick={() => refetch()}
           className="text-sm text-red-200 underline hover:text-red-100"
         >
-          Tentar novamente
+          Try again
         </button>
       </div>
     );
@@ -246,10 +246,10 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
     <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <div className="mb-5">
         <h2 className="font-[Poppins] text-base font-semibold text-white">
-          Filtros de busca
+          Search filters
         </h2>
         <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-          Selecione os critérios e clique em buscar para listar os registros.
+          Select the criteria and click search to list the records.
         </p>
       </div>
 
@@ -257,7 +257,7 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3">
           <div className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-blue-400/30 border-t-blue-400" />
           <p className="font-[Poppins] text-sm text-blue-300">
-            Carregando filtros...
+            Loading filters...
           </p>
         </div>
       )}
@@ -265,16 +265,16 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
       <div className="mb-5 grid gap-4">
         <div className="flex-1 min-w-[200px]">
           <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Tipo de filtro
+            Filter type
           </label>
           <Select
             value={filterType}
             onChange={(v) => setFilterType(v as FilterType)}
             disabled={loading}
-            placeholder="Selecione"
+            placeholder="Select"
             options={allowedFilters.map((ft) => ({
               value: ft,
-              label: ({ universities: "Universidades", courses: "Cursos", disciplines: "Disciplinas", classes: "Turmas", professors: "Professores", students: "Alunos do Sistema", "students-course": "Alunos por Curso", "students-discipline": "Alunos por Disciplina", "students-class": "Alunos por Turma" } as Record<string, string>)[ft] || ft,
+              label: ({ universities: "Universities", courses: "Programs", disciplines: "Subjects", classes: "Classes", professors: "Professors", students: "System Students", "students-course": "Students by Program", "students-discipline": "Students by Subject", "students-class": "Students by Class" } as Record<string, string>)[ft] || ft,
             }))}
           />
         </div>
@@ -282,13 +282,13 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         {showUniversitySelect && (
           <div>
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Universidade
+              University
             </label>
             <Select
               value={selectedUniversity}
               onChange={(v) => { setSelectedUniversity(v); setSelectedCourse(""); setSelectedDiscipline(""); setSelectedClass(""); }}
               disabled={loading}
-              placeholder="Selecione a universidade"
+              placeholder="Select the university"
               options={universities.map((u) => ({ value: u._id, label: u.name }))}
             />
           </div>
@@ -297,13 +297,13 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         {showCourseSelect && (
           <div>
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Curso
+              Program
             </label>
             <Select
               value={selectedCourse}
               onChange={(v) => { setSelectedCourse(v); setSelectedDiscipline(""); setSelectedClass(""); }}
               disabled={loading || courses.length === 0}
-              placeholder="Selecione o curso"
+              placeholder="Select the program"
               options={courses.map((c) => ({ value: c._id, label: c.name }))}
             />
           </div>
@@ -312,13 +312,13 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         {showStudentDisciplineSelect && (
           <div>
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Disciplina
+              Subject
             </label>
             <Select
               value={selectedDiscipline}
               onChange={setSelectedDiscipline}
               disabled={loading || disciplines.length === 0}
-              placeholder="Selecione a disciplina"
+              placeholder="Select the subject"
               options={disciplines.map((d) => ({ value: d._id, label: d.name }))}
             />
           </div>
@@ -327,13 +327,13 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         {showStudentClassSelect && (
           <div>
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Turma
+              Class
             </label>
             <Select
               value={selectedClass}
               onChange={setSelectedClass}
               disabled={loading || classes.length === 0}
-              placeholder="Selecione a turma"
+              placeholder="Select the class"
               options={classes.map((c) => ({ value: c._id, label: c.name }))}
             />
           </div>

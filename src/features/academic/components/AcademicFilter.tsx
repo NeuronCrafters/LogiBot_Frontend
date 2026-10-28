@@ -298,7 +298,7 @@ export function AcademicFilter({
     });
   };
 
-  if (error) return <div className="text-red-500">Erro ao carregar dados</div>;
+  if (error) return <div className="text-red-500">Failed to load data</div>;
 
   return (
     <div className="w-full">
@@ -315,7 +315,7 @@ export function AcademicFilter({
               setSelectedIds([]);
               onSelect([], { universityId: v });
             }}
-            placeholder={isAdmin ? "Selecione a Universidade" : universities[0]?.name || "Universidade"}
+            placeholder={isAdmin ? "Select the University" : universities[0]?.name || "University"}
             options={universities.map((u) => ({ value: u._id, label: u.name }))}
           />
         )}
@@ -331,7 +331,7 @@ export function AcademicFilter({
               setSelectedIds([]);
               onSelect([], { universityId: selectedUniversity, courseId: v });
             }}
-            placeholder={!selectedUniversity ? "Selecione a Universidade..." : courses.length === 0 ? "Nenhum curso disponível" : "Selecione o Curso"}
+            placeholder={!selectedUniversity ? "Select the University..." : courses.length === 0 ? "No program available" : "Select the Program"}
             options={courses.map((c) => ({ value: c._id, label: c.name }))}
           />
         )}
@@ -341,7 +341,7 @@ export function AcademicFilter({
             disabled={!isCourseEnabled || isLoading}
             value={selectedDiscipline}
             onChange={handleDisciplineChange}
-            placeholder="Selecione a Disciplina"
+            placeholder="Select the Subject"
             options={disciplines.map((d) => ({ value: d._id, label: d.name }))}
           />
         )}
@@ -355,7 +355,7 @@ export function AcademicFilter({
               setSelectedIds([]);
               onSelect([], { universityId: selectedUniversity, courseId: selectedCourse, classId: v });
             }}
-            placeholder={!selectedCourse ? "Selecione o Curso..." : classes.length === 0 ? "Nenhuma turma disponível" : "Selecione a Turma"}
+            placeholder={!selectedCourse ? "Select the Program..." : classes.length === 0 ? "No class available" : "Select the Class"}
             options={classes.map((c) => ({ value: c._id, label: c.name }))}
           />
         )}
@@ -365,7 +365,7 @@ export function AcademicFilter({
             disabled={!canShowEntitySelector() || isLoading}
             value={selectedIds[0] ?? ""}
             onChange={(v) => { if (v) toggleItem(v); }}
-            placeholder={isLoading ? "Carregando..." : `Selecione ${entityType === "student" ? "o aluno" : entityType === "discipline" ? "a disciplina" : entityType === "class" ? "a turma" : entityType === "course" ? "o curso" : "a universidade"}`}
+            placeholder={isLoading ? "Loading..." : `Select ${entityType === "student" ? "the student" : entityType === "discipline" ? "the subject" : entityType === "class" ? "the class" : entityType === "course" ? "the program" : "the university"}`}
             options={filteredEntities.map((item) => ({ value: item._id, label: item.name }))}
           />
         )}

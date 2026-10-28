@@ -26,7 +26,7 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Relaciona o esforco (tempo de uso em minutos) com o desempenho (taxa de acertos). As linhas tracejadas mostram a media do grupo e as cores separam quem esta acima ou abaixo da media em desempenho e esforco.";
+  "Relates effort (usage time in minutes) to performance (accuracy rate). The dashed lines show the group average and the colors separate who is above or below average in performance and effort.";
 
 const MATRIX_COLORS = {
   highHigh: "#10b981",
@@ -36,11 +36,11 @@ const MATRIX_COLORS = {
   average: "#f8fafc",
 };
 const QUADRANT_LABELS = {
-  highHigh: "Acima da media em desempenho e esforco",
-  highLow: "Bom desempenho com menor esforco",
-  lowHigh: "Muito esforco com baixo desempenho",
-  lowLow: "Abaixo da media em desempenho e esforco",
-  average: "Media do grupo",
+  highHigh: "Above average in performance and effort",
+  highLow: "Good performance with lower effort",
+  lowHigh: "High effort with low performance",
+  lowLow: "Below average in performance and effort",
+  average: "Group average",
 };
 
 interface ChartProps {
@@ -124,10 +124,10 @@ export function EffortMatrixChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Matriz Desempenho vs. Esforco
+              Performance vs. Effort Matrix
             </CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Quadrantes por media de esforco e taxa de acertos
+              Quadrants by average effort and accuracy rate
             </CardDescription>
           </div>
         </div>
@@ -138,7 +138,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
             info={CHART_INFO}
             insight={{
               chart: "effort-matrix",
-              title: "Matriz desempenho versus esforço",
+              title: "Performance versus effort matrix",
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -147,13 +147,13 @@ export function EffortMatrixChart({ filters }: ChartProps) {
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">
-        {isLoading && <ChartLoader text="Carregando dados..." />}
+        {isLoading && <ChartLoader text="Loading data..." />}
         {isError && (
           <ChartError message={(error as Error)?.message} onRetry={refetch} />
         )}
         {!isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
-            <p>Nenhum dado disponivel para esta entidade.</p>
+            <p>No data available for this entity.</p>
           </NoData>
         )}
         {!isLoading && !isError && matrix && (
@@ -205,7 +205,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                 <XAxis
                   type="number"
                   dataKey="effort"
-                  name="Esforco"
+                  name="Effort"
                   unit=" min"
                   domain={[0, matrix.effortDomainMax]}
                   stroke="rgba(255,255,255,0.3)"
@@ -214,7 +214,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                 <YAxis
                   type="number"
                   dataKey="performance"
-                  name="Desempenho"
+                  name="Performance"
                   unit="%"
                   domain={[0, 100]}
                   stroke="rgba(255,255,255,0.3)"
@@ -242,13 +242,13 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                           </span>
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Desempenho:{" "}
+                          Performance:{" "}
                           <span className="font-medium text-white">
                             {d.originalPerformance.toFixed(1)}%
                           </span>
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Esforco:{" "}
+                          Effort:{" "}
                           <span className="font-medium text-white">
                             {d.originalEffort.toFixed(1)} min
                           </span>
@@ -264,7 +264,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                       stroke="rgba(255,255,255,0.35)"
                       strokeDasharray="4 4"
                       label={{
-                        value: `Media ${matrix.avgPerformance.toFixed(1)}%`,
+                        value: `Average ${matrix.avgPerformance.toFixed(1)}%`,
                         fill: "rgba(255,255,255,0.55)",
                         fontSize: 11,
                         position: "insideTopLeft",
@@ -283,7 +283,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                     />
                   </>
                 )}
-                <Scatter name="Entidades" data={matrix.points}>
+                <Scatter name="Entities" data={matrix.points}>
                   {matrix.points.map((point, i) => (
                     <Cell
                       key={`cell-${i}`}
@@ -306,22 +306,22 @@ export function EffortMatrixChart({ filters }: ChartProps) {
             [
               [
                 "highHigh",
-                "Alto desempenho, alto esforco",
+                "High performance, high effort",
                 matrix.counts.highHigh,
               ],
               [
                 "highLow",
-                "Alto desempenho, baixo esforco",
+                "High performance, low effort",
                 matrix.counts.highLow,
               ],
               [
                 "lowHigh",
-                "Baixo desempenho, alto esforco",
+                "Low performance, high effort",
                 matrix.counts.lowHigh,
               ],
               [
                 "lowLow",
-                "Baixo desempenho, baixo esforco",
+                "Low performance, low effort",
                 matrix.counts.lowLow,
               ],
             ] as const

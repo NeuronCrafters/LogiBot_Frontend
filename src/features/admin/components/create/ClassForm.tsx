@@ -203,7 +203,7 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
     return (
       <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
         <Loader2 className="w-4 h-4 animate-spin" />
-        Carregando dados acadêmicos...
+        Loading academic data...
       </div>
     );
   }
@@ -211,18 +211,18 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelCls}>Nome da Turma</label>
+        <label className={labelCls}>Class Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Turma A — 2024"
+          placeholder="e.g. Class A — 2024"
           required
           className={inputCls}
         />
       </div>
       <div>
-        <label className={labelCls}>Universidade</label>
+        <label className={labelCls}>University</label>
         <Select
           value={selectedUniversity}
           onChange={(v) => {
@@ -231,12 +231,12 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
             setSelectedDisciplineIds([]);
           }}
           options={filteredUniversities.map((uni) => ({ value: uni._id, label: uni.name }))}
-          placeholder="Selecione a universidade"
+          placeholder="Select the university"
         />
       </div>
       {selectedUniversity && (
         <div>
-          <label className={labelCls}>Curso</label>
+          <label className={labelCls}>Program</label>
           <Select
             value={selectedCourse}
             onChange={(v) => {
@@ -244,18 +244,17 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
               setSelectedDisciplineIds([]);
             }}
             options={availableCourses.map((course) => ({ value: course._id, label: course.name }))}
-            placeholder="Selecione o curso"
+            placeholder="Select the program"
           />
         </div>
       )}
       {selectedCourse && (
         <div>
           <label className={labelCls}>
-            Disciplinas vinculadas{" "}
+            Linked subjects{" "}
             {selectedDisciplineIds.length > 0 && (
               <span className="normal-case tracking-normal text-blue-400 ml-1">
-                ({selectedDisciplineIds.length} selecionada
-                {selectedDisciplineIds.length !== 1 ? "s" : ""})
+                ({selectedDisciplineIds.length} selected)
               </span>
             )}
           </label>
@@ -263,11 +262,10 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
             items={availableDisciplines}
             selected={selectedDisciplineIds}
             onToggle={toggleDiscipline}
-            emptyText="Nenhuma disciplina disponível para este curso. Você pode criar a turma sem disciplinas e vincular depois."
+            emptyText="No subject available for this program. You can create the class without subjects and link them later."
           />
           <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">
-            A turma gera um codigo unico de acesso; as disciplinas selecionadas
-            formam a grade da turma.
+            The class generates a unique access code; the selected subjects make up the class curriculum.
           </p>
         </div>
       )}

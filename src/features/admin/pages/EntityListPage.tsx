@@ -40,20 +40,29 @@ type EntityType =
   | "student";
 
 const ENTITY_LABEL: Record<string, string> = {
-  university: "universidade",
-  course: "curso",
-  discipline: "disciplina",
-  class: "turma",
+  university: "university",
+  course: "program",
+  discipline: "subject",
+  class: "class",
   professor: "professor",
-  student: "aluno",
+  student: "student",
+};
+
+const ENTITY_LABEL_PLURAL: Record<string, string> = {
+  university: "universities",
+  course: "programs",
+  discipline: "subjects",
+  class: "classes",
+  professor: "professors",
+  student: "students",
 };
 
 const EDIT_META: Record<string, { label: string; icon: ReactNode }> = {
-  university: { label: "Editar Universidade", icon: <School className="h-5 w-5" /> },
-  course: { label: "Editar Curso", icon: <BookOpen className="h-5 w-5" /> },
-  class: { label: "Editar Turma", icon: <Users className="h-5 w-5" /> },
-  discipline: { label: "Editar Disciplina", icon: <Library className="h-5 w-5" /> },
-  professor: { label: "Editar Professor", icon: <GraduationCap className="h-5 w-5" /> },
+  university: { label: "Edit University", icon: <School className="h-5 w-5" /> },
+  course: { label: "Edit Program", icon: <BookOpen className="h-5 w-5" /> },
+  class: { label: "Edit Class", icon: <Users className="h-5 w-5" /> },
+  discipline: { label: "Edit Subject", icon: <Library className="h-5 w-5" /> },
+  professor: { label: "Edit Professor", icon: <GraduationCap className="h-5 w-5" /> },
 };
 
 function FormModal({
@@ -133,8 +142,8 @@ export function EntityList() {
       try {
         return await searchEntitiesByFilter(userRole, currentFilter);
       } catch (error) {
-        logger.error("Admin", "Erro na busca.", error);
-        throw new Error("Falha ao buscar entidades");
+        logger.error("Admin", "Search error.", error);
+        throw new Error("Failed to fetch entities");
       }
     },
     enabled: !!currentFilter,
@@ -239,15 +248,15 @@ export function EntityList() {
         data,
       );
       if (data.items.length === 0)
-        toast("Nenhum resultado encontrado para os filtros selecionados.");
+        toast("No results found for the selected filters.");
       else
         toast.success(
-          `${data.items.length} ${ENTITY_LABEL[data.entity] ?? "registro"}(s) encontrado(s).`,
+          `${data.items.length} ${(data.items.length === 1 ? ENTITY_LABEL : ENTITY_LABEL_PLURAL)[data.entity] ?? "records"} found.`,
         );
     },
     onError: (error) => {
-      logger.error("Admin", "Erro na busca.", error);
-      toast.error("Erro ao buscar registros. Tente novamente.");
+      logger.error("Admin", "Search error.", error);
+      toast.error("Failed to fetch records. Please try again.");
     },
   });
 
@@ -259,11 +268,11 @@ export function EntityList() {
         ["university", "course", "class", "discipline"].includes(displayEntity)
       )
         await academicApi.delete(displayEntity as any, id);
-      else throw new Error(`Nao e possivel deletar: ${displayEntity}`);
+      else throw new Error(`Cannot delete: ${displayEntity}`);
       return id;
     },
     onSuccess: () => {
-      toast.success("Registro excluido com sucesso.");
+      toast.success("Record deleted successfully.");
       queryClient.invalidateQueries({
         queryKey: ["searchEntities", userRole, currentFilter],
       });
@@ -271,8 +280,8 @@ export function EntityList() {
       if (currentFilter) refetchSearch();
     },
     onError: (error) => {
-      logger.error("Admin", "Erro ao deletar.", error);
-      toast.error("Erro ao excluir registro.");
+      logger.error("Admin", "Failed to delete.", error);
+      toast.error("Failed to delete record.");
     },
   });
 
@@ -284,21 +293,21 @@ export function EntityList() {
       entityType: EntityType;
       item: any;
     }) => {
-      if (!editTarget?.id) throw new Error("ID ausente");
+      if (!editTarget?.id) throw new Error("Missing ID");
       if (entityType === "professor")
         return adminApi.updateProfessor(editTarget.id, item);
       return academicApi.update(entityType as any, editTarget.id, item);
     },
     onSuccess: () => {
-      toast.success("Registro atualizado com sucesso.");
+      toast.success("Record updated successfully.");
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       queryClient.invalidateQueries({ queryKey: ["searchEntities"] });
       setEditTarget(null);
       if (currentFilter) refetchSearch();
     },
     onError: (error) => {
-      logger.error("Admin", "Erro ao atualizar registro.", error);
-      toast.error("Erro ao atualizar. Verifique os dados e tente novamente.");
+      logger.error("Admin", "Failed to update record.", error);
+      toast.error("Update failed. Check the data and try again.");
     },
   });
 
@@ -327,20 +336,18 @@ export function EntityList() {
               </div>
               <div>
                 <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                  Listar entidades
+                  List entities
                 </h1>
                 <p className="mt-1 font-[Poppins] text-sm text-zinc-400">
-                  Pesquise, visualize e gerencie registros academicos do
-                  sistema.
+                  Search, view and manage the system's academic records.
                 </p>
               </div>
             </div>
             {items.length > 0 && !isLoading && (
               <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-2 font-[Poppins] text-sm text-zinc-300">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                {items.length} {ENTITY_LABEL[displayEntity] ?? "registro"}
-                {items.length !== 1 ? "s" : ""} encontrado
-                {items.length !== 1 ? "s" : ""}
+                {items.length}{" "}
+                {(items.length === 1 ? ENTITY_LABEL : ENTITY_LABEL_PLURAL)[displayEntity] ?? "records"} found
               </div>
             )}
           </div>
@@ -355,10 +362,10 @@ export function EntityList() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-medium text-white">
-                Buscando registros...
+                Fetching records...
               </p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-600">
-                Isso pode levar alguns segundos
+                This may take a few seconds
               </p>
             </div>
           </div>
@@ -371,10 +378,10 @@ export function EntityList() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Erro ao buscar registros
+                Failed to fetch records
               </p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Verifique sua conexao e tente novamente.
+                Check your connection and try again.
               </p>
             </div>
             <button
@@ -385,7 +392,7 @@ export function EntityList() {
               <RefreshCw
                 className={`h-3.5 w-3.5 ${isSearching ? "animate-spin" : ""}`}
               />
-              Tentar novamente
+              Try again
             </button>
           </div>
         )}
@@ -406,10 +413,10 @@ export function EntityList() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Nenhum resultado encontrado
+                No results found
               </p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Tente ajustar os filtros de busca.
+                Try adjusting the search filters.
               </p>
             </div>
             <button
@@ -417,7 +424,7 @@ export function EntityList() {
               className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <RefreshCw className="h-3.5 w-3.5" />
-              Limpar filtros
+              Clear filters
             </button>
           </div>
         )}
@@ -429,18 +436,17 @@ export function EntityList() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Pronto para buscar
+                Ready to search
               </p>
               <p className="mt-1 max-w-xs font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                Configure os filtros acima e clique em{" "}
-                <span className="text-zinc-400">Buscar</span> para listar os
-                registros do sistema.
+                Set the filters above and click{" "}
+                <span className="text-zinc-400">Search</span> to list the system records.
               </p>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-2.5">
               <SlidersHorizontal className="h-3.5 w-3.5 text-zinc-600" />
               <span className="font-[Poppins] text-xs text-zinc-600">
-                Tipo de filtro - Selecionar - Buscar
+                Filter type - Select - Search
               </span>
             </div>
           </div>
@@ -449,14 +455,14 @@ export function EntityList() {
 
       {editTarget && (
         <FormModal
-          title={EDIT_META[editTarget.entityType]?.label ?? "Editar"}
+          title={EDIT_META[editTarget.entityType]?.label ?? "Edit"}
           icon={EDIT_META[editTarget.entityType]?.icon ?? <School className="h-5 w-5" />}
           onClose={() => setEditTarget(null)}
         >
           {isLoadingAcademic || !editInitialData ? (
             <div className="flex items-center gap-2 py-6 font-[Poppins] text-sm text-zinc-500">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Carregando dados...
+              Loading data...
             </div>
           ) : (
             <>

@@ -88,9 +88,9 @@ export const quizHandlers = [
     return HttpResponse.json({
       quiz: {
         id: fakeId("quiz"),
-        title: body.title ?? "Quiz gerado por IA",
+        title: body.title ?? "AI-generated Quiz",
         topic: body.theme ?? "variaveis",
-        description: "Gerado automaticamente a partir do material selecionado.",
+        description: "Automatically generated from the selected material.",
         disciplineId: body.disciplineId ?? "",
         disciplineName: "",
         disciplines: [],

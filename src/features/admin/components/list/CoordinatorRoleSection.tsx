@@ -26,7 +26,7 @@ export function CoordinatorRoleSection({
   return (
     <div className="space-y-2">
       <p className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
-        Cargo de Coordenador
+        Coordinator Role
       </p>
 
       <label
@@ -44,12 +44,12 @@ export function CoordinatorRoleSection({
         />
         <div>
           <p className="font-[Poppins] text-sm text-white font-medium leading-snug">
-            Adicionar coordenador de curso
+            Add program coordinator
           </p>
           <p className="font-[Poppins] text-xs text-zinc-500 mt-0.5">
             {alreadyIsCoordinator
-              ? "Este professor já é coordenador"
-              : "Atribuir o papel de coordenador a este professor"}
+              ? "This professor is already a coordinator"
+              : "Assign the coordinator role to this professor"}
           </p>
         </div>
       </label>
@@ -69,12 +69,12 @@ export function CoordinatorRoleSection({
         />
         <div>
           <p className="font-[Poppins] text-sm text-white font-medium leading-snug">
-            Remover coordenador de curso
+            Remove program coordinator
           </p>
           <p className="font-[Poppins] text-xs text-zinc-500 mt-0.5">
             {!alreadyIsCoordinator
-              ? "Este professor não é coordenador"
-              : "Revogar o papel de coordenador deste professor"}
+              ? "This professor is not a coordinator"
+              : "Revoke the coordinator role from this professor"}
           </p>
         </div>
       </label>

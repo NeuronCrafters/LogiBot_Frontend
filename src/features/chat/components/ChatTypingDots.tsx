@@ -7,16 +7,16 @@ interface ChatTypingDotsProps {
 
 function getStageLabel(streamStage?: ChatStreamStage) {
   if (streamStage === "queued") {
-    return "Aguardando na fila";
+    return "Waiting in queue";
   }
   if (streamStage === "history") {
-    return "Carregando contexto";
+    return "Loading context";
   }
   if (streamStage === "rag") {
-    return "Consultando materiais";
+    return "Consulting materials";
   }
   if (streamStage === "agent") {
-    return "Gerando resposta";
+    return "Generating answer";
   }
   return null;
 }

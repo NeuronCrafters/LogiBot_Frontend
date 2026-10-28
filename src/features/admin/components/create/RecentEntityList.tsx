@@ -29,22 +29,22 @@ const TYPE_META: Record<
   { label: string; icon: React.ReactNode; color: string }
 > = {
   university: {
-    label: "Universidade",
+    label: "University",
     icon: <School className="h-3.5 w-3.5" />,
     color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
   },
   course: {
-    label: "Curso",
+    label: "Program",
     icon: <BookOpen className="h-3.5 w-3.5" />,
     color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
   },
   class: {
-    label: "Turma",
+    label: "Class",
     icon: <Users className="h-3.5 w-3.5" />,
     color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
   },
   discipline: {
-    label: "Disciplina",
+    label: "Subject",
     icon: <Library className="h-3.5 w-3.5" />,
     color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
   },
@@ -100,10 +100,10 @@ export function RecentEntityList({
         <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
           <div>
             <p className="font-[Poppins] text-sm font-semibold text-white">
-              Registros recentes
+              Recent records
             </p>
             <p className="mt-0.5 font-[Poppins] text-xs text-zinc-600">
-              Últimos cadastros realizados nesta sessão
+              Latest records created in this session
             </p>
           </div>
           {items.length > 0 && (
@@ -138,10 +138,10 @@ export function RecentEntityList({
               </div>
               <div className="text-center">
                 <p className="font-[Poppins] text-sm font-medium text-zinc-500">
-                  Nenhum cadastro ainda
+                  No records yet
                 </p>
                 <p className="mt-0.5 font-[Poppins] text-xs text-zinc-700">
-                  Os registros criados aparecerão aqui.
+                  Created records will appear here.
                 </p>
               </div>
             </div>
@@ -164,18 +164,18 @@ export function RecentEntityList({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-[Poppins] text-sm font-medium text-zinc-200">
-                        {item.name || "Sem nome"}
+                        {item.name || "Unnamed"}
                       </p>
                       <div className="mt-1 flex items-center gap-2">
                         <TypeBadge type={item.type} />
                         <span className="font-[Poppins] text-[10px] text-zinc-700">
-                          {item.action === "update" ? "Editado" : "Criado"}
+                          {item.action === "update" ? "Edited" : "Created"}
                         </span>
                       </div>
                       {item.registrationCode ? (
                         <div className="mt-2 flex flex-wrap items-center gap-1.5">
                           <span className="font-[Poppins] text-[10px] text-zinc-600">
-                            Codigo da turma
+                            Class code
                           </span>
                           <span className="rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-mono text-[11px] text-blue-300">
                             {item.registrationCode}
@@ -186,7 +186,7 @@ export function RecentEntityList({
                   </div>
                   <button
                     onClick={() => handleEditClick(item)}
-                    title="Editar"
+                    title="Edit"
                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 opacity-0 transition-all hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400 group-hover:opacity-100"
                   >
                     <Pencil className="h-3 w-3" />
@@ -201,10 +201,10 @@ export function RecentEntityList({
       <AppModal
         isOpen={modalOpen}
         type="update"
-        title="Confirmar edição"
-        description={`Você está prestes a editar "${selectedItem?.name}". Deseja continuar?`}
-        acceptLabel="Sim, editar"
-        cancelLabel="Cancelar"
+        title="Confirm edit"
+        description={`You are about to edit "${selectedItem?.name}". Do you want to continue?`}
+        acceptLabel="Yes, edit"
+        cancelLabel="Cancel"
         onConfirm={confirmEdit}
         onCancel={closeModal}
         onClose={closeModal}
@@ -212,13 +212,13 @@ export function RecentEntityList({
         {selectedItem && (
           <div className="space-y-2">
             <div className="rounded-xl border border-white/5 bg-neutral-950/60 px-4 py-3">
-              <p className="font-[Poppins] text-xs text-zinc-500">Tipo</p>
+              <p className="font-[Poppins] text-xs text-zinc-500">Type</p>
               <div className="mt-1">
                 <TypeBadge type={selectedItem.type} />
               </div>
             </div>
             <div className="rounded-xl border border-white/5 bg-neutral-950/60 px-4 py-3">
-              <p className="font-[Poppins] text-xs text-zinc-500">Nome</p>
+              <p className="font-[Poppins] text-xs text-zinc-500">Name</p>
               <p className="mt-0.5 font-[Poppins] text-sm text-white">
                 {selectedItem.name || "—"}
               </p>

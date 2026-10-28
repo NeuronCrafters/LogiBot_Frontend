@@ -46,20 +46,20 @@ function ResultView({
             {pct}%
           </span>
           <span className="font-[Poppins] text-xs text-indigo-300">
-            Aproveitamento
+            Score
           </span>
         </div>
         <div className="flex flex-col items-center gap-1 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 py-6">
           <span className="font-[Poppins] text-4xl font-bold text-emerald-400">
             {result.score}
           </span>
-          <span className="font-[Poppins] text-xs text-emerald-400">Acertos</span>
+          <span className="font-[Poppins] text-xs text-emerald-400">Correct</span>
         </div>
         <div className="flex flex-col items-center gap-1 rounded-2xl border border-red-500/20 bg-red-500/10 py-6">
           <span className="font-[Poppins] text-4xl font-bold text-red-400">
             {result.totalQuestions - result.score}
           </span>
-          <span className="font-[Poppins] text-xs text-red-400">Erros</span>
+          <span className="font-[Poppins] text-xs text-red-400">Wrong</span>
         </div>
       </div>
 
@@ -101,7 +101,7 @@ function ResultView({
                     <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
                     <div>
                       <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-red-400">
-                        Sua resposta ({detail.selected})
+                        Your answer ({detail.selected})
                       </p>
                       <p className="mt-0.5 font-[Poppins] text-sm text-zinc-300">
                         {detail.selectedText}
@@ -113,7 +113,7 @@ function ResultView({
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                   <div>
                     <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-emerald-400">
-                      Resposta correta ({detail.correct})
+                      Correct answer ({detail.correct})
                     </p>
                     <p className="mt-0.5 font-[Poppins] text-sm text-zinc-300">
                       {detail.correctText}
@@ -138,13 +138,13 @@ function ResultView({
           onClick={onRetry}
           className="h-11 flex-1 rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
         >
-          Tentar novamente
+          Try again
         </button>
         <button
           onClick={onBack}
           className="h-11 flex-1 rounded-lg border border-white/10 bg-white/5 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
-          Voltar aos quizzes
+          Back to quizzes
         </button>
       </div>
     </div>
@@ -178,7 +178,7 @@ export function QuizAttempt() {
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ["studentQuizHub"] });
     },
-    onError: () => toast.error("Erro ao enviar respostas. Tente novamente."),
+    onError: () => toast.error("Failed to submit answers. Please try again."),
   });
 
   const handleSelect = (questionId: string, letter: string) => {
@@ -207,13 +207,13 @@ export function QuizAttempt() {
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
         <AlertCircle className="h-10 w-10 text-red-400" />
         <p className="font-[Poppins] text-sm text-zinc-400">
-          Quiz não encontrado.
+          Quiz not found.
         </p>
         <button
           onClick={() => navigate("/quiz")}
           className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-[Poppins] text-sm text-zinc-300 hover:bg-white/10"
         >
-          Voltar
+          Back
         </button>
       </main>
     );
@@ -255,7 +255,7 @@ export function QuizAttempt() {
                 className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar
+                Back
               </button>
             )}
           </div>
@@ -282,10 +282,10 @@ export function QuizAttempt() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-[Poppins] text-xs text-zinc-500">
-                      Questão {currentIndex + 1} de {total}
+                      Question {currentIndex + 1} of {total}
                     </span>
                     <span className="font-[Poppins] text-xs text-zinc-600">
-                      {Object.keys(answers).length}/{total} respondidas
+                      {Object.keys(answers).length}/{total} answered
                     </span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
@@ -341,7 +341,7 @@ export function QuizAttempt() {
                     className="flex h-10 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-4 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Anterior
+                    Previous
                   </button>
 
                   <div className="flex flex-1 justify-center gap-1">
@@ -370,7 +370,7 @@ export function QuizAttempt() {
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <>
-                          Finalizar
+                          Finish
                           <CheckCircle2 className="h-4 w-4" />
                         </>
                       )}
@@ -381,7 +381,7 @@ export function QuizAttempt() {
                       disabled={!answered}
                       className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Próxima
+                      Next
                       <ArrowRight className="h-4 w-4" />
                     </button>
                   )}

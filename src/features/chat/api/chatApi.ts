@@ -160,11 +160,11 @@ export const chatApi = {
     });
 
     if (!response.ok) {
-      throw new Error(`Stream falhou com status ${response.status}`);
+      throw new Error(`Stream failed with status ${response.status}`);
     }
 
     if (!response.body) {
-      throw new Error("Resposta de stream sem body.");
+      throw new Error("Stream response without body.");
     }
 
     const result: ChatStreamResult = {};
@@ -216,7 +216,7 @@ export const chatApi = {
       if (event === "error") {
         const payload = parseSseJson<{ message?: string }>(data);
         const message =
-          payload?.message || "Nao consegui concluir sua resposta agora.";
+          payload?.message || "I could not complete your answer right now.";
         callbacks.onError?.(message);
         throw new Error(message);
       }

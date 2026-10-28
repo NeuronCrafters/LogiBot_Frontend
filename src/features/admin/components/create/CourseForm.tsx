@@ -36,7 +36,7 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
         const response = await academicFiltersApi.getAcademicData();
         setAcademicData(response.data);
       } catch (error) {
-        logger.error("Admin", "Erro ao carregar dados academicos.", error);
+        logger.error("Admin", "Failed to load academic data.", error);
       }
     };
     fetchAcademicData();
@@ -63,23 +63,23 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
   return (
     <form onSubmit={handleSubmit} className="mt-5 space-y-4">
       <div>
-        <label className={labelCls}>Nome do Curso</label>
+        <label className={labelCls}>Program Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Ciencia da Computacao"
+          placeholder="e.g. Computer Science"
           required
           className={inputCls}
         />
       </div>
       <div>
-        <label className={labelCls}>Universidade</label>
+        <label className={labelCls}>University</label>
         <Select
           value={universityId}
           onChange={(v) => setUniversityId(v)}
           options={(academicData?.universities ?? []).map((uni) => ({ value: uni._id, label: uni.name }))}
-          placeholder="Selecione a universidade"
+          placeholder="Select the university"
         />
       </div>
       <div className="pt-1">

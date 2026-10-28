@@ -27,10 +27,10 @@ import { ChartDownloadButton } from "../ChartDownloadButton";
 import { dashboardFiltersFromLegacy } from "../../insightFilters";
 
 const CHART_INFO =
-  "Frequência de acesso por categoria de conteúdo no chat (Variáveis, Funções, Listas…). Indica quais assuntos de lógica de programação geram mais dúvidas entre os estudantes.";
+  "Access frequency by content category in the chat (Variables, Functions, Lists…). Indicates which programming logic topics raise the most questions among students.";
 
 const chartConfig = {
-  acessos: { label: "Acessos", color: "#3b82f6" },
+  acessos: { label: "Accesses", color: "#3b82f6" },
 } satisfies ChartConfig;
 
 interface CategoryChartProps {
@@ -65,7 +65,7 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
     ],
     queryFn: async () => {
       if (!targetId)
-        throw new Error("Selecione todos os filtros para visualizar");
+        throw new Error("Select all filters to view");
       if (filter.type === "student")
         return logApi.getFilteredStudentSummary({
           universityId: universityId!,
@@ -81,7 +81,7 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
         discipline: () => logApi.getDisciplineSummary(targetId),
       };
       const fn = calls[filter.type];
-      if (!fn) throw new Error(`Tipo inválido: ${filter.type}`);
+      if (!fn) throw new Error(`Invalid type: ${filter.type}`);
       return fn();
     },
     enabled: hasRequired,
@@ -90,11 +90,11 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
     select: (raw: any) => {
       const counts = raw.subjectCounts ?? {};
       const chartData = [
-        { category: "Variáveis", acessos: counts.variaveis ?? 0 },
-        { category: "Tipos de Dados", acessos: counts.tipos ?? 0 },
-        { category: "Condicionais", acessos: counts.verificacoes ?? 0 },
-        { category: "Repetição", acessos: counts.loops ?? 0 },
-        { category: "Funções", acessos: counts.funcoes ?? 0 },
+        { category: "Variables", acessos: counts.variaveis ?? 0 },
+        { category: "Data Types", acessos: counts.tipos ?? 0 },
+        { category: "Conditionals", acessos: counts.verificacoes ?? 0 },
+        { category: "Loops", acessos: counts.loops ?? 0 },
+        { category: "Functions", acessos: counts.funcoes ?? 0 },
       ];
       const totalAccesses = chartData.reduce((s, d) => s + d.acessos, 0);
       return { chartData, totalAccesses };
@@ -121,7 +121,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
   }, [data]);
   const refetchTyped = refetch as () => void;
   const errorMessage =
-    error instanceof Error ? error.message : "Erro ao carregar dados.";
+    error instanceof Error ? error.message : "Failed to load data.";
 
   return (
     <Card
@@ -132,10 +132,10 @@ export function CategoryChart({ filter }: CategoryChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Assuntos Mais Acessados: Chat
+              Most Accessed Topics: Chat
             </CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Acessos por categoria de conteúdo
+              Accesses by content category
             </CardDescription>
           </div>
         </div>
@@ -146,7 +146,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             info={CHART_INFO}
             insight={{
               chart: "chat-topics",
-              title: "Assuntos mais acessados no chat",
+              title: "Most accessed topics in the chat",
               filters: dashboardFiltersFromLegacy(filter),
               disabled: isLoading || !hasData,
             }}
@@ -157,10 +157,10 @@ export function CategoryChart({ filter }: CategoryChartProps) {
       <CardContent className="flex flex-1 flex-col min-h-0 px-2 sm:p-6">
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
-            <p>Selecione uma entidade para visualizar dados.</p>
+            <p>Select an entity to view data.</p>
           </NoData>
         )}
-        {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
+        {hasRequired && isLoading && <ChartLoader text="Loading data..." />}
         {hasRequired && isError && (
           <ChartError message={errorMessage} onRetry={refetchTyped} />
         )}
@@ -185,7 +185,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                           {entry.category}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Acessos:{" "}
+                          Accesses:{" "}
                           <span className="font-medium text-white">
                             {entry.acessos}
                           </span>
@@ -223,7 +223,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
         )}
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>
-            <p>Nenhum dado de categorias disponível.</p>
+            <p>No category data available.</p>
           </NoData>
         )}
       </CardContent>
@@ -232,7 +232,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex items-center gap-4">
             <span className="font-[Poppins] text-sm text-zinc-400">
-              Total de acessos:{" "}
+              Total accesses:{" "}
               <span className="font-semibold text-white">
                 {data!.totalAccesses}
               </span>
@@ -241,7 +241,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
               <>
                 <span className="text-white/20">|</span>
                 <span className="font-[Poppins] text-sm text-zinc-400">
-                  Mais acessado:{" "}
+                  Most accessed:{" "}
                   <span className="font-semibold text-white">
                     {topCategory.name}
                   </span>

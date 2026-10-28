@@ -209,9 +209,9 @@ export function ClassDisciplineManager({
       academicApi.attachDisciplineToClass(selectedClass, disciplineId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Disciplina vinculada a grade da turma.");
+      toast.success("Subject linked to the class curriculum.");
     },
-    onError: () => toast.error("Nao foi possivel vincular a disciplina."),
+    onError: () => toast.error("Could not link the subject."),
   });
 
   const detachDisciplineMutation = useMutation({
@@ -219,9 +219,9 @@ export function ClassDisciplineManager({
       academicApi.detachDisciplineFromClass(selectedClass, disciplineId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Disciplina removida da grade da turma.");
+      toast.success("Subject removed from the class curriculum.");
     },
-    onError: () => toast.error("Nao foi possivel desvincular a disciplina."),
+    onError: () => toast.error("Could not unlink the subject."),
   });
 
   const regenerateCodeMutation = useMutation({
@@ -233,9 +233,9 @@ export function ClassDisciplineManager({
       setLatestRegistrationCode(response.registrationCode || "");
       setCopiedCode(false);
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Codigo da turma regenerado.");
+      toast.success("Class code regenerated.");
     },
-    onError: () => toast.error("Nao foi possivel regenerar o codigo da turma."),
+    onError: () => toast.error("Could not regenerate the class code."),
   });
 
   const enrollStudentMutation = useMutation({
@@ -243,9 +243,9 @@ export function ClassDisciplineManager({
       academicApi.enrollStudentInClass(selectedClass, studentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Aluno transferido para a turma.");
+      toast.success("Student transferred to the class.");
     },
-    onError: () => toast.error("Nao foi possivel transferir o aluno."),
+    onError: () => toast.error("Could not transfer the student."),
   });
 
   const resetUniversity = (universityId: string) => {
@@ -285,7 +285,7 @@ export function ClassDisciplineManager({
   const loader = (
     <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
       <Loader2 className="h-4 w-4 animate-spin" />
-      Carregando vinculos...
+      Loading links...
     </div>
   );
 
@@ -294,10 +294,10 @@ export function ClassDisciplineManager({
       {!inModal && (
         <div className="mb-5">
           <h2 className="font-[Poppins] text-base font-semibold text-white">
-            Gerenciar turma
+            Manage class
           </h2>
           <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-            Controle grade, codigo de acesso e alunos da turma.
+            Manage the curriculum, access code and students of the class.
           </p>
         </div>
       )}
@@ -306,36 +306,36 @@ export function ClassDisciplineManager({
         <div className="grid gap-4 md:grid-cols-3">
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Universidade
+              University
             </label>
             <Select
               value={selectedUniversity}
               onChange={(v) => resetUniversity(v)}
               options={(academicData?.universities ?? []).map((university) => ({ value: university._id, label: university.name }))}
-              placeholder="Selecione"
+              placeholder="Select"
             />
           </div>
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Curso
+              Program
             </label>
             <Select
               value={selectedCourse}
               onChange={(v) => resetCourse(v)}
               options={courses.map((item) => ({ value: item._id, label: item.name }))}
-              placeholder="Selecione"
+              placeholder="Select"
               disabled={!selectedUniversity}
             />
           </div>
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Turma
+              Class
             </label>
             <Select
               value={selectedClass}
               onChange={(v) => resetClass(v)}
               options={(course?.classes ?? []).map((item) => ({ value: item._id, label: item.name }))}
-              placeholder="Selecione"
+              placeholder="Select"
               disabled={!selectedCourse}
             />
           </div>
@@ -351,7 +351,7 @@ export function ClassDisciplineManager({
               </div>
               <div className="min-w-0">
                 <p className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Codigo da turma
+                  Class code
                 </p>
                 <p className="mt-1 truncate font-mono text-base font-semibold text-blue-300">
                   {registrationCode}
@@ -370,7 +370,7 @@ export function ClassDisciplineManager({
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
-                {copiedCode ? "Copiado" : "Copiar"}
+                {copiedCode ? "Copied" : "Copy"}
               </button>
               <button
                 type="button"
@@ -381,7 +381,7 @@ export function ClassDisciplineManager({
                 <RefreshCw
                   className={`h-4 w-4 ${regenerateCodeMutation.isPending ? "animate-spin" : ""}`}
                 />
-                Regenerar
+                Regenerate
               </button>
             </div>
           </div>
@@ -392,14 +392,14 @@ export function ClassDisciplineManager({
               onClick={() => setActiveTab("disciplines")}
               className={`flex-1 rounded-lg px-3 py-2 font-[Poppins] text-sm transition-colors ${activeTab === "disciplines" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
             >
-              Disciplinas
+              Subjects
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("students")}
               className={`flex-1 rounded-lg px-3 py-2 font-[Poppins] text-sm transition-colors ${activeTab === "students" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
             >
-              Alunos
+              Students
             </button>
           </div>
 
@@ -408,13 +408,13 @@ export function ClassDisciplineManager({
               <SearchField
                 value={disciplineSearch}
                 onChange={setDisciplineSearch}
-                placeholder="Buscar disciplina..."
+                placeholder="Search subject..."
               />
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Disciplinas disponiveis
+                    Available subjects
                   </h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredAvailableDisciplines.length}
@@ -422,7 +422,7 @@ export function ClassDisciplineManager({
                 </div>
                 <AssignmentList
                   items={filteredAvailableDisciplines}
-                  emptyText="Nenhuma disciplina disponivel."
+                  emptyText="No subject available."
                   action={(discipline) => (
                     <button
                       type="button"
@@ -432,7 +432,7 @@ export function ClassDisciplineManager({
                       }
                       className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 font-[Poppins] text-xs text-blue-300 transition-colors hover:bg-blue-500/20 disabled:opacity-50"
                     >
-                      Vincular
+                      Link
                     </button>
                   )}
                 />
@@ -443,7 +443,7 @@ export function ClassDisciplineManager({
                   <div className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-blue-400" />
                     <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                      Grade da turma
+                      Class curriculum
                     </h3>
                   </div>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
@@ -452,7 +452,7 @@ export function ClassDisciplineManager({
                 </div>
                 <AssignmentList
                   items={filteredLinkedDisciplines}
-                  emptyText="Nenhuma disciplina vinculada."
+                  emptyText="No subject linked."
                   action={(discipline) => (
                     <button
                       type="button"
@@ -463,7 +463,7 @@ export function ClassDisciplineManager({
                       className="flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 font-[Poppins] text-xs text-red-300 transition-colors hover:bg-red-500/20 disabled:opacity-50"
                     >
                       <X className="h-3.5 w-3.5" />
-                      Remover
+                      Remove
                     </button>
                   )}
                 />
@@ -476,26 +476,25 @@ export function ClassDisciplineManager({
               <SearchField
                 value={studentSearch}
                 onChange={setStudentSearch}
-                placeholder="Buscar aluno por nome ou email..."
+                placeholder="Search student by name or email..."
               />
 
               <div className="rounded-xl border border-white/10 bg-neutral-950/40 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-emerald-400" />
                   <p className="font-[Poppins] text-sm font-semibold text-white">
-                    Matricula por turma
+                    Enrollment by class
                   </p>
                 </div>
                 <p className="mt-1 font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                  Alunos pertencem a uma unica turma. Transferir um aluno para
-                  esta turma altera suas disciplinas conforme a grade atual.
+                  Students belong to a single class. Transferring a student to this class changes their subjects according to the current curriculum.
                 </p>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Alunos de outras turmas do curso
+                    Students from other classes in the program
                   </h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredAvailableStudents.length}
@@ -503,7 +502,7 @@ export function ClassDisciplineManager({
                 </div>
                 <AssignmentList
                   items={filteredAvailableStudents}
-                  emptyText="Nenhum aluno disponivel para transferencia."
+                  emptyText="No student available for transfer."
                   action={(student) => (
                     <button
                       type="button"
@@ -511,7 +510,7 @@ export function ClassDisciplineManager({
                       onClick={() => enrollStudentMutation.mutate(student._id)}
                       className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-[Poppins] text-xs text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
                     >
-                      Transferir
+                      Transfer
                     </button>
                   )}
                 />
@@ -520,7 +519,7 @@ export function ClassDisciplineManager({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Alunos da turma
+                    Class students
                   </h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredEnrolledStudents.length}
@@ -528,7 +527,7 @@ export function ClassDisciplineManager({
                 </div>
                 <AssignmentList
                   items={filteredEnrolledStudents}
-                  emptyText="Nenhum aluno nesta turma."
+                  emptyText="No students in this class."
                 />
               </div>
             </div>

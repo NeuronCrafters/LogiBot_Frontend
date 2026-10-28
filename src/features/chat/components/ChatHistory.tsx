@@ -43,7 +43,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
       <div className="flex flex-col items-center justify-center h-40 gap-2">
         <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
         <span className="text-xs text-zinc-500 font-[Poppins]">
-          Carregando...
+          Loading...
         </span>
       </div>
     );
@@ -58,21 +58,21 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
         className="w-full h-9 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-[Poppins] font-medium rounded-lg border border-blue-500/30 transition-colors gap-1.5 mb-1"
       >
         <Plus size={14} />
-        Nova conversa
+        New chat
       </Button>
 
       {isError ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
           <AlertCircle className="w-5 h-5 text-red-500" />
           <span className="text-xs text-zinc-500 font-[Poppins]">
-            Erro ao carregar histórico.
+            Failed to load history.
           </span>
         </div>
       ) : hasNoSessions ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
           <MessageSquare className="w-5 h-5 text-zinc-700" />
           <span className="text-xs text-zinc-500 font-[Poppins]">
-            Nenhuma conversa iniciada.
+            No conversation started.
           </span>
         </div>
       ) : (
@@ -93,7 +93,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
               />
               <div className="flex flex-col min-w-0 flex-1">
                 <span className={`text-xs font-[Poppins] truncate leading-snug transition-colors ${session.sessionId === activeSessionId ? "text-white" : "text-zinc-300 group-hover:text-white"}`}>
-                  {session.title || "Nova Interação"}
+                  {session.title || "New Interaction"}
                 </span>
                 <span className="text-[11px] text-zinc-600 font-[Poppins] leading-snug">
                   {session.lastActivityAt

@@ -12,7 +12,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({
           <MessageSquare size={32} className="text-white" />
         </div>
         <Typograph
-          text="Bem-vindo ao Chat LogiBot"
+          text="Welcome to LogiBot Chat"
           colorText="text-white"
           variant="text1"
           weight="bold"
@@ -20,7 +20,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({
           className="mb-4"
         />
         <Typograph
-          text="Nosso chat educacional é uma ferramenta exclusiva para estudantes."
+          text="Our educational chat is a tool exclusively for students."
           colorText="text-gray-400"
           variant="text6"
           weight="regular"
@@ -33,7 +33,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({
           <Lock className="mt-1 text-purple-500" size={24} />
           <div>
             <Typograph
-              text="Acesso Restrito"
+              text="Restricted Access"
               colorText="text-white"
               variant="text6"
               weight="bold"
@@ -41,7 +41,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({
               className="mb-2"
             />
             <Typograph
-              text="Esta área é exclusiva para estudantes. A funcionalidade de chat permite tirar dúvidas, fazer exercícios e praticar conteúdos através de quizzes interativos."
+              text="This area is exclusive to students. The chat lets you ask questions, do exercises and practice content through interactive quizzes."
               colorText="text-gray-400"
               variant="text7"
               weight="regular"
@@ -54,7 +54,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({
           <Info className="w-5 h-5 text-purple-500" />
           <AlertTitle className="text-white">
             <Typograph
-              text="Você não tem acesso a esta área"
+              text="You do not have access to this area"
               colorText="text-white"
               variant="text6"
               weight="bold"
@@ -63,7 +63,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({
           </AlertTitle>
           <AlertDescription className="text-gray-400">
             <Typograph
-              text={`Seu perfil atual (${userRoles.join(", ")}) não tem permissão para acessar a funcionalidade de chat. Entre em contato com o administrador se precisar de acesso.`}
+              text={`Your current profile (${userRoles.join(", ")}) does not have permission to access the chat feature. Contact the administrator if you need access.`}
               colorText="text-gray-400"
               variant="text7"
               weight="regular"
@@ -85,7 +85,7 @@ export const AdminWelcome: React.FC = () => {
           <Lock size={32} className="text-white" />
         </div>
         <Typograph
-          text="Chat Exclusivo"
+          text="Exclusive Chat"
           colorText="text-white"
           variant="text1"
           weight="bold"
@@ -93,7 +93,7 @@ export const AdminWelcome: React.FC = () => {
           className="mb-4"
         />
         <Typograph
-          text="Como administrador, você tem acesso a diferentes funcionalidades do sistema."
+          text="As an administrator, you have access to different system features."
           colorText="text-gray-400"
           variant="text6"
           weight="regular"
@@ -106,7 +106,7 @@ export const AdminWelcome: React.FC = () => {
           <Info className="mt-1 text-fuchsia-400" size={24} />
           <div>
             <Typograph
-              text="Chat Exclusivo para Estudantes"
+              text="Chat Exclusive to Students"
               colorText="text-white"
               variant="text6"
               weight="bold"
@@ -114,7 +114,7 @@ export const AdminWelcome: React.FC = () => {
               className="mb-2"
             />
             <Typograph
-              text="A funcionalidade de chat foi projetada exclusivamente para estudantes, permitindo que eles pratiquem seus conhecimentos através de quizzes e tirem dúvidas."
+              text="The chat feature was designed exclusively for students, allowing them to practice their knowledge through quizzes and ask questions."
               colorText="text-gray-400"
               variant="text7"
               weight="regular"
@@ -128,7 +128,7 @@ export const AdminWelcome: React.FC = () => {
             <Info className="w-5 h-5 text-fuchsia-400" />
             <AlertTitle className="text-white">
               <Typograph
-                text="Permissão de Administrador"
+                text="Administrator Permission"
                 colorText="text-white"
                 variant="text6"
                 weight="bold"
@@ -137,7 +137,7 @@ export const AdminWelcome: React.FC = () => {
             </AlertTitle>
             <AlertDescription className="text-gray-400">
               <Typograph
-                text="Como administrador, você tem acesso às funcionalidades de gerenciamento do sistema, como criação de conteúdo, visualização de relatórios e configurações gerais. Para gerenciar essas funções, utilize as outras seções do menu administrativo."
+                text="As an administrator, you have access to the system management features, such as content creation, report viewing and general settings. To manage these, use the other sections of the administrative menu."
                 colorText="text-gray-400"
                 variant="text7"
                 weight="regular"

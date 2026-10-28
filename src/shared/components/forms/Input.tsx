@@ -35,10 +35,10 @@ export function Input({
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
   const defaultPlaceholder = {
-    name: "Nome",
-    email: "E-mail",
-    password: "Senha",
-    text: "Digite aqui...",
+    name: "Name",
+    email: "Email",
+    password: "Password",
+    text: "Type here...",
   };
 
   return (

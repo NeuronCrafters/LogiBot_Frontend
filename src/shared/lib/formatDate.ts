@@ -19,12 +19,12 @@ export function formatRelativeTime(date: Date): string {
   const months = Math.floor(days / 30);
   const years = Math.floor(days / 365);
 
-  if (minutes < 1) return "há menos de um minuto";
-  if (minutes < 60) return `há ${minutes} minuto${minutes !== 1 ? "s" : ""}`;
-  if (hours < 24) return `há ${hours} hora${hours !== 1 ? "s" : ""}`;
-  if (days < 30) return `há ${days} dia${days !== 1 ? "s" : ""}`;
-  if (months < 12) return `há ${months} mês${months !== 1 ? "es" : ""}`;
-  return `há ${years} ano${years !== 1 ? "s" : ""}`;
+  if (minutes < 1) return "less than a minute ago";
+  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+  if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+  if (days < 30) return `${days} day${days !== 1 ? "s" : ""} ago`;
+  if (months < 12) return `${months} month${months !== 1 ? "s" : ""} ago`;
+  return `${years} year${years !== 1 ? "s" : ""} ago`;
 }
 
 export function formatDuration(end: Date, start: Date): string {
@@ -34,10 +34,10 @@ export function formatDuration(end: Date, start: Date): string {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) return `${days} dia${days !== 1 ? "s" : ""}`;
-  if (hours > 0) return `${hours} hora${hours !== 1 ? "s" : ""}`;
-  if (minutes > 0) return `${minutes} minuto${minutes !== 1 ? "s" : ""}`;
-  return `${seconds} segundo${seconds !== 1 ? "s" : ""}`;
+  if (days > 0) return `${days} day${days !== 1 ? "s" : ""}`;
+  if (hours > 0) return `${hours} hour${hours !== 1 ? "s" : ""}`;
+  if (minutes > 0) return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+  return `${seconds} second${seconds !== 1 ? "s" : ""}`;
 }
 
 export function formatDateTime(date: Date): string {
@@ -47,5 +47,5 @@ export function formatDateTime(date: Date): string {
   const dd = String(date.getDate()).padStart(2, "0");
   const mo = String(date.getMonth() + 1).padStart(2, "0");
   const yy = String(date.getFullYear()).slice(2);
-  return `${hh}:${mm}:${ss} de ${dd}/${mo}/${yy}`;
+  return `${hh}:${mm}:${ss} on ${mo}/${dd}/${yy}`;
 }

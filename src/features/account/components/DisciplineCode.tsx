@@ -36,7 +36,7 @@ export function DisciplineCode({ text, disciplines }: DisciplineCodeProps) {
       <DialogContent className="max-w-md border border-white/10 bg-[#1f1f1f] text-white font-[Poppins]">
         <DialogHeader>
           <DialogTitle className="text-base text-white">
-            Disciplinas vinculadas
+            Linked subjects
           </DialogTitle>
         </DialogHeader>
         <div className="mt-4 space-y-3">

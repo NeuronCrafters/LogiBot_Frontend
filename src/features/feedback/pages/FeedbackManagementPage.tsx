@@ -23,13 +23,13 @@ const TYPE_META: Record<
   { label: string; icon: React.ReactNode; color: string; bg: string }
 > = {
   GERAL: {
-    label: "Geral",
+    label: "General",
     icon: <MessageCircle className="h-3.5 w-3.5" />,
     color: "text-blue-400",
     bg: "bg-blue-500/10 border-blue-500/20",
   },
   SUGESTAO: {
-    label: "Sugestão",
+    label: "Suggestion",
     icon: <Lightbulb className="h-3.5 w-3.5" />,
     color: "text-yellow-400",
     bg: "bg-yellow-500/10 border-yellow-500/20",
@@ -41,20 +41,20 @@ const TYPE_META: Record<
     bg: "bg-red-500/10 border-red-500/20",
   },
   ELOGIO: {
-    label: "Elogio",
+    label: "Praise",
     icon: <Heart className="h-3.5 w-3.5" />,
     color: "text-pink-400",
     bg: "bg-pink-500/10 border-pink-500/20",
   },
   general: {
-    label: "Geral",
+    label: "General",
     icon: <MessageCircle className="h-3.5 w-3.5" />,
     color: "text-blue-400",
     bg: "bg-blue-500/10 border-blue-500/20",
   },
 };
 
-const FILTER_OPTIONS = ["Todos", "GERAL", "SUGESTAO", "BUG", "ELOGIO"];
+const FILTER_OPTIONS = ["All", "GERAL", "SUGESTAO", "BUG", "ELOGIO"];
 
 function TypeBadge({ type }: { type: string }) {
   const meta = TYPE_META[type] ?? {
@@ -74,7 +74,7 @@ function TypeBadge({ type }: { type: string }) {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR", {
+  return new Date(iso).toLocaleString("en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -104,7 +104,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
         </div>
         <div className="min-w-0">
           <p className="text-xs font-medium text-zinc-300 font-[Poppins] truncate">
-            {item.authorName ?? "Usuário removido"}
+            {item.authorName ?? "Removed user"}
           </p>
           <p className="text-xs text-zinc-500 font-[Poppins] truncate">
             {item.authorEmail ?? "—"}
@@ -118,7 +118,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
 export function FeedbackManagementPage() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("Todos");
+  const [typeFilter, setTypeFilter] = useState("All");
 
   const isAdmin = Array.isArray(user?.role)
     ? user.role.includes("admin")
@@ -137,7 +137,7 @@ export function FeedbackManagementPage() {
 
   const filtered = useMemo(() => {
     return feedbacks.filter((f) => {
-      const matchType = typeFilter === "Todos" || f.type === typeFilter;
+      const matchType = typeFilter === "All" || f.type === typeFilter;
       const q = search.toLowerCase();
       const matchSearch =
         !q ||
@@ -159,7 +159,7 @@ export function FeedbackManagementPage() {
   if (!isAdmin) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-zinc-500 font-[Poppins] text-sm">Acesso restrito.</p>
+        <p className="text-zinc-500 font-[Poppins] text-sm">Restricted access.</p>
       </div>
     );
   }
@@ -169,10 +169,10 @@ export function FeedbackManagementPage() {
     <div className="mx-auto w-full max-w-5xl font-[Poppins]">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">
-          Feedbacks dos Alunos
+          Student Feedback
         </h1>
         <p className="mt-1 text-sm text-zinc-400">
-          Veja o que os alunos estão reportando sobre a plataforma.
+          See what students are reporting about the platform.
         </p>
       </div>
 
@@ -189,12 +189,12 @@ export function FeedbackManagementPage() {
                   : "border-white/10 bg-white/5 text-zinc-400 hover:border-white/20 hover:text-white"
               }`}
             >
-              {opt === "Todos" ? (
+              {opt === "All" ? (
                 <MessageSquare className="h-3.5 w-3.5" />
               ) : (
                 TYPE_META[opt]?.icon
               )}
-              {opt === "Todos" ? "Todos" : (TYPE_META[opt]?.label ?? opt)}
+              {opt === "All" ? "All" : (TYPE_META[opt]?.label ?? opt)}
               {counts[opt] !== undefined && (
                 <span className="ml-0.5 tabular-nums opacity-70">
                   {counts[opt]}
@@ -208,7 +208,7 @@ export function FeedbackManagementPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
           <input
             type="text"
-            placeholder="Buscar por mensagem ou aluno..."
+            placeholder="Search by message or student..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-9 w-full rounded-xl border border-white/10 bg-neutral-950/60 pl-9 pr-3 text-sm text-white placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 sm:w-72"
@@ -226,7 +226,7 @@ export function FeedbackManagementPage() {
       {isError && (
         <div className="flex items-center justify-center gap-2 py-20 text-sm text-red-400">
           <AlertCircle className="h-5 w-5" />
-          Erro ao carregar feedbacks.
+          Failed to load feedback.
         </div>
       )}
 
@@ -235,8 +235,8 @@ export function FeedbackManagementPage() {
           <MessageSquare className="h-10 w-10 opacity-40" />
           <p className="text-sm">
             {feedbacks.length === 0
-              ? "Nenhum feedback recebido ainda."
-              : "Nenhum resultado para os filtros aplicados."}
+              ? "No feedback received yet."
+              : "No results for the applied filters."}
           </p>
         </div>
       )}

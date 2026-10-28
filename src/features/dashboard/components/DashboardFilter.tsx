@@ -108,24 +108,24 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
   const getEntityTypeTitle = (t: LogEntityType) => {
     switch (t) {
       case "student":
-        return "Aluno";
+        return "Student";
       case "discipline":
-        return "Disciplina";
+        return "Subject";
       case "class":
-        return "Turma";
+        return "Class";
       case "course":
-        return "Curso";
+        return "Program";
       case "university":
-        return "Universidade";
+        return "University";
       default:
-        return "Entidade";
+        return "Entity";
     }
   };
 
   return (
     <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <h3 className="font-[Poppins] text-base font-semibold text-white">
-        Filtros
+        Filters
       </h3>
 
       <div className="mt-5 w-full space-y-5">
@@ -135,12 +135,12 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
               htmlFor="entity-type"
               className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500"
             >
-              Analisar por
+              Analyze by
             </Label>
             <Select
               value={entityType}
               onChange={handleEntityTypeChange}
-              placeholder="Selecione uma Entidade"
+              placeholder="Select an Entity"
               options={allowedEntityTypes.map((type) => ({
                 value: type,
                 label: getEntityTypeTitle(type),

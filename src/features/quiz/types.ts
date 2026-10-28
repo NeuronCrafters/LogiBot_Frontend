@@ -1,9 +1,9 @@
 export const QUIZ_TOPICS = [
-  { value: "variaveis", label: "Variáveis" },
-  { value: "listas", label: "Listas" },
-  { value: "condicionais", label: "Condicionais" },
-  { value: "funcoes", label: "Funções" },
-  { value: "operadores_logicos", label: "Operadores Lógicos" },
+  { value: "variaveis", label: "Variables" },
+  { value: "listas", label: "Lists" },
+  { value: "condicionais", label: "Conditionals" },
+  { value: "funcoes", label: "Functions" },
+  { value: "operadores_logicos", label: "Logical Operators" },
 ] as const;
 
 export type QuizTopic = (typeof QUIZ_TOPICS)[number]["value"];

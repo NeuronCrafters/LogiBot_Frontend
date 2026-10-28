@@ -27,29 +27,29 @@ const FEEDBACK_OPTIONS: Array<{
 }> = [
   {
     value: "GERAL",
-    label: "Geral",
-    description: "Comentários sobre a experiência.",
+    label: "General",
+    description: "Comments about the experience.",
     icon: <MessageCircle className="h-4 w-4" />,
     tone: "text-blue-400 bg-blue-500/10",
   },
   {
     value: "SUGESTAO",
-    label: "Sugestão",
-    description: "Ideias para melhorar o LogiBot.",
+    label: "Suggestion",
+    description: "Ideas to improve LogiBot.",
     icon: <Lightbulb className="h-4 w-4" />,
     tone: "text-amber-400 bg-amber-500/10",
   },
   {
     value: "BUG",
-    label: "Erro",
-    description: "Algo que não funcionou bem.",
+    label: "Bug",
+    description: "Something that did not work well.",
     icon: <Bug className="h-4 w-4" />,
     tone: "text-red-400 bg-red-500/10",
   },
   {
     value: "ELOGIO",
-    label: "Elogio",
-    description: "Algo que ajudou você.",
+    label: "Praise",
+    description: "Something that helped you.",
     icon: <Heart className="h-4 w-4" />,
     tone: "text-emerald-400 bg-emerald-500/10",
   },
@@ -69,16 +69,16 @@ export function Feedback() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!type) return toast.error("Por favor, selecione uma categoria.");
-    if (!message.trim()) return toast.error("A mensagem não pode estar vazia.");
+    if (!type) return toast.error("Please select a category.");
+    if (!message.trim()) return toast.error("The message cannot be empty.");
     try {
       setLoading(true);
       await api.post("/feedback", { message: message.trim(), type });
-      toast.success("Feedback enviado com sucesso!");
+      toast.success("Feedback sent successfully!");
       setMessage("");
       setType("");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Erro ao enviar feedback.");
+      toast.error(error.response?.data?.error || "Failed to send feedback.");
     } finally {
       setLoading(false);
     }
@@ -97,30 +97,28 @@ export function Feedback() {
                 Feedback
               </p>
               <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">
-                Envie sua opinião
+                Share your opinion
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-                Relate problemas, sugira melhorias ou compartilhe o que está
-                funcionando bem na sua experiência com o LogiBot.
+                Report problems, suggest improvements or share what is working well in your experience with LogiBot.
               </p>
             </div>
             <div className="mt-6 rounded-xl border border-white/10 bg-neutral-950/60 p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
                 <p className="text-xs leading-relaxed text-zinc-400">
-                  A mensagem será enviada para a equipe de administração. Quanto
-                  mais contexto você incluir, mais fácil fica entender o caso.
+                  The message will be sent to the administration team. The more context you include, the easier it is to understand the case.
                 </p>
               </div>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
               <SummaryTile
-                label="Categoria"
-                value={selectedOption?.label ?? "Não selecionada"}
+                label="Category"
+                value={selectedOption?.label ?? "Not selected"}
               />
               <SummaryTile
-                label="Mensagem"
-                value={`${message.trim().length}/${MAX_MESSAGE_LENGTH} caracteres`}
+                label="Message"
+                value={`${message.trim().length}/${MAX_MESSAGE_LENGTH} characters`}
               />
             </div>
           </section>
@@ -132,7 +130,7 @@ export function Feedback() {
             <div className="space-y-6">
               <div>
                 <Label className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Tipo de mensagem
+                  Message type
                 </Label>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {FEEDBACK_OPTIONS.map((option) => {
@@ -175,7 +173,7 @@ export function Feedback() {
                     htmlFor="message"
                     className="text-xs font-semibold uppercase tracking-wider text-zinc-500"
                   >
-                    Mensagem
+                    Message
                   </Label>
                   <span className="text-xs text-zinc-600">
                     {message.length}/{MAX_MESSAGE_LENGTH}
@@ -184,7 +182,7 @@ export function Feedback() {
                 <Textarea
                   id="message"
                   maxLength={MAX_MESSAGE_LENGTH}
-                  placeholder="Descreva sua sugestão, elogio ou o problema encontrado..."
+                  placeholder="Describe your suggestion, praise or the problem you found..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="min-h-[210px] resize-none rounded-xl border-white/10 bg-neutral-950/60 p-4 text-sm text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-blue-500"
@@ -200,11 +198,11 @@ export function Feedback() {
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Enviando
+                    Sending
                   </>
                 ) : (
                   <>
-                    Enviar feedback
+                    Send feedback
                     <Send className="h-4 w-4" />
                   </>
                 )}

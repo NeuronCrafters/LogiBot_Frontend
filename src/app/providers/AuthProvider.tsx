@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate("/home");
       }
     } catch (error: any) {
-      const message = error?.response?.data?.message || "erro ao autenticar";
+      const message = error?.response?.data?.message || "authentication error";
       throw new Error(message);
     }
   }
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error: any) {
       if (error?.response?.status !== 401) {
-        logger.error("Auth", "Erro ao obter usuário.", error);
+        logger.error("Auth", "Failed to get user.", error);
       }
       localStorage.removeItem("has_session");
       setUser(null);
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await flushClicks();
       await api.post("/auth/logout", {}, { withCredentials: true });
     } catch (error) {
-      logger.error("Auth", "Erro ao fazer logout.", error);
+      logger.error("Auth", "Failed to log out.", error);
     } finally {
       localStorage.removeItem("has_session");
       queryClient.clear();
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     inactivityTimer.current = setTimeout(() => {
       if (isAuthenticated) {
-        logger.info("Auth", "Usuário inativo por 2 horas. Desconectando.");
+        logger.info("Auth", "User inactive for 2 hours. Logging out.");
         logout();
       }
     }, INACTIVITY_TIMEOUT);

@@ -32,7 +32,7 @@ const classAStudents: Student[] = [
   {
     _id: STUDENT_USER_ID,
     name: "Ana Beatriz Souza",
-    email: "aluno@logibot.dev",
+    email: "student@logibot.dev",
     status: "active",
   },
   { _id: "student-2", name: "Bruno Carvalho Lima", email: "bruno.lima@logibot.dev", status: "active" },
@@ -56,10 +56,10 @@ function dedupeStudents(students: Student[]): Student[] {
 
 const classA: Class = {
   _id: CLASS_A_ID,
-  name: "Turma A - Lógica de Programação 2026.1",
+  name: "Class A - Programming Logic 2026.1",
   disciplines: [
-    { _id: DISC_LOGICA_ID, name: "Lógica de Programação" },
-    { _id: DISC_ESTRUTURAS_ID, name: "Estrutura de Dados" },
+    { _id: DISC_LOGICA_ID, name: "Programming Logic" },
+    { _id: DISC_ESTRUTURAS_ID, name: "Data Structures" },
   ],
   students: classAStudents,
   registrationCode: CLASS_A_REGISTRATION_CODE,
@@ -67,15 +67,15 @@ const classA: Class = {
 
 const classB: Class = {
   _id: CLASS_B_ID,
-  name: "Turma B - Lógica de Programação 2026.1",
-  disciplines: [{ _id: DISC_LOGICA_ID, name: "Lógica de Programação" }],
+  name: "Class B - Programming Logic 2026.1",
+  disciplines: [{ _id: DISC_LOGICA_ID, name: "Programming Logic" }],
   students: classBStudents,
   registrationCode: CLASS_B_REGISTRATION_CODE,
 };
 
 const disciplineLogica: Discipline = {
   _id: DISC_LOGICA_ID,
-  name: "Lógica de Programação",
+  name: "Programming Logic",
   classes: [
     { _id: CLASS_A_ID, name: classA.name },
     { _id: CLASS_B_ID, name: classB.name },
@@ -86,7 +86,7 @@ const disciplineLogica: Discipline = {
 
 const disciplineEstruturas: Discipline = {
   _id: DISC_ESTRUTURAS_ID,
-  name: "Estrutura de Dados",
+  name: "Data Structures",
   classes: [{ _id: CLASS_A_ID, name: classA.name }],
   professors: [professor],
   students: classAStudents,
@@ -94,7 +94,7 @@ const disciplineEstruturas: Discipline = {
 
 const course: Course = {
   _id: COURSE_ID,
-  name: "Engenharia de Software",
+  name: "Software Engineering",
   classes: [classA, classB],
   disciplines: [disciplineLogica, disciplineEstruturas],
   professors: [professor],
@@ -103,7 +103,7 @@ const course: Course = {
 
 const university: University = {
   _id: UNIVERSITY_ID,
-  name: "Universidade Federal de Tecnologia",
+  name: "Federal University of Technology",
   courses: [course],
 };
 

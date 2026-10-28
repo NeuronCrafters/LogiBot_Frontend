@@ -45,11 +45,11 @@ interface EntityCreateFormProps {
 }
 
 const ENTITY_LABELS: Record<EntityType, string> = {
-  university: "Universidade",
-  course: "Curso",
-  class: "Turma",
+  university: "University",
+  course: "Program",
+  class: "Class",
   professor: "Professor",
-  discipline: "Disciplina",
+  discipline: "Subject",
 };
 
 export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
@@ -97,23 +97,23 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
     <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <div className="mb-5">
         <h2 className="font-[Poppins] text-base font-semibold text-white">
-          Nova entidade
+          New entity
         </h2>
         <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-          Selecione o tipo de registro e preencha as informações abaixo.
+          Select the record type and fill in the information below.
         </p>
       </div>
 
       {!lockEntity && (
         <div>
           <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Tipo de entidade
+            Entity type
           </label>
           <Select
             value={selectedEntity}
             onChange={(v) => setSelectedEntity(v as EntityType)}
             options={allowedEntities.map((ent) => ({ value: ent, label: ENTITY_LABELS[ent] }))}
-            placeholder="Selecione o tipo"
+            placeholder="Select the type"
           />
         </div>
       )}

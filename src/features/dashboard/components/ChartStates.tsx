@@ -4,7 +4,7 @@ import { AlertCircle, BarChart3, RefreshCw } from "lucide-react";
 const H = "h-full min-h-[260px]";
 
 export const ChartLoader = ({
-  text = "Carregando dados...",
+  text = "Loading data...",
 }: {
   text?: string;
 }) => (
@@ -32,7 +32,7 @@ export const ChartError = ({
       </div>
       <div>
         <p className="font-[Poppins] text-sm font-medium text-white/80">
-          {message ?? "Erro ao carregar dados."}
+          {message ?? "Failed to load data."}
         </p>
       </div>
       {onRetry && (
@@ -41,7 +41,7 @@ export const ChartError = ({
           className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-[Poppins] text-xs text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
         >
           <RefreshCw className="h-3 w-3" />
-          Tentar novamente
+          Try again
         </button>
       )}
     </div>
@@ -61,7 +61,7 @@ export const NoData = ({
         <BarChart3 className="h-5 w-5" />
       </div>
       <div className="max-w-xs font-[Poppins] text-sm text-white/50">
-        {children ?? "Nenhum dado disponível para a seleção atual."}
+        {children ?? "No data available for the current selection."}
       </div>
       {onRetry && (
         <button
@@ -69,7 +69,7 @@ export const NoData = ({
           className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-[Poppins] text-xs text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
         >
           <RefreshCw className="h-3 w-3" />
-          Tentar novamente
+          Try again
         </button>
       )}
     </div>

@@ -24,7 +24,7 @@ async function downloadChartAsPng(
   fileName: string,
 ): Promise<void> {
   const container = document.getElementById(containerId);
-  if (!container) throw new Error(`Container '${containerId}' não encontrado.`);
+  if (!container) throw new Error(`Container '${containerId}' not found.`);
 
   const dataUrl = await toPng(container, {
     backgroundColor: "#1f1f1f",
@@ -69,7 +69,7 @@ export function ChartDownloadButton({
     try {
       await downloadChartAsPng(containerId, fileName);
     } catch (error) {
-      logger.warn("Dashboard", "Erro ao exportar gráfico.", error);
+      logger.warn("Dashboard", "Failed to export chart.", error);
     } finally {
       setDownloading(false);
     }
@@ -81,7 +81,7 @@ export function ChartDownloadButton({
         <div ref={infoRef} className="relative">
           <button
             type="button"
-            aria-label="Informações sobre o gráfico"
+            aria-label="Chart information"
             onClick={() => setShowInfo((v) => !v)}
             className={`rounded-lg border p-2 transition-colors ${
               showInfo
@@ -96,7 +96,7 @@ export function ChartDownloadButton({
             <div className="absolute right-0 top-11 z-50 w-72 rounded-xl border border-white/10 bg-[#141414] p-4 shadow-2xl shadow-black/60">
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Sobre este gráfico
+                  About this chart
                 </span>
                 <button
                   onClick={() => setShowInfo(false)}
@@ -116,8 +116,8 @@ export function ChartDownloadButton({
       {insight && (
         <button
           type="button"
-          aria-label={`Gerar insight de IA para ${insight.title}`}
-          title="Analisar com IA"
+          aria-label={`Generate AI insight for ${insight.title}`}
+          title="Analyze with AI"
           disabled={insight.disabled}
           onClick={() =>
             dashboardInsights.openChart(
@@ -134,8 +134,8 @@ export function ChartDownloadButton({
 
       <button
         type="button"
-        aria-label="Baixar gráfico como PNG"
-        title="Baixar como PNG"
+        aria-label="Download chart as PNG"
+        title="Download as PNG"
         disabled={downloading}
         onClick={handleDownload}
         className="rounded-lg border border-white/10 bg-white/5 p-2 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40"

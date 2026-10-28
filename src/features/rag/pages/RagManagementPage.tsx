@@ -48,23 +48,23 @@ const inputCls =
 /* ── Status badge ── */
 const STATUS_META: Record<string, { label: string; className: string }> = {
   uploaded: {
-    label: "Na fila",
+    label: "Queued",
     className: "border-blue-500/20 bg-blue-500/10 text-blue-300",
   },
   processing: {
-    label: "Processando",
+    label: "Processing",
     className: "border-amber-500/20 bg-amber-500/10 text-amber-300",
   },
   ready: {
-    label: "Pronto",
+    label: "Ready",
     className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
   },
   error: {
-    label: "Erro",
+    label: "Error",
     className: "border-red-500/20 bg-red-500/10 text-red-300",
   },
   deleted: {
-    label: "Removido",
+    label: "Removed",
     className: "border-white/10 bg-white/5 text-zinc-500",
   },
 };
@@ -96,18 +96,18 @@ function TabBar({
   }[] = [
     {
       id: "settings",
-      label: "Configurações",
+      label: "Settings",
       icon: <Settings className="h-4 w-4" />,
     },
     {
       id: "documents",
-      label: "Documentos",
+      label: "Documents",
       icon: <FileText className="h-4 w-4" />,
       locked: ragMode === "none",
     },
     {
       id: "chat",
-      label: "Chat de Teste",
+      label: "Test Chat",
       icon: <MessageSquare className="h-4 w-4" />,
       locked: ragMode === "none",
     },
@@ -197,10 +197,10 @@ function SettingsTab({
     <Panel className="space-y-6">
       <div>
         <h2 className="font-[Poppins] text-base font-semibold text-white">
-          Modo RAG
+          RAG Mode
         </h2>
         <p className="mt-1 font-[Poppins] text-sm text-zinc-500">
-          Define como a IA irá recuperar informações dos documentos.
+          Defines how the AI will retrieve information from the documents.
         </p>
       </div>
 
@@ -208,29 +208,29 @@ function SettingsTab({
         <ModeButton
           value="none"
           current={ragMode}
-          label="Nenhum"
-          description="IA responde sem usar documentos."
+          label="None"
+          description="AI answers without using documents."
           onClick={setRagMode}
         />
         <ModeButton
           value="context"
           current={ragMode}
           label="Context"
-          description="Sempre busca nos documentos antes de responder."
+          description="Always searches the documents before answering."
           onClick={setRagMode}
         />
         <ModeButton
           value="self"
           current={ragMode}
           label="Self"
-          description="IA decide se precisa buscar antes de responder."
+          description="AI decides whether it needs to search before answering."
           onClick={setRagMode}
         />
         <ModeButton
           value="hybrid"
           current={ragMode}
           label="Hybrid"
-          description="Busca por significado e por palavras-chave ao mesmo tempo."
+          description="Searches by meaning and by keywords at the same time."
           onClick={setRagMode}
         />
       </div>
@@ -248,11 +248,11 @@ function SettingsTab({
             className={inputCls}
           />
           <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">
-            Quantidade máxima de trechos recuperados.
+            Maximum number of retrieved excerpts.
           </p>
         </div>
         <div>
-          <label className={labelCls}>Score mínimo</label>
+          <label className={labelCls}>Minimum score</label>
           <input
             type="number"
             min={0}
@@ -262,7 +262,7 @@ function SettingsTab({
             className={inputCls}
           />
           <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">
-            Relevância mínima para aceitar um trecho (0–100).
+            Minimum relevance to accept an excerpt (0–100).
           </p>
         </div>
         </div>
@@ -279,7 +279,7 @@ function SettingsTab({
         ) : (
           <Save className="h-4 w-4" />
         )}
-        Salvar configurações
+        Save settings
       </button>
     </Panel>
   );
@@ -343,13 +343,13 @@ function DocumentRow({
           </p>
           {!document.isOwner && (
             <span className="shrink-0 rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-blue-300">
-              Compartilhado
+              Shared
             </span>
           )}
         </div>
         <p className="font-[Poppins] text-xs text-zinc-600 truncate">
           {document.sourceType.toUpperCase()} · {formatBytes(document.fileSize)}{" "}
-          · {new Date(document.createdAt).toLocaleDateString("pt-BR")}
+          · {new Date(document.createdAt).toLocaleDateString("en-US")}
         </p>
         {document.errorMessage && (
           <p className="mt-1 line-clamp-1 font-[Poppins] text-xs text-red-400">
@@ -374,9 +374,9 @@ function DocumentRow({
               ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
               : "border-white/10 bg-white/5 text-zinc-500 hover:bg-white/10"
           }`}
-          title={document.enabled ? "Desativar nesta turma" : "Ativar nesta turma"}
+          title={document.enabled ? "Deactivate in this class" : "Activate in this class"}
         >
-          {document.enabled ? "Ativo" : "Inativo"}
+          {document.enabled ? "Active" : "Inactive"}
         </button>
 
         {document.status === "ready" && (
@@ -385,7 +385,7 @@ function DocumentRow({
               <button
                 type="button"
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
-                title="Vincular a outra turma"
+                title="Link to another class"
               >
                 <Link2 className="h-3.5 w-3.5" />
               </button>
@@ -393,11 +393,10 @@ function DocumentRow({
             <DialogContent className="border-white/10 bg-neutral-900 text-white">
               <DialogHeader>
                 <DialogTitle className="font-[Poppins] text-white">
-                  Vincular a outra turma
+                  Link to another class
                 </DialogTitle>
                 <DialogDescription className="font-[Poppins] text-zinc-400">
-                  Reaproveita esse documento já processado em outra turma, sem
-                  reenviar o arquivo.
+                  Reuse this already processed document in another class, without re-uploading the file.
                 </DialogDescription>
               </DialogHeader>
 
@@ -440,7 +439,7 @@ function DocumentRow({
                       </span>
                       {alreadyLinked && (
                         <span className="ml-auto shrink-0 font-[Poppins] text-xs text-emerald-500">
-                          Já vinculado
+                          Already linked
                         </span>
                       )}
                     </label>
@@ -449,7 +448,7 @@ function DocumentRow({
                 </div>
               ) : (
                 <p className="font-[Poppins] text-sm text-zinc-500">
-                  Nenhuma outra turma disponível.
+                  No other class available.
                 </p>
               )}
 
@@ -465,7 +464,7 @@ function DocumentRow({
                   ) : (
                     <Link2 className="h-4 w-4" />
                   )}
-                  Vincular
+                  Link
                 </button>
               </DialogFooter>
             </DialogContent>
@@ -477,7 +476,7 @@ function DocumentRow({
           onClick={() => onReprocess(document.id)}
           disabled={isReprocessing || document.status === "processing"}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-          title="Reprocessar"
+          title="Reprocess"
         >
           {isReprocessing ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -490,7 +489,7 @@ function DocumentRow({
           onClick={() => onDelete(document.id)}
           disabled={isDeleting}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
-          title={document.isOwner ? "Remover" : "Remover desta turma"}
+          title={document.isOwner ? "Remove" : "Remove from this class"}
         >
           {isDeleting ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -556,14 +555,13 @@ function DocumentsTab({
           </div>
           <div className="text-center px-8">
             <p className="font-[Poppins] text-sm font-semibold text-zinc-200">
-              Documentos desativados
+              Documents disabled
             </p>
             <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
-              Ative o modo{" "}
+              Enable the{" "}
               <span className="text-blue-400 font-medium">Context</span>,{" "}
-              <span className="text-blue-400 font-medium">Self</span> ou{" "}
-              <span className="text-blue-400 font-medium">Hybrid</span> na aba
-              de Configurações.
+              <span className="text-blue-400 font-medium">Self</span> or{" "}
+              <span className="text-blue-400 font-medium">Hybrid</span> mode in the Settings tab.
             </p>
           </div>
         </div>
@@ -573,7 +571,7 @@ function DocumentsTab({
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="font-[Poppins] text-base font-semibold text-white">
-              Documentos
+              Documents
             </h2>
             <p className="mt-0.5 font-[Poppins] text-sm text-zinc-500">
               {classLabel}
@@ -590,13 +588,13 @@ function DocumentsTab({
           className="rounded-xl bg-neutral-950/50 p-4"
         >
           <p className="mb-3 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Novo documento
+            New document
           </p>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <label className="flex h-10 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-xl border border-white/10 bg-neutral-800/50 px-4 transition-colors hover:bg-neutral-800/80">
               <Upload className="h-4 w-4 shrink-0 text-zinc-400" />
               <span className="truncate font-[Poppins] text-sm text-zinc-400">
-                {uploadFile ? uploadFile.name : "Selecionar arquivo (.pdf, .txt, .docx)"}
+                {uploadFile ? uploadFile.name : "Select file (.pdf, .txt, .docx)"}
               </span>
               <input
                 type="file"
@@ -608,7 +606,7 @@ function DocumentsTab({
             <input
               value={uploadTitle}
               onChange={(e) => onTitleChange(e.target.value)}
-              placeholder="Título (opcional)"
+              placeholder="Title (optional)"
               className="h-10 rounded-xl border border-white/10 bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 sm:w-48"
             />
             <button
@@ -617,7 +615,7 @@ function DocumentsTab({
               className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              Enviar
+              Upload
             </button>
           </div>
         </form>
@@ -648,7 +646,7 @@ function DocumentsTab({
         ) : (
           <div className="rounded-xl border border-dashed border-white/10 py-12 text-center">
             <p className="font-[Poppins] text-sm text-zinc-500">
-              Nenhum documento enviado para esta turma.
+              No document uploaded for this class.
             </p>
           </div>
         )}
@@ -722,14 +720,13 @@ function ChatTab({
           </div>
           <div className="text-center px-8">
             <p className="font-[Poppins] text-sm font-semibold text-zinc-200">
-              Chat desativado
+              Chat disabled
             </p>
             <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
-              Ative o modo{" "}
+              Enable the{" "}
               <span className="text-blue-400 font-medium">Context</span>,{" "}
-              <span className="text-blue-400 font-medium">Self</span> ou{" "}
-              <span className="text-blue-400 font-medium">Hybrid</span> para
-              testar o RAG.
+              <span className="text-blue-400 font-medium">Self</span> or{" "}
+              <span className="text-blue-400 font-medium">Hybrid</span> mode to test RAG.
             </p>
           </div>
         </div>
@@ -740,11 +737,11 @@ function ChatTab({
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-zinc-500" />
           <span className="font-[Poppins] text-sm font-medium text-zinc-300">
-            Chat de Teste
+            Test Chat
           </span>
           {settings && (
             <span className="ml-auto rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-500">
-              modo: {settings.ragMode}
+              mode: {settings.ragMode}
             </span>
           )}
         </div>
@@ -758,7 +755,7 @@ function ChatTab({
         {messages.length === 0 && !isTesting && (
           <div className="flex h-full items-center justify-center">
             <p className="font-[Poppins] text-sm text-zinc-600">
-              Digite uma pergunta para testar o RAG desta turma...
+              Type a question to test this class's RAG...
             </p>
           </div>
         )}
@@ -806,7 +803,7 @@ function ChatTab({
             value={input}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
-            placeholder="Digite sua pergunta... (Enter para enviar)"
+            placeholder="Type your question... (Enter to send)"
             rows={1}
             disabled={isTesting || locked}
             className="flex-1 resize-none overflow-hidden rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 disabled:opacity-50"
@@ -878,15 +875,15 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragSettings", selectedClassId],
       });
-      toast.success("Configuração RAG salva.");
+      toast.success("RAG settings saved.");
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao salvar RAG."),
+      toast.error(error?.response?.data?.message ?? "Failed to save RAG."),
   });
 
   const uploadMutation = useMutation({
     mutationFn: () => {
-      if (!uploadFile) throw new Error("Selecione um arquivo.");
+      if (!uploadFile) throw new Error("Select a file.");
       return ragApi.uploadDocument(selectedClassId, uploadFile, uploadTitle);
     },
     onSuccess: () => {
@@ -895,10 +892,10 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragDocuments", selectedClassId],
       });
-      toast.success("Documento enviado para processamento.");
+      toast.success("Document sent for processing.");
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao enviar arquivo."),
+      toast.error(error?.response?.data?.message ?? "Failed to upload file."),
   });
 
   const deleteMutation = useMutation({
@@ -908,10 +905,10 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragDocuments", selectedClassId],
       });
-      toast.success("Documento removido desta turma.");
+      toast.success("Document removed from this class.");
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao remover."),
+      toast.error(error?.response?.data?.message ?? "Failed to remove."),
   });
 
   const toggleEnabledMutation = useMutation({
@@ -923,7 +920,7 @@ export function RagManagementPage() {
       });
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao atualizar documento."),
+      toast.error(error?.response?.data?.message ?? "Failed to update document."),
   });
 
   const linkMutation = useMutation({
@@ -934,10 +931,10 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragDocumentLinkedClasses", variables.documentId],
       });
-      toast.success("Documento vinculado.");
+      toast.success("Document linked.");
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao vincular documento."),
+      toast.error(error?.response?.data?.message ?? "Failed to link document."),
   });
 
   const reprocessMutation = useMutation({
@@ -946,10 +943,10 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragDocuments", selectedClassId],
       });
-      toast.success("Reprocessamento agendado.");
+      toast.success("Reprocessing scheduled.");
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao reprocessar."),
+      toast.error(error?.response?.data?.message ?? "Failed to reprocess."),
   });
 
   const testChatMutation = useMutation({
@@ -980,7 +977,7 @@ export function RagManagementPage() {
     },
     onError: (error: any) => {
       setChatMessages((prev) => prev.filter((m) => m.id !== "typing"));
-      toast.error(error?.response?.data?.message ?? "Erro ao testar RAG.");
+      toast.error(error?.response?.data?.message ?? "Failed to test RAG.");
     },
   });
 
@@ -997,16 +994,16 @@ export function RagManagementPage() {
       <div className="mx-auto w-full max-w-4xl space-y-5">
         <PageHeader
           icon={<Database className="h-5 w-5" />}
-          title="Base RAG"
-          description="Configure a recuperação de materiais por turma."
+          title="RAG Base"
+          description="Configure material retrieval per class."
         />
 
         {/* Class selector */}
         <Panel>
-          <label className={labelCls}>Turma</label>
+          <label className={labelCls}>Class</label>
           {classesLoading ? (
             <div className="flex h-11 items-center gap-2 font-[Poppins] text-sm text-zinc-500">
-              <Loader2 className="h-4 w-4 animate-spin" /> Carregando turmas...
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading classes...
             </div>
           ) : classes.length ? (
             <Select
@@ -1016,7 +1013,7 @@ export function RagManagementPage() {
             />
           ) : (
             <p className="font-[Poppins] text-sm text-zinc-500">
-              Nenhuma turma disponível.
+              No class available.
             </p>
           )}
         </Panel>

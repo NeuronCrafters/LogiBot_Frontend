@@ -44,7 +44,7 @@ function QuizCard({
           </span>
         ) : (
           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 font-[Poppins] text-xs text-zinc-500">
-            Não respondido
+            Not answered
           </span>
         )}
       </div>
@@ -69,7 +69,7 @@ function QuizCard({
           {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
         </span>
         <span className="ml-auto flex items-center gap-1 font-[Poppins] text-[10px] text-zinc-600">
-          {quiz.questionCount} {quiz.questionCount === 1 ? "questão" : "questões"}
+          {quiz.questionCount} {quiz.questionCount === 1 ? "question" : "questions"}
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
@@ -101,10 +101,10 @@ export function Quiz() {
             </div>
             <div>
               <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                Meus Quizzes
+                My Quizzes
               </h1>
               <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                Quizzes disponíveis para as disciplinas da sua turma.
+                Quizzes available for your class subjects.
               </p>
             </div>
           </div>
@@ -114,7 +114,7 @@ export function Quiz() {
           <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-[#1f1f1f] py-20">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
             <p className="font-[Poppins] text-sm text-zinc-500">
-              Carregando quizzes...
+              Loading quizzes...
             </p>
           </div>
         )}
@@ -126,17 +126,17 @@ export function Quiz() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Erro ao carregar quizzes
+                Failed to load quizzes
               </p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Verifique sua conexão e tente novamente.
+                Check your connection and try again.
               </p>
             </div>
             <button
               onClick={() => refetch()}
               className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 font-[Poppins] text-sm text-red-300 transition-colors hover:bg-red-500/20"
             >
-              Tentar novamente
+              Try again
             </button>
           </div>
         )}
@@ -148,10 +148,10 @@ export function Quiz() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Nenhum quiz disponível
+                No quiz available
               </p>
               <p className="mt-1 max-w-xs font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                Seus professores ainda não criaram quizzes para as suas disciplinas.
+                Your professors have not created quizzes for your subjects yet.
               </p>
             </div>
           </div>

@@ -138,39 +138,39 @@ function QuizForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelCls}>Título do Quiz</label>
+        <label className={labelCls}>Quiz Title</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Ex: Quiz sobre Variáveis"
+          placeholder="e.g. Variables Quiz"
           required
           className={inputCls}
         />
       </div>
       <div>
-        <label className={labelCls}>Disciplina</label>
+        <label className={labelCls}>Subject</label>
         <Select
           value={disciplineId}
           onChange={setDisciplineId}
-          placeholder="Selecione a disciplina"
+          placeholder="Select the subject"
           options={disciplines.map((d) => ({ value: d.id, label: d.name }))}
         />
       </div>
       <div>
-        <label className={labelCls}>Tópico</label>
+        <label className={labelCls}>Topic</label>
         <Select
           value={topic}
           onChange={setTopic}
-          placeholder="Selecione o tópico"
+          placeholder="Select the topic"
           options={QUIZ_TOPICS.map((t) => ({ value: t.value, label: t.label }))}
         />
       </div>
       <div>
-        <label className={labelCls}>Descrição (opcional)</label>
+        <label className={labelCls}>Description (optional)</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Descreva o objetivo deste quiz..."
+          placeholder="Describe the goal of this quiz..."
           rows={2}
           className="w-full resize-none rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-indigo-500/60 placeholder:text-zinc-600"
         />
@@ -183,12 +183,12 @@ function QuizForm({
         {isPending ? (
           <span className="flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Salvando...
+            Saving...
           </span>
         ) : initial?.id ? (
-          "Salvar alterações"
+          "Save changes"
         ) : (
-          "Criar Quiz"
+          "Create Quiz"
         )}
       </button>
     </form>
@@ -246,17 +246,17 @@ function QuestionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-white/10 bg-neutral-950/40 p-4">
       <div>
-        <label className={labelCls}>Pergunta</label>
+        <label className={labelCls}>Question</label>
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Digite a pergunta..."
+          placeholder="Type the question..."
           required
           className={inputCls}
         />
       </div>
       <div className="space-y-2">
-        <label className={labelCls}>Alternativas</label>
+        <label className={labelCls}>Options</label>
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="flex items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 font-[Poppins] text-xs font-bold text-zinc-500">
@@ -265,29 +265,29 @@ function QuestionForm({
             <input
               value={options[i] ?? ""}
               onChange={(e) => setOption(i, e.target.value)}
-              placeholder={`Alternativa ${LETTERS[i]}`}
+              placeholder={`Option ${LETTERS[i]}`}
               className={inputCls}
             />
           </div>
         ))}
       </div>
       <div>
-        <label className={labelCls}>Resposta correta</label>
+        <label className={labelCls}>Correct answer</label>
         <Select
           value={correctOption}
           onChange={setCorrectOption}
-          placeholder="Selecione a resposta correta"
+          placeholder="Select the correct answer"
           options={options
             .map((opt, i) => (opt.trim() ? { value: LETTERS[i], label: `${LETTERS[i]} — ${opt}` } : null))
             .filter((o): o is NonNullable<typeof o> => o !== null)}
         />
       </div>
       <div>
-        <label className={labelCls}>Explicação (opcional)</label>
+        <label className={labelCls}>Explanation (optional)</label>
         <textarea
           value={explanation}
           onChange={(e) => setExplanation(e.target.value)}
-          placeholder="Explique por que esta é a resposta correta..."
+          placeholder="Explain why this is the correct answer..."
           rows={2}
           className="w-full resize-none rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-indigo-500/60 placeholder:text-zinc-600"
         />
@@ -298,14 +298,14 @@ function QuestionForm({
           disabled={isPending}
           className="h-9 flex-1 rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
         >
-          {isPending ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : initial?.id ? "Salvar" : "Adicionar"}
+          {isPending ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : initial?.id ? "Save" : "Add"}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="h-9 rounded-lg border border-white/10 bg-white/5 px-4 font-[Poppins] text-sm text-zinc-300 hover:bg-white/10"
         >
-          Cancelar
+          Cancel
         </button>
       </div>
     </form>
@@ -333,9 +333,9 @@ function QuestionsPanel({ quizId }: { quizId: string }) {
       queryClient.invalidateQueries({ queryKey: ["professorQuizQuestions", quizId] });
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
       setShowForm(false);
-      toast.success("Pergunta adicionada.");
+      toast.success("Question added.");
     },
-    onError: () => toast.error("Erro ao adicionar pergunta."),
+    onError: () => toast.error("Failed to add question."),
   });
 
   const updateMutation = useMutation({
@@ -349,9 +349,9 @@ function QuestionsPanel({ quizId }: { quizId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["professorQuizQuestions", quizId] });
       setEditingId(null);
-      toast.success("Pergunta atualizada.");
+      toast.success("Question updated.");
     },
-    onError: () => toast.error("Erro ao atualizar pergunta."),
+    onError: () => toast.error("Failed to update question."),
   });
 
   const deleteMutation = useMutation({
@@ -361,9 +361,9 @@ function QuestionsPanel({ quizId }: { quizId: string }) {
       queryClient.invalidateQueries({ queryKey: ["professorQuizQuestions", quizId] });
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
       setDeleteId(null);
-      toast.success("Pergunta removida.");
+      toast.success("Question removed.");
     },
-    onError: () => toast.error("Erro ao remover pergunta."),
+    onError: () => toast.error("Failed to remove question."),
   });
 
   return (
@@ -377,7 +377,7 @@ function QuestionsPanel({ quizId }: { quizId: string }) {
       {!isLoading && questions.length === 0 && !showForm && (
         <div className="rounded-xl border border-dashed border-white/10 py-8 text-center">
           <p className="font-[Poppins] text-sm text-zinc-500">
-            Nenhuma pergunta ainda.
+            No questions yet.
           </p>
         </div>
       )}
@@ -419,7 +419,7 @@ function QuestionsPanel({ quizId }: { quizId: string }) {
               </div>
               {q.explanation && (
                 <p className="mt-2 font-[Poppins] text-[11px] leading-relaxed text-zinc-500">
-                  <span className="font-semibold text-zinc-400">Explicação: </span>
+                  <span className="font-semibold text-zinc-400">Explanation: </span>
                   {q.explanation}
                 </p>
               )}
@@ -454,15 +454,15 @@ function QuestionsPanel({ quizId }: { quizId: string }) {
           className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 font-[Poppins] text-sm text-zinc-500 transition-colors hover:border-indigo-500/30 hover:text-indigo-400"
         >
           <Plus className="h-4 w-4" />
-          Adicionar pergunta
+          Add question
         </button>
       )}
 
       <AppModal
         isOpen={!!deleteId}
         type="delete"
-        title="Remover pergunta"
-        description="Esta ação não pode ser desfeita."
+        title="Remove question"
+        description="This action cannot be undone."
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         onCancel={() => setDeleteId(null)}
         onClose={() => setDeleteId(null)}
@@ -490,7 +490,7 @@ function ResultsModal({
   return (
     <Modal
       wide
-      title="Resultados do Quiz"
+      title="Quiz Results"
       icon={<CheckCircle2 className="h-5 w-5" />}
       onClose={onClose}
     >
@@ -504,11 +504,11 @@ function ResultsModal({
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-[Poppins] text-xs text-zinc-400">
               {data.attempts.length}{" "}
-              {data.attempts.length === 1 ? "tentativa" : "tentativas"}
+              {data.attempts.length === 1 ? "attempt" : "attempts"}
             </span>
             {data.attempts.length > 0 && (
               <span className="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 font-[Poppins] text-xs text-indigo-400">
-                Média:{" "}
+                Average:{" "}
                 {Math.round(
                   (data.attempts.reduce(
                     (sum, a) =>
@@ -526,7 +526,7 @@ function ResultsModal({
           {data.attempts.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/10 py-10 text-center">
               <p className="font-[Poppins] text-sm text-zinc-500">
-                Nenhum aluno respondeu este quiz ainda.
+                No student has answered this quiz yet.
               </p>
             </div>
           ) : (
@@ -534,7 +534,7 @@ function ResultsModal({
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/5">
-                    {["Aluno", "Acertos", "Aproveitamento", "Data"].map(
+                    {["Student", "Correct", "Score", "Date"].map(
                       (h) => (
                         <th
                           key={h}
@@ -576,7 +576,7 @@ function ResultsModal({
                           </span>
                         </td>
                         <td className="px-4 py-3 font-[Poppins] text-xs text-zinc-600">
-                          {new Date(a.completedAt).toLocaleDateString("pt-BR")}
+                          {new Date(a.completedAt).toLocaleDateString("en-US")}
                         </td>
                       </tr>
                     );
@@ -660,12 +660,12 @@ function QuizCard({
             </p>
             {isDraft ? (
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-amber-400">
-                Rascunho
+                Draft
               </span>
             ) : (
               <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-emerald-400">
                 <CheckCircle2 className="h-3 w-3" />
-                Publicado
+                Published
               </span>
             )}
           </div>
@@ -688,11 +688,11 @@ function QuizCard({
             {quiz.generationSource === "ai" && (
               <span className="flex items-center gap-1 rounded-md border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-purple-400">
                 <Sparkles className="h-2.5 w-2.5" />
-                IA
+                AI
               </span>
             )}
             <span className="font-[Poppins] text-[10px] text-zinc-600">
-              {quiz.questionCount} {quiz.questionCount === 1 ? "questão" : "questões"}
+              {quiz.questionCount} {quiz.questionCount === 1 ? "question" : "questions"}
             </span>
           </div>
         </div>
@@ -708,21 +708,21 @@ function QuizCard({
           ) : (
             <ChevronRight className="h-3 w-3" />
           )}
-          Perguntas
+          Questions
         </button>
         <button
           onClick={onViewResults}
           className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
           <Users className="h-3 w-3" />
-          Resultados
+          Results
         </button>
         <button
           onClick={onEdit}
           className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
           <Pencil className="h-3 w-3" />
-          Editar
+          Edit
         </button>
 
         <Dialog>
@@ -732,17 +732,16 @@ function QuizCard({
               className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <Link2 className="h-3 w-3" />
-              Matérias
+              Subjects
             </button>
           </DialogTrigger>
           <DialogContent className="border-white/10 bg-neutral-900 text-white">
             <DialogHeader>
               <DialogTitle className="font-[Poppins] text-white">
-                Vincular a outra matéria
+                Link to another subject
               </DialogTitle>
               <DialogDescription className="font-[Poppins] text-zinc-400">
-                Usa esse mesmo quiz em outra disciplina, sem duplicar
-                perguntas.
+                Use this same quiz in another subject, without duplicating questions.
               </DialogDescription>
             </DialogHeader>
 
@@ -800,8 +799,8 @@ function QuizCard({
                           disabled={isLastLink || isUnlinking}
                           title={
                             isLastLink
-                              ? "Um quiz precisa de pelo menos uma matéria"
-                              : "Desvincular"
+                              ? "A quiz needs at least one subject"
+                              : "Unlink"
                           }
                           onClick={() =>
                             onUnlinkFromDiscipline(quiz.id, discipline.id)
@@ -817,7 +816,7 @@ function QuizCard({
               </div>
             ) : (
               <p className="font-[Poppins] text-sm text-zinc-500">
-                Nenhuma disciplina disponível.
+                No subject available.
               </p>
             )}
 
@@ -835,7 +834,7 @@ function QuizCard({
                 ) : (
                   <Link2 className="h-4 w-4" />
                 )}
-                Vincular
+                Link
               </button>
             </DialogFooter>
           </DialogContent>
@@ -846,7 +845,7 @@ function QuizCard({
           <button
             onClick={onPublish}
             disabled={isPublishing || quiz.questionCount === 0}
-            title={quiz.questionCount === 0 ? "Adicione ao menos uma pergunta" : undefined}
+            title={quiz.questionCount === 0 ? "Add at least one question" : undefined}
             className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 font-[Poppins] text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isPublishing ? (
@@ -854,7 +853,7 @@ function QuizCard({
             ) : (
               <Send className="h-3 w-3" />
             )}
-            Publicar
+            Publish
           </button>
         ) : (
           <button
@@ -867,7 +866,7 @@ function QuizCard({
             ) : (
               <EyeOff className="h-3 w-3" />
             )}
-            Despublicar
+            Unpublish
           </button>
         )}
 
@@ -946,9 +945,9 @@ export function ProfessorQuizPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
       setCreateModal(false);
-      toast.success("Quiz criado com sucesso!");
+      toast.success("Quiz created successfully!");
     },
-    onError: () => toast.error("Erro ao criar quiz."),
+    onError: () => toast.error("Failed to create quiz."),
   });
 
   const updateMutation = useMutation({
@@ -957,9 +956,9 @@ export function ProfessorQuizPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
       setEditTarget(null);
-      toast.success("Quiz atualizado.");
+      toast.success("Quiz updated.");
     },
-    onError: () => toast.error("Erro ao atualizar quiz."),
+    onError: () => toast.error("Failed to update quiz."),
   });
 
   const deleteMutation = useMutation({
@@ -967,28 +966,28 @@ export function ProfessorQuizPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
       setDeleteTarget(null);
-      toast.success("Quiz excluído.");
+      toast.success("Quiz deleted.");
     },
-    onError: () => toast.error("Erro ao excluir quiz."),
+    onError: () => toast.error("Failed to delete quiz."),
   });
 
   const publishMutation = useMutation({
     mutationFn: (id: string) => professorQuizApi.publishQuiz(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
-      toast.success("Quiz publicado! Os alunos já podem respondê-lo.");
+      toast.success("Quiz published! Students can now answer it.");
     },
     onError: (err: any) =>
-      toast.error(err?.response?.data?.message ?? "Erro ao publicar quiz."),
+      toast.error(err?.response?.data?.message ?? "Failed to publish quiz."),
   });
 
   const unpublishMutation = useMutation({
     mutationFn: (id: string) => professorQuizApi.unpublishQuiz(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
-      toast.success("Quiz voltou para rascunho.");
+      toast.success("Quiz moved back to draft.");
     },
-    onError: () => toast.error("Erro ao despublicar quiz."),
+    onError: () => toast.error("Failed to unpublish quiz."),
   });
 
   const linkDisciplinesMutation = useMutation({
@@ -999,10 +998,10 @@ export function ProfessorQuizPage() {
       queryClient.invalidateQueries({
         queryKey: ["quizLinkedDisciplines", variables.quizId],
       });
-      toast.success("Quiz vinculado à matéria.");
+      toast.success("Quiz linked to the subject.");
     },
     onError: (err: any) =>
-      toast.error(err?.response?.data?.message ?? "Erro ao vincular quiz."),
+      toast.error(err?.response?.data?.message ?? "Failed to link quiz."),
   });
 
   const unlinkDisciplineMutation = useMutation({
@@ -1013,10 +1012,10 @@ export function ProfessorQuizPage() {
       queryClient.invalidateQueries({
         queryKey: ["quizLinkedDisciplines", variables.quizId],
       });
-      toast.success("Quiz desvinculado da matéria.");
+      toast.success("Quiz unlinked from the subject.");
     },
     onError: (err: any) =>
-      toast.error(err?.response?.data?.message ?? "Erro ao desvincular quiz."),
+      toast.error(err?.response?.data?.message ?? "Failed to unlink quiz."),
   });
 
   return (
@@ -1031,10 +1030,10 @@ export function ProfessorQuizPage() {
               </div>
               <div>
                 <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                  Meus Quizzes
+                  My Quizzes
                 </h1>
                 <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                  Crie e gerencie quizzes para suas disciplinas.
+                  Create and manage quizzes for your subjects.
                 </p>
               </div>
             </div>
@@ -1044,14 +1043,14 @@ export function ProfessorQuizPage() {
                 className="flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 font-[Poppins] text-sm font-semibold text-indigo-300 transition-colors hover:border-indigo-500/60 hover:bg-indigo-500/20"
               >
                 <Sparkles className="h-4 w-4" />
-                Criar com IA
+                Create with AI
               </button>
               <button
                 onClick={() => setCreateModal(true)}
                 className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
               >
                 <Plus className="h-4 w-4" />
-                Criar Quiz
+                Create Quiz
               </button>
             </div>
           </div>
@@ -1067,13 +1066,13 @@ export function ProfessorQuizPage() {
           <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-red-500/20 bg-red-500/5 py-16">
             <AlertCircle className="h-8 w-8 text-red-400" />
             <p className="font-[Poppins] text-sm text-zinc-400">
-              Erro ao carregar quizzes.
+              Failed to load quizzes.
             </p>
             <button
               onClick={() => refetch()}
               className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 font-[Poppins] text-sm text-red-300 hover:bg-red-500/20"
             >
-              Tentar novamente
+              Try again
             </button>
           </div>
         )}
@@ -1085,10 +1084,10 @@ export function ProfessorQuizPage() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Nenhum quiz criado
+                No quiz created
               </p>
               <p className="mt-1 max-w-xs font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                Crie seu primeiro quiz para os alunos das suas disciplinas.
+                Create your first quiz for the students of your subjects.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1097,14 +1096,14 @@ export function ProfessorQuizPage() {
                 className="flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 font-[Poppins] text-sm font-semibold text-indigo-300 hover:border-indigo-500/60 hover:bg-indigo-500/20"
               >
                 <Sparkles className="h-4 w-4" />
-                Criar com IA
+                Create with AI
               </button>
               <button
                 onClick={() => setCreateModal(true)}
                 className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white hover:bg-indigo-700"
               >
                 <Plus className="h-4 w-4" />
-                Criar Quiz
+                Create Quiz
               </button>
             </div>
           </div>
@@ -1153,7 +1152,7 @@ export function ProfessorQuizPage() {
       {/* AI generate modal */}
       {aiModal && (
         <Modal
-          title="Criar Quiz com IA"
+          title="Create Quiz with AI"
           icon={<Sparkles className="h-5 w-5" />}
           onClose={() => setAiModal(false)}
           wide
@@ -1165,7 +1164,7 @@ export function ProfessorQuizPage() {
       {/* Create modal */}
       {createModal && (
         <Modal
-          title="Criar Quiz"
+          title="Create Quiz"
           icon={<Brain className="h-5 w-5" />}
           onClose={() => setCreateModal(false)}
         >
@@ -1180,7 +1179,7 @@ export function ProfessorQuizPage() {
       {/* Edit modal */}
       {editTarget && (
         <Modal
-          title="Editar Quiz"
+          title="Edit Quiz"
           icon={<Pencil className="h-5 w-5" />}
           onClose={() => setEditTarget(null)}
         >
@@ -1207,8 +1206,8 @@ export function ProfessorQuizPage() {
       <AppModal
         isOpen={!!deleteTarget}
         type="delete"
-        title={`Excluir "${deleteTarget?.title}"`}
-        description="Todas as perguntas e tentativas deste quiz serão removidas permanentemente."
+        title={`Delete "${deleteTarget?.title}"`}
+        description="All questions and attempts of this quiz will be permanently removed."
         onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
         onCancel={() => setDeleteTarget(null)}
         onClose={() => setDeleteTarget(null)}

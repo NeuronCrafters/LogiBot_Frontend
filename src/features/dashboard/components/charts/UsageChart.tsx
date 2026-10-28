@@ -57,7 +57,7 @@ function useUsageData(filter: UsageChartProps["filter"]) {
     ],
     queryFn: async () => {
       if (!mainId)
-        throw new Error(`IDs insuficientes para tipo: ${filter.type}`);
+        throw new Error(`Insufficient IDs for type: ${filter.type}`);
       if (isStudent) {
         const response = await api.post("/logs/students/summary", {
           universityId,
@@ -81,7 +81,7 @@ function useUsageData(filter: UsageChartProps["filter"]) {
       };
       const url = urls[filter.type];
       if (!url)
-        throw new Error(`Tipo de entidade não suportado: ${filter.type}`);
+        throw new Error(`Unsupported entity type: ${filter.type}`);
       const response = await api.get(url);
       return {
         totalUsageTime: response.data.usageTimeInSeconds,
@@ -108,7 +108,7 @@ export function UsageChart({ filter }: UsageChartProps) {
   } = useUsageData(filter);
   const hasRequiredIds = !!filter.hierarchyParams.universityId;
   const chartConfig = useMemo(
-    () => ({ usage: { label: "Minutos", color: "#3b82f6" } }),
+    () => ({ usage: { label: "Minutes", color: "#3b82f6" } }),
     [],
   );
   const chartData = useMemo(() => {
@@ -137,16 +137,16 @@ export function UsageChart({ filter }: UsageChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Tempo de Uso Diário
+              Daily Usage Time
             </CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Minutos de utilização nos últimos dias
+              Minutes of usage in recent days
             </CardDescription>
           </div>
         </div>
         <div className="border-t border-white/10 px-6 py-4">
           <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-            Tempo Total
+            Total Time
           </p>
           <p className="mt-1 font-[Poppins] text-2xl font-bold text-white sm:text-3xl">
             {hasData ? formattedTime : "—"}
@@ -156,10 +156,10 @@ export function UsageChart({ filter }: UsageChartProps) {
           <ChartDownloadButton
             containerId="usage-chart"
             fileName="tempo_de_uso"
-            info="Exibe o tempo de uso diário em minutos para o período analisado."
+            info="Shows the daily usage time in minutes for the analyzed period."
             insight={{
               chart: "usage",
-              title: "Tempo de uso diário",
+              title: "Daily usage time",
               filters: dashboardFiltersFromLegacy(filter),
               disabled: isLoading || !hasData,
             }}
@@ -170,11 +170,11 @@ export function UsageChart({ filter }: UsageChartProps) {
       <CardContent className="px-2 sm:p-6">
         {!hasRequiredIds && (
           <NoData>
-            <p>Selecione uma entidade para visualizar dados.</p>
+            <p>Select an entity to view data.</p>
           </NoData>
         )}
         {hasRequiredIds && isLoading && (
-          <ChartLoader text="Carregando dados..." />
+          <ChartLoader text="Loading data..." />
         )}
         {hasRequiredIds && isError && (
           <ChartError
@@ -208,7 +208,7 @@ export function UsageChart({ filter }: UsageChartProps) {
                   minTickGap={32}
                   stroke="#666"
                   tickFormatter={(v: string) =>
-                    new Date(v).toLocaleDateString("pt-BR", {
+                    new Date(v).toLocaleDateString("en-US", {
                       day: "2-digit",
                       month: "2-digit",
                       timeZone: "UTC",
@@ -220,7 +220,7 @@ export function UsageChart({ filter }: UsageChartProps) {
                   content={(props) => {
                     if (!props.active || !props.payload?.[0]) return null;
                     const d = props.payload[0].payload as any;
-                    const date = new Date(d.date).toLocaleDateString("pt-BR", {
+                    const date = new Date(d.date).toLocaleDateString("en-US", {
                       day: "2-digit",
                       month: "2-digit",
                       year: "numeric",
@@ -233,14 +233,14 @@ export function UsageChart({ filter }: UsageChartProps) {
                           {date}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Tempo:{" "}
+                          Time:{" "}
                           <span className="font-medium text-white">
                             {formatTimeWithDays(secs)}
                           </span>
                         </p>
                         {d.sessions?.length > 0 && (
                           <p className="font-[Poppins] text-zinc-400">
-                            Sessões:{" "}
+                            Sessions:{" "}
                             <span className="font-medium text-white">
                               {d.sessions.length}
                             </span>
@@ -262,7 +262,7 @@ export function UsageChart({ filter }: UsageChartProps) {
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
-            <p>Nenhum dado de uso disponível para esta entidade.</p>
+            <p>No usage data available for this entity.</p>
           </NoData>
         )}
       </CardContent>

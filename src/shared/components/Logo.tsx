@@ -14,8 +14,8 @@ export function Logo({ className, type }: LogoProps) {
         src={logos[type]}
         alt={
           type === "mascote"
-            ? "Logo Mascote do LogiBot"
-            : "Logo Completa do LogiBot"
+            ? "LogiBot Mascot Logo"
+            : "LogiBot Full Logo"
         }
         className="object-contain"
       />

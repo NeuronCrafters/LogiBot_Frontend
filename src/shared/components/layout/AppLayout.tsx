@@ -32,15 +32,15 @@ const PAGE_META: Record<string, { title: string; icon: ReactNode }> = {
     icon: <PieChart className="w-4 h-4 text-blue-400" />,
   },
   "/entities/create": {
-    title: "Criar Entidades",
+    title: "Create Entities",
     icon: <Settings className="w-4 h-4 text-zinc-400" />,
   },
   "/entities": {
-    title: "Listar Entidades",
+    title: "List Entities",
     icon: <TableProperties className="w-4 h-4 text-zinc-400" />,
   },
   "/profile": {
-    title: "Meu Perfil",
+    title: "My Profile",
     icon: <User className="w-4 h-4 text-zinc-400" />,
   },
   "/feedback": {

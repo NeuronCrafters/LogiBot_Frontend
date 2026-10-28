@@ -23,7 +23,7 @@ export function Select({
   value,
   onChange,
   options,
-  placeholder = "Selecione...",
+  placeholder = "Select...",
   className,
   disabled = false,
 }: SelectProps) {
@@ -188,7 +188,7 @@ export function Select({
             })}
             {options.length === 0 && (
               <li className="px-3 py-2.5 text-sm font-[Poppins] text-zinc-600">
-                Nenhuma opção disponível.
+                No options available.
               </li>
             )}
           </ul>,

@@ -20,23 +20,23 @@ import {
 const features = [
   {
     icon: <MessageCircle className="h-5 w-5" />,
-    title: "Chat especializado",
+    title: "Specialized chat",
     description:
-      "Tire dúvidas sobre lógica de programação com um assistente focado no contexto acadêmico.",
+      "Ask questions about programming logic with an assistant focused on the academic context.",
     tone: "text-blue-400 bg-blue-500/10",
   },
   {
     icon: <BookOpen className="h-5 w-5" />,
-    title: "Quiz adaptativo",
+    title: "Adaptive quiz",
     description:
-      "Pratique por nível, tema e subtópico, com feedback imediato para cada resposta.",
+      "Practice by level, topic and subtopic, with immediate feedback for every answer.",
     tone: "text-indigo-400 bg-indigo-500/10",
   },
   {
     icon: <BarChart2 className="h-5 w-5" />,
-    title: "Analytics educacional",
+    title: "Educational analytics",
     description:
-      "Acompanhe desempenho, esforço e evolução para apoiar decisões pedagógicas.",
+      "Track performance, effort and progress to support pedagogical decisions.",
     tone: "text-emerald-400 bg-emerald-500/10",
   },
 ];
@@ -44,21 +44,21 @@ const features = [
 const profiles = [
   {
     icon: <GraduationCap className="h-5 w-5" />,
-    role: "Aluno",
-    description: "Aprende, pratica e revisa conteúdos com apoio individual.",
-    benefits: ["Chat sobre lógica", "Quizzes guiados", "Feedback imediato"],
+    role: "Student",
+    description: "Learns, practices and reviews content with individual support.",
+    benefits: ["Logic chat", "Guided quizzes", "Immediate feedback"],
   },
   {
     icon: <Users className="h-5 w-5" />,
     role: "Professor",
-    description: "Acompanha turmas e identifica dificuldades com mais clareza.",
-    benefits: ["Relatórios por turma", "Matriz de esforço", "Dados por aluno"],
+    description: "Follows classes and identifies difficulties more clearly.",
+    benefits: ["Reports by class", "Effort matrix", "Data per student"],
   },
   {
     icon: <Building2 className="h-5 w-5" />,
-    role: "Coordenador",
-    description: "Observa indicadores amplos para orientar ações acadêmicas.",
-    benefits: ["Visão por curso", "Filtros institucionais", "Gestão por dados"],
+    role: "Coordinator",
+    description: "Observes broad indicators to guide academic actions.",
+    benefits: ["Program overview", "Institutional filters", "Data-driven management"],
   },
 ];
 
@@ -90,13 +90,13 @@ export function Home() {
           </a>
           <nav className="hidden items-center gap-6 font-[Poppins] text-sm text-zinc-400 md:flex">
             <a href="#features" className="transition-colors hover:text-white">
-              Recursos
+              Features
             </a>
             <a href="#profiles" className="transition-colors hover:text-white">
-              Perfis
+              Roles
             </a>
             <a href="#start" className="transition-colors hover:text-white">
-              Começar
+              Get started
             </a>
           </nav>
           <button
@@ -104,7 +104,7 @@ export function Home() {
             onClick={handleStart}
             className="inline-flex h-10 items-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700"
           >
-            Entrar
+            Sign in
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>
@@ -123,24 +123,23 @@ export function Home() {
               </div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 font-[Poppins] text-xs font-medium text-zinc-300">
                 <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-                Plataforma de IA para lógica de programação
+                AI platform for programming logic
               </div>
               <h1
                 id="welcome-title"
                 className="mt-5 max-w-4xl font-[Poppins] text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl"
               >
-                Aprenda, pratique e acompanhe evolução com o LogiBot.AI
+                Learn, practice and track progress with LogiBot.AI
               </h1>
               <p className="mt-5 max-w-2xl font-[Poppins] text-base leading-relaxed text-zinc-400 sm:text-lg">
-                Um ambiente educacional com chat inteligente, quizzes guiados e
-                dashboards para transformar dados de aprendizagem em ações.
+                An educational environment with an intelligent chat, guided quizzes and dashboards to turn learning data into action.
               </p>
               <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                 <button
                   onClick={handleStart}
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-6 font-[Poppins] text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700"
                 >
-                  Começar agora
+                  Get started now
                   <Play className="h-4 w-4" />
                 </button>
                 <button
@@ -151,7 +150,7 @@ export function Home() {
                   }
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-6 font-[Poppins] text-sm font-semibold text-zinc-200 transition-colors hover:bg-white/10 hover:text-white"
                 >
-                  Ver recursos
+                  See features
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
@@ -161,9 +160,9 @@ export function Home() {
 
         <SectionShell
           id="features"
-          eyebrow="Recursos"
-          title="Um fluxo completo para estudar e acompanhar"
-          description="As principais experiências do produto seguem a mesma lógica: interfaces simples, foco na tarefa e informações organizadas."
+          eyebrow="Features"
+          title="A complete flow to study and follow progress"
+          description="The main product experiences follow the same logic: simple interfaces, task focus and organized information."
         >
           <div className="grid gap-4 md:grid-cols-3">
             {features.map((feature) => (
@@ -186,9 +185,9 @@ export function Home() {
 
         <SectionShell
           id="profiles"
-          eyebrow="Perfis"
-          title="Feito para quem aprende e para quem acompanha"
-          description="Aluno, professor e coordenação enxergam o que importa para cada papel, sem excesso de ruído."
+          eyebrow="Roles"
+          title="Built for those who learn and those who follow along"
+          description="Students, professors and coordinators see what matters for each role, without excess noise."
         >
           <div className="grid gap-4 md:grid-cols-3">
             {profiles.map((profile) => (
@@ -225,18 +224,17 @@ export function Home() {
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="max-w-2xl">
                 <h2 className="font-[Poppins] text-2xl font-semibold text-white sm:text-3xl">
-                  Comece a usar o LogiBot.AI hoje
+                  Start using LogiBot.AI today
                 </h2>
                 <p className="mt-3 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                  Crie sua conta para acessar o chat, praticar com quizzes e
-                  explorar uma experiência de aprendizagem mais guiada.
+                  Create your account to access the chat, practice with quizzes and explore a more guided learning experience.
                 </p>
               </div>
               <button
                 onClick={handleStart}
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-6 font-[Poppins] text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700 md:w-auto"
               >
-                Criar conta gratuita
+                Create free account
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>

@@ -47,18 +47,18 @@ const MODAL_META: Record<
   { create: string; edit: string; icon: ReactNode }
 > = {
   classes: {
-    create: "Nova Turma",
-    edit: "Editar Turma",
+    create: "New Class",
+    edit: "Edit Class",
     icon: <Users className="h-5 w-5" />,
   },
   disciplines: {
-    create: "Nova Disciplina",
-    edit: "Editar Disciplina",
+    create: "New Subject",
+    edit: "Edit Subject",
     icon: <Library className="h-5 w-5" />,
   },
   professors: {
-    create: "Novo Professor",
-    edit: "Editar Professor",
+    create: "New Professor",
+    edit: "Edit Professor",
     icon: <GraduationCap className="h-5 w-5" />,
   },
 };
@@ -197,7 +197,7 @@ function EntityCard({
             className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
           >
             {linksIcon ?? <Library className="h-3 w-3" />}
-            {linksLabel ?? "Vínculos"}
+            {linksLabel ?? "Links"}
           </button>
         )}
         <button
@@ -205,12 +205,12 @@ function EntityCard({
           className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
           <Pencil className="h-3 w-3" />
-          Editar
+          Edit
         </button>
         <button
           onClick={onDelete}
           className="ml-auto flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-1.5 text-zinc-600 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
-          title="Excluir"
+          title="Delete"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -344,12 +344,12 @@ export function ManageEntities() {
       return academicApi.post(entity as any, item);
     },
     onSuccess: () => {
-      toast.success("Cadastrado com sucesso!");
+      toast.success("Registered successfully!");
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       setCreateModal(null);
     },
     onError: () =>
-      toast.error("Erro ao cadastrar. Verifique os dados e tente novamente."),
+      toast.error("Registration failed. Check the data and try again."),
   });
 
   const updateMutation = useMutation({
@@ -366,12 +366,12 @@ export function ManageEntities() {
       return academicApi.update(entity as any, id, item);
     },
     onSuccess: () => {
-      toast.success("Atualizado com sucesso!");
+      toast.success("Updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       setEditTarget(null);
     },
     onError: () =>
-      toast.error("Erro ao atualizar. Verifique os dados e tente novamente."),
+      toast.error("Update failed. Check the data and try again."),
   });
 
   const deleteMutation = useMutation({
@@ -380,12 +380,12 @@ export function ManageEntities() {
       return academicApi.delete(type as any, id);
     },
     onSuccess: () => {
-      toast.success("Excluído com sucesso.");
+      toast.success("Deleted successfully.");
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       setDeleteTarget(null);
     },
     onError: () => {
-      toast.error("Erro ao excluir. Tente novamente.");
+      toast.error("Failed to delete. Please try again.");
       setDeleteTarget(null);
     },
   });
@@ -434,24 +434,24 @@ export function ManageEntities() {
   const TABS = [
     {
       key: "classes" as Tab,
-      label: "Turmas",
+      label: "Classes",
       icon: <Users className="h-4 w-4" />,
       count: classes.length,
-      createLabel: "Nova Turma",
+      createLabel: "New Class",
     },
     {
       key: "disciplines" as Tab,
-      label: "Disciplinas",
+      label: "Subjects",
       icon: <Library className="h-4 w-4" />,
       count: disciplines.length,
-      createLabel: "Nova Disciplina",
+      createLabel: "New Subject",
     },
     {
       key: "professors" as Tab,
-      label: "Professores",
+      label: "Professors",
       icon: <GraduationCap className="h-4 w-4" />,
       count: professors.length,
-      createLabel: "Novo Professor",
+      createLabel: "New Professor",
     },
   ];
   const activeTab = TABS.find((t) => t.key === tab)!;
@@ -470,10 +470,10 @@ export function ManageEntities() {
               </div>
               <div>
                 <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                  Gestão Acadêmica
+                  Academic Management
                 </h1>
                 <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                  Crie, edite e vincule turmas, disciplinas e professores.
+                  Create, edit and link classes, subjects and professors.
                 </p>
               </div>
             </div>
@@ -484,14 +484,14 @@ export function ManageEntities() {
                   className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <School className="h-3.5 w-3.5" />
-                  Nova Universidade
+                  New University
                 </Link>
                 <Link
                   to="/entities/create/course"
                   className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <BookOpen className="h-3.5 w-3.5" />
-                  Novo Curso
+                  New Program
                 </Link>
               </div>
             )}
@@ -501,12 +501,12 @@ export function ManageEntities() {
             <div className="mt-4 flex flex-wrap items-end gap-3 border-t border-white/5 pt-4">
               <div className="flex flex-col gap-1">
                 <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Universidade
+                  University
                 </label>
                 <Select
                   value={adminUniversityId}
                   onChange={(v) => { setAdminUniversityId(v); setAdminCourseId(""); }}
-                  placeholder="Selecione"
+                  placeholder="Select"
                   options={universities.map((u: any) => ({ value: u._id, label: u.name }))}
                   className="min-w-[180px]"
                 />
@@ -514,12 +514,12 @@ export function ManageEntities() {
               {adminUniversityId && (
                 <div className="flex flex-col gap-1">
                   <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Curso
+                    Program
                   </label>
                   <Select
                     value={adminCourseId}
                     onChange={setAdminCourseId}
-                    placeholder="Selecione"
+                    placeholder="Select"
                     options={adminCourses.map((c: any) => ({ value: c._id, label: c.name }))}
                     className="min-w-[180px]"
                   />
@@ -532,7 +532,7 @@ export function ManageEntities() {
         {isLoading && (
           <div className="flex items-center justify-center gap-2 py-12 font-[Poppins] text-sm text-zinc-500">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Carregando dados acadêmicos...
+            Loading academic data...
           </div>
         )}
 
@@ -543,10 +543,10 @@ export function ManageEntities() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Selecione universidade e curso
+                Select a university and a program
               </p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Escolha acima para ver e gerenciar as entidades.
+                Choose above to view and manage the entities.
               </p>
             </div>
           </div>
@@ -581,8 +581,8 @@ export function ManageEntities() {
             {tab === "classes" &&
               (classes.length === 0 ? (
                 <EmptyTab
-                  message="Nenhuma turma cadastrada neste curso."
-                  createLabel="Nova Turma"
+                  message="No class registered in this program."
+                  createLabel="New Class"
                   onCreateClick={() => setCreateModal("classes")}
                 />
               ) : (
@@ -599,8 +599,8 @@ export function ManageEntities() {
                         key={cls._id}
                         name={cls.name}
                         badges={[
-                          `${discCount} ${discCount === 1 ? "disciplina" : "disciplinas"}`,
-                          `${studCount} ${studCount === 1 ? "aluno" : "alunos"}`,
+                          `${discCount} ${discCount === 1 ? "subject" : "subjects"}`,
+                          `${studCount} ${studCount === 1 ? "student" : "students"}`,
                         ]}
                         onEdit={() =>
                           setEditTarget({
@@ -619,7 +619,7 @@ export function ManageEntities() {
                           })
                         }
                         linksIcon={<BookOpen className="h-3 w-3" />}
-                        linksLabel="Grade"
+                        linksLabel="Curriculum"
                         onDelete={() =>
                           setDeleteTarget({
                             id: cls._id,
@@ -637,8 +637,8 @@ export function ManageEntities() {
             {tab === "disciplines" &&
               (disciplines.length === 0 ? (
                 <EmptyTab
-                  message="Nenhuma disciplina cadastrada neste curso."
-                  createLabel="Nova Disciplina"
+                  message="No subject registered in this program."
+                  createLabel="New Subject"
                   onCreateClick={() => setCreateModal("disciplines")}
                 />
               ) : (
@@ -652,7 +652,7 @@ export function ManageEntities() {
                         name={disc.name}
                         badges={[
                           `${profCount} ${profCount === 1 ? "professor" : "professores"}`,
-                          `${studCount} ${studCount === 1 ? "aluno" : "alunos"}`,
+                          `${studCount} ${studCount === 1 ? "student" : "students"}`,
                         ]}
                         onEdit={() =>
                           setEditTarget({
@@ -671,7 +671,7 @@ export function ManageEntities() {
                           })
                         }
                         linksIcon={<Users className="h-3 w-3" />}
-                        linksLabel="Professores"
+                        linksLabel="Professors"
                         onDelete={() =>
                           setDeleteTarget({
                             id: disc._id,
@@ -689,8 +689,8 @@ export function ManageEntities() {
             {tab === "professors" &&
               (professors.length === 0 ? (
                 <EmptyTab
-                  message="Nenhum professor cadastrado neste curso."
-                  createLabel="Novo Professor"
+                  message="No professor registered in this program."
+                  createLabel="New Professor"
                   onCreateClick={() => setCreateModal("professors")}
                 />
               ) : (
@@ -811,8 +811,8 @@ export function ManageEntities() {
           wide
           title={
             linksModal.type === "class-disciplines"
-              ? `Disciplinas — ${linksModal.label}`
-              : `Professores & Alunos — ${linksModal.label}`
+              ? `Subjects — ${linksModal.label}`
+              : `Professors & Students — ${linksModal.label}`
           }
           icon={
             linksModal.type === "class-disciplines" ? (
@@ -845,8 +845,8 @@ export function ManageEntities() {
       <AppModal
         isOpen={!!deleteTarget}
         type="delete"
-        title={`Excluir "${deleteTarget?.name}"`}
-        description="Esta ação não pode ser desfeita. O registro será removido permanentemente."
+        title={`Delete "${deleteTarget?.name}"`}
+        description="This action cannot be undone. The record will be permanently removed."
         onConfirm={() =>
           deleteTarget &&
           deleteMutation.mutate({

@@ -49,7 +49,7 @@ function useChatHistory({ userId, enabled = true }: UseChatHistoryOptions) {
 
       return result;
     } catch (error) {
-      logger.error("ChatHistory", "Erro ao buscar mensagens.", error);
+      logger.error("ChatHistory", "Failed to fetch messages.", error);
       throw error;
     }
   };

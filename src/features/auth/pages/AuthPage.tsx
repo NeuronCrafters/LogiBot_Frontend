@@ -40,9 +40,9 @@ export function AuthPage({ mode }: AuthPageProps) {
     setLoading(true);
     try {
       await login(finalEmail, finalPassword);
-      toast.success("Login realizado com sucesso.");
+      toast.success("Signed in successfully.");
     } catch (error: any) {
-      toast.error(error?.message || "Erro ao fazer login.");
+      toast.error(error?.message || "Failed to sign in.");
     } finally {
       setLoading(false);
     }
@@ -57,18 +57,18 @@ export function AuthPage({ mode }: AuthPageProps) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ0-9\s]{3,}$/;
 
-    if (!finalName) return toast.error("Nome é obrigatório.");
+    if (!finalName) return toast.error("Name is required.");
     if (!nameRegex.test(finalName))
       return toast.error(
-        "Nome inválido. Use ao menos 3 caracteres e evite símbolos especiais.",
+        "Invalid name. Use at least 3 characters and avoid special symbols.",
       );
-    if (!finalEmail) return toast.error("E-mail é obrigatório.");
+    if (!finalEmail) return toast.error("Email is required.");
     if (!emailRegex.test(finalEmail))
-      return toast.error("Formato de e-mail inválido.");
-    if (!finalPassword) return toast.error("Senha é obrigatória.");
+      return toast.error("Invalid email format.");
+    if (!finalPassword) return toast.error("Password is required.");
     if (finalPassword.length < 12)
-      return toast.error("A senha deve ter pelo menos 12 caracteres.");
-    if (!finalCode) return toast.error("Código de acesso é obrigatório.");
+      return toast.error("The password must be at least 12 characters long.");
+    if (!finalCode) return toast.error("Access code is required.");
 
     setLoading(true);
     try {
@@ -81,7 +81,7 @@ export function AuthPage({ mode }: AuthPageProps) {
       await login(finalEmail, finalPassword);
     } catch (err: any) {
       toast.error(
-        err?.response?.data?.message ?? "Erro ao realizar o cadastro.",
+        err?.response?.data?.message ?? "Failed to sign up.",
       );
     } finally {
       setLoading(false);
@@ -104,8 +104,8 @@ export function AuthPage({ mode }: AuthPageProps) {
       <AppModal
         isOpen={showConsent}
         type="consent"
-        title="Consentimento para coleta de dados"
-        description="O LogiBot.AI coleta dados de uso com finalidade educacional e para melhorar a sua experiência, tudo em conformidade com a LGPD."
+        title="Consent to data collection"
+        description="LogiBot.AI collects usage data for educational purposes and to improve your experience, in compliance with data protection regulations."
         onConfirm={handleAcceptConsent}
         onClose={() => setShowConsent(false)}
       />
@@ -127,10 +127,10 @@ export function AuthPage({ mode }: AuthPageProps) {
                 <AnimatedLogo className="scale-[0.78]" />
               </div>
               <h1 className="mt-8 max-w-xs text-2xl font-semibold leading-tight text-white">
-                Aprenda lógica com apoio inteligente.
+                Learn logic with smart support.
               </h1>
               <p className="mt-3 max-w-xs text-sm leading-relaxed text-zinc-500">
-                Entre para continuar sua jornada no LogiBot.AI.
+                Sign in to continue your journey on LogiBot.AI.
               </p>
             </div>
           </section>
@@ -148,12 +148,12 @@ export function AuthPage({ mode }: AuthPageProps) {
 
               <div className="mb-6">
                 <h2 className="text-2xl font-semibold text-white">
-                  {isSignup ? "Criar conta" : "Entrar"}
+                  {isSignup ? "Create account" : "Sign in"}
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">
                   {isSignup
-                    ? "Preencha seus dados de acesso."
-                    : "Acesse sua conta do LogiBot.AI."}
+                    ? "Fill in your account details."
+                    : "Access your LogiBot.AI account."}
                 </p>
               </div>
 
@@ -163,7 +163,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                     id="signup-name-input"
                     icon={<User className="h-4 w-4" />}
                     type="text"
-                    placeholder="Nome completo"
+                    placeholder="Full name"
                     value={name}
                     onChange={setName}
                     required
@@ -173,7 +173,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                   id={isSignup ? "signup-email-input" : "signin-email-input"}
                   icon={<Mail className="h-4 w-4" />}
                   type="email"
-                  placeholder="E-mail"
+                  placeholder="Email"
                   value={email}
                   onChange={(value) => setEmail(value.replace(/\s/g, ""))}
                   required
@@ -184,7 +184,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                   }
                   icon={<Lock className="h-4 w-4" />}
                   type="password"
-                  placeholder="Senha"
+                  placeholder="Password"
                   value={password}
                   onChange={(value) => setPassword(value.replace(/\s/g, ""))}
                   required
@@ -195,13 +195,13 @@ export function AuthPage({ mode }: AuthPageProps) {
                       id="signup-code-input"
                       icon={<FileText className="h-4 w-4" />}
                       type="text"
-                      placeholder="Código de acesso"
+                      placeholder="Access code"
                       value={code}
                       onChange={(value) => setCode(value.replace(/\s/g, ""))}
                       required
                     />
                     <p className="pl-1 text-xs text-zinc-500">
-                      A senha deve ter no mínimo 12 caracteres.
+                      The password must be at least 12 characters long.
                     </p>
                   </>
                 )}
@@ -215,23 +215,23 @@ export function AuthPage({ mode }: AuthPageProps) {
                 >
                   {loading
                     ? isSignup
-                      ? "Cadastrando..."
-                      : "Entrando..."
+                      ? "Signing up..."
+                      : "Signing in..."
                     : isSignup
-                      ? "Criar conta"
-                      : "Entrar"}
+                      ? "Create account"
+                      : "Sign in"}
                   {!loading && <ArrowRight className="h-4 w-4" />}
                 </button>
               </form>
 
               <p className="mt-5 text-center text-xs text-zinc-500">
-                {isSignup ? "Já possui conta?" : "Não possui conta?"}{" "}
+                {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
                 {isSignup ? (
                   <Link
                     to="/signin"
                     className="text-blue-400 hover:text-blue-300"
                   >
-                    Faça login
+                    Sign in
                   </Link>
                 ) : (
                   <button
@@ -239,7 +239,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                     onClick={() => setShowConsent(true)}
                     className="text-blue-400 transition-colors hover:text-blue-300"
                   >
-                    Faça seu cadastro
+                    Sign up
                   </button>
                 )}
               </p>
@@ -249,7 +249,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                 className="mt-8 flex items-center justify-center gap-1.5 text-xs text-zinc-600 transition-colors hover:text-zinc-400"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                Voltar para a página inicial
+                Back to home page
               </Link>
             </div>
           </section>
@@ -294,7 +294,7 @@ function AuthInput({
       {type === "password" && (
         <button
           type="button"
-          aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+          aria-label={showPassword ? "Hide password" : "Show password"}
           onClick={() => setShowPassword((current) => !current)}
           className="rounded-md p-1 text-zinc-500 transition-colors hover:text-white"
         >

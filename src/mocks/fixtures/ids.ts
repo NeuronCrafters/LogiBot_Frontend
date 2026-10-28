@@ -7,7 +7,7 @@ export const DISC_ESTRUTURAS_ID = "disc-estruturas";
 export const CLASS_A_ID = "class-a";
 export const CLASS_B_ID = "class-b";
 
-export const STUDENT_USER_ID = "user-aluno-1";
+export const STUDENT_USER_ID = "user-student-1";
 export const STAFF_USER_ID = "user-admin-1";
 export const PROFESSOR_ID = STAFF_USER_ID;
 

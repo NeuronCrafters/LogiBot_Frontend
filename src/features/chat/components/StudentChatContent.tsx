@@ -84,7 +84,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     const title =
       rawTitle.length > 55
         ? `${rawTitle.slice(0, 55).trimEnd()}...`
-        : rawTitle || "Nova Conversa";
+        : rawTitle || "New Chat";
     addSessionToCache({
       sessionId,
       title,
@@ -153,7 +153,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
           setSessionId(sessionIdFromUrl);
         }
       } catch (error) {
-        logger.error("Chat", "Erro ao carregar histórico.", error);
+        logger.error("Chat", "Failed to load history.", error);
       } finally {
         setLoadingHistory(false);
       }
@@ -203,7 +203,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
       try {
         await sendMessage(text);
       } catch (error) {
-        logger.error("Chat", "Erro ao enviar mensagem.", error);
+        logger.error("Chat", "Failed to send message.", error);
       } finally {
         setIsWaitingResponse(false);
       }
@@ -220,7 +220,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="font-poppins text-sm text-gray-400">
-            Carregando conversa...
+            Loading conversation...
           </p>
         </div>
       </div>
@@ -241,12 +241,10 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                 />
               </div>
               <h1 className="font-[Poppins] text-2xl sm:text-3xl font-semibold text-white">
-                O que vamos programar hoje?
+                What are we going to code today?
               </h1>
               <p className="mt-3 font-[Poppins] text-sm sm:text-base text-neutral-400">
-                Tire dúvidas sobre lógica, entenda erros no código e peça
-                explicações passo a passo para aprender programação com mais
-                clareza.
+                Ask questions about logic, understand errors in your code and request step-by-step explanations to learn programming more clearly.
               </p>
             </div>
             <ChatInput

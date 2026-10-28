@@ -24,10 +24,10 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Nível de acerto médio (%) por assunto no quiz. Quanto maior a área preenchida, maior o domínio naquele tópico. Ajuda a identificar onde concentrar os esforços de ensino.";
+  "Average accuracy level (%) per quiz topic. The larger the filled area, the greater the mastery of that topic. Helps identify where to focus teaching efforts.";
 
 const chartConfig = {
-  score: { label: "Acerto", color: "#3b82f6" },
+  score: { label: "Accuracy", color: "#3b82f6" },
 } satisfies ChartConfig;
 
 // Tópicos vêm de texto livre digitado pelo professor ao criar o quiz, sem
@@ -36,7 +36,7 @@ const chartConfig = {
 // no meio da frase).
 function capitalizeSubject(text: string) {
   if (!text) return text;
-  return text.charAt(0).toLocaleUpperCase("pt-BR") + text.slice(1);
+  return text.charAt(0).toLocaleUpperCase("en-US") + text.slice(1);
 }
 
 interface ChartProps {
@@ -99,7 +99,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
   const hasData = data?.hasPerformanceData ?? false;
   const refetchTyped = refetch as () => void;
   const errorMessage =
-    error instanceof Error ? error.message : "Erro ao carregar dados.";
+    error instanceof Error ? error.message : "Failed to load data.";
 
   return (
     <Card
@@ -110,10 +110,10 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Proficiência por Assunto: Quiz
+              Proficiency by Topic: Quiz
             </CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Nível de acerto médio em cada assunto principal
+              Average accuracy level in each main topic
             </CardDescription>
           </div>
         </div>
@@ -124,7 +124,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
             info={CHART_INFO}
             insight={{
               chart: "proficiency-radar",
-              title: "Proficiência por assunto",
+              title: "Proficiency by topic",
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -136,12 +136,11 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
             <p>
-              Selecione uma universidade para visualizar o radar de
-              proficiência.
+              Select a university to view the proficiency radar.
             </p>
           </NoData>
         )}
-        {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
+        {hasRequired && isLoading && <ChartLoader text="Loading data..." />}
         {hasRequired && isError && (
           <ChartError message={errorMessage} onRetry={refetchTyped} />
         )}
@@ -166,7 +165,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                           {entry.subject}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Acerto:{" "}
+                          Accuracy:{" "}
                           <span className="font-medium text-white">
                             {entry.score.toFixed(1)}%
                           </span>
@@ -204,7 +203,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         )}
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>
-            <p>Nenhum dado de proficiência disponível.</p>
+            <p>No proficiency data available.</p>
           </NoData>
         )}
       </CardContent>
@@ -213,21 +212,21 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex items-center gap-4">
             <span className="font-[Poppins] text-sm text-zinc-400">
-              Média:{" "}
+              Average:{" "}
               <span className="font-semibold text-white">
                 {data!.metrics?.average.toFixed(1)}%
               </span>
             </span>
             <span className="text-white/20">|</span>
             <span className="font-[Poppins] text-sm text-zinc-400">
-              Melhor:{" "}
+              Best:{" "}
               <span className="font-semibold text-white">
                 {data!.metrics?.best.subject}
               </span>
             </span>
             <span className="text-white/20">|</span>
             <span className="font-[Poppins] text-sm text-zinc-400">
-              A melhorar:{" "}
+              To improve:{" "}
               <span className="font-semibold text-white">
                 {data!.metrics?.worst.subject}
               </span>{" "}

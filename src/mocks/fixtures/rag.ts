@@ -14,16 +14,16 @@ function iso(daysAgo: number): string {
 export const ragClasses: RagClass[] = [
   {
     id: CLASS_A_ID,
-    name: "Turma A - Lógica de Programação 2026.1",
+    name: "Class A - Programming Logic 2026.1",
     courseId: COURSE_ID,
-    courseName: "Engenharia de Software",
+    courseName: "Software Engineering",
     registrationCode: CLASS_A_REGISTRATION_CODE,
   },
   {
     id: CLASS_B_ID,
-    name: "Turma B - Lógica de Programação 2026.1",
+    name: "Class B - Programming Logic 2026.1",
     courseId: COURSE_ID,
-    courseName: "Engenharia de Software",
+    courseName: "Software Engineering",
     registrationCode: CLASS_B_REGISTRATION_CODE,
   },
 ];
@@ -35,7 +35,7 @@ export const ragSettingsByClassId: Record<string, RagSettings> = {
     topK: 4,
     minScore: 0.72,
     systemPrompt:
-      "Você é o tutor de Lógica de Programação do LogiBot. Responda de forma didática, com exemplos em Python, e cite o material da disciplina sempre que possível.",
+      "You are LogiBot's Programming Logic tutor. Answer in a didactic way, with Python examples, and cite the subject material whenever possible.",
     llmModel: "gpt-4o-mini",
     embeddingModel: "text-embedding-3-small",
     createdAt: iso(60),
@@ -60,7 +60,7 @@ export const ragDocumentsByClassId: Record<string, RagDocument[]> = {
       id: "doc-1",
       classId: CLASS_A_ID,
       uploadedBy: PROFESSOR_ID,
-      title: "Apostila de Lógica - Capítulo 1",
+      title: "Logic Handbook - Chapter 1",
       originalFileName: "apostila_logica_cap1.pdf",
       storedFileName: "apostila_logica_cap1_stored.pdf",
       filePath: "/uploads/apostila_logica_cap1_stored.pdf",
@@ -80,7 +80,7 @@ export const ragDocumentsByClassId: Record<string, RagDocument[]> = {
       id: "doc-2",
       classId: CLASS_A_ID,
       uploadedBy: PROFESSOR_ID,
-      title: "Slides - Estruturas de Repetição",
+      title: "Slides - Loop Structures",
       originalFileName: "slides_estruturas_repeticao.pdf",
       storedFileName: "slides_estruturas_repeticao_stored.pdf",
       filePath: "/uploads/slides_estruturas_repeticao_stored.pdf",
@@ -100,7 +100,7 @@ export const ragDocumentsByClassId: Record<string, RagDocument[]> = {
       id: "doc-3",
       classId: CLASS_A_ID,
       uploadedBy: PROFESSOR_ID,
-      title: "Exercícios Resolvidos - Lista 3",
+      title: "Solved Exercises - List 3",
       originalFileName: "exercicios_resolvidos_lista3.docx",
       storedFileName: "exercicios_resolvidos_lista3_stored.docx",
       filePath: "/uploads/exercicios_resolvidos_lista3_stored.docx",
@@ -120,7 +120,7 @@ export const ragDocumentsByClassId: Record<string, RagDocument[]> = {
       id: "doc-4",
       classId: CLASS_A_ID,
       uploadedBy: PROFESSOR_ID,
-      title: "Guia de Listas e Estruturas de Dados",
+      title: "Guide to Lists and Data Structures",
       originalFileName: "guia_listas_estruturas_dados.pdf",
       storedFileName: "guia_listas_estruturas_dados_stored.pdf",
       filePath: "/uploads/guia_listas_estruturas_dados_stored.pdf",
@@ -142,7 +142,7 @@ export const ragDocumentsByClassId: Record<string, RagDocument[]> = {
       id: "doc-1",
       classId: CLASS_B_ID,
       uploadedBy: PROFESSOR_ID,
-      title: "Apostila de Lógica - Capítulo 1",
+      title: "Logic Handbook - Chapter 1",
       originalFileName: "apostila_logica_cap1.pdf",
       storedFileName: "apostila_logica_cap1_stored.pdf",
       filePath: "/uploads/apostila_logica_cap1_stored.pdf",
@@ -163,69 +163,69 @@ export const ragDocumentsByClassId: Record<string, RagDocument[]> = {
 
 const loopsResponse: RagTestChatResponse = {
   answer:
-    "Estruturas de repetição servem para executar um bloco de código várias vezes sem duplicar o código manualmente. Em Python, você tem duas principais: `for`, usado quando o número de repetições é conhecido (como percorrer uma lista), e `while`, usado quando a repetição depende de uma condição avaliada a cada volta. Segundo a apostila do capítulo 1, o `for` é preferível sempre que você já tem uma coleção ou um intervalo definido para percorrer.",
+    "Loop structures are used to run a block of code several times without manually duplicating the code. In Python, there are two main ones: `for`, used when the number of repetitions is known (such as iterating over a list), and `while`, used when the repetition depends on a condition evaluated on every iteration. According to the Chapter 1 handbook, `for` is preferable whenever you already have a collection or a defined range to iterate over.",
   provider: "openai/gpt-4o-mini",
   retrievedChunks: [
     {
       chromaId: "chunk-doc1-12",
       documentId: "doc-1",
-      documentTitle: "Apostila de Lógica - Capítulo 1",
+      documentTitle: "Logic Handbook - Chapter 1",
       chunkIndex: 12,
       score: 0.89,
       content:
-        "O laço `for` é indicado quando conhecemos previamente a quantidade de repetições ou quando percorremos uma coleção (lista, tupla, string). Já o laço `while` é indicado quando a repetição depende de uma condição que só pode ser avaliada durante a execução do programa.",
+        "The `for` loop is recommended when we know the number of repetitions beforehand or when we iterate over a collection (list, tuple, string). The `while` loop, on the other hand, is recommended when the repetition depends on a condition that can only be evaluated while the program runs.",
     },
     {
       chromaId: "chunk-doc2-04",
       documentId: "doc-2",
-      documentTitle: "Slides - Estruturas de Repetição",
+      documentTitle: "Slides - Loop Structures",
       chunkIndex: 4,
       score: 0.81,
       content:
-        "Exemplo prático: um menu que repete até o usuário escolher 'sair' deve usar `while`, pois não sabemos quantas interações o usuário fará antes de encerrar.",
+        "Practical example: a menu that repeats until the user chooses 'quit' should use `while`, since we don't know how many interactions the user will make before exiting.",
     },
   ],
 };
 
 const listasResponse: RagTestChatResponse = {
   answer:
-    "Listas em Python são coleções ordenadas e mutáveis: você cria uma com colchetes, por exemplo `numeros = [10, 20, 30]`, acessa um item pelo índice (`numeros[0]`) e percorre todos com `for item in numeros`. Segundo o guia de listas, o cuidado principal é lembrar que os índices começam em 0 — e que `numeros[-1]` sempre devolve o último elemento. Métodos como `.append()` e `.remove()` alteram a lista original, então tome cuidado ao reutilizar a mesma variável em vários lugares.",
+    "Lists in Python are ordered, mutable collections: you create one with square brackets, for example `numbers = [10, 20, 30]`, access an item by its index (`numbers[0]`) and iterate over all of them with `for item in numbers`. According to the lists guide, the main thing to remember is that indices start at 0 — and that `numbers[-1]` always returns the last element. Methods such as `.append()` and `.remove()` change the original list, so be careful when reusing the same variable in several places.",
   provider: "openai/gpt-4o-mini",
   retrievedChunks: [
     {
       chromaId: "chunk-doc4-03",
       documentId: "doc-4",
-      documentTitle: "Guia de Listas e Estruturas de Dados",
+      documentTitle: "Guide to Lists and Data Structures",
       chunkIndex: 3,
       score: 0.86,
       content:
-        "Uma lista é criada com colchetes `[]` e pode conter valores de tipos diferentes. O primeiro elemento está sempre no índice 0, e índices negativos (como -1) contam a partir do final da lista.",
+        "A list is created with square brackets `[]` and can hold values of different types. The first element is always at index 0, and negative indices (such as -1) count from the end of the list.",
     },
     {
       chromaId: "chunk-doc4-07",
       documentId: "doc-4",
-      documentTitle: "Guia de Listas e Estruturas de Dados",
+      documentTitle: "Guide to Lists and Data Structures",
       chunkIndex: 7,
       score: 0.78,
       content:
-        "Métodos como `.append(valor)`, `.remove(valor)` e `.pop(indice)` modificam a lista original diretamente (in-place), sem criar uma cópia.",
+        "Methods such as `.append(value)`, `.remove(value)` and `.pop(index)` modify the original list directly (in-place), without creating a copy.",
     },
   ],
 };
 
 const defaultResponse: RagTestChatResponse = {
   answer:
-    "Boa pergunta! Com base no material desta turma, recomendo revisar a apostila do capítulo 1 e os slides de estruturas de repetição — eles cobrem os fundamentos de lógica de programação com bastante exemplo prático. Se quiser, pergunte algo mais específico (por exemplo, sobre `for`, `while` ou listas) que eu detalho com trechos do material.",
+    "Great question! Based on this class's material, I recommend reviewing the Chapter 1 handbook and the loop structures slides — they cover the fundamentals of programming logic with plenty of practical examples. If you want, ask something more specific (for example, about `for`, `while` or lists) and I'll detail it with excerpts from the material.",
   provider: "openai/gpt-4o-mini",
   retrievedChunks: [
     {
       chromaId: "chunk-doc1-01",
       documentId: "doc-1",
-      documentTitle: "Apostila de Lógica - Capítulo 1",
+      documentTitle: "Logic Handbook - Chapter 1",
       chunkIndex: 1,
       score: 0.62,
       content:
-        "Este capítulo introduz os conceitos fundamentais de lógica de programação: variáveis, tipos de dados, estruturas condicionais e de repetição.",
+        "This chapter introduces the fundamental concepts of programming logic: variables, data types, conditional structures and loops.",
     },
   ],
 };
@@ -233,8 +233,8 @@ const defaultResponse: RagTestChatResponse = {
 /** Escolhe uma resposta canned com base em palavras-chave da pergunta (mock simples, sem LLM real). */
 export function pickRagTestChatResponse(message: string): RagTestChatResponse {
   const normalized = message.toLowerCase();
-  if (normalized.includes("lista")) return listasResponse;
-  if (normalized.includes("for") || normalized.includes("while") || normalized.includes("repeti"))
+  if (normalized.includes("list")) return listasResponse;
+  if (normalized.includes("for") || normalized.includes("while") || normalized.includes("loop"))
     return loopsResponse;
   return defaultResponse;
 }

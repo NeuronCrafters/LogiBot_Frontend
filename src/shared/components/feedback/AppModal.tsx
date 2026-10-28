@@ -25,15 +25,15 @@ interface AppModalProps {
 
 const defaultConfig = {
   consent: {
-    acceptLabel: "Aceito os termos",
-    cancelLabel: "Não aceito",
+    acceptLabel: "I accept the terms",
+    cancelLabel: "I do not accept",
     icon: <ShieldCheck className="h-5 w-5" />,
     tone: "text-blue-400 bg-blue-500/10",
     confirm:
       "bg-blue-600 hover:bg-blue-700 border-blue-400/40 shadow-blue-900/30",
   },
   info: {
-    acceptLabel: "Fechar",
+    acceptLabel: "Close",
     cancelLabel: "",
     icon: <Info className="h-5 w-5" />,
     tone: "text-blue-400 bg-blue-500/10",
@@ -41,31 +41,31 @@ const defaultConfig = {
       "bg-blue-600 hover:bg-blue-700 border-blue-400/40 shadow-blue-900/30",
   },
   delete: {
-    acceptLabel: "Excluir",
-    cancelLabel: "Cancelar",
+    acceptLabel: "Delete",
+    cancelLabel: "Cancel",
     icon: <Trash className="h-5 w-5" />,
     tone: "text-red-400 bg-red-500/10",
     confirm: "bg-red-600 hover:bg-red-700 border-red-400/40 shadow-red-900/30",
   },
   create: {
-    acceptLabel: "Salvar",
-    cancelLabel: "Cancelar",
+    acceptLabel: "Save",
+    cancelLabel: "Cancel",
     icon: <CheckCircle2 className="h-5 w-5" />,
     tone: "text-emerald-400 bg-emerald-500/10",
     confirm:
       "bg-blue-600 hover:bg-blue-700 border-blue-400/40 shadow-blue-900/30",
   },
   update: {
-    acceptLabel: "Atualizar",
-    cancelLabel: "Cancelar",
+    acceptLabel: "Update",
+    cancelLabel: "Cancel",
     icon: <Save className="h-5 w-5" />,
     tone: "text-indigo-400 bg-indigo-500/10",
     confirm:
       "bg-blue-600 hover:bg-blue-700 border-blue-400/40 shadow-blue-900/30",
   },
   password: {
-    acceptLabel: "Salvar",
-    cancelLabel: "Cancelar",
+    acceptLabel: "Save",
+    cancelLabel: "Cancel",
     icon: <KeyRound className="h-5 w-5" />,
     tone: "text-amber-400 bg-amber-500/10",
     confirm:
@@ -130,7 +130,7 @@ export function AppModal({
                 type="button"
                 onClick={handleCancel}
                 disabled={disabled}
-                aria-label="Fechar modal"
+                aria-label="Close modal"
                 className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <X className="h-4 w-4" />

@@ -70,7 +70,7 @@ export const logApi = {
       LogApiResponse<UserAnalysisLog> | UserAnalysisLog
     >(LOG_ROUTES.summary.filteredStudent, params);
     if (isFailedEnvelope(response))
-      throw new Error(response.error || "Erro ao buscar dados de usuário");
+      throw new Error(response.error || "Failed to fetch user data");
     return unwrapLogResponse(response);
   },
 
@@ -154,7 +154,7 @@ export const logApi = {
           studentId: id,
         });
       default:
-        throw new Error(`Entidade inválida: ${entity}`);
+        throw new Error(`Invalid entity: ${entity}`);
     }
   },
 
@@ -172,7 +172,7 @@ export const logApi = {
       case "subjects":
         return logApi.getSubjectsData(entity, id, filters);
       default:
-        throw new Error(`Métrica inválida: ${metric}`);
+        throw new Error(`Invalid metric: ${metric}`);
     }
   },
 };

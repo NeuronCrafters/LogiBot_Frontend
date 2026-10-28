@@ -10,7 +10,7 @@ import {
   UNIVERSITY_ID,
 } from "./ids";
 
-export const STUDENT_EMAIL = "aluno@logibot.dev";
+export const STUDENT_EMAIL = "student@logibot.dev";
 export const STAFF_EMAIL = "admin@logibot.dev";
 export const MOCK_PASSWORD = "logibot123";
 
@@ -19,16 +19,16 @@ export const studentUser: User = {
   name: "Ana Beatriz Souza",
   email: STUDENT_EMAIL,
   role: ["student"],
-  school: "Universidade Federal de Tecnologia",
+  school: "Federal University of Technology",
   schoolId: UNIVERSITY_ID,
-  schoolName: "Universidade Federal de Tecnologia",
-  course: "Engenharia de Software",
+  schoolName: "Federal University of Technology",
+  course: "Software Engineering",
   courses: [COURSE_ID],
   courseId: COURSE_ID,
-  courseName: "Engenharia de Software",
+  courseName: "Software Engineering",
   class: CLASS_A_ID,
   classes: [CLASS_A_ID],
-  className: "Turma A - Lógica de Programação 2026.1",
+  className: "Class A - Programming Logic 2026.1",
   classId: CLASS_A_ID,
   disciplines: [DISC_LOGICA_ID, DISC_ESTRUTURAS_ID],
 };
@@ -38,21 +38,21 @@ export const staffUser: User = {
   name: "Marcus Teixeira",
   email: STAFF_EMAIL,
   role: ["admin"],
-  school: "Universidade Federal de Tecnologia",
+  school: "Federal University of Technology",
   schoolId: UNIVERSITY_ID,
-  schoolName: "Universidade Federal de Tecnologia",
+  schoolName: "Federal University of Technology",
   courses: [COURSE_ID],
   courseId: COURSE_ID,
-  courseName: "Engenharia de Software",
+  courseName: "Software Engineering",
   classes: [CLASS_A_ID, CLASS_B_ID],
   className: [
-    "Turma A - Lógica de Programação 2026.1",
-    "Turma B - Lógica de Programação 2026.1",
+    "Class A - Programming Logic 2026.1",
+    "Class B - Programming Logic 2026.1",
   ],
   classId: [CLASS_A_ID, CLASS_B_ID],
   disciplines: [
-    { id: DISC_LOGICA_ID, _id: DISC_LOGICA_ID, name: "Lógica de Programação" },
-    { id: DISC_ESTRUTURAS_ID, _id: DISC_ESTRUTURAS_ID, name: "Estrutura de Dados" },
+    { id: DISC_LOGICA_ID, _id: DISC_LOGICA_ID, name: "Programming Logic" },
+    { id: DISC_ESTRUTURAS_ID, _id: DISC_ESTRUTURAS_ID, name: "Data Structures" },
   ],
 };
 

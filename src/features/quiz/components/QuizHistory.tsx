@@ -35,7 +35,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
       <div className="flex h-40 flex-col items-center justify-center gap-2">
         <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
         <span className="font-[Poppins] text-xs text-zinc-500">
-          Carregando histórico...
+          Loading history...
         </span>
       </div>
     );
@@ -48,21 +48,21 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
         className="mb-1 h-9 w-full px-3 gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600 font-[Poppins] text-xs font-medium text-white transition-colors hover:bg-indigo-500"
       >
         <Plus size={14} />
-        Ver quizzes
+        View quizzes
       </Button>
 
       {isError ? (
         <div className="flex h-32 flex-col items-center justify-center gap-2 px-4 text-center">
           <AlertCircle className="h-5 w-5 text-red-500" />
           <span className="font-[Poppins] text-xs text-zinc-500">
-            Erro ao carregar histórico.
+            Failed to load history.
           </span>
         </div>
       ) : quizzes.length === 0 ? (
         <div className="flex h-32 flex-col items-center justify-center gap-2 px-4 text-center">
           <Brain className="h-5 w-5 text-zinc-700" />
           <span className="font-[Poppins] text-xs text-zinc-500">
-            Nenhum quiz respondido.
+            No quiz answered.
           </span>
         </div>
       ) : (

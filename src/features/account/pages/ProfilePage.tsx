@@ -30,11 +30,11 @@ interface DisciplineObject {
 
 const translateRole = (r: string) =>
   ({
-    student: "Estudante",
+    student: "Student",
     professor: "Professor",
     teacher: "Professor",
-    "course-coordinator": "Coordenador de Curso",
-    admin: "Administrador",
+    "course-coordinator": "Program Coordinator",
+    admin: "Administrator",
   })[r] ?? r;
 
 function isDisciplineObj(d: unknown): d is DisciplineObject {
@@ -65,7 +65,7 @@ export function Profile() {
       <div className="flex min-h-full items-center justify-center bg-neutral-900">
         <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] px-4 py-3 text-zinc-400 shadow-lg">
           <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-          <span className="font-[Poppins] text-sm">Carregando perfil...</span>
+          <span className="font-[Poppins] text-sm">Loading profile...</span>
         </div>
       </div>
     );
@@ -74,7 +74,7 @@ export function Profile() {
     return (
       <div className="flex min-h-full items-center justify-center bg-neutral-900 px-4">
         <Typograph
-          text="Erro ao carregar os dados."
+          text="Failed to load data."
           colorText="text-red-400"
           variant="text5"
           weight="medium"
@@ -112,10 +112,10 @@ export function Profile() {
       });
       if (setUser && response.data.user)
         setUser({ ...user, ...response.data.user });
-      toast.success("Nome atualizado com sucesso!");
+      toast.success("Name updated successfully!");
     } catch (error: any) {
-      logger.error("Profile", "Erro ao atualizar nome.", error);
-      toast.error(error.response?.data?.message || "Erro ao atualizar nome.");
+      logger.error("Profile", "Failed to update name.", error);
+      toast.error(error.response?.data?.message || "Failed to update name.");
       throw error;
     }
   };
@@ -128,10 +128,10 @@ export function Profile() {
       });
       if (setUser && response.data.user)
         setUser({ ...user, ...response.data.user });
-      toast.success("E-mail atualizado com sucesso!");
+      toast.success("Email updated successfully!");
     } catch (error: any) {
-      logger.error("Profile", "Erro ao atualizar e-mail.", error);
-      toast.error(error.response?.data?.message || "Erro ao atualizar e-mail.");
+      logger.error("Profile", "Failed to update email.", error);
+      toast.error(error.response?.data?.message || "Failed to update email.");
       throw error;
     }
   };
@@ -142,10 +142,10 @@ export function Profile() {
         currentPassword: currentPass,
         newPassword: newPass,
       });
-      toast.success("Senha alterada com sucesso!");
+      toast.success("Password changed successfully!");
     } catch (error: any) {
-      logger.error("Profile", "Erro ao alterar senha.", error);
-      toast.error(error.response?.data?.error || "Erro ao alterar senha.");
+      logger.error("Profile", "Failed to change password.", error);
+      toast.error(error.response?.data?.error || "Failed to change password.");
       throw error;
     }
   };
@@ -166,7 +166,7 @@ export function Profile() {
                 </div>
                 <div className="min-w-0">
                   <p className="mb-2 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Perfil da conta
+                    Account profile
                   </p>
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="break-words font-[Poppins] text-2xl font-semibold text-white sm:text-3xl">
@@ -183,7 +183,7 @@ export function Profile() {
               </div>
               <div className="rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 lg:w-72">
                 <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Identificador
+                  Identifier
                 </div>
                 <p className="mt-1 max-w-[18rem] truncate font-mono text-xs text-zinc-300">
                   {user._id.toUpperCase()}
@@ -196,55 +196,55 @@ export function Profile() {
             <div className="space-y-5">
               <Panel
                 icon={<UserIcon className="h-5 w-5 text-blue-400" />}
-                title="Informações pessoais"
-                subtitle="Dados principais usados na sua conta."
+                title="Personal information"
+                subtitle="Main details used in your account."
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <InfoTile
-                    label="Nome completo"
+                    label="Full name"
                     value={user.name}
-                    actionLabel="Editar nome"
+                    actionLabel="Edit name"
                     onAction={() => setShowEditName(true)}
                   />
                   <InfoTile
-                    label="E-mail"
+                    label="Email"
                     value={user.email}
-                    actionLabel="Editar e-mail"
+                    actionLabel="Edit email"
                     onAction={() => setShowEditEmail(true)}
                   />
-                  <InfoTile label="Ocupação principal" value={occupation} />
+                  <InfoTile label="Primary role" value={occupation} />
                 </div>
               </Panel>
 
               {!isAdmin && (
                 <Panel
                   icon={<GraduationCap className="h-5 w-5 text-emerald-400" />}
-                  title="Dados acadêmicos"
-                  subtitle="Vínculos carregados a partir da sua instituição."
+                  title="Academic data"
+                  subtitle="Links loaded from your institution."
                 >
                   <div className="grid gap-3 sm:grid-cols-2">
                     <InfoTile
                       icon={<School className="h-4 w-4 text-emerald-400" />}
-                      label="Instituição"
+                      label="Institution"
                       value={schoolName}
                     />
                     {isProfessor ? (
                       <>
                         <InfoTile
                           icon={<BookOpen className="h-4 w-4 text-blue-400" />}
-                          label="Cursos ministrados"
+                          label="Programs taught"
                           value={profCourses}
                         />
                         <InfoTile
                           icon={<Users className="h-4 w-4 text-indigo-400" />}
-                          label="Turmas"
+                          label="Classes"
                           value={profClasses}
                         />
                         <div className="rounded-xl border border-white/10 bg-neutral-950/60 p-4 sm:col-span-2">
                           <div className="mb-2 flex items-center gap-2">
                             <BookOpen className="h-4 w-4 text-emerald-400" />
                             <span className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                              Disciplinas
+                              Subjects
                             </span>
                           </div>
                           {disciplineObjects.length > 0 ? (
@@ -263,12 +263,12 @@ export function Profile() {
                       <>
                         <InfoTile
                           icon={<BookOpen className="h-4 w-4 text-blue-400" />}
-                          label="Curso"
+                          label="Program"
                           value={courseName}
                         />
                         <InfoTile
                           icon={<Users className="h-4 w-4 text-indigo-400" />}
-                          label="Turma"
+                          label="Class"
                           value={className}
                         />
                       </>
@@ -281,8 +281,8 @@ export function Profile() {
             <aside className="space-y-5">
               <Panel
                 icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
-                title="Segurança"
-                subtitle="Mantenha o acesso da conta protegido."
+                title="Security"
+                subtitle="Keep your account access protected."
               >
                 <div className="rounded-xl border border-white/10 bg-neutral-950/60 p-4">
                   <div className="flex items-start gap-3">
@@ -291,10 +291,10 @@ export function Profile() {
                     </div>
                     <div className="min-w-0">
                       <p className="font-[Poppins] text-sm font-semibold text-white">
-                        Senha de acesso
+                        Access password
                       </p>
                       <p className="mt-1 font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                        Use uma senha forte e diferente das outras contas.
+                        Use a strong password that differs from your other accounts.
                       </p>
                     </div>
                   </div>
@@ -304,7 +304,7 @@ export function Profile() {
                     onClick={() => setShowEditPassword(true)}
                   >
                     <KeyRound className="h-4 w-4" />
-                    Alterar senha
+                    Change password
                   </Button>
                 </div>
               </Panel>

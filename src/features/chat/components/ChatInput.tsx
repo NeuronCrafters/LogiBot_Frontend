@@ -45,7 +45,7 @@ export const ChatInput = memo(function ChatInput({
       if (textareaRef.current) textareaRef.current.style.height = "auto";
       await Promise.resolve(sendMessage(text));
     } catch (err) {
-      logger.error("Chat", "Erro ao enviar mensagem.", err);
+      logger.error("Chat", "Failed to send message.", err);
     } finally {
       setIsSending(false);
     }
@@ -67,8 +67,8 @@ export const ChatInput = memo(function ChatInput({
           ref={textareaRef}
           placeholder={
             isWaitingResponse
-              ? "LogiBot está digitando..."
-              : "Mensagem para o LogiBot"
+              ? "LogiBot is typing..."
+              : "Message LogiBot"
           }
           className="flex-1 bg-transparent text-gray-200 text-sm outline-none resize-none overflow-y-auto max-h-[200px] min-h-[24px] py-1 leading-normal placeholder-neutral-500 font-[Poppins] disabled:cursor-not-allowed"
           rows={1}
@@ -80,7 +80,7 @@ export const ChatInput = memo(function ChatInput({
         <button
           onClick={handleSend}
           disabled={!canSend}
-          aria-label="Enviar mensagem"
+          aria-label="Send message"
           className={`shrink-0 h-8 w-8 flex items-center justify-center rounded-full transition-all ${
             isLocked
               ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"

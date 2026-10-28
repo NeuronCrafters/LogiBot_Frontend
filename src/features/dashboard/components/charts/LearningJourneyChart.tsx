@@ -23,7 +23,7 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Mostra a evolucao da taxa de acerto por quiz concluido. Para turmas, cursos ou universidade, cada ponto representa a media do quiz correspondente entre os alunos.";
+  "Shows the evolution of the accuracy rate per completed quiz. For classes, programs or university, each point represents the average of the corresponding quiz across students.";
 
 interface ApiData {
   labels: string[];
@@ -74,7 +74,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
   const hasRequiredIds = !!filters.universityId;
-  const scopeLabel = filters.studentId ? "do estudante" : "media do grupo";
+  const scopeLabel = filters.studentId ? "of the student" : "group average";
 
   const summary = useMemo(() => {
     if (!data?.length) return null;
@@ -92,7 +92,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
       (data[data.length - 1].performance - data[0].performance).toFixed(1),
     );
     const trend =
-      evolution > 0 ? "em alta" : evolution < 0 ? "em queda" : "estavel";
+      evolution > 0 ? "rising" : evolution < 0 ? "falling" : "estavel";
     return { average: Number(average.toFixed(1)), peak, low, evolution, trend };
   }, [data]);
 
@@ -105,10 +105,10 @@ export function LearningJourneyChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Jornada de Aprendizagem
+              Learning Journey
             </CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Evolucao da taxa de acerto por quiz concluido: {scopeLabel}
+              Evolution of the accuracy rate per completed quiz: {scopeLabel}
             </CardDescription>
           </div>
         </div>
@@ -119,7 +119,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
             info={CHART_INFO}
             insight={{
               chart: "learning-journey",
-              title: "Jornada de aprendizagem",
+              title: "Learning journey",
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -131,13 +131,12 @@ export function LearningJourneyChart({ filters }: ChartProps) {
         {!hasRequiredIds && (
           <NoData onRetry={refetch}>
             <p>
-              Selecione uma universidade para visualizar a Jornada de
-              Aprendizagem.
+              Select a university to view the Learning Journey.
             </p>
           </NoData>
         )}
         {hasRequiredIds && isLoading && (
-          <ChartLoader text="Carregando dados..." />
+          <ChartLoader text="Loading data..." />
         )}
         {hasRequiredIds && isError && (
           <ChartError message={(error as Error)?.message} onRetry={refetch} />
@@ -177,21 +176,21 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                     const item = payload[0].payload as ChartData;
                     const delta =
                       item.deltaFromPrevious === null
-                        ? "primeiro quiz"
-                        : `${item.deltaFromPrevious > 0 ? "+" : ""}${item.deltaFromPrevious.toFixed(1)} p.p. vs. quiz anterior`;
+                        ? "first quiz"
+                        : `${item.deltaFromPrevious > 0 ? "+" : ""}${item.deltaFromPrevious.toFixed(1)} p.p. vs. previous quiz`;
                     return (
                       <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl">
                         <p className="mb-1 font-[Poppins] font-bold text-white">
                           {item.name}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Taxa de acerto:{" "}
+                          Accuracy rate:{" "}
                           <span className="font-medium text-white">
                             {item.performance.toFixed(1)}%
                           </span>
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Variacao:{" "}
+                          Change:{" "}
                           <span className="font-medium text-white">
                             {delta}
                           </span>
@@ -205,7 +204,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                   stroke="rgba(255,255,255,0.35)"
                   strokeDasharray="4 4"
                   label={{
-                    value: `Media ${summary.average.toFixed(1)}%`,
+                    value: `Average ${summary.average.toFixed(1)}%`,
                     fill: "rgba(255,255,255,0.55)",
                     fontSize: 11,
                     position: "insideTopLeft",
@@ -230,7 +229,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
-            <p>Nenhum dado de jornada disponivel para esta entidade.</p>
+            <p>No journey data available for this entity.</p>
           </NoData>
         )}
       </CardContent>
@@ -238,13 +237,13 @@ export function LearningJourneyChart({ filters }: ChartProps) {
       {summary && (
         <CardFooter className="grid grid-cols-1 gap-4 border-t border-white/10 px-6 py-4 sm:grid-cols-4">
           <div>
-            <p className="font-[Poppins] text-xs text-zinc-500">Media Geral</p>
+            <p className="font-[Poppins] text-xs text-zinc-500">Overall Average</p>
             <p className="mt-0.5 font-[Poppins] font-bold text-white">
               {summary.average.toFixed(1)}%
             </p>
           </div>
           <div>
-            <p className="font-[Poppins] text-xs text-zinc-500">Evolucao</p>
+            <p className="font-[Poppins] text-xs text-zinc-500">Evolution</p>
             <p
               className="mt-0.5 font-[Poppins] font-bold"
               style={{ color: summary.evolution >= 0 ? "#10b981" : "#ef4444" }}
@@ -257,7 +256,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
             </p>
           </div>
           <div>
-            <p className="font-[Poppins] text-xs text-zinc-500">Melhor Quiz</p>
+            <p className="font-[Poppins] text-xs text-zinc-500">Best Quiz</p>
             <p className="mt-0.5 font-[Poppins] font-bold text-white">
               {summary.peak.name}
               <span className="ml-1.5 font-normal text-zinc-500 text-sm">
@@ -267,7 +266,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
           </div>
           <div>
             <p className="font-[Poppins] text-xs text-zinc-500">
-              Ponto Critico
+              Critical Point
             </p>
             <p className="mt-0.5 font-[Poppins] font-bold text-white">
               {summary.low.name}

@@ -42,9 +42,9 @@ const dailyUsage: DailyUsage[] = DAILY_MINUTES.map((minutes, index) => {
             usage: minutes,
             formatted: `${minutes} min`,
             userId: "class-a",
-            userName: "Turma A",
-            courseName: "Engenharia de Software",
-            className: "Turma A - Lógica de Programação 2026.1",
+            userName: "Class A",
+            courseName: "Software Engineering",
+            className: "Class A - Programming Logic 2026.1",
           },
         ];
   return { date, usage: minutes, formatted: `${minutes} min`, sessions };
@@ -78,11 +78,11 @@ export const classUsageSummary: UserAnalysisLog = {
 // ── Desempenho por tópico ───────────────────────────────────────────────────────
 
 export const topicPerformance: TopicPerformanceData[] = [
-  { topic: "Variáveis", successPercentage: 82, errorPercentage: 18 },
-  { topic: "Listas", successPercentage: 74, errorPercentage: 26 },
-  { topic: "Condicionais", successPercentage: 88, errorPercentage: 12 },
-  { topic: "Funções", successPercentage: 61, errorPercentage: 39 },
-  { topic: "Operadores Lógicos", successPercentage: 55, errorPercentage: 45 },
+  { topic: "Variables", successPercentage: 82, errorPercentage: 18 },
+  { topic: "Lists", successPercentage: 74, errorPercentage: 26 },
+  { topic: "Conditionals", successPercentage: 88, errorPercentage: 12 },
+  { topic: "Functions", successPercentage: 61, errorPercentage: 39 },
+  { topic: "Logical Operators", successPercentage: 55, errorPercentage: 45 },
 ];
 
 // ── Matriz de esforço x desempenho ──────────────────────────────────────────────
@@ -102,14 +102,14 @@ export const effortMatrix: EffortMatrixData = {
 // ── Radar de proficiência por tópico ────────────────────────────────────────────
 
 export const proficiencyRadar: ProficiencyRadarData = {
-  labels: ["Variáveis", "Listas", "Condicionais", "Funções", "Operadores Lógicos"],
+  labels: ["Variables", "Lists", "Conditionals", "Functions", "Logical Operators"],
   data: [78, 65, 84, 58, 52],
 };
 
 // ── Jornada de aprendizado (evolução ao longo das semanas) ──────────────────────
 
 export const learningJourney: LearningJourneyData = {
-  labels: ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5", "Sem 6", "Sem 7", "Sem 8"],
+  labels: ["Wk 1", "Wk 2", "Wk 3", "Wk 4", "Wk 5", "Wk 6", "Wk 7", "Wk 8"],
   data: [38, 44, 50, 55, 61, 68, 73, 79],
 };
 
@@ -132,27 +132,7 @@ export const sessionDetails: SessionDetailsData[] = dailyUsage
 
 export function buildInsight(): DashboardInsightResponse {
   return {
-    insight: `## Panorama geral
-
-A Turma A vem mantendo um ritmo consistente de estudo ao longo das últimas semanas, com **566 minutos** de uso acumulado e evolução constante na jornada de aprendizado — a proficiência média subiu de 38% na semana 1 para **79% na semana 8**.
-
-## Pontos de destaque
-
-- Domínio sólido em **Condicionais** (88% de acerto) e **Variáveis** (82%), os dois tópicos mais praticados pela turma.
-- Bruno Carvalho Lima e Elisa Nogueira Pinto se destacam com alto desempenho aliado a bom nível de esforço, indicando aprendizado eficiente.
-- Os picos de uso concentram-se às terças e quintas à noite, sugerindo que reforços síncronos nesses dias teriam maior adesão.
-
-## Pontos de atenção
-
-- **Operadores Lógicos** é o tópico mais frágil da turma, com 45% de taxa de erro — bem acima da média dos demais assuntos.
-- Diego Martins Rocha e Felipe Andrade Costa apresentam desempenho abaixo da média combinado com baixo engajamento (esforço registrado abaixo de 40%).
-- Funções também merece atenção: 39% de erro indica que o conceito de parâmetros e retorno ainda não está consolidado para parte da turma.
-
-## Recomendações
-
-1. Reforçar Operadores Lógicos com exercícios práticos de combinação \`and\`/\`or\`/\`not\` antes da próxima avaliação.
-2. Priorizar contato individual com Diego e Felipe para entender as barreiras de engajamento.
-3. Aproveitar os horários de pico (terças e quintas à noite) para monitorias ou plantões de dúvidas ao vivo.`,
+    insight: `## Overview\n\nClass A has kept a consistent study rhythm over the past weeks, with **566 minutes** of accumulated usage and steady progress in the learning journey — average proficiency rose from 38% in week 1 to **79% in week 8**.\n\n## Highlights\n\n- Solid mastery of **Conditionals** (88% accuracy) and **Variables** (82%), the two topics most practiced by the class.\n- Bruno Carvalho Lima and Elisa Nogueira Pinto stand out with high performance combined with a good level of effort, indicating efficient learning.\n- Usage peaks concentrate on Tuesday and Thursday evenings, suggesting that synchronous reinforcement sessions on those days would have higher attendance.\n\n## Points of attention\n\n- **Logical Operators** is the class's weakest topic, with a 45% error rate — well above the average of the other topics.\n- Diego Martins Rocha and Felipe Andrade Costa show below-average performance combined with low engagement (recorded effort below 40%).\n- Functions also deserve attention: a 39% error rate indicates that the concept of parameters and return values is not yet consolidated for part of the class.\n\n## Recommendations\n\n1. Reinforce Logical Operators with hands-on exercises combining \`and\`/\`or\`/\`not\` before the next assessment.\n2. Prioritize one-on-one contact with Diego and Felipe to understand the engagement barriers.\n3. Take advantage of peak hours (Tuesday and Thursday evenings) for tutoring sessions or live Q&A office hours.`,
     generatedAt: new Date().toISOString(),
     cached: false,
   };

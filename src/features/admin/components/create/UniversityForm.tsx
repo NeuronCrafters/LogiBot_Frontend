@@ -30,12 +30,12 @@ function UniversityForm({ onSubmit, initialData }: UniversityFormProps) {
   return (
     <form onSubmit={handleSubmit} className="mt-5 space-y-4">
       <div>
-        <label className={labelCls}>Nome da Universidade</label>
+        <label className={labelCls}>University Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Universidade Federal de São Paulo"
+          placeholder="e.g. Federal University of São Paulo"
           required
           className={inputCls}
         />

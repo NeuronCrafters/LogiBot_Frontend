@@ -132,7 +132,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
           <Loader2 className="w-4 h-4 animate-spin" />
-          Carregando dados acadêmicos...
+          Loading academic data...
         </div>
         {[...Array(4)].map((_, i) => (
           <div key={i} className="h-11 rounded-xl bg-white/5 animate-pulse" />
@@ -144,7 +144,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     return (
       <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4">
         <p className="font-[Poppins] text-sm text-red-400">
-          Erro ao carregar dados acadêmicos. Tente novamente.
+          Failed to load academic data. Please try again.
         </p>
       </div>
     );
@@ -153,18 +153,18 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Nome completo</label>
+          <label className={labelCls}>Full name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ex: João da Silva"
+            placeholder="e.g. John Smith"
             required
             className={inputCls}
           />
         </div>
         <div>
-          <label className={labelCls}>E-mail</label>
+          <label className={labelCls}>Email</label>
           <input
             type="email"
             value={email}
@@ -176,7 +176,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </div>
       </div>
       <div>
-        <label className={labelCls}>Senha de acesso</label>
+        <label className={labelCls}>Access password</label>
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
@@ -184,8 +184,8 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             placeholder={
               initialData
-                ? "Deixe em branco para manter a senha"
-                : "Mínimo 6 caracteres"
+                ? "Leave blank to keep the password"
+                : "Minimum 6 characters"
             }
             required={!initialData}
             className={`${inputCls} pr-11`}
@@ -200,30 +200,30 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </div>
       </div>
       <div>
-        <label className={labelCls}>Universidade</label>
+        <label className={labelCls}>University</label>
         <Select
           value={school}
           onChange={(v) => handleUniversityChange(v)}
           options={(academicData?.universities ?? []).map((uni) => ({ value: uni._id, label: uni.name }))}
-          placeholder="Selecione a universidade"
+          placeholder="Select the university"
           disabled={isCoordinator}
         />
       </div>
       {school && availableCourses.length > 0 && (
         <div>
-          <label className={labelCls}>Curso</label>
+          <label className={labelCls}>Program</label>
           <Select
             value={courses[0] ?? ""}
             onChange={(v) => setCourses(v ? [v] : [])}
             options={availableCourses.map((course) => ({ value: course._id, label: course.name }))}
-            placeholder="Selecione o curso"
+            placeholder="Select the program"
           />
         </div>
       )}
       {school && availableCourses.length === 0 && (
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
           <p className="font-[Poppins] text-sm text-amber-400">
-            Nenhum curso encontrado para esta universidade.
+            No program found for this university.
           </p>
         </div>
       )}

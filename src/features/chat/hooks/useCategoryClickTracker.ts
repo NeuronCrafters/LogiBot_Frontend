@@ -45,7 +45,7 @@ export function useCategoryClickTracker(userId: string | null) {
       clicksRef.current = {};
       localStorage.removeItem(STORAGE_KEY);
     } catch (err) {
-      logger.error("Analytics", "Erro ao enviar clicks de categoria.", err);
+      logger.error("Analytics", "Failed to send category clicks.", err);
     }
   }
 

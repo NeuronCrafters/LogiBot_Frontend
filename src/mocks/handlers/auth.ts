@@ -11,7 +11,7 @@ export const authHandlers = [
     const user = body.email ? usersByEmail[body.email] : undefined;
     if (!user) {
       return HttpResponse.json(
-        { message: "Credenciais inválidas." },
+        { message: "Invalid credentials." },
         { status: 401 },
       );
     }

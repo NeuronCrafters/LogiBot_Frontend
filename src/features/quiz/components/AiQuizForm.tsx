@@ -131,13 +131,13 @@ export function AiQuizForm({ onClose }: Props) {
     mutationFn: professorQuizApi.generateAiQuiz,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
-      toast.success("Quiz gerado como rascunho. Revise antes de publicar.");
+      toast.success("Quiz generated as a draft. Review it before publishing.");
       onClose();
     },
     onError: (err: any) => {
       const msg =
         err?.response?.data?.message ??
-        "Erro ao gerar quiz com IA. Tente novamente.";
+        "Failed to generate quiz with AI. Please try again.";
       toast.error(msg);
     },
   });
@@ -153,10 +153,10 @@ export function AiQuizForm({ onClose }: Props) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!disciplineId) return toast.error("Selecione uma disciplina.");
-    if (!theme.trim()) return toast.error("Informe o tema do quiz.");
-    if (theme.trim().length > 180) return toast.error("Tema deve ter no máximo 180 caracteres.");
-    if (!selectedDocIds.size) return toast.error("Selecione ao menos um documento.");
+    if (!disciplineId) return toast.error("Select a subject.");
+    if (!theme.trim()) return toast.error("Enter the quiz topic.");
+    if (theme.trim().length > 180) return toast.error("Topic must be at most 180 characters.");
+    if (!selectedDocIds.size) return toast.error("Select at least one document.");
 
     generateMutation.mutate({
       disciplineId,
@@ -174,9 +174,9 @@ export function AiQuizForm({ onClose }: Props) {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Disciplina */}
       <div>
-        <label className={labelCls}>Disciplina</label>
+        <label className={labelCls}>Subject</label>
         {disciplines.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma disciplina disponível.</p>
+          <p className="text-sm text-zinc-500">No subject available.</p>
         ) : (
           <select
             value={disciplineId}
@@ -185,7 +185,7 @@ export function AiQuizForm({ onClose }: Props) {
             disabled={isPending}
             required
           >
-            <option value="">Selecionar disciplina…</option>
+            <option value="">Select subject…</option>
             {disciplines.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}
@@ -198,14 +198,14 @@ export function AiQuizForm({ onClose }: Props) {
       {/* Tema */}
       <div>
         <label className={labelCls}>
-          Tema do quiz{" "}
+          Quiz topic{" "}
           <span className="normal-case text-zinc-600">({theme.length}/180)</span>
         </label>
         <input
           value={theme}
           onChange={(e) => setTheme(e.target.value)}
           maxLength={180}
-          placeholder="Ex: variáveis e tipos de dados em Python"
+          placeholder="e.g. variables and data types in Python"
           className={inputCls}
           disabled={isPending}
           required
@@ -214,7 +214,7 @@ export function AiQuizForm({ onClose }: Props) {
 
       {/* Quantidade de perguntas */}
       <div>
-        <label className={labelCls}>Número de perguntas</label>
+        <label className={labelCls}>Number of questions</label>
         <div className="flex gap-2">
           {[3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
             <button
@@ -237,22 +237,22 @@ export function AiQuizForm({ onClose }: Props) {
       {/* Documentos RAG de todas as turmas */}
       <div>
         <label className={labelCls}>
-          Documentos RAG{" "}
+          RAG documents{" "}
           <span className="normal-case font-normal text-zinc-600">
-            (todas as turmas gerenciáveis)
+            (all manageable classes)
           </span>
         </label>
 
         {loadingDocs ? (
           <div className="flex items-center gap-2 text-zinc-500 text-sm">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Carregando documentos…
+            Loading documents…
           </div>
         ) : readyDocs.length === 0 ? (
           <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
             <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
             <p className="font-[Poppins] text-xs text-amber-300">
-              Nenhum documento pronto encontrado. Processe documentos na área de RAG primeiro.
+              No ready document found. Process documents in the RAG area first.
             </p>
           </div>
         ) : (
@@ -304,25 +304,25 @@ export function AiQuizForm({ onClose }: Props) {
 
       {/* Título e descrição (opcionais) */}
       <div>
-        <label className={labelCls}>Título do quiz (opcional)</label>
+        <label className={labelCls}>Quiz title (optional)</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={120}
-          placeholder="Deixe em branco para a IA sugerir"
+          placeholder="Leave blank for the AI to suggest one"
           className={inputCls}
           disabled={isPending}
         />
       </div>
 
       <div>
-        <label className={labelCls}>Descrição (opcional)</label>
+        <label className={labelCls}>Description (optional)</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={500}
           rows={2}
-          placeholder="Descrição curta do quiz"
+          placeholder="Short quiz description"
           className="w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-indigo-500/60 placeholder:text-zinc-600 disabled:opacity-40 resize-none"
           disabled={isPending}
         />
@@ -332,8 +332,7 @@ export function AiQuizForm({ onClose }: Props) {
       <div className="flex items-start gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3">
         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-400" />
         <p className="font-[Poppins] text-xs leading-relaxed text-indigo-300">
-          O quiz será criado como rascunho. Revise as perguntas e explicações
-          antes de publicar.
+          The quiz will be created as a draft. Review the questions and explanations before publishing.
         </p>
       </div>
 
@@ -350,12 +349,12 @@ export function AiQuizForm({ onClose }: Props) {
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Gerando quiz com IA…
+            Generating quiz with AI…
           </>
         ) : (
           <>
             <Sparkles className="h-4 w-4" />
-            Gerar Quiz com IA
+            Generate Quiz with AI
           </>
         )}
       </button>

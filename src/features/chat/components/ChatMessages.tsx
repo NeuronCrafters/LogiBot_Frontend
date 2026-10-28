@@ -64,12 +64,12 @@ const CodeBlock = ({
           {copied ? (
             <>
               <Check size={12} />
-              Copiado
+              Copied
             </>
           ) : (
             <>
               <Copy size={12} />
-              Copiar
+              Copy
             </>
           )}
         </button>
@@ -167,7 +167,7 @@ const markdownComponents = {
         e.currentTarget.onerror = null;
         e.currentTarget.src =
           "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23262626'/%3E%3Ctext x='200' y='150' fill='%23d4d4d4' font-family='Arial,sans-serif' font-size='16' text-anchor='middle' dominant-baseline='middle'%3EImagem indisponivel%3C/text%3E%3C/svg%3E";
-        e.currentTarget.alt = "Imagem não carregada";
+        e.currentTarget.alt = "Image failed to load";
       }}
     />
   ),
@@ -178,21 +178,21 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
     const content = message.content || message.text;
 
     if (!content || typeof content !== "string") {
-      logger.warn("Chat", "Mensagem com content inválido.", message);
+      logger.warn("Chat", "Message with invalid content.", message);
       return null;
     }
 
     const contentLower = content.toLowerCase();
     const isInstruction =
-      contentLower.includes("escolha seu nível") ||
-      contentLower.includes("escolha um assunto") ||
-      contentLower.includes("escolha um tópico") ||
-      contentLower.includes("tópico selecionado") ||
-      contentLower.includes("suas perguntas estão prontas") ||
+      contentLower.includes("choose your level") ||
+      contentLower.includes("choose a topic") ||
+      contentLower.includes("choose a subtopic") ||
+      contentLower.includes("selected topic") ||
+      contentLower.includes("your questions are ready") ||
       contentLower.includes("respostas:") ||
       contentLower.includes("⚠️") ||
       contentLower.includes("praticar") ||
-      contentLower.includes("gerando suas perguntas");
+      contentLower.includes("generating your questions");
 
     if (isInstruction) {
       return (

@@ -37,12 +37,12 @@ const CodeBlock = memo(function CodeBlock({
           {copied ? (
             <>
               <Check size={14} />
-              Copiado
+              Copied
             </>
           ) : (
             <>
               <Copy size={14} />
-              Copiar
+              Copy
             </>
           )}
         </button>
@@ -195,7 +195,7 @@ const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedC
         className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-[Poppins]"
       >
         <BookOpen size={13} />
-        {chunks.length} {chunks.length === 1 ? "fonte usada" : "fontes usadas"}
+        {chunks.length} {chunks.length === 1 ? "source used" : "sources used"}
         {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
       </button>
 
@@ -216,7 +216,7 @@ const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedC
                     {chunk.score}%
                   </span>
                   <span className="truncate text-xs text-zinc-400 font-[Poppins]">
-                    {chunk.documentTitle} · trecho {chunk.chunkIndex + 1}
+                    {chunk.documentTitle} · excerpt {chunk.chunkIndex + 1}
                   </span>
                 </div>
                 {openIndex === index ? (

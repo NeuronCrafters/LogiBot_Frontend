@@ -127,7 +127,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
                 ? {
                     ...message,
                     type: "text",
-                    text: streamedText || "Resposta concluida.",
+                    text: streamedText || "Answer completed.",
                     streamStage: undefined,
                     retrievedChunks: result.retrievedChunks?.length
                       ? result.retrievedChunks
@@ -138,13 +138,13 @@ export function useChatFlow(_options: UseChatFlowOptions) {
           );
         }
       } catch (error) {
-        logger.error("Chat", "Erro ao enviar mensagem.", error);
+        logger.error("Chat", "Failed to send message.", error);
         setMessages((prev) =>
           prev
             .filter((m) => m.id !== typingMsg.id)
             .concat({
               id: `error-${Date.now()}`,
-              text: "Erro ao processar mensagem. Tente novamente.",
+              text: "Failed to process message. Please try again.",
               sender: "bot",
               type: "text",
             }),

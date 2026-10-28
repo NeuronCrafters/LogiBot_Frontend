@@ -36,7 +36,7 @@ export const ragHandlers = [
       {
         id: fakeId("doc"),
         classId: params.classId,
-        title: "Novo documento",
+        title: "New document",
         status: "processing",
         enabled: true,
         isOwner: true,

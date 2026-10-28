@@ -35,7 +35,7 @@ export function EditEmailModal({
               <div className="flex items-center gap-2">
                 <Mail size={18} className="text-purple-400" />
                 <Typograph
-                  text="Alterar E-mail"
+                  text="Change Email"
                   colorText="text-white"
                   variant="text4"
                   weight="semibold"
@@ -52,7 +52,7 @@ export function EditEmailModal({
             <div className="p-6 space-y-5">
               <div className="space-y-2">
                 <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">
-                  E-mail Atual
+                  Current Email
                 </label>
                 <div className="w-full bg-[#141414]/50 border border-zinc-800 rounded-lg p-3 text-zinc-400 cursor-not-allowed select-none">
                   {currentEmail}
@@ -60,13 +60,13 @@ export function EditEmailModal({
               </div>
               <div className="space-y-2">
                 <label className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
-                  Novo E-mail
+                  New Email
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Digite o novo e-mail"
+                  placeholder="Enter the new email"
                   className="w-full bg-[#141414] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500 transition-colors placeholder:text-zinc-600"
                 />
               </div>
@@ -77,14 +77,14 @@ export function EditEmailModal({
                 onClick={onClose}
                 className="text-zinc-400 hover:bg-red-600 hover:text-white"
               >
-                Cancelar
+                Cancel
               </Button>
               <Button
                 onClick={handleSave}
                 disabled={!email.trim()}
                 className="bg-purple-600 hover:bg-purple-700 text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Save size={16} /> Salvar
+                <Save size={16} /> Save
               </Button>
             </div>
           </div>

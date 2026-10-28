@@ -167,25 +167,25 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
     return (
       <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
         <Loader2 className="w-4 h-4 animate-spin" />
-        Carregando dados acadêmicos...
+        Loading academic data...
       </div>
     );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelCls}>Nome da Disciplina</label>
+        <label className={labelCls}>Subject Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Algoritmos e Programação"
+          placeholder="e.g. Algorithms and Programming"
           required
           className={inputCls}
         />
       </div>
       <div>
-        <label className={labelCls}>Universidade</label>
+        <label className={labelCls}>University</label>
         <Select
           value={selectedUniversity}
           onChange={(v) => {
@@ -195,12 +195,12 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
             setSelectedProfessorIds([]);
           }}
           options={(academicData?.universities ?? []).map((uni) => ({ value: uni._id, label: uni.name }))}
-          placeholder="Selecione a universidade"
+          placeholder="Select the university"
         />
       </div>
       {selectedUniversity && (
         <div>
-          <label className={labelCls}>Curso</label>
+          <label className={labelCls}>Program</label>
           <Select
             value={selectedCourse}
             onChange={(v) => {
@@ -209,7 +209,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               setSelectedProfessorIds([]);
             }}
             options={availableCourses.map((course) => ({ value: course._id, label: course.name }))}
-            placeholder="Selecione o curso"
+            placeholder="Select the program"
           />
         </div>
       )}
@@ -217,11 +217,10 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
         <>
           <div>
             <label className={labelCls}>
-              Turmas{" "}
+              Classes{" "}
               {selectedClassIds.length > 0 && (
                 <span className="normal-case tracking-normal text-blue-400 ml-1">
-                  ({selectedClassIds.length} selecionada
-                  {selectedClassIds.length !== 1 ? "s" : ""})
+                  ({selectedClassIds.length} selected)
                 </span>
               )}
             </label>
@@ -229,16 +228,15 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               items={availableClasses}
               selected={selectedClassIds}
               onToggle={toggleClass}
-              emptyText="Nenhuma turma disponível para este curso."
+              emptyText="No class available for this program."
             />
           </div>
           <div>
             <label className={labelCls}>
-              Professores{" "}
+              Professors{" "}
               {selectedProfessorIds.length > 0 && (
                 <span className="normal-case tracking-normal text-blue-400 ml-1">
-                  ({selectedProfessorIds.length} selecionado
-                  {selectedProfessorIds.length !== 1 ? "s" : ""})
+                  ({selectedProfessorIds.length} selected)
                 </span>
               )}
             </label>
@@ -246,7 +244,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               items={availableProfessors}
               selected={selectedProfessorIds}
               onToggle={toggleProfessor}
-              emptyText="Nenhum professor disponível para este curso."
+              emptyText="No professor available for this program."
             />
           </div>
         </>

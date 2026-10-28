@@ -60,7 +60,7 @@ function errorMessage(error: any) {
   return (
     error?.response?.data?.message ||
     error?.message ||
-    "Não foi possível gerar o insight agora."
+    "Could not generate the insight right now."
   );
 }
 
@@ -219,7 +219,7 @@ export function DashboardInsightProvider({
     (filters: DashboardFilterParams) => {
       const next: InsightRequest = {
         kind: "overview",
-        title: "Análise geral do dashboard",
+        title: "Overall dashboard analysis",
         filters,
       };
       setRequest(next);
@@ -252,14 +252,14 @@ export function DashboardInsightProvider({
                     {request.title}
                   </h2>
                   <p className="mt-1 font-[Poppins] text-sm text-zinc-500">
-                    Insight pedagógico gerado a partir dos dados atuais.
+                    Pedagogical insight generated from the current data.
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={close}
-                aria-label="Fechar insight"
+                aria-label="Close insight"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <X className="h-4 w-4" />
@@ -271,7 +271,7 @@ export function DashboardInsightProvider({
                 <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 text-center">
                   <Loader2 className="h-7 w-7 animate-spin text-violet-400" />
                   <p className="font-[Poppins] text-sm text-zinc-400">
-                    Analisando os dados do dashboard...
+                    Analyzing the dashboard data...
                   </p>
                 </div>
               )}
@@ -287,7 +287,7 @@ export function DashboardInsightProvider({
                     onClick={() => void load(request, false)}
                     className="rounded-lg bg-blue-600 px-4 py-2 font-[Poppins] text-sm font-semibold hover:bg-blue-500"
                   >
-                    Tentar novamente
+                    Try again
                   </button>
                 </div>
               )}
@@ -297,7 +297,7 @@ export function DashboardInsightProvider({
                   {loading && (
                     <div className="flex items-center gap-2 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 font-[Poppins] text-xs text-violet-300">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Gerando uma nova análise...
+                      Generating a new analysis...
                     </div>
                   )}
                   <div className="mx-auto w-full max-w-5xl">
@@ -309,9 +309,7 @@ export function DashboardInsightProvider({
                     </Markdown>
                   </div>
                   <div className="mx-auto w-full max-w-5xl rounded-xl border border-amber-500/15 bg-amber-500/5 p-4 font-[Poppins] text-xs leading-relaxed text-amber-200/70">
-                    Este conteúdo apoia a decisão pedagógica e deve ser
-                    interpretado junto ao contexto da turma e à observação do
-                    professor.
+                    This content supports pedagogical decisions and should be interpreted alongside the class context and the professor's observations.
                   </div>
                 </div>
               )}
@@ -324,7 +322,7 @@ export function DashboardInsightProvider({
                   onClick={close}
                   className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-[Poppins] text-sm font-semibold text-zinc-200 hover:bg-white/10"
                 >
-                  Fechar
+                  Close
                 </button>
                 {result && (
                   <button
@@ -338,7 +336,7 @@ export function DashboardInsightProvider({
                     ) : (
                       <Sparkles className="h-4 w-4" />
                     )}
-                    Gerar novamente
+                    Regenerate
                   </button>
                 )}
               </div>
@@ -354,7 +352,7 @@ export function useDashboardInsights() {
   const context = useContext(DashboardInsightContext);
   if (!context)
     throw new Error(
-      "useDashboardInsights deve ser usado dentro de DashboardInsightProvider",
+      "useDashboardInsights must be used within DashboardInsightProvider",
     );
   return context;
 }

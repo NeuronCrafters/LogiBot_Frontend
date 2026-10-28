@@ -41,31 +41,31 @@ const ENTITY_META: Record<
   { title: string; description: string; icon: ReactNode }
 > = {
   university: {
-    title: "Nova Universidade",
+    title: "New University",
     description:
-      "Cadastre uma instituicao para organizar cursos, turmas e usuarios.",
+      "Register an institution to organize programs, classes and users.",
     icon: <School className="h-5 w-5" />,
   },
   course: {
-    title: "Novo Curso",
-    description: "Crie um curso dentro de uma universidade ja cadastrada.",
+    title: "New Program",
+    description: "Create a program within an already registered university.",
     icon: <BookOpen className="h-5 w-5" />,
   },
   class: {
-    title: "Nova Turma",
+    title: "New Class",
     description:
-      "Crie uma turma, defina sua grade e gere um codigo unico de acesso para os alunos.",
+      "Create a class, define its curriculum and generate a unique access code for students.",
     icon: <Users className="h-5 w-5" />,
   },
   discipline: {
-    title: "Nova Disciplina",
+    title: "New Subject",
     description:
-      "Crie uma disciplina e vincule turmas ou professores quando fizer sentido.",
+      "Create a subject and link classes or professors when it makes sense.",
     icon: <Library className="h-5 w-5" />,
   },
   professor: {
-    title: "Novo Professor",
-    description: "Crie o acesso de professor e vincule ao curso correto.",
+    title: "New Professor",
+    description: "Create the professor account and link it to the right program.",
     icon: <GraduationCap className="h-5 w-5" />,
   },
 };
@@ -86,7 +86,7 @@ function PermissionDenied() {
         <ShieldOff className="h-6 w-6" />
       </div>
       <p className="font-[Poppins] text-sm text-zinc-500">
-        Voce nao tem permissao para acessar esta pagina.
+        You do not have permission to access this page.
       </p>
     </div>
   );
@@ -95,15 +95,15 @@ function PermissionDenied() {
 function NextActions({ entity }: { entity: EntityType }) {
   const actions = [
     ...(["class", "discipline", "professor"].includes(entity)
-      ? [{ to: "/entities/manage", label: "Gerenciar vínculos" }]
+      ? [{ to: "/entities/manage", label: "Manage links" }]
       : []),
-    { to: "/entities", label: "Listar entidades" },
+    { to: "/entities", label: "List entities" },
   ];
 
   return (
     <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <p className="font-[Poppins] text-sm font-semibold text-white">
-        Proximas acoes
+        Next actions
       </p>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {actions.map((action) => (
@@ -149,7 +149,7 @@ export function CreateEntities() {
 
   const createMutation = useMutation({
     mutationFn: async ({ entity, item }: { entity: EntityType; item: any }) => {
-      logger.info("Admin", `Enviando ${entity}.`, item);
+      logger.info("Admin", `Submitting ${entity}.`, item);
       const response: ApiResponse =
         entity === "professor"
           ? await adminApi.createProfessor<ApiResponse>({
@@ -176,7 +176,7 @@ export function CreateEntities() {
           response?.id ||
           response?._id ||
           `temp-${Date.now()}`,
-        name: created?.name || item.name || "Item sem nome",
+        name: created?.name || item.name || "Unnamed item",
         type: entity,
         action: "create",
         registrationCode,
@@ -186,13 +186,13 @@ export function CreateEntities() {
       queryClient.invalidateQueries({ queryKey: ["searchEntities"] });
       toast.success(
         registrationCode
-          ? "Turma criada. Codigo de acesso gerado."
-          : "Cadastro realizado com sucesso!",
+          ? "Class created. Access code generated."
+          : "Registration completed successfully!",
       );
     },
     onError: (error) => {
-      logger.error("Admin", "Erro ao enviar dados.", error);
-      toast.error("Erro ao cadastrar. Verifique os dados e tente novamente.");
+      logger.error("Admin", "Failed to submit data.", error);
+      toast.error("Registration failed. Check the data and try again.");
     },
   });
 
@@ -221,7 +221,7 @@ export function CreateEntities() {
               className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <TableProperties className="h-4 w-4" />
-              Gestao
+              Management
             </Link>
           </div>
         </section>

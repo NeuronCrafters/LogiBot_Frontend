@@ -55,13 +55,13 @@ export const logApiSmart = {
       if (entity === "student") {
         if (!filters?.disciplineId) {
           throw new Error(
-            "disciplineId obrigatório para professores ao buscar aluno",
+            "disciplineId is required for professors when fetching a student",
           );
         }
         const response = await getRequest<
           LogApiResponse<UserAnalysisLog> | UserAnalysisLog
         >(PROFESSOR_LOG_ROUTES.getStudentDetails(id, filters.disciplineId));
-        logger.info("LogAPI", "Resposta da API para aluno.", response);
+        logger.info("LogAPI", "API response for student.", response);
         return unwrap(response);
       }
     }
@@ -102,12 +102,12 @@ export const logApiSmart = {
         });
         if (isFailedEnvelope(response))
           throw new Error(
-            response.error || "erro ao buscar dados do estudante",
+            response.error || "failed to fetch student data",
           );
         return unwrap(response);
       }
       default:
-        throw new Error("Entidade inválida");
+        throw new Error("Invalid entity");
     }
   },
 };
