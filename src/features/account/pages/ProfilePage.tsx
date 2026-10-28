@@ -157,8 +157,8 @@ export function Profile() {
 
   return (
     <>
-      <main className="flex min-h-full flex-1 items-center overflow-y-auto px-4 py-6 md:px-8 md:py-8">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
+      <main className="flex min-h-0 flex-1 items-start overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+        <div className="mx-auto my-auto flex w-full max-w-5xl flex-col gap-5">
           <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
