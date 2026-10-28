@@ -862,5 +862,12 @@
   "admin.professorEmailExample": "profesor@universidad.edu",
   "common.avatar": "avatar",
   "chat.imageUnavailable": "Imagen no disponible",
-  "common.removeSelection": "Quitar selección: {{name}}"
+  "common.removeSelection": "Quitar selección: {{name}}",
+  "feedback.characterCount": "{{current}}/{{max}} caracteres",
+  "dashboard.axisHour": "Hora",
+  "dashboard.axisDay": "Día",
+  "dashboard.axisEffort": "Esfuerzo",
+  "dashboard.axisPerformance": "Rendimiento",
+  "dashboard.entities": "Entidades",
+  "dashboard.pointDescription": "{{name}}: rendimiento {{performance}}, esfuerzo {{effort}} min"
 }

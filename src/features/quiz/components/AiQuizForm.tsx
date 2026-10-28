@@ -186,6 +186,7 @@ export function AiQuizForm({ onClose }: Props) {
           <p className="text-sm text-zinc-500">{t("quiz.nenhumaDisciplinaDisponivel", {}, locale)}</p>
         ) : (
           <select
+            aria-label={t("common.disciplina")}
             value={disciplineId}
             onChange={(e) => setDisciplineId(e.target.value)}
             className={selectCls}
@@ -227,6 +228,7 @@ export function AiQuizForm({ onClose }: Props) {
             <button
               key={n}
               type="button"
+              aria-pressed={questionCount === n}
               onClick={() => setQuestionCount(n)}
               disabled={isPending}
               className={`h-9 w-9 rounded-lg border font-[Poppins] text-sm font-semibold transition-colors ${
@@ -273,6 +275,7 @@ export function AiQuizForm({ onClose }: Props) {
                       <button
                         key={doc.id}
                         type="button"
+                        aria-pressed={checked}
                         onClick={() => toggleDoc(doc.id)}
                         disabled={isPending}
                         className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors ${

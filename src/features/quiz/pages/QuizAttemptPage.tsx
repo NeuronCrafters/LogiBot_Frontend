@@ -312,6 +312,7 @@ export function QuizAttempt() {
                       return (
                         <button
                           key={oi}
+                          aria-pressed={selected}
                           onClick={() => handleSelect(q.id, letter)}
                           className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
                             selected

@@ -107,8 +107,8 @@ export function AppModal({
   };
 
   return (
-    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title || t("common.details")} tabIndex={-1} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md">
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title || t("common.details")} tabIndex={-1} className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
+      <div className="my-auto w-full max-w-md shrink-0">
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] text-white shadow-2xl shadow-black/30">
           <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
             <div className="flex items-start gap-3">

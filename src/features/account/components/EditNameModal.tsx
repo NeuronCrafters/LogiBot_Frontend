@@ -9,7 +9,7 @@ interface EditNameModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentName: string;
-  onSave: (newName: string) => void;
+  onSave: (newName: string) => void | Promise<void>;
 }
 
 export function EditNameModal({
@@ -19,23 +19,30 @@ export function EditNameModal({
   onSave,
 }: EditNameModalProps) {
   useLocale();
-  const dialogRef = useDialogFocus<HTMLDivElement>(isOpen, onClose);
+  const [isSaving, setIsSaving] = useState(false);
+  const dialogRef = useDialogFocus<HTMLDivElement>(isOpen, isSaving ? undefined : onClose);
 
   const [name, setName] = useState("");
 
-  const handleSave = () => {
-    if (name.trim()) {
-      onSave(name);
+  const handleSave = async () => {
+    if (!name.trim() || isSaving) return;
+    setIsSaving(true);
+    try {
+      await onSave(name.trim());
       setName("");
       onClose();
+    } catch {
+      setName(name);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("account.alterarNome")} tabIndex={-1} className="w-full max-w-md bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4">
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-busy={isSaving} aria-label={t("account.alterarNome")} tabIndex={-1} className="my-auto w-full max-w-md shrink-0 bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <div className="flex items-center gap-2">
                 <User size={18} className="text-blue-400" />
@@ -49,6 +56,7 @@ export function EditNameModal({
               </div>
               <button
                 aria-label={t("common.fechar")}
+                disabled={isSaving}
                 onClick={onClose}
                 className="text-zinc-400 hover:text-white"
               >
@@ -67,6 +75,7 @@ export function EditNameModal({
                 <label className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
                   {t("account.novoNome")}</label>
                 <input
+                  disabled={isSaving}
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -79,13 +88,14 @@ export function EditNameModal({
             <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-[#1a1a1a]">
               <Button
                 variant="ghost"
+                disabled={isSaving}
                 onClick={onClose}
                 className="text-zinc-400 hover:bg-red-600 hover:text-white"
               >
                 {t("common.cancelar")}</Button>
               <Button
                 onClick={handleSave}
-                disabled={!name.trim()}
+                disabled={isSaving || !name.trim()}
                 className="bg-blue-600 hover:bg-blue-700 text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={16} /> {t("common.salvar")}</Button>

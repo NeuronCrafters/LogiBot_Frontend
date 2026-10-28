@@ -1,5 +1,5 @@
 import { apiError } from "@/shared/lib/apiError";
-import { percent, t, useLocale } from "@/i18n";
+import { number, percent, t, useLocale } from "@/i18n";
 ﻿import { useQuery } from "@tanstack/react-query";
 import { Pie, PieChart, Cell, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,7 +97,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
             <PieChart width={320} height={300}>
               <Pie data={accuracyData.chartData} cx="50%" cy="45%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="value" nameKey="name">
                 {accuracyData.chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} stroke="transparent" />
+                  <Cell key={`cell-${index}`} fill={entry.fill} stroke="transparent" aria-label={`${entry.name}: ${number(entry.value)}`} />
                 ))}
               </Pie>
               <Tooltip contentStyle={{ backgroundColor: "#141414", borderColor: "rgba(255,255,255,0.1)", borderRadius: 12 }} labelStyle={{ color: "#fff" }} itemStyle={{ color: "#fff" }} />
@@ -109,7 +109,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
       </CardContent>
 
       {hasData && (
-        <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
+        <CardFooter className="flex flex-col items-start gap-3 px-6 py-4 border-t border-white/10 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /><span className="font-[Poppins] text-sm text-white">{t("dashboard.acertos")}{" "}{accuracyData!.totalCorrect}</span></div>
             <span className="text-white/20">|</span>

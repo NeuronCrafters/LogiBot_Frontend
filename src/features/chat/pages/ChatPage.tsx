@@ -17,7 +17,7 @@ export function Chat() {
   const isAdmin = userRoles.includes("admin");
 
   return (
-    <>
+    <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {isAuthenticated && isStudent && user && (
         <StudentChatContent user={user} />
       )}
@@ -27,6 +27,6 @@ export function Chat() {
       {isAuthenticated && !isStudent && !isAdmin && (
         <NonStudentWelcome userRoles={userRoles} />
       )}
-    </>
+    </main>
   );
 }

@@ -12,8 +12,8 @@ export async function mockApi(page:Page,role:string="student"){
   const language=request.headers()['x-language']||request.headers()['accept-language']||'pt-BR';
   let body:any;try{body=request.postDataJSON();}catch{}
   requests.push({path:pathname,language,body});
-  const user={id:"test-user",_id:"test-user",name:"João da Silva",email:"joao@example.invalid",role:[role],preferredLanguage:preference,school:ids.university,schoolId:[ids.university],schoolName:["Universidade original"],courseId:[ids.course],courseName:["Curso original"],classId:[ids.class],className:["Turma original"],courses:[ids.course],classes:[ids.class],disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original"}],disciplineId:[ids.discipline]};
-  const university={id:ids.university,_id:ids.university,name:"Universidade original",courses:[{id:ids.course,_id:ids.course,name:"Curso original",classes:[{id:ids.class,_id:ids.class,name:"Turma original",disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original"}],students:[]}],disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original",professors:[{id:"test-user",_id:"test-user",name:user.name}]}]}]};
+  const user={id:"test-user",_id:"test-user",name:"João da Silva",email:"joao@example.invalid",role:role==='course-coordinator'?['professor',role]:[role],preferredLanguage:preference,school:ids.university,schoolId:[ids.university],schoolName:["Universidade original"],courseId:[ids.course],courseName:["Curso original"],classId:[ids.class],className:["Turma original"],courses:[ids.course],classes:[ids.class],disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original"}],disciplineId:[ids.discipline]};
+  const university={id:ids.university,_id:ids.university,name:"Universidade original",courses:[{id:ids.course,_id:ids.course,name:"Curso original",classes:[{id:ids.class,_id:ids.class,name:"Turma original",disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original"}],students:[user]}],disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original",professors:[{id:"test-user",_id:"test-user",name:user.name}]}]}]};
   let data:any=[];
   if(pathname==='/auth/me')data=user;
   else if(pathname==='/auth/session')data={success:true,user};
@@ -31,7 +31,8 @@ export async function mockApi(page:Page,role:string="student"){
   else if(pathname.includes('/summary'))data={totalCorrectAnswers:8,totalWrongAnswers:2,usageTimeInSeconds:3600,dailyUsage:[{date:"2026-10-28",usage:60}],subjectCounts:{variaveis:4}};
   else if(pathname.includes('topic-performance'))data=[{topic:"variaveis",successPercentage:80,errorPercentage:20}];
   else if(pathname.includes('proficiency'))data={labels:["variaveis"],data:[80]};
-  else if(pathname.includes('effort'))data={points:[],averages:{avgPerformance:80,avgEffort:60}};
+  else if(pathname.includes('effort'))data={points:[{name:user.name,effort:60,performance:80}],averages:{avgPerformance:80,avgEffort:60}};
+  else if(pathname.includes('session-details'))data=[{startTime:'2026-10-28T12:00:00Z',endTime:'2026-10-28T13:00:00Z'}];
   else if(pathname.includes('learning'))data={labels:["Quiz original em português"],data:[80]};
   else if(pathname.includes('insights/'))data={language,insight:language==='en-US'?'## Main findings\nEnglish insight.':language==='es-ES'?'## Lectura principal\nAnálisis en español.':'## Leitura principal\nAnálise em português.',generatedAt:"2026-10-28T12:00:00Z",cached:false};
   else if(pathname.startsWith('/chat/sessions')&&pathname.endsWith('/messages'))data=[{id:"message",role:"assistant",content:"Resposta original em português.",metadata:{outputLanguage:"pt-BR"}}];

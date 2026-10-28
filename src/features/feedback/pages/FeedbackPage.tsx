@@ -89,8 +89,8 @@ export function Feedback() {
 
   return (
     <>
-      <main className="flex min-h-full flex-1 items-center overflow-y-auto px-4 py-6 font-[Poppins] md:px-8 md:py-8">
-        <div className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+      <main className="flex min-h-0 flex-1 items-start overflow-y-auto px-4 py-6 font-[Poppins] md:px-8 md:py-8">
+        <div className="mx-auto my-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
           <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
               <MessageSquare className="h-6 w-6" />
@@ -117,7 +117,7 @@ export function Feedback() {
               />
               <SummaryTile
                 label={t("common.mensagem", {}, locale)}
-                value={`${message.trim().length}/${MAX_MESSAGE_LENGTH} caracteres`}
+                value={t("feedback.characterCount", { current: message.trim().length, max: MAX_MESSAGE_LENGTH }, locale)}
               />
             </div>
           </section>
@@ -138,6 +138,7 @@ export function Feedback() {
                         key={option.value}
                         type="button"
                         disabled={loading}
+                        aria-pressed={isSelected}
                         onClick={() => setType(option.value)}
                         className={`rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${isSelected ? "border-blue-400/50 bg-blue-500/10" : "border-white/10 bg-neutral-950/60 hover:bg-white/5"}`}
                       >

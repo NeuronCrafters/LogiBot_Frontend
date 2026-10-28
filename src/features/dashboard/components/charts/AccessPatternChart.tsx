@@ -4,6 +4,7 @@ import { t, useLocale } from "@/i18n";
 import {
   Scatter,
   ScatterChart,
+  Symbols,
   XAxis,
   YAxis,
   ResponsiveContainer,
@@ -168,7 +169,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
                 <XAxis
                   type="number"
                   dataKey="hour"
-                  name="Hora"
+                  name={t("dashboard.axisHour")}
                   domain={[0, 24]}
                   ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
                   tickFormatter={(h) => `${Math.floor(h)}h`}
@@ -178,7 +179,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
                 <YAxis
                   type="number"
                   dataKey="day"
-                  name="Dia"
+                  name={t("dashboard.axisDay")}
                   domain={[-0.5, 6.5]}
                   ticks={[0, 1, 2, 3, 4, 5, 6]}
                   tickFormatter={(d) => DAYS()[d]}
@@ -193,7 +194,12 @@ export function AccessPatternChart({ filters }: ChartProps) {
                   data={sessions}
                   fill="#8b5cf6"
                   fillOpacity={0.75}
-                  shape="circle"
+                  shape={(point: any) => (
+                    <>
+                      <title>{`${formatDateTime(point.payload.startTime)} — ${point.payload.duration}`}</title>
+                      <Symbols {...point} type="circle" />
+                    </>
+                  )}
                 />
               </ScatterChart>
             </ResponsiveContainer>

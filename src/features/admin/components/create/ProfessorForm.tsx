@@ -191,6 +191,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
             className={`${inputCls} pr-11`}
           />
           <button
+            aria-label={t(showPassword ? "auth.ocultarSenha" : "auth.mostrarSenha")}
             type="button"
             onClick={() => setShowPassword((p) => !p)}
             className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500 hover:text-zinc-300 transition-colors"

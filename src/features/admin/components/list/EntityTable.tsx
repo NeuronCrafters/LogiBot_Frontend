@@ -180,7 +180,7 @@ export function EntityTable({
                     )}
                     {showActions && (
                       <td className="px-5 py-3.5 text-right">
-                        <div className="inline-flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div className="inline-flex items-center gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                           {canEdit && (
                             <button
                               onClick={() => onEdit(item)}

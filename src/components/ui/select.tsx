@@ -18,7 +18,7 @@ interface SelectProps {
   disabled?: boolean;
 }
 
-type DropdownRect = { top: number; left: number; width: number };
+type DropdownRect = { top?: number; bottom?: number; left: number; width: number; maxHeight: number };
 
 export function Select({
   value,
@@ -41,8 +41,23 @@ export function Select({
   const updateRect = useCallback(() => {
     if (!buttonRef.current) return;
     const r = buttonRef.current.getBoundingClientRect();
-    setRect({ top: r.bottom + 4, left: r.left, width: r.width });
+    const below = Math.max(0, window.innerHeight - r.bottom - 12);
+    const above = Math.max(0, r.top - 12);
+    const opensAbove = below < 240 && above > below;
+    const width = Math.min(r.width, window.innerWidth - 16);
+    setRect({
+      ...(opensAbove ? { bottom: Math.max(8, window.innerHeight - r.top + 4) } : { top: Math.max(8, r.bottom + 4) }),
+      left: Math.max(8, Math.min(r.left, window.innerWidth - width - 8)),
+      width,
+      maxHeight: Math.min(240, opensAbove ? above : below),
+    });
   }, []);
+
+  const commit = (value: string) => {
+    onChange(value);
+    setOpen(false);
+    buttonRef.current?.focus();
+  };
 
   const handleOpen = () => {
     if (disabled) return;
@@ -131,6 +146,8 @@ export function Select({
             style={{
               position: "fixed",
               top: rect.top,
+              bottom: rect.bottom,
+              maxHeight: rect.maxHeight,
               left: rect.left,
               width: rect.width,
               zIndex: 9999,
@@ -145,11 +162,10 @@ export function Select({
                 role="option"
                 aria-selected={value === ""}
                 onClick={() => {
-                  onChange("");
-                  setOpen(false);
+                  commit("");
                 }}
                 onKeyDown={(e) =>
-                  e.key === "Enter" && (onChange(""), setOpen(false))
+                  (e.key === "Enter" || e.key === " ") && (e.preventDefault(), commit(""))
                 }
                 className={cn(
                   "flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm font-[Poppins] outline-none transition-colors focus:bg-white/5",
@@ -172,11 +188,10 @@ export function Select({
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => {
-                    onChange(opt.value);
-                    setOpen(false);
+                    commit(opt.value);
                   }}
                   onKeyDown={(e) =>
-                    e.key === "Enter" && (onChange(opt.value), setOpen(false))
+                    (e.key === "Enter" || e.key === " ") && (e.preventDefault(), commit(opt.value))
                   }
                   className={cn(
                     "flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm font-[Poppins] outline-none transition-colors focus:bg-white/5",
@@ -212,6 +227,9 @@ export function Select({
         aria-haspopup="listbox"
         type="button"
         disabled={disabled}
+        onKeyDown={event => {
+          if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) { event.preventDefault(); updateRect(); setOpen(true); }
+        }}
         onClick={handleOpen}
         className={cn(
           "flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm outline-none transition-colors",

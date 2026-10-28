@@ -4,6 +4,8 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
 	theme: {
     	extend: {
+        textColor: { zinc: { 500: "#a1a1aa", 600: "#a1a1aa", 700: "#a1a1aa" } },
+        placeholderColor: { zinc: { 500: "#a1a1aa", 600: "#a1a1aa", 700: "#a1a1aa" } },
     		fontFamily: {
     			Montserrat: [
     				'Montserrat',

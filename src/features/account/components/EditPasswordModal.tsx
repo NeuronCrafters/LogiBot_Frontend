@@ -57,8 +57,8 @@ export function EditPasswordModal({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("account.alterarSenha")} tabIndex={-1} className="w-full max-w-md bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4">
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("account.alterarSenha")} tabIndex={-1} className="my-auto w-full max-w-md shrink-0 bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <div className="flex items-center gap-2">
                 <KeyRound size={18} className="text-orange-400" />
@@ -137,7 +137,7 @@ export function EditPasswordModal({
               <Button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="bg-orange-600 hover:bg-orange-700 text-white gap-2 min-w-[100px]"
+                className="bg-orange-700 hover:bg-orange-800 text-white gap-2 min-w-[100px]"
               >
                 {isLoading ? (
                   <Loader2 size={16} className="animate-spin" />

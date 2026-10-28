@@ -290,7 +290,7 @@ export function DashboardInsightProvider({
               </button>
             </div>
 
-            <div className="min-h-[320px] flex-1 overflow-y-auto p-5 sm:px-8 sm:py-7">
+            <div tabIndex={0} role="region" aria-label={t("dashboard.insightPedagogicoGeradoAPartirDosDados", {}, locale)} className="min-h-0 flex-1 overflow-y-auto p-5 sm:px-8 sm:py-7">
               {loading && !result && (
                 <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 text-center">
                   <Loader2 className="h-7 w-7 animate-spin text-violet-400" />

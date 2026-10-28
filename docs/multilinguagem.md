@@ -52,9 +52,15 @@ O helper de CSV existente não tinha consumidores na aplicação inspecionada. F
 
 ## Alcance e limites
 
-Os fluxos autenticados do navegador utilizam respostas controladas para testar a interface sem cadastrar usuários, alterar dados acadêmicos, disparar e-mails ou consumir o provedor de IA. Os testes de preferência, quizzes e streaming verificam o contrato de saída e a preservação dos dados do frontend; não certificam a qualidade semântica das respostas do modelo.
+A suíte controlada continua verificando contratos, preservação dos dados, concorrência e falhas sem depender do provedor. Foi acrescentada uma suíte com sessões reais contra a API local, contas temporárias de aluno/professor/coordenador e a conta administrativa configurada no `.env`. Os dados temporários são removidos e a preferência administrativa original é restaurada ao terminar.
 
-A validação real do proxy consulta a saúde e os erros de autenticação da API existente. Entrega de e-mail, sessões reais de contas de todos os perfis, jobs e geração real de IA continuam dependendo dos serviços e credenciais já configurados na API. Nenhum arquivo do backend foi alterado nesta etapa.
+A homologação real cobre cadastro/consentimento, nome, e-mail, conflito HTTP 409, alteração de senha autenticada, novo login e preferência persistida; envio de feedback; criação, edição, exclusão e vínculos acadêmicos; permissões de coordenador; criação manual, pergunta, edição, publicação, tentativa, resultados, despublicação e exclusão de quiz. Esses fluxos rodam nos três idiomas em desktop e mobile.
+
+O cenário de integração dos serviços realiza upload de TXT, processamento pelo worker, reprocessamento, geração real de três questões a partir do documento, chat por SSE, insight geral, exportação PNG e exclusão do material. Verifica metadados de idioma, fontes do quiz e respostas sem erro; guarda o conteúdo gerado para revisão. A geração usa os serviços e credenciais existentes, não certifica a correção semântica de toda resposta possível do modelo nem todos os formatos de material.
+
+A auditoria axe cobre WCAG 2 A/AA e 2.1 A/AA nas 18 rotas da matriz, nos três idiomas e dois tamanhos de tela, além de modais do perfil/quiz e dashboard com gráficos preenchidos. Inclui nomes dos pontos e setores dos gráficos, contraste, foco e rolagem do insight. A inspeção visual usa capturas desktop/mobile; a automação não substitui uma avaliação manual exaustiva com todas as tecnologias assistivas.
+
+Por decisão do usuário, a validação da entrega de e-mail e do link de recuperação de senha está excluída. A alteração autenticada de senha foi validada. A implantação em VPS também está excluída. Nenhum arquivo do backend foi alterado nesta etapa.
 
 O build original foi compilado em Docker antes da implementação. O aviso de tamanho de chunk do Vite também existia na base; a implementação não altera sua classificação para erro nem aumenta o limite para ocultá-lo. A configuração original de lint foi alinhada ao formato flat config e às dependências já declaradas. Os ajustes de hooks preservam permissões e evitam chamadas condicionais e efeitos com dependências instáveis.
 
@@ -64,12 +70,26 @@ Nenhum arquivo fonte, logo ou mídia original foi excluído. Os comentários exi
 
 - Build TypeScript/Vite aprovado em container.
 - ESLint aprovado, sem erros ou avisos.
-- 864 chaves equivalentes por catálogo, interpolações compatíveis e 734 textos do fixture português preservados literalmente.
+- 871 chaves equivalentes por catálogo, interpolações compatíveis e 734 textos do fixture português preservados literalmente.
 - 27 testes Vitest aprovados em seis arquivos.
-- 46 cenários Playwright aprovados, distribuídos entre desktop e mobile.
-- PNGs e capturas do dashboard/perfil gerados e inspecionados.
+- 196 cenários Playwright com respostas controladas aprovados em desktop/mobile, incluindo 24 regressões do perfil (quatro perfis × três idiomas × dois projetos), 108 auditorias por rota e testes adicionais de modais/gráficos e seis regressões de seletores na borda da tela.
+- 24 cenários reais de conta/feedback, gestão acadêmica e quizzes aprovados nos três idiomas em desktop/mobile; três cenários adicionais de RAG/IA aprovados no desktop.
+- PNGs e capturas do dashboard/perfil/insights gerados e inspecionados.
+- Cada geração real de quiz utilizou um documento e recuperou dois trechos; os exemplos de chat e insights foram conferidos em PT/EN/ES.
+- Conferência final do banco: zero contas, universidades, quizzes e feedbacks temporários E2E; quatro contas de demonstração preservadas e idioma administrativo restaurado.
 - Saúde do frontend confirmada pelo Compose; acesso em `http://localhost:5173`.
 - Chave do frontend conferida com a API local, sem literais de credenciais nos arquivos versionáveis.
 - `git diff --check` aprovado; nenhum arquivo original excluído, nenhuma alteração em linhas de comentários existentes e repositório do backend sem alterações.
 
 Os comandos para reproduzir a validação estão no README. Os resultados respeitam o alcance descrito acima; a matriz automatizada não equivale a uma certificação de todos os dados e cenários possíveis da aplicação.
+
+## Fechamento das pendências autorizadas
+
+| Ponto | Resultado |
+|---|---|
+| 1 — Homologação integrada | Suíte real reproduzível em Docker, com dados isolados, três idiomas, quatro perfis e serviços de geração configurados |
+| 2 — Recuperação de senha por e-mail | Excluída por solicitação do usuário |
+| 3 — Revisão visual/acessibilidade | Contraste corrigido; ações acessíveis no toque/teclado; seletores retornam foco e abrem dentro da tela; modais preservam alcance em telas baixas; gráficos e áreas roláveis com nomes/foco; métricas do gráfico em duas linhas no celular; edição de conta aguarda a API e conserva dados em falha |
+| 4 — Regressão do perfil | Teste permanente verifica topo e final alcançáveis em aluno, professor, coordenador e administrador, em PT/EN/ES e desktop/mobile |
+
+O contador de feedback e os metadados acessíveis dos gráficos receberam traduções adicionais, mantendo os textos portugueses existentes. As opções selecionadas e expansores também expõem seu estado às tecnologias assistivas.

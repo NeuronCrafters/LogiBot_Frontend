@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Scatter,
   ScatterChart,
+  Symbols,
   Tooltip,
   XAxis,
   YAxis,
@@ -209,7 +210,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                 <XAxis
                   type="number"
                   dataKey="effort"
-                  name="Esforco"
+                  name={t("dashboard.axisEffort")}
                   unit=" min"
                   domain={[0, matrix.effortDomainMax]}
                   stroke="rgba(255,255,255,0.3)"
@@ -218,7 +219,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                 <YAxis
                   type="number"
                   dataKey="performance"
-                  name="Desempenho"
+                  name={t("dashboard.axisPerformance")}
                   unit="%"
                   domain={[0, 100]}
                   stroke="rgba(255,255,255,0.3)"
@@ -287,7 +288,16 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                     />
                   </>
                 )}
-                <Scatter name="Entidades" data={matrix.points}>
+                <Scatter name={t("dashboard.entities")} data={matrix.points} shape={(point: any) => (
+                  <>
+                    <title>{t("dashboard.pointDescription", {
+                      name: point.payload.name,
+                      performance: percent(point.payload.originalPerformance / 100),
+                      effort: number(point.payload.originalEffort),
+                    })}</title>
+                    <Symbols {...point} type="circle" />
+                  </>
+                )}>
                   {matrix.points.map((point, i) => (
                     <Cell
                       key={`cell-${i}`}

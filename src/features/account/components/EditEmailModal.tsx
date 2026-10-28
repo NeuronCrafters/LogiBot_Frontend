@@ -9,7 +9,7 @@ interface EditEmailModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentEmail: string;
-  onSave: (newEmail: string) => void;
+  onSave: (newEmail: string) => void | Promise<void>;
 }
 
 export function EditEmailModal({
@@ -19,23 +19,30 @@ export function EditEmailModal({
   onSave,
 }: EditEmailModalProps) {
   useLocale();
-  const dialogRef = useDialogFocus<HTMLDivElement>(isOpen, onClose);
+  const [isSaving, setIsSaving] = useState(false);
+  const dialogRef = useDialogFocus<HTMLDivElement>(isOpen, isSaving ? undefined : onClose);
 
   const [email, setEmail] = useState("");
 
-  const handleSave = () => {
-    if (email.trim()) {
-      onSave(email);
+  const handleSave = async () => {
+    if (!email.trim() || isSaving) return;
+    setIsSaving(true);
+    try {
+      await onSave(email.trim());
       setEmail("");
       onClose();
+    } catch {
+      setEmail(email);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("account.alterarEMail")} tabIndex={-1} className="w-full max-w-md bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4">
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-busy={isSaving} aria-label={t("account.alterarEMail")} tabIndex={-1} className="my-auto w-full max-w-md shrink-0 bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <div className="flex items-center gap-2">
                 <Mail size={18} className="text-purple-400" />
@@ -49,6 +56,7 @@ export function EditEmailModal({
               </div>
               <button
                 aria-label={t("common.fechar")}
+                disabled={isSaving}
                 onClick={onClose}
                 className="text-zinc-400 hover:text-white"
               >
@@ -67,6 +75,7 @@ export function EditEmailModal({
                 <label className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
                   {t("account.novoEMail")}</label>
                 <input
+                  disabled={isSaving}
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -79,13 +88,14 @@ export function EditEmailModal({
             <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-[#1a1a1a]">
               <Button
                 variant="ghost"
+                disabled={isSaving}
                 onClick={onClose}
                 className="text-zinc-400 hover:bg-red-600 hover:text-white"
               >
                 {t("common.cancelar")}</Button>
               <Button
                 onClick={handleSave}
-                disabled={!email.trim()}
+                disabled={isSaving || !email.trim()}
                 className="bg-purple-600 hover:bg-purple-700 text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={16} /> {t("common.salvar")}</Button>

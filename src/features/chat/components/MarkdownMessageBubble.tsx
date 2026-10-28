@@ -195,6 +195,7 @@ const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedC
     <div className="mt-3 border-t border-neutral-800 pt-3">
       <button
         type="button"
+        aria-expanded={expanded}
         onClick={() => setExpanded((v) => !v)}
         className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-[Poppins]"
       >
@@ -212,6 +213,7 @@ const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedC
             >
               <button
                 type="button"
+                aria-expanded={openIndex === index}
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-neutral-800/40 transition-colors"
               >

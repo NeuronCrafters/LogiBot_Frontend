@@ -233,7 +233,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                 {isSignup ? (
                   <Link
                     to="/signin"
-                    className="text-blue-400 hover:text-blue-300"
+                    className="text-blue-400 underline hover:text-blue-300"
                   >
                     {t("auth.facaLogin")}</Link>
                 ) : (

@@ -149,6 +149,7 @@ function ModeButton({
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={() => onClick(value)}
       className={`flex flex-col gap-0.5 rounded-xl border p-3 text-left transition-colors ${
         active
@@ -236,6 +237,7 @@ function SettingsTab({
         <div>
           <label className={labelCls}>{t("rag.topK")}</label>
           <input
+            aria-label={t("rag.topK")}
             type="number"
             min={1}
             max={10}
@@ -249,6 +251,7 @@ function SettingsTab({
         <div>
           <label className={labelCls}>{t("rag.scoreMinimo")}</label>
           <input
+            aria-label={t("rag.scoreMinimo")}
             type="number"
             min={0}
             max={100}
@@ -296,7 +299,7 @@ function DocumentRow({
 
   const meta = STATUS_META[document.status] ?? STATUS_META.uploaded;
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-3 min-w-0">
+    <div role="listitem" className="flex items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-3 min-w-0">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500">
         <FileText className="h-4 w-4" />
       </div>
@@ -467,7 +470,7 @@ function DocumentsTab({
             <Loader2 className="h-6 w-6 animate-spin text-zinc-500" />
           </div>
         ) : documents.length ? (
-          <div className="space-y-2 overflow-hidden">
+          <div role="list" className="space-y-2 overflow-hidden">
             {documents.map((doc) => (
               <DocumentRow
                 key={doc.id}
