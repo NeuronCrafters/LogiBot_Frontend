@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { percent, t, useLocale, number } from "@/i18n";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -26,7 +28,7 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Relaciona o esforco (tempo de uso em minutos) com o desempenho (taxa de acertos). As linhas tracejadas mostram a media do grupo e as cores separam quem esta acima ou abaixo da media em desempenho e esforco.";
+  () => (t("dashboard.relacionaOEsforcoTempoDeUsoEm"));
 
 const MATRIX_COLORS = {
   highHigh: "#10b981",
@@ -36,11 +38,11 @@ const MATRIX_COLORS = {
   average: "#f8fafc",
 };
 const QUADRANT_LABELS = {
-  highHigh: "Acima da media em desempenho e esforco",
-  highLow: "Bom desempenho com menor esforco",
-  lowHigh: "Muito esforco com baixo desempenho",
-  lowLow: "Abaixo da media em desempenho e esforco",
-  average: "Media do grupo",
+  get highHigh() { return t("dashboard.acimaDaMediaEmDesempenhoEEsforco"); },
+  get highLow() { return t("dashboard.bomDesempenhoComMenorEsforco"); },
+  get lowHigh() { return t("dashboard.muitoEsforcoComBaixoDesempenho"); },
+  get lowLow() { return t("dashboard.abaixoDaMediaEmDesempenhoEEsforco"); },
+  get average() { return t("dashboard.mediaDoGrupo"); },
 };
 
 interface ChartProps {
@@ -54,6 +56,8 @@ interface ChartProps {
 }
 
 function useChartData(filters: ChartProps["filters"]) {
+  useLocale();
+
   return useQuery({
     queryKey: ["effortMatrix", filters],
     queryFn: () =>
@@ -64,6 +68,8 @@ function useChartData(filters: ChartProps["filters"]) {
 }
 
 export function EffortMatrixChart({ filters }: ChartProps) {
+  const locale = useLocale();
+
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.points.length > 0;
   const showReferenceLines = data && data.points.length > 1;
@@ -124,21 +130,19 @@ export function EffortMatrixChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Matriz Desempenho vs. Esforco
-            </CardTitle>
+              {t("dashboard.matrizDesempenhoVsEsforco", {}, locale)}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Quadrantes por media de esforco e taxa de acertos
-            </CardDescription>
+              {t("dashboard.quadrantesPorMediaDeEsforcoETaxa", {}, locale)}</CardDescription>
           </div>
         </div>
         <div className="absolute top-5 right-4 z-40">
           <ChartDownloadButton
             containerId="effort-matrix-chart"
-            fileName="matriz_esforco"
-            info={CHART_INFO}
+            fileName={t("dashboard.export.matriz_esforco")}
+            info={CHART_INFO()}
             insight={{
               chart: "effort-matrix",
-              title: "Matriz desempenho versus esforço",
+              title: t("dashboard.matrizDesempenhoVersusEsforco", {}, locale),
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -147,13 +151,13 @@ export function EffortMatrixChart({ filters }: ChartProps) {
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">
-        {isLoading && <ChartLoader text="Carregando dados..." />}
+        {isLoading && <ChartLoader text={t("common.carregandoDados", {}, locale)} />}
         {isError && (
-          <ChartError message={(error as Error)?.message} onRetry={refetch} />
+          <ChartError message={apiError(error, "common.erroAoCarregarDados")} onRetry={refetch} />
         )}
         {!isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
-            <p>Nenhum dado disponivel para esta entidade.</p>
+            <p>{t("dashboard.nenhumDadoDisponivelParaEstaEntidade", {}, locale)}</p>
           </NoData>
         )}
         {!isLoading && !isError && matrix && (
@@ -232,7 +236,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                           {d.name}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Status:{" "}
+                          {t("dashboard.status", {}, locale)}{" "}
                           <span className="font-medium text-white">
                             {
                               QUADRANT_LABELS[
@@ -242,15 +246,15 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                           </span>
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Desempenho:{" "}
+                          {t("dashboard.desempenho", {}, locale)}{" "}
                           <span className="font-medium text-white">
-                            {d.originalPerformance.toFixed(1)}%
+                            {percent((d.originalPerformance) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                           </span>
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Esforco:{" "}
+                          {t("dashboard.esforco", {}, locale)}{" "}
                           <span className="font-medium text-white">
-                            {d.originalEffort.toFixed(1)} min
+                            {number(d.originalEffort, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} min
                           </span>
                         </p>
                       </div>
@@ -264,7 +268,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                       stroke="rgba(255,255,255,0.35)"
                       strokeDasharray="4 4"
                       label={{
-                        value: `Media ${matrix.avgPerformance.toFixed(1)}%`,
+                        value: t("common.mediaValue0", { value0: number(matrix.avgPerformance, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
                         fill: "rgba(255,255,255,0.55)",
                         fontSize: 11,
                         position: "insideTopLeft",
@@ -275,7 +279,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                       stroke="rgba(255,255,255,0.35)"
                       strokeDasharray="4 4"
                       label={{
-                        value: `${matrix.avgEffort.toFixed(1)} min`,
+                        value: t("dashboard.value0Min", { value0: number(matrix.avgEffort, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
                         fill: "rgba(255,255,255,0.55)",
                         fontSize: 11,
                         position: "insideTopRight",
@@ -306,22 +310,22 @@ export function EffortMatrixChart({ filters }: ChartProps) {
             [
               [
                 "highHigh",
-                "Alto desempenho, alto esforco",
+                t("dashboard.altoDesempenhoAltoEsforco", {}, locale),
                 matrix.counts.highHigh,
               ],
               [
                 "highLow",
-                "Alto desempenho, baixo esforco",
+                t("dashboard.altoDesempenhoBaixoEsforco", {}, locale),
                 matrix.counts.highLow,
               ],
               [
                 "lowHigh",
-                "Baixo desempenho, alto esforco",
+                t("dashboard.baixoDesempenhoAltoEsforco", {}, locale),
                 matrix.counts.lowHigh,
               ],
               [
                 "lowLow",
-                "Baixo desempenho, baixo esforco",
+                t("dashboard.baixoDesempenhoBaixoEsforco", {}, locale),
                 matrix.counts.lowLow,
               ],
             ] as const

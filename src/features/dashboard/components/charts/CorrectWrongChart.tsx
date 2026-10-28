@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { percent, t, useLocale } from "@/i18n";
 ﻿import { useQuery } from "@tanstack/react-query";
 import { Pie, PieChart, Cell, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +10,7 @@ import { ChartDownloadButton } from "../ChartDownloadButton";
 import { dashboardFiltersFromLegacy } from "../../insightFilters";
 
 const COLORS = ["#10b981", "#ef4444"];
-const CHART_INFO = "Proporção de acertos e erros nos quizzes. A fatia verde representa respostas corretas; a vermelha, os erros. Indica a taxa de acerto geral da entidade selecionada.";
+const CHART_INFO = () => (t("dashboard.proporcaoDeAcertosEErrosNosQuizzes"));
 
 interface CorrectWrongChartProps {
   filter: DashboardFilterState & {
@@ -17,6 +19,8 @@ interface CorrectWrongChartProps {
 }
 
 function useAccuracyData(filter: CorrectWrongChartProps["filter"]) {
+  useLocale();
+
   const validIds = Array.isArray(filter.ids) ? filter.ids.filter((id) => typeof id === "string" && id.trim() !== "") : [];
   const targetId = validIds[0] || "";
   const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
@@ -26,7 +30,7 @@ function useAccuracyData(filter: CorrectWrongChartProps["filter"]) {
   return useQuery({
     queryKey: ["accuracy", filter.type, targetId, universityId, courseId, classId, disciplineId],
     queryFn: async () => {
-      if (!targetId) throw new Error("Filtros incompletos.");
+      if (!targetId) throw new Error(t("dashboard.filtrosIncompletos"));
       if (isStudent) return logApi.getFilteredStudentSummary({ universityId: universityId!, courseId, classId, studentId: targetId, disciplineId } as any);
       const calls: Record<string, () => Promise<any>> = {
         university: () => logApi.getUniversitySummary(targetId),
@@ -35,7 +39,7 @@ function useAccuracyData(filter: CorrectWrongChartProps["filter"]) {
         discipline: () => logApi.getDisciplineSummary(targetId),
       };
       const fn = calls[filter.type];
-      if (!fn) throw new Error(`Tipo inválido: ${filter.type}`);
+      if (!fn) throw new Error(t("common.tipoInvalidoValue0", { value0: filter.type }));
       return fn();
     },
     enabled: hasRequired,
@@ -46,35 +50,37 @@ function useAccuracyData(filter: CorrectWrongChartProps["filter"]) {
       const totalWrong = Number(rawData.totalWrong ?? rawData.totalWrongAnswers ?? 0);
       const total = totalCorrect + totalWrong;
       const accuracy = total > 0 ? (totalCorrect / total) * 100 : 0;
-      return { chartData: [{ name: "Acertos", value: totalCorrect, fill: COLORS[0] }, { name: "Erros", value: totalWrong, fill: COLORS[1] }], totalCorrect, totalWrong, accuracy };
+      return { chartData: [{ name: t("common.acertos"), value: totalCorrect, fill: COLORS[0] }, { name: t("common.erros"), value: totalWrong, fill: COLORS[1] }], totalCorrect, totalWrong, accuracy };
     },
   });
 }
 
 export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
+  useLocale();
+
   const { data: accuracyData, isLoading, isError, error, refetch } = useAccuracyData(filter);
   const hasRequired = !!filter.hierarchyParams.universityId;
   const hasData = !!accuracyData && (accuracyData.totalCorrect > 0 || accuracyData.totalWrong > 0);
   const refetchTyped = refetch as () => void;
-  const errorMessage = error instanceof Error ? error.message : "Erro ao carregar dados.";
+  const errorMessage = apiError(error, "common.erroAoCarregarDados");
 
   return (
     <Card id="correct-wrong-chart" className="bg-[#1f1f1f] border-white/10 flex flex-col h-full">
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
-            <CardTitle className="text-white font-[Poppins]">Desempenho por Tópico Geral</CardTitle>
-            <CardDescription className="text-white/50 font-[Poppins] mt-1">Acertos e Erros com base na interação do Quiz</CardDescription>
+            <CardTitle className="text-white font-[Poppins]">{t("dashboard.desempenhoPorTopicoGeral")}</CardTitle>
+            <CardDescription className="text-white/50 font-[Poppins] mt-1">{t("dashboard.acertosEErrosComBaseNaInteracao")}</CardDescription>
           </div>
         </div>
         <div className="absolute top-5 right-4 z-40">
           <ChartDownloadButton
             containerId="correct-wrong-chart"
-            fileName="acertos_erros"
-            info={CHART_INFO}
+            fileName={t("dashboard.export.acertos_erros")}
+            info={CHART_INFO()}
             insight={{
               chart: "accuracy",
-              title: "Acertos e erros",
+              title: t("dashboard.acertosEErros"),
               filters: dashboardFiltersFromLegacy(filter),
               disabled: isLoading || !hasData,
             }}
@@ -83,8 +89,8 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col min-h-0 px-2 sm:p-6">
-        {!hasRequired && <NoData onRetry={refetchTyped}><p>Selecione uma entidade para visualizar dados.</p></NoData>}
-        {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
+        {!hasRequired && <NoData onRetry={refetchTyped}><p>{t("dashboard.selecioneUmaEntidadeParaVisualizarDados")}</p></NoData>}
+        {hasRequired && isLoading && <ChartLoader text={t("common.carregandoDados")} />}
         {hasRequired && isError && <ChartError message={errorMessage} onRetry={refetchTyped} />}
         {hasRequired && !isLoading && !isError && hasData && (
           <div className="flex flex-1 min-h-[260px] w-full items-center justify-center">
@@ -99,17 +105,17 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
             </PieChart>
           </div>
         )}
-        {hasRequired && !isLoading && !isError && !hasData && <NoData onRetry={refetchTyped}><p>Nenhum dado de acertos/erros disponível.</p></NoData>}
+        {hasRequired && !isLoading && !isError && !hasData && <NoData onRetry={refetchTyped}><p>{t("dashboard.nenhumDadoDeAcertosErrosDisponivel")}</p></NoData>}
       </CardContent>
 
       {hasData && (
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /><span className="font-[Poppins] text-sm text-white">Acertos: {accuracyData!.totalCorrect}</span></div>
+            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /><span className="font-[Poppins] text-sm text-white">{t("dashboard.acertos")}{" "}{accuracyData!.totalCorrect}</span></div>
             <span className="text-white/20">|</span>
-            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-500" /><span className="font-[Poppins] text-sm text-white">Erros: {accuracyData!.totalWrong}</span></div>
+            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-500" /><span className="font-[Poppins] text-sm text-white">{t("dashboard.erros")}{" "}{accuracyData!.totalWrong}</span></div>
           </div>
-          <span className="font-[Poppins] text-sm text-zinc-400">Precisão: <span className="font-semibold text-white">{accuracyData!.accuracy.toFixed(1)}%</span></span>
+          <span className="font-[Poppins] text-sm text-zinc-400">{t("dashboard.precisao")}{" "}<span className="font-semibold text-white">{percent((accuracyData!.accuracy) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span></span>
         </CardFooter>
       )}
     </Card>

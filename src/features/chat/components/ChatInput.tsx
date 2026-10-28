@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { ArrowUp, Loader2 } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
 import { userAnalysisApi } from "@/features/chat/api/chatAnalyticsApi";
@@ -12,6 +13,8 @@ export const ChatInput = memo(function ChatInput({
   sendMessage,
   isWaitingResponse = false,
 }: ChatInputProps) {
+  const locale = useLocale();
+
   const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -67,8 +70,8 @@ export const ChatInput = memo(function ChatInput({
           ref={textareaRef}
           placeholder={
             isWaitingResponse
-              ? "LogiBot está digitando..."
-              : "Mensagem para o LogiBot"
+              ? t("chat.logibotEstaDigitando", {}, locale)
+              : t("chat.mensagemParaOLogibot", {}, locale)
           }
           className="flex-1 bg-transparent text-gray-200 text-sm outline-none resize-none overflow-y-auto max-h-[200px] min-h-[24px] py-1 leading-normal placeholder-neutral-500 font-[Poppins] disabled:cursor-not-allowed"
           rows={1}
@@ -80,7 +83,7 @@ export const ChatInput = memo(function ChatInput({
         <button
           onClick={handleSend}
           disabled={!canSend}
-          aria-label="Enviar mensagem"
+          aria-label={t("chat.enviarMensagem", {}, locale)}
           className={`shrink-0 h-8 w-8 flex items-center justify-center rounded-full transition-all ${
             isLocked
               ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"

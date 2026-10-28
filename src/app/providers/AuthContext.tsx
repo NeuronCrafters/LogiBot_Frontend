@@ -1,6 +1,8 @@
+import type { Language } from "@/i18n";
 import { createContext, Dispatch, SetStateAction } from "react";
 
 export interface User {
+    preferredLanguage?: Language | null;
     _id: string;
     name: string;
     email: string;

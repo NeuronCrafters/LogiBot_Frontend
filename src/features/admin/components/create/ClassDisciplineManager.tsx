@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -41,6 +42,8 @@ function SearchField({
   onChange: (value: string) => void;
   placeholder: string;
 }) {
+  useLocale();
+
   return (
     <div className="relative">
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
@@ -55,6 +58,8 @@ function SearchField({
 }
 
 function EmptyList({ message }: { message: string }) {
+  useLocale();
+
   return (
     <p className="px-4 py-6 text-center font-[Poppins] text-sm text-zinc-600">
       {message}
@@ -71,6 +76,8 @@ function AssignmentList({
   emptyText: string;
   action?: (item: ListItem) => ReactNode;
 }) {
+  useLocale();
+
   return (
     <div className="overflow-hidden rounded-xl border border-white/10">
       {items.length === 0 ? (
@@ -110,6 +117,8 @@ export function ClassDisciplineManager({
   initialClassId?: string;
   inModal?: boolean;
 } = {}) {
+  const locale = useLocale();
+
   const queryClient = useQueryClient();
   const [selectedUniversity, setSelectedUniversity] =
     useState(initialUniversityId);
@@ -209,9 +218,9 @@ export function ClassDisciplineManager({
       academicApi.attachDisciplineToClass(selectedClass, disciplineId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Disciplina vinculada a grade da turma.");
+      toast.success({ key: "admin.disciplinaVinculadaAGradeDaTurma", params: {} });
     },
-    onError: () => toast.error("Nao foi possivel vincular a disciplina."),
+    onError: () => toast.error({ key: "admin.naoFoiPossivelVincularADisciplina", params: {} }),
   });
 
   const detachDisciplineMutation = useMutation({
@@ -219,9 +228,9 @@ export function ClassDisciplineManager({
       academicApi.detachDisciplineFromClass(selectedClass, disciplineId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Disciplina removida da grade da turma.");
+      toast.success({ key: "admin.disciplinaRemovidaDaGradeDaTurma", params: {} });
     },
-    onError: () => toast.error("Nao foi possivel desvincular a disciplina."),
+    onError: () => toast.error({ key: "admin.naoFoiPossivelDesvincularADisciplina", params: {} }),
   });
 
   const regenerateCodeMutation = useMutation({
@@ -233,9 +242,9 @@ export function ClassDisciplineManager({
       setLatestRegistrationCode(response.registrationCode || "");
       setCopiedCode(false);
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Codigo da turma regenerado.");
+      toast.success({ key: "admin.codigoDaTurmaRegenerado", params: {} });
     },
-    onError: () => toast.error("Nao foi possivel regenerar o codigo da turma."),
+    onError: () => toast.error({ key: "admin.naoFoiPossivelRegenerarOCodigoDa", params: {} }),
   });
 
   const enrollStudentMutation = useMutation({
@@ -243,9 +252,9 @@ export function ClassDisciplineManager({
       academicApi.enrollStudentInClass(selectedClass, studentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
-      toast.success("Aluno transferido para a turma.");
+      toast.success({ key: "admin.alunoTransferidoParaATurma", params: {} });
     },
-    onError: () => toast.error("Nao foi possivel transferir o aluno."),
+    onError: () => toast.error({ key: "admin.naoFoiPossivelTransferirOAluno", params: {} }),
   });
 
   const resetUniversity = (universityId: string) => {
@@ -285,8 +294,7 @@ export function ClassDisciplineManager({
   const loader = (
     <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
       <Loader2 className="h-4 w-4 animate-spin" />
-      Carregando vinculos...
-    </div>
+      {t("common.carregandoVinculos", {}, locale)}</div>
   );
 
   const body = (
@@ -294,11 +302,9 @@ export function ClassDisciplineManager({
       {!inModal && (
         <div className="mb-5">
           <h2 className="font-[Poppins] text-base font-semibold text-white">
-            Gerenciar turma
-          </h2>
+            {t("admin.gerenciarTurma", {}, locale)}</h2>
           <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-            Controle grade, codigo de acesso e alunos da turma.
-          </p>
+            {t("admin.controleGradeCodigoDeAcessoEAlunos", {}, locale)}</p>
         </div>
       )}
 
@@ -306,36 +312,33 @@ export function ClassDisciplineManager({
         <div className="grid gap-4 md:grid-cols-3">
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Universidade
-            </label>
+              {t("common.universidade", {}, locale)}</label>
             <Select
               value={selectedUniversity}
               onChange={(v) => resetUniversity(v)}
               options={(academicData?.universities ?? []).map((university) => ({ value: university._id, label: university.name }))}
-              placeholder="Selecione"
+              placeholder={t("common.selecione_92", {}, locale)}
             />
           </div>
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Curso
-            </label>
+              {t("common.curso", {}, locale)}</label>
             <Select
               value={selectedCourse}
               onChange={(v) => resetCourse(v)}
               options={courses.map((item) => ({ value: item._id, label: item.name }))}
-              placeholder="Selecione"
+              placeholder={t("common.selecione_92", {}, locale)}
               disabled={!selectedUniversity}
             />
           </div>
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Turma
-            </label>
+              {t("common.turma", {}, locale)}</label>
             <Select
               value={selectedClass}
               onChange={(v) => resetClass(v)}
               options={(course?.classes ?? []).map((item) => ({ value: item._id, label: item.name }))}
-              placeholder="Selecione"
+              placeholder={t("common.selecione_92", {}, locale)}
               disabled={!selectedCourse}
             />
           </div>
@@ -351,8 +354,7 @@ export function ClassDisciplineManager({
               </div>
               <div className="min-w-0">
                 <p className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Codigo da turma
-                </p>
+                  {t("common.codigoDaTurma", {}, locale)}</p>
                 <p className="mt-1 truncate font-mono text-base font-semibold text-blue-300">
                   {registrationCode}
                 </p>
@@ -370,7 +372,7 @@ export function ClassDisciplineManager({
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
-                {copiedCode ? "Copiado" : "Copiar"}
+                {copiedCode ? t("common.copiado", {}, locale) : t("common.copiar", {}, locale)}
               </button>
               <button
                 type="button"
@@ -381,8 +383,7 @@ export function ClassDisciplineManager({
                 <RefreshCw
                   className={`h-4 w-4 ${regenerateCodeMutation.isPending ? "animate-spin" : ""}`}
                 />
-                Regenerar
-              </button>
+                {t("admin.regenerar", {}, locale)}</button>
             </div>
           </div>
 
@@ -392,15 +393,13 @@ export function ClassDisciplineManager({
               onClick={() => setActiveTab("disciplines")}
               className={`flex-1 rounded-lg px-3 py-2 font-[Poppins] text-sm transition-colors ${activeTab === "disciplines" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
             >
-              Disciplinas
-            </button>
+              {t("common.disciplinas", {}, locale)}</button>
             <button
               type="button"
               onClick={() => setActiveTab("students")}
               className={`flex-1 rounded-lg px-3 py-2 font-[Poppins] text-sm transition-colors ${activeTab === "students" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
             >
-              Alunos
-            </button>
+              {t("common.alunos", {}, locale)}</button>
           </div>
 
           {activeTab === "disciplines" && (
@@ -408,21 +407,20 @@ export function ClassDisciplineManager({
               <SearchField
                 value={disciplineSearch}
                 onChange={setDisciplineSearch}
-                placeholder="Buscar disciplina..."
+                placeholder={t("admin.buscarDisciplina", {}, locale)}
               />
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Disciplinas disponiveis
-                  </h3>
+                    {t("admin.disciplinasDisponiveis", {}, locale)}</h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredAvailableDisciplines.length}
                   </span>
                 </div>
                 <AssignmentList
                   items={filteredAvailableDisciplines}
-                  emptyText="Nenhuma disciplina disponivel."
+                  emptyText={t("admin.noAvailableSubjects")}
                   action={(discipline) => (
                     <button
                       type="button"
@@ -432,8 +430,7 @@ export function ClassDisciplineManager({
                       }
                       className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 font-[Poppins] text-xs text-blue-300 transition-colors hover:bg-blue-500/20 disabled:opacity-50"
                     >
-                      Vincular
-                    </button>
+                      {t("common.vincular", {}, locale)}</button>
                   )}
                 />
               </div>
@@ -443,8 +440,7 @@ export function ClassDisciplineManager({
                   <div className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-blue-400" />
                     <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                      Grade da turma
-                    </h3>
+                      {t("admin.gradeDaTurma", {}, locale)}</h3>
                   </div>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredLinkedDisciplines.length}
@@ -452,7 +448,7 @@ export function ClassDisciplineManager({
                 </div>
                 <AssignmentList
                   items={filteredLinkedDisciplines}
-                  emptyText="Nenhuma disciplina vinculada."
+                  emptyText={t("admin.noLinkedSubjects")}
                   action={(discipline) => (
                     <button
                       type="button"
@@ -463,8 +459,7 @@ export function ClassDisciplineManager({
                       className="flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 font-[Poppins] text-xs text-red-300 transition-colors hover:bg-red-500/20 disabled:opacity-50"
                     >
                       <X className="h-3.5 w-3.5" />
-                      Remover
-                    </button>
+                      {t("common.remover", {}, locale)}</button>
                   )}
                 />
               </div>
@@ -476,34 +471,30 @@ export function ClassDisciplineManager({
               <SearchField
                 value={studentSearch}
                 onChange={setStudentSearch}
-                placeholder="Buscar aluno por nome ou email..."
+                placeholder={t("common.buscarAlunoPorNomeOuEmail", {}, locale)}
               />
 
               <div className="rounded-xl border border-white/10 bg-neutral-950/40 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-emerald-400" />
                   <p className="font-[Poppins] text-sm font-semibold text-white">
-                    Matricula por turma
-                  </p>
+                    {t("admin.matriculaPorTurma", {}, locale)}</p>
                 </div>
                 <p className="mt-1 font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                  Alunos pertencem a uma unica turma. Transferir um aluno para
-                  esta turma altera suas disciplinas conforme a grade atual.
-                </p>
+                  {t("admin.alunosPertencemAUmaUnicaTurmaTransferir", {}, locale)}</p>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Alunos de outras turmas do curso
-                  </h3>
+                    {t("admin.alunosDeOutrasTurmasDoCurso", {}, locale)}</h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredAvailableStudents.length}
                   </span>
                 </div>
                 <AssignmentList
                   items={filteredAvailableStudents}
-                  emptyText="Nenhum aluno disponivel para transferencia."
+                  emptyText={t("admin.noTransferStudents")}
                   action={(student) => (
                     <button
                       type="button"
@@ -511,8 +502,7 @@ export function ClassDisciplineManager({
                       onClick={() => enrollStudentMutation.mutate(student._id)}
                       className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-[Poppins] text-xs text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
                     >
-                      Transferir
-                    </button>
+                      {t("admin.transferir", {}, locale)}</button>
                   )}
                 />
               </div>
@@ -520,15 +510,14 @@ export function ClassDisciplineManager({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Alunos da turma
-                  </h3>
+                    {t("admin.alunosDaTurma", {}, locale)}</h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredEnrolledStudents.length}
                   </span>
                 </div>
                 <AssignmentList
                   items={filteredEnrolledStudents}
-                  emptyText="Nenhum aluno nesta turma."
+                  emptyText={t("admin.noClassStudents")}
                 />
               </div>
             </div>

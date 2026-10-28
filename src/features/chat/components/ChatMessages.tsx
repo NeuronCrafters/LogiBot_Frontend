@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { Avatar } from "@/shared/components/Avatar";
 import { logger } from "@/shared/lib/logger";
 import logo from "@/assets/logo.svg";
@@ -30,6 +31,8 @@ const CodeBlock = ({
   language: string;
   children: string;
 }) => {
+  useLocale();
+
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -64,13 +67,11 @@ const CodeBlock = ({
           {copied ? (
             <>
               <Check size={12} />
-              Copiado
-            </>
+              {t("common.copiado")}</>
           ) : (
             <>
               <Copy size={12} />
-              Copiar
-            </>
+              {t("common.copiar")}</>
           )}
         </button>
       </div>
@@ -159,21 +160,20 @@ const markdownComponents = {
     <th className="px-3 py-2 font-semibold text-left" {...props} />
   ),
   td: ({ node, ...props }: any) => <td className="px-3 py-2" {...props} />,
-  img: ({ node, ...props }: any) => (
-    <img
-      className="h-auto max-w-full rounded-lg"
-      {...props}
-      onError={(e) => {
-        e.currentTarget.onerror = null;
-        e.currentTarget.src =
-          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23262626'/%3E%3Ctext x='200' y='150' fill='%23d4d4d4' font-family='Arial,sans-serif' font-size='16' text-anchor='middle' dominant-baseline='middle'%3EImagem indisponivel%3C/text%3E%3C/svg%3E";
-        e.currentTarget.alt = "Imagem não carregada";
-      }}
-    />
-  ),
+  img: ({ node, ...props }: any) => <MarkdownImage {...props} />,
+
 };
 
+function MarkdownImage(props: React.ImgHTMLAttributes<HTMLImageElement>) {
+  useLocale();
+  const [failed, setFailed] = useState(false);
+  const fallback = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="#262626"/><text x="200" y="150" fill="#d4d4d4" font-family="Arial,sans-serif" font-size="16" text-anchor="middle">${t("chat.imageUnavailable")}</text></svg>`)}`;
+  return <img {...props} className="h-auto max-w-full rounded-lg" src={failed ? fallback : props.src} alt={failed ? t("chat.imagemNaoCarregada") : props.alt} onError={() => setFailed(true)} />;
+}
+
 function ChatMessages({ messages, userId }: ChatMessagesProps) {
+  useLocale();
+
   const formatMessage = (message: Message) => {
     const content = message.content || message.text;
 
@@ -182,17 +182,7 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
       return null;
     }
 
-    const contentLower = content.toLowerCase();
-    const isInstruction =
-      contentLower.includes("escolha seu nível") ||
-      contentLower.includes("escolha um assunto") ||
-      contentLower.includes("escolha um tópico") ||
-      contentLower.includes("tópico selecionado") ||
-      contentLower.includes("suas perguntas estão prontas") ||
-      contentLower.includes("respostas:") ||
-      contentLower.includes("⚠️") ||
-      contentLower.includes("praticar") ||
-      contentLower.includes("gerando suas perguntas");
+    const isInstruction = message.type === "instruction";
 
     if (isInstruction) {
       return (
@@ -232,7 +222,7 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
               <div className="mr-2">
                 <img
                   src={logo}
-                  alt="Bot"
+                  alt={t("common.bot")}
                   className="w-10 h-10 p-1 bg-white rounded-full"
                 />
               </div>

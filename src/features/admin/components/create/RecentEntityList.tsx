@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { AppModal } from "@/shared/components/feedback/AppModal";
 import { useState } from "react";
 import {
@@ -29,33 +30,35 @@ const TYPE_META: Record<
   { label: string; icon: React.ReactNode; color: string }
 > = {
   university: {
-    label: "Universidade",
+    get label() { return t("common.universidade"); },
     icon: <School className="h-3.5 w-3.5" />,
     color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
   },
   course: {
-    label: "Curso",
+    get label() { return t("common.curso"); },
     icon: <BookOpen className="h-3.5 w-3.5" />,
     color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
   },
   class: {
-    label: "Turma",
+    get label() { return t("common.turma"); },
     icon: <Users className="h-3.5 w-3.5" />,
     color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
   },
   discipline: {
-    label: "Disciplina",
+    get label() { return t("common.disciplina"); },
     icon: <Library className="h-3.5 w-3.5" />,
     color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
   },
   professor: {
-    label: "Professor",
+    get label() { return t("common.professor"); },
     icon: <GraduationCap className="h-3.5 w-3.5" />,
     color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
   },
 };
 
 function TypeBadge({ type }: { type: string }) {
+  useLocale();
+
   const meta = TYPE_META[type];
   if (!meta)
     return (
@@ -78,6 +81,8 @@ export function RecentEntityList({
   onEdit,
   loading = false,
 }: RecentEntityListProps) {
+  useLocale();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<RecentItem | null>(null);
 
@@ -100,11 +105,9 @@ export function RecentEntityList({
         <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
           <div>
             <p className="font-[Poppins] text-sm font-semibold text-white">
-              Registros recentes
-            </p>
+              {t("admin.registrosRecentes")}</p>
             <p className="mt-0.5 font-[Poppins] text-xs text-zinc-600">
-              Últimos cadastros realizados nesta sessão
-            </p>
+              {t("admin.ultimosCadastrosRealizadosNestaSessao")}</p>
           </div>
           {items.length > 0 && (
             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
@@ -138,11 +141,9 @@ export function RecentEntityList({
               </div>
               <div className="text-center">
                 <p className="font-[Poppins] text-sm font-medium text-zinc-500">
-                  Nenhum cadastro ainda
-                </p>
+                  {t("admin.nenhumCadastroAinda")}</p>
                 <p className="mt-0.5 font-[Poppins] text-xs text-zinc-700">
-                  Os registros criados aparecerão aqui.
-                </p>
+                  {t("admin.osRegistrosCriadosApareceraoAqui")}</p>
               </div>
             </div>
           )}
@@ -164,19 +165,18 @@ export function RecentEntityList({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-[Poppins] text-sm font-medium text-zinc-200">
-                        {item.name || "Sem nome"}
+                        {item.name || t("admin.semNome")}
                       </p>
                       <div className="mt-1 flex items-center gap-2">
                         <TypeBadge type={item.type} />
                         <span className="font-[Poppins] text-[10px] text-zinc-700">
-                          {item.action === "update" ? "Editado" : "Criado"}
+                          {item.action === "update" ? t("admin.editado") : t("admin.criado")}
                         </span>
                       </div>
                       {item.registrationCode ? (
                         <div className="mt-2 flex flex-wrap items-center gap-1.5">
                           <span className="font-[Poppins] text-[10px] text-zinc-600">
-                            Codigo da turma
-                          </span>
+                            {t("common.codigoDaTurma")}</span>
                           <span className="rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-mono text-[11px] text-blue-300">
                             {item.registrationCode}
                           </span>
@@ -186,7 +186,7 @@ export function RecentEntityList({
                   </div>
                   <button
                     onClick={() => handleEditClick(item)}
-                    title="Editar"
+                    title={t("common.editar")}
                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 opacity-0 transition-all hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400 group-hover:opacity-100"
                   >
                     <Pencil className="h-3 w-3" />
@@ -201,10 +201,10 @@ export function RecentEntityList({
       <AppModal
         isOpen={modalOpen}
         type="update"
-        title="Confirmar edição"
-        description={`Você está prestes a editar "${selectedItem?.name}". Deseja continuar?`}
-        acceptLabel="Sim, editar"
-        cancelLabel="Cancelar"
+        title={t("admin.confirmarEdicao")}
+        description={t("admin.voceEstaPrestesAEditarValue0Deseja", { value0: selectedItem?.name })}
+        acceptLabel={t("common.confirmEdit")}
+        cancelLabel={t("common.cancelar")}
         onConfirm={confirmEdit}
         onCancel={closeModal}
         onClose={closeModal}
@@ -212,13 +212,13 @@ export function RecentEntityList({
         {selectedItem && (
           <div className="space-y-2">
             <div className="rounded-xl border border-white/5 bg-neutral-950/60 px-4 py-3">
-              <p className="font-[Poppins] text-xs text-zinc-500">Tipo</p>
+              <p className="font-[Poppins] text-xs text-zinc-500">{t("admin.tipo")}</p>
               <div className="mt-1">
                 <TypeBadge type={selectedItem.type} />
               </div>
             </div>
             <div className="rounded-xl border border-white/5 bg-neutral-950/60 px-4 py-3">
-              <p className="font-[Poppins] text-xs text-zinc-500">Nome</p>
+              <p className="font-[Poppins] text-xs text-zinc-500">{t("common.nome")}</p>
               <p className="mt-0.5 font-[Poppins] text-sm text-white">
                 {selectedItem.name || "—"}
               </p>

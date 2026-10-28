@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import React, { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -18,6 +19,8 @@ const inputCls =
   "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
 
 function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
+  const locale = useLocale();
+
   const { user } = useAuth();
   const roles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isCoordinator =
@@ -123,8 +126,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       courses,
       onSubmit,
       isCoordinator,
-      initialData,
-    ],
+      initialData,],
   );
 
   if (isLoading)
@@ -132,8 +134,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
           <Loader2 className="w-4 h-4 animate-spin" />
-          Carregando dados acadêmicos...
-        </div>
+          {t("common.carregandoDadosAcademicos", {}, locale)}</div>
         {[...Array(4)].map((_, i) => (
           <div key={i} className="h-11 rounded-xl bg-white/5 animate-pulse" />
         ))}
@@ -144,8 +145,7 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     return (
       <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4">
         <p className="font-[Poppins] text-sm text-red-400">
-          Erro ao carregar dados acadêmicos. Tente novamente.
-        </p>
+          {t("admin.erroAoCarregarDadosAcademicosTenteNovamente", {}, locale)}</p>
       </div>
     );
 
@@ -153,30 +153,30 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Nome completo</label>
+          <label className={labelCls}>{t("common.nomeCompleto", {}, locale)}</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ex: João da Silva"
+            placeholder={t("admin.exJoaoDaSilva", {}, locale)}
             required
             className={inputCls}
           />
         </div>
         <div>
-          <label className={labelCls}>E-mail</label>
+          <label className={labelCls}>{t("common.email", {}, locale)}</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="professor@universidade.edu.br"
+            placeholder={t("admin.professorEmailExample")}
             required
             className={inputCls}
           />
         </div>
       </div>
       <div>
-        <label className={labelCls}>Senha de acesso</label>
+        <label className={labelCls}>{t("common.senhaDeAcesso", {}, locale)}</label>
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
@@ -184,8 +184,8 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             placeholder={
               initialData
-                ? "Deixe em branco para manter a senha"
-                : "Mínimo 6 caracteres"
+                ? t("admin.deixeEmBrancoParaManterASenha", {}, locale)
+                : t("admin.minimo6Caracteres", {}, locale)
             }
             required={!initialData}
             className={`${inputCls} pr-11`}
@@ -200,31 +200,30 @@ function ProfessorForm({ onSubmit, initialData }: ProfessorFormProps) {
         </div>
       </div>
       <div>
-        <label className={labelCls}>Universidade</label>
+        <label className={labelCls}>{t("common.universidade", {}, locale)}</label>
         <Select
           value={school}
           onChange={(v) => handleUniversityChange(v)}
           options={(academicData?.universities ?? []).map((uni) => ({ value: uni._id, label: uni.name }))}
-          placeholder="Selecione a universidade"
+          placeholder={t("common.selecioneAUniversidade", {}, locale)}
           disabled={isCoordinator}
         />
       </div>
       {school && availableCourses.length > 0 && (
         <div>
-          <label className={labelCls}>Curso</label>
+          <label className={labelCls}>{t("common.curso", {}, locale)}</label>
           <Select
             value={courses[0] ?? ""}
             onChange={(v) => setCourses(v ? [v] : [])}
             options={availableCourses.map((course) => ({ value: course._id, label: course.name }))}
-            placeholder="Selecione o curso"
+            placeholder={t("common.selecioneOCurso", {}, locale)}
           />
         </div>
       )}
       {school && availableCourses.length === 0 && (
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
           <p className="font-[Poppins] text-sm text-amber-400">
-            Nenhum curso encontrado para esta universidade.
-          </p>
+            {t("admin.nenhumCursoEncontradoParaEstaUniversidade", {}, locale)}</p>
         </div>
       )}
       <div className="pt-1">

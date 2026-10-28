@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { useState, useEffect } from "react";
 import { Typograph } from "@/shared/components/Typography";
 
@@ -7,6 +8,8 @@ interface TypingBubbleProps {
 }
 
 export function TypingBubble({ onDone, text }: TypingBubbleProps) {
+  useLocale();
+
   const [dotCount, setDotCount] = useState(1);
   const [showText, setShowText] = useState(false);
 
@@ -31,7 +34,7 @@ export function TypingBubble({ onDone, text }: TypingBubbleProps) {
     <div className="flex items-end w-full mb-3 justify-start animate-fade-in">
       <div className="bg-[#2c2c2c] text-gray-200 px-4 py-2 rounded-xl rounded-bl-none shadow max-w-[75%]">
         <Typograph
-          text={showText ? text : `Só um momento${".".repeat(dotCount)}`}
+          text={showText ? text : t("chat.soUmMomentovalue0", { value0: ".".repeat(dotCount) })}
           variant="text8"
           weight="regular"
           fontFamily="poppins"

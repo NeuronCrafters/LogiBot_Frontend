@@ -1,6 +1,10 @@
+import { apiError } from "@/shared/lib/apiError";
+import { useDialogFocus } from "@/shared/hooks/useDialogFocus";
+import { t, useLocale, getLanguage, type Language } from "@/i18n";
 import {
   createContext,
   useCallback,
+  useEffect,
   useContext,
   useRef,
   useState,
@@ -20,7 +24,7 @@ import type {
   DashboardInsightResponse,
 } from "@/features/dashboard/types";
 
-type InsightRequest =
+type InsightRequest = { language: Language } & (
   | {
       kind: "chart";
       chart: DashboardInsightChart;
@@ -31,7 +35,7 @@ type InsightRequest =
       kind: "overview";
       title: string;
       filters: DashboardFilterParams;
-    };
+    });
 
 type DashboardInsightContextValue = {
   openChart: (
@@ -45,23 +49,31 @@ type DashboardInsightContextValue = {
 const DashboardInsightContext =
   createContext<DashboardInsightContextValue | null>(null);
 
+const INSIGHT_TITLES = {
+  "usage": "dashboard.tempoDeUsoDiario_490",
+  "accuracy": "dashboard.acertosEErros",
+  "chat-topics": "dashboard.assuntosMaisAcessadosNoChat",
+  "general-score": "dashboard.avaliacaoGeralDeDesempenho_443",
+  "proficiency-radar": "dashboard.proficienciaPorAssunto",
+  "effort-matrix": "dashboard.matrizDesempenhoVersusEsforco",
+  "learning-journey": "dashboard.jornadaDeAprendizagem_458",
+  "access-pattern": "dashboard.padraoDeAcesso"
+} as const;
+
 const STALE_TIME = 15 * 60 * 1000;
 
 function queryKey(request: InsightRequest) {
   return [
     "dashboard-insight",
+    request.language,
     request.kind,
     request.kind === "chart" ? request.chart : "overview",
     request.filters,
   ] as const;
 }
 
-function errorMessage(error: any) {
-  return (
-    error?.response?.data?.message ||
-    error?.message ||
-    "Não foi possível gerar o insight agora."
-  );
+function errorMessage(error: unknown) {
+  return apiError(error, "dashboard.naoFoiPossivelGerarOInsightAgora");
 }
 
 const insightMarkdownComponents = {
@@ -155,6 +167,8 @@ export function DashboardInsightProvider({
 }: {
   children: ReactNode;
 }) {
+  const locale = useLocale();
+
   const queryClient = useQueryClient();
   const [request, setRequest] = useState<InsightRequest | null>(null);
   const [result, setResult] = useState<DashboardInsightResponse | null>(null);
@@ -177,8 +191,9 @@ export function DashboardInsightProvider({
                   next.chart,
                   next.filters,
                   force,
+                  next.language,
                 )
-              : await dashboardApi.getOverviewInsight(next.filters, force);
+              : await dashboardApi.getOverviewInsight(next.filters, force, next.language);
           return response.data;
         };
 
@@ -191,12 +206,12 @@ export function DashboardInsightProvider({
             });
 
         if (force) queryClient.setQueryData(queryKey(next), data);
-        if (requestNumber === activeRequest.current) setResult(data);
+        if (requestNumber === activeRequest.current && next.language === getLanguage()) setResult(data);
       } catch (caught) {
-        if (requestNumber === activeRequest.current)
+        if (requestNumber === activeRequest.current && next.language === getLanguage())
           setError(errorMessage(caught));
       } finally {
-        if (requestNumber === activeRequest.current) setLoading(false);
+        if (requestNumber === activeRequest.current && next.language === getLanguage()) setLoading(false);
       }
     },
     [queryClient],
@@ -208,7 +223,7 @@ export function DashboardInsightProvider({
       title: string,
       filters: DashboardFilterParams,
     ) => {
-      const next: InsightRequest = { kind: "chart", chart, title, filters };
+      const next: InsightRequest = { kind: "chart", chart, title, filters, language: getLanguage() };
       setRequest(next);
       void load(next, false);
     },
@@ -219,14 +234,22 @@ export function DashboardInsightProvider({
     (filters: DashboardFilterParams) => {
       const next: InsightRequest = {
         kind: "overview",
-        title: "Análise geral do dashboard",
+        language: getLanguage(),
+        title: t("dashboard.analiseGeralDoDashboard", {}, locale),
         filters,
       };
       setRequest(next);
       void load(next, false);
     },
-    [load],
+    [load, locale],
   );
+
+  useEffect(() => {
+    if (!request || request.language === locale) return;
+    const next = { ...request, language: locale };
+    setRequest(next);
+    void load(next, false);
+  }, [locale, request, load]);
 
   const close = () => {
     activeRequest.current += 1;
@@ -236,11 +259,13 @@ export function DashboardInsightProvider({
     setLoading(false);
   };
 
+  const dialogRef = useDialogFocus<HTMLDivElement>(Boolean(request), close);
+
   return (
     <DashboardInsightContext.Provider value={{ openChart, openOverview }}>
       {children}
       {request && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-6">
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("dashboard.insightPedagogicoGeradoAPartirDosDados", {}, locale)} tabIndex={-1} className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-6">
           <div className="flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] text-white shadow-2xl shadow-black/50">
             <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-gradient-to-r from-violet-500/[0.08] to-transparent p-5 sm:px-8 sm:py-6">
               <div className="flex items-start gap-3">
@@ -249,17 +274,16 @@ export function DashboardInsightProvider({
                 </div>
                 <div>
                   <h2 className="font-[Poppins] text-lg font-semibold">
-                    {request.title}
+                    {request.kind === "overview" ? t("dashboard.analiseGeralDoDashboard", {}, locale) : t(INSIGHT_TITLES[request.chart], {}, locale)}
                   </h2>
                   <p className="mt-1 font-[Poppins] text-sm text-zinc-500">
-                    Insight pedagógico gerado a partir dos dados atuais.
-                  </p>
+                    {t("dashboard.insightPedagogicoGeradoAPartirDosDados", {}, locale)}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={close}
-                aria-label="Fechar insight"
+                aria-label={t("dashboard.fecharInsight", {}, locale)}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <X className="h-4 w-4" />
@@ -271,8 +295,7 @@ export function DashboardInsightProvider({
                 <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 text-center">
                   <Loader2 className="h-7 w-7 animate-spin text-violet-400" />
                   <p className="font-[Poppins] text-sm text-zinc-400">
-                    Analisando os dados do dashboard...
-                  </p>
+                    {t("dashboard.analisandoOsDadosDoDashboard", {}, locale)}</p>
                 </div>
               )}
 
@@ -287,8 +310,7 @@ export function DashboardInsightProvider({
                     onClick={() => void load(request, false)}
                     className="rounded-lg bg-blue-600 px-4 py-2 font-[Poppins] text-sm font-semibold hover:bg-blue-500"
                   >
-                    Tentar novamente
-                  </button>
+                    {t("common.tentarNovamente", {}, locale)}</button>
                 </div>
               )}
 
@@ -297,10 +319,9 @@ export function DashboardInsightProvider({
                   {loading && (
                     <div className="flex items-center gap-2 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 font-[Poppins] text-xs text-violet-300">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Gerando uma nova análise...
-                    </div>
+                      {t("dashboard.gerandoUmaNovaAnalise", {}, locale)}</div>
                   )}
-                  <div className="mx-auto w-full max-w-5xl">
+                  <div lang={result.language} className="mx-auto w-full max-w-5xl">
                     <Markdown
                       remarkPlugins={[remarkGfm]}
                       components={insightMarkdownComponents}
@@ -309,10 +330,7 @@ export function DashboardInsightProvider({
                     </Markdown>
                   </div>
                   <div className="mx-auto w-full max-w-5xl rounded-xl border border-amber-500/15 bg-amber-500/5 p-4 font-[Poppins] text-xs leading-relaxed text-amber-200/70">
-                    Este conteúdo apoia a decisão pedagógica e deve ser
-                    interpretado junto ao contexto da turma e à observação do
-                    professor.
-                  </div>
+                    {t("dashboard.esteConteudoApoiaADecisaoPedagogicaE", {}, locale)}</div>
                 </div>
               )}
             </div>
@@ -324,8 +342,7 @@ export function DashboardInsightProvider({
                   onClick={close}
                   className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-[Poppins] text-sm font-semibold text-zinc-200 hover:bg-white/10"
                 >
-                  Fechar
-                </button>
+                  {t("common.fechar", {}, locale)}</button>
                 {result && (
                   <button
                     type="button"
@@ -338,8 +355,7 @@ export function DashboardInsightProvider({
                     ) : (
                       <Sparkles className="h-4 w-4" />
                     )}
-                    Gerar novamente
-                  </button>
+                    {t("dashboard.gerarNovamente", {}, locale)}</button>
                 )}
               </div>
             </div>
@@ -351,10 +367,12 @@ export function DashboardInsightProvider({
 }
 
 export function useDashboardInsights() {
+  useLocale();
+
   const context = useContext(DashboardInsightContext);
   if (!context)
     throw new Error(
-      "useDashboardInsights deve ser usado dentro de DashboardInsightProvider",
+      t("dashboard.usedashboardinsightsDeveSerUsadoDentroDeDashboardinsightprovider"),
     );
   return context;
 }

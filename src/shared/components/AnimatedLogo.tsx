@@ -1,19 +1,22 @@
+import { t, useLocale } from "@/i18n";
 import boneco from "@/assets/boneco.svg";
 import parte from "@/assets/parte.svg";
 
 export const AnimatedLogo = ({ className = "" }: { className?: string }) => {
+  useLocale();
+
   return (
     <div className={`relative ${className}`}>
-      <img src={boneco} alt="Ícone LogiBot" className="w-48 h-48 mt-14" />
+      <img src={boneco} alt={t("common.iconeLogibot")} className="w-48 h-48 mt-14" />
       <img
         src={parte}
-        alt="Orelha animada esquerda"
+        alt={t("common.orelhaAnimadaEsquerda")}
         className="absolute w-20 h-16 top-4 left-6 animate-ear-left"
         style={{ transformOrigin: "bottom", animation: "moveEarLeft 1.5s 30" }}
       />
       <img
         src={parte}
-        alt="Orelha direita"
+        alt={t("common.orelhaDireita")}
         className="absolute top-4 right-6 w-20 h-16 scale-x-[-1]"
       />
       <style>{`

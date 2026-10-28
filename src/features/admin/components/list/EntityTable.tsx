@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import { useEffect, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { AppModal } from "@/shared/components/feedback/AppModal";
@@ -28,16 +29,18 @@ interface EntityTableProps {
 }
 
 const ROLE_LABEL: Record<string, string> = {
-  "course-coordinator": "Coordenador",
-  professor: "Professor",
-  student: "Aluno",
-  admin: "Administrador",
+  get "course-coordinator"() { return t("common.coordenador"); },
+  get professor() { return t("common.professor"); },
+  get student() { return t("common.aluno"); },
+  get admin() { return t("common.administrador"); },
 };
 function translateRole(r: string): string {
   return ROLE_LABEL[r] ?? r;
 }
 
 function RowSkeleton({ cols }: { cols: number }) {
+  useLocale();
+
   const widths = ["w-8", "w-48", "w-40", "w-24", "w-16"];
   return (
     <tr className="border-b border-white/5">
@@ -58,6 +61,8 @@ export function EntityTable({
   onEdit,
   onDelete,
 }: EntityTableProps) {
+  useLocale();
+
   const { user } = useAuth();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,7 +92,7 @@ export function EntityTable({
     : showActions
       ? 4
       : 3;
-  const headerSecondary = hasPeopleColumns ? "E-mail" : "ID";
+  const headerSecondary = hasPeopleColumns ? t("common.email") : "ID";
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-lg shadow-black/10">
@@ -95,19 +100,19 @@ export function EntityTable({
         <div>
           <p className="font-[Poppins] text-sm font-semibold text-white capitalize">
             {entity === "university"
-              ? "Universidades"
+              ? t("common.universidades")
               : entity === "course"
-                ? "Cursos"
+                ? t("common.cursos")
                 : entity === "discipline"
-                  ? "Disciplinas"
+                  ? t("common.disciplinas")
                   : entity === "class"
-                    ? "Turmas"
+                    ? t("common.turmas")
                     : entity === "professor"
-                      ? "Professores"
-                      : "Alunos"}
+                      ? t("common.professores")
+                      : t("common.alunos")}
           </p>
           <p className="mt-0.5 font-[Poppins] text-xs text-zinc-600">
-            {items.length} {items.length === 1 ? "registro" : "registros"}
+            {t("common.records", { count: items.length })}
           </p>
         </div>
       </div>
@@ -117,23 +122,20 @@ export function EntityTable({
           <thead>
             <tr className="border-b border-white/5">
               <th className="w-12 px-5 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-                Nº
+                {t("common.numberColumn")}
               </th>
               <th className="px-5 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-                Nome
-              </th>
+                {t("common.nome")}</th>
               <th className="px-5 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
                 {headerSecondary}
               </th>
               {hasPeopleColumns && (
                 <th className="px-5 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-                  Cargo
-                </th>
+                  {t("admin.cargo")}</th>
               )}
               {showActions && (
                 <th className="px-5 py-3 text-right font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-                  Ações
-                </th>
+                  {t("admin.acoes")}</th>
               )}
             </tr>
           </thead>
@@ -182,7 +184,7 @@ export function EntityTable({
                           {canEdit && (
                             <button
                               onClick={() => onEdit(item)}
-                              title="Editar registro"
+                              title={t("admin.editarRegistro")}
                               className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400"
                             >
                               <Pencil className="h-3.5 w-3.5" />
@@ -191,7 +193,7 @@ export function EntityTable({
                           {canDelete && (
                             <button
                               onClick={() => setDeleteId(item.id)}
-                              title="Excluir"
+                              title={t("common.excluir")}
                               className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -209,15 +211,15 @@ export function EntityTable({
       <AppModal
         isOpen={!!deleteId}
         type="delete"
-        title="Confirmar exclusao"
-        description="Tem certeza que deseja excluir este registro? Esta acao nao pode ser desfeita."
+        title={t("admin.confirmarExclusao")}
+        description={t("admin.temCertezaQueDesejaExcluirEsteRegistro")}
         onClose={() => setDeleteId(null)}
         onCancel={() => setDeleteId(null)}
         onConfirm={() => {
           if (deleteId) onDelete(deleteId);
           setDeleteId(null);
         }}
-        acceptLabel="Excluir"
+        acceptLabel={t("common.excluir")}
       />
     </div>
   );

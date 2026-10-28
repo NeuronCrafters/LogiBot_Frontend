@@ -1,3 +1,4 @@
+import { t, useLocale, normalizeLanguage } from "@/i18n";
 ﻿import { ArrowDown } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
 import { User } from "@/app/providers/AuthContext";
@@ -30,6 +31,8 @@ const ChatMessageList = memo(function ChatMessageList({
 }: {
   messages: ChatMessage[];
 }) {
+  useLocale();
+
   return (
     <>
       {messages.map((msg, index) =>
@@ -39,6 +42,7 @@ const ChatMessageList = memo(function ChatMessageList({
           <MarkdownMessageBubble
             key={msg.id || index}
             text={msg.text}
+            outputLanguage={msg.outputLanguage}
             sender={msg.sender}
             retrievedChunks={msg.retrievedChunks}
           />
@@ -49,6 +53,8 @@ const ChatMessageList = memo(function ChatMessageList({
 });
 
 const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
+  const locale = useLocale();
+
   const userId = user?._id || "user";
   const [searchParams, setSearchParams] = useSearchParams();
   const sessionIdFromUrl = searchParams.get("session");
@@ -84,7 +90,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     const title =
       rawTitle.length > 55
         ? `${rawTitle.slice(0, 55).trimEnd()}...`
-        : rawTitle || "Nova Conversa";
+        : rawTitle || t("chat.novaConversa_333", {}, locale);
     addSessionToCache({
       sessionId,
       title,
@@ -140,6 +146,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
           const formatted = rows.map((m: any, index: number) => ({
             id: m.id || m._id || `msg-${index}`,
             text: m.content || "",
+            outputLanguage: normalizeLanguage(m.metadata?.outputLanguage),
             sender: (m.role === "assistant" ? "bot" : "user") as "user" | "bot",
             type: "text" as const,
             retrievedChunks: m.metadata?.retrievedChunks?.length
@@ -220,8 +227,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="font-poppins text-sm text-gray-400">
-            Carregando conversa...
-          </p>
+            {t("chat.carregandoConversa", {}, locale)}</p>
         </div>
       </div>
     );
@@ -236,18 +242,14 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
               <div className="mb-4 flex h-14 w-14 items-center justify-center bg-neutral-900 shadow-lg">
                 <img
                   src={logo}
-                  alt="LogiBot"
+                  alt={t("common.logibot", {}, locale)}
                   className="h-full w-full object-contain"
                 />
               </div>
               <h1 className="font-[Poppins] text-2xl sm:text-3xl font-semibold text-white">
-                O que vamos programar hoje?
-              </h1>
+                {t("chat.oQueVamosProgramarHoje", {}, locale)}</h1>
               <p className="mt-3 font-[Poppins] text-sm sm:text-base text-neutral-400">
-                Tire dúvidas sobre lógica, entenda erros no código e peça
-                explicações passo a passo para aprender programação com mais
-                clareza.
-              </p>
+                {t("chat.tireDuvidasSobreLogicaEntendaErrosNo", {}, locale)}</p>
             </div>
             <ChatInput
               sendMessage={handleSendWrapper}

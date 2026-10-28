@@ -1,3 +1,5 @@
+import { ContentLanguageLabel } from "@/i18n/ContentLanguage";
+import { percent, t, useLocale } from "@/i18n";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -12,7 +14,7 @@ import { studentQuizApi } from "@/features/quiz/api/quizApi";
 import { QUIZ_TOPICS } from "@/features/quiz/types";
 import type { StudentQuizItem } from "@/features/quiz/types";
 
-const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
+const TOPIC_LABEL = (): Record<string, string> => Object.fromEntries(
   QUIZ_TOPICS.map((t) => [t.value, t.label]),
 );
 
@@ -23,6 +25,8 @@ function QuizCard({
   quiz: StudentQuizItem;
   onClick: () => void;
 }) {
+  useLocale();
+
   const pct =
     quiz.attempted && quiz.bestTotalQuestions
       ? Math.round((quiz.bestScore! / quiz.bestTotalQuestions) * 100)
@@ -40,21 +44,21 @@ function QuizCard({
         {quiz.attempted ? (
           <span className="flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 font-[Poppins] text-xs font-medium text-emerald-400">
             <CheckCircle2 className="h-3 w-3" />
-            {pct}%
+            {percent(pct / 100, { maximumFractionDigits: 0 })}
           </span>
         ) : (
           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 font-[Poppins] text-xs text-zinc-500">
-            Não respondido
-          </span>
+            {t("quiz.naoRespondido")}</span>
         )}
       </div>
 
       <div className="flex-1">
-        <p className="font-[Poppins] text-sm font-semibold leading-snug text-white">
+        <p lang={quiz.language || undefined} className="font-[Poppins] text-sm font-semibold leading-snug text-white">
           {quiz.title}
         </p>
+        <ContentLanguageLabel language={quiz.language} />
         {quiz.description && (
-          <p className="mt-1 line-clamp-2 font-[Poppins] text-xs leading-relaxed text-zinc-500">
+          <p lang={quiz.language || undefined} className="mt-1 line-clamp-2 font-[Poppins] text-xs leading-relaxed text-zinc-500">
             {quiz.description}
           </p>
         )}
@@ -66,10 +70,10 @@ function QuizCard({
           {quiz.disciplineName}
         </span>
         <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-[10px] text-zinc-500">
-          {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
+          {TOPIC_LABEL()[quiz.topic] ?? quiz.topic}
         </span>
         <span className="ml-auto flex items-center gap-1 font-[Poppins] text-[10px] text-zinc-600">
-          {quiz.questionCount} {quiz.questionCount === 1 ? "questão" : "questões"}
+          {t("common.questions", { count: quiz.questionCount })}
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
@@ -78,6 +82,8 @@ function QuizCard({
 }
 
 export function Quiz() {
+  useLocale();
+
   const navigate = useNavigate();
 
   const {
@@ -101,11 +107,9 @@ export function Quiz() {
             </div>
             <div>
               <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                Meus Quizzes
-              </h1>
+                {t("common.meusQuizzes")}</h1>
               <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                Quizzes disponíveis para as disciplinas da sua turma.
-              </p>
+                {t("quiz.quizzesDisponiveisParaAsDisciplinasDaSua")}</p>
             </div>
           </div>
         </section>
@@ -114,8 +118,7 @@ export function Quiz() {
           <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-[#1f1f1f] py-20">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
             <p className="font-[Poppins] text-sm text-zinc-500">
-              Carregando quizzes...
-            </p>
+              {t("quiz.carregandoQuizzes")}</p>
           </div>
         )}
 
@@ -126,18 +129,15 @@ export function Quiz() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Erro ao carregar quizzes
-              </p>
+                {t("quiz.erroAoCarregarQuizzes_665")}</p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Verifique sua conexão e tente novamente.
-              </p>
+                {t("quiz.verifiqueSuaConexaoETenteNovamente")}</p>
             </div>
             <button
               onClick={() => refetch()}
               className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 font-[Poppins] text-sm text-red-300 transition-colors hover:bg-red-500/20"
             >
-              Tentar novamente
-            </button>
+              {t("common.tentarNovamente")}</button>
           </div>
         )}
 
@@ -148,11 +148,9 @@ export function Quiz() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Nenhum quiz disponível
-              </p>
+                {t("quiz.nenhumQuizDisponivel")}</p>
               <p className="mt-1 max-w-xs font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                Seus professores ainda não criaram quizzes para as suas disciplinas.
-              </p>
+                {t("quiz.seusProfessoresAindaNaoCriaramQuizzesPara")}</p>
             </div>
           </div>
         )}

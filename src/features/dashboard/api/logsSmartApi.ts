@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { api } from "@/shared/api/httpClient";
 import { logger } from "@/shared/lib/logger";
 import { LOG_ROUTES, PROFESSOR_LOG_ROUTES } from "@/services/api/api_routes";
@@ -55,7 +56,7 @@ export const logApiSmart = {
       if (entity === "student") {
         if (!filters?.disciplineId) {
           throw new Error(
-            "disciplineId obrigatório para professores ao buscar aluno",
+            t("dashboard.disciplineidObrigatorioParaProfessoresAoBuscarAluno"),
           );
         }
         const response = await getRequest<
@@ -102,12 +103,12 @@ export const logApiSmart = {
         });
         if (isFailedEnvelope(response))
           throw new Error(
-            response.error || "erro ao buscar dados do estudante",
+            response.error || t("dashboard.erroAoBuscarDadosDoEstudante"),
           );
         return unwrap(response);
       }
       default:
-        throw new Error("Entidade inválida");
+        throw new Error(t("dashboard.entidadeInvalida"));
     }
   },
 };

@@ -1,3 +1,4 @@
+import { t, requestLanguageHeaders, type Language } from "@/i18n";
 import { api, apiKey, baseURL } from "@/shared/api/httpClient";
 
 export interface RetrievedChunk {
@@ -11,6 +12,7 @@ export interface RetrievedChunk {
 
 export interface ChatSubmitResponse {
   status: "queued";
+  outputLanguage: Language;
   jobId: string;
   sessionId: string;
   userMessageId: string;
@@ -19,6 +21,7 @@ export interface ChatSubmitResponse {
 
 export interface ChatJobStatusResponse {
   status: "queued" | "running" | "done" | "failed";
+  outputLanguage: Language;
   jobId: string;
   sessionId: string;
   userMessageId: string;
@@ -154,17 +157,18 @@ export const chatApi = {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        ...requestLanguageHeaders(),
         "x-api-key": apiKey,
       },
       body: JSON.stringify({ message, sessionId }),
     });
 
     if (!response.ok) {
-      throw new Error(`Stream falhou com status ${response.status}`);
+      throw new Error(t("chat.streamFalhouComStatusValue0", { value0: response.status }));
     }
 
     if (!response.body) {
-      throw new Error("Resposta de stream sem body.");
+      throw new Error(t("chat.respostaDeStreamSemBody"));
     }
 
     const result: ChatStreamResult = {};
@@ -216,7 +220,7 @@ export const chatApi = {
       if (event === "error") {
         const payload = parseSseJson<{ message?: string }>(data);
         const message =
-          payload?.message || "Nao consegui concluir sua resposta agora.";
+          payload?.message || t("chat.naoConseguiConcluirSuaRespostaAgora");
         callbacks.onError?.(message);
         throw new Error(message);
       }

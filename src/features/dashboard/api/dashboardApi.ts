@@ -1,3 +1,4 @@
+import type { Language } from "@/i18n";
 import { api } from "@/shared/api/httpClient";
 import type {
   TopicPerformanceData,
@@ -43,16 +44,17 @@ export const dashboardApi = {
     chart: DashboardInsightChart,
     filters: DashboardFilterParams,
     force = false,
+    language?: Language,
   ) =>
     api.post<DashboardInsightResponse>("/dashboard/insights/chart", {
       chart,
       filters,
       force,
-    }),
+    }, language ? { headers: { "Accept-Language": language, "X-Language": language } } : undefined),
 
-  getOverviewInsight: (filters: DashboardFilterParams, force = false) =>
+  getOverviewInsight: (filters: DashboardFilterParams, force = false, language?: Language) =>
     api.post<DashboardInsightResponse>("/dashboard/insights/overview", {
       filters,
       force,
-    }),
+    }, language ? { headers: { "Accept-Language": language, "X-Language": language } } : undefined),
 };

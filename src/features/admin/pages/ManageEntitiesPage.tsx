@@ -1,3 +1,5 @@
+import { useDialogFocus } from "@/shared/hooks/useDialogFocus";
+import { t, useLocale } from "@/i18n";
 import { useState, useMemo } from "react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
@@ -47,18 +49,18 @@ const MODAL_META: Record<
   { create: string; edit: string; icon: ReactNode }
 > = {
   classes: {
-    create: "Nova Turma",
-    edit: "Editar Turma",
+    get create() { return t("common.novaTurma"); },
+    get edit() { return t("common.editarTurma"); },
     icon: <Users className="h-5 w-5" />,
   },
   disciplines: {
-    create: "Nova Disciplina",
-    edit: "Editar Disciplina",
+    get create() { return t("common.novaDisciplina"); },
+    get edit() { return t("common.editarDisciplina"); },
     icon: <Library className="h-5 w-5" />,
   },
   professors: {
-    create: "Novo Professor",
-    edit: "Editar Professor",
+    get create() { return t("common.novoProfessor"); },
+    get edit() { return t("common.editarProfessor"); },
     icon: <GraduationCap className="h-5 w-5" />,
   },
 };
@@ -78,8 +80,12 @@ function FormModal({
   children: ReactNode;
   wide?: boolean;
 }) {
+  useLocale();
+  const dialogRef = useDialogFocus<HTMLDivElement>(true, onClose);
+
   return (
     <div
+      ref={dialogRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
       className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -98,6 +104,7 @@ function FormModal({
                 </h2>
               </div>
               <button
+                aria-label={t("common.fechar")}
                 onClick={onClose}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
               >
@@ -127,6 +134,8 @@ function TabButton({
   label: string;
   count: number;
 }) {
+  useLocale();
+
   return (
     <button
       onClick={onClick}
@@ -166,6 +175,8 @@ function EntityCard({
   linksIcon?: ReactNode;
   onDelete: () => void;
 }) {
+  useLocale();
+
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] p-4 shadow-md shadow-black/10 transition-colors hover:border-white/20">
       <div>
@@ -197,7 +208,7 @@ function EntityCard({
             className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
           >
             {linksIcon ?? <Library className="h-3 w-3" />}
-            {linksLabel ?? "Vínculos"}
+            {linksLabel ?? t("admin.vinculos")}
           </button>
         )}
         <button
@@ -205,12 +216,11 @@ function EntityCard({
           className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
           <Pencil className="h-3 w-3" />
-          Editar
-        </button>
+          {t("common.editar")}</button>
         <button
           onClick={onDelete}
           className="ml-auto flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-1.5 text-zinc-600 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
-          title="Excluir"
+          title={t("common.excluir")}
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -228,6 +238,8 @@ function EmptyTab({
   createLabel: string;
   onCreateClick: () => void;
 }) {
+  useLocale();
+
   return (
     <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-14">
       <p className="font-[Poppins] text-sm text-zinc-500">{message}</p>
@@ -245,6 +257,8 @@ function EmptyTab({
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export function ManageEntities() {
+  const locale = useLocale();
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("classes");
@@ -323,8 +337,7 @@ export function ManageEntities() {
     adminUniversityId,
     adminCourseId,
     coordUniversityId,
-    coordCourseIds,
-  ]);
+    coordCourseIds,]);
 
   const classes = (activeCourse?.classes as any[]) ?? [];
   const disciplines = (activeCourse?.disciplines as any[]) ?? [];
@@ -344,12 +357,12 @@ export function ManageEntities() {
       return academicApi.post(entity as any, item);
     },
     onSuccess: () => {
-      toast.success("Cadastrado com sucesso!");
+      toast.success({ key: "admin.cadastradoComSucesso", params: {} });
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       setCreateModal(null);
     },
     onError: () =>
-      toast.error("Erro ao cadastrar. Verifique os dados e tente novamente."),
+      toast.error({ key: "admin.erroAoCadastrarVerifiqueOsDadosE", params: {} }),
   });
 
   const updateMutation = useMutation({
@@ -366,12 +379,12 @@ export function ManageEntities() {
       return academicApi.update(entity as any, id, item);
     },
     onSuccess: () => {
-      toast.success("Atualizado com sucesso!");
+      toast.success({ key: "admin.atualizadoComSucesso", params: {} });
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       setEditTarget(null);
     },
     onError: () =>
-      toast.error("Erro ao atualizar. Verifique os dados e tente novamente."),
+      toast.error({ key: "admin.erroAoAtualizarVerifiqueOsDadosE", params: {} }),
   });
 
   const deleteMutation = useMutation({
@@ -380,12 +393,12 @@ export function ManageEntities() {
       return academicApi.delete(type as any, id);
     },
     onSuccess: () => {
-      toast.success("Excluído com sucesso.");
+      toast.success({ key: "admin.excluidoComSucesso", params: {} });
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       setDeleteTarget(null);
     },
     onError: () => {
-      toast.error("Erro ao excluir. Tente novamente.");
+      toast.error({ key: "admin.erroAoExcluirTenteNovamente", params: {} });
       setDeleteTarget(null);
     },
   });
@@ -434,24 +447,24 @@ export function ManageEntities() {
   const TABS = [
     {
       key: "classes" as Tab,
-      label: "Turmas",
+      label: t("common.turmas", {}, locale),
       icon: <Users className="h-4 w-4" />,
       count: classes.length,
-      createLabel: "Nova Turma",
+      createLabel: t("common.novaTurma", {}, locale),
     },
     {
       key: "disciplines" as Tab,
-      label: "Disciplinas",
+      label: t("common.disciplinas", {}, locale),
       icon: <Library className="h-4 w-4" />,
       count: disciplines.length,
-      createLabel: "Nova Disciplina",
+      createLabel: t("common.novaDisciplina", {}, locale),
     },
     {
       key: "professors" as Tab,
-      label: "Professores",
+      label: t("common.professores", {}, locale),
       icon: <GraduationCap className="h-4 w-4" />,
       count: professors.length,
-      createLabel: "Novo Professor",
+      createLabel: t("common.novoProfessor", {}, locale),
     },
   ];
   const activeTab = TABS.find((t) => t.key === tab)!;
@@ -470,11 +483,9 @@ export function ManageEntities() {
               </div>
               <div>
                 <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                  Gestão Acadêmica
-                </h1>
+                  {t("common.gestaoAcademica", {}, locale)}</h1>
                 <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                  Crie, edite e vincule turmas, disciplinas e professores.
-                </p>
+                  {t("admin.crieEditeEVinculeTurmasDisciplinasE", {}, locale)}</p>
               </div>
             </div>
             {isAdmin && (
@@ -484,15 +495,13 @@ export function ManageEntities() {
                   className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <School className="h-3.5 w-3.5" />
-                  Nova Universidade
-                </Link>
+                  {t("common.novaUniversidade", {}, locale)}</Link>
                 <Link
                   to="/entities/create/course"
                   className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <BookOpen className="h-3.5 w-3.5" />
-                  Novo Curso
-                </Link>
+                  {t("common.novoCurso", {}, locale)}</Link>
               </div>
             )}
           </div>
@@ -501,12 +510,11 @@ export function ManageEntities() {
             <div className="mt-4 flex flex-wrap items-end gap-3 border-t border-white/5 pt-4">
               <div className="flex flex-col gap-1">
                 <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Universidade
-                </label>
+                  {t("common.universidade", {}, locale)}</label>
                 <Select
                   value={adminUniversityId}
                   onChange={(v) => { setAdminUniversityId(v); setAdminCourseId(""); }}
-                  placeholder="Selecione"
+                  placeholder={t("common.selecione_92", {}, locale)}
                   options={universities.map((u: any) => ({ value: u._id, label: u.name }))}
                   className="min-w-[180px]"
                 />
@@ -514,12 +522,11 @@ export function ManageEntities() {
               {adminUniversityId && (
                 <div className="flex flex-col gap-1">
                   <label className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Curso
-                  </label>
+                    {t("common.curso", {}, locale)}</label>
                   <Select
                     value={adminCourseId}
                     onChange={setAdminCourseId}
-                    placeholder="Selecione"
+                    placeholder={t("common.selecione_92", {}, locale)}
                     options={adminCourses.map((c: any) => ({ value: c._id, label: c.name }))}
                     className="min-w-[180px]"
                   />
@@ -532,8 +539,7 @@ export function ManageEntities() {
         {isLoading && (
           <div className="flex items-center justify-center gap-2 py-12 font-[Poppins] text-sm text-zinc-500">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Carregando dados acadêmicos...
-          </div>
+            {t("common.carregandoDadosAcademicos", {}, locale)}</div>
         )}
 
         {!isLoading && needsCourseSelection && (
@@ -543,11 +549,9 @@ export function ManageEntities() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Selecione universidade e curso
-              </p>
+                {t("admin.selecioneUniversidadeECurso", {}, locale)}</p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Escolha acima para ver e gerenciar as entidades.
-              </p>
+                {t("admin.escolhaAcimaParaVerEGerenciarAs", {}, locale)}</p>
             </div>
           </div>
         )}
@@ -581,8 +585,8 @@ export function ManageEntities() {
             {tab === "classes" &&
               (classes.length === 0 ? (
                 <EmptyTab
-                  message="Nenhuma turma cadastrada neste curso."
-                  createLabel="Nova Turma"
+                  message={t("admin.nenhumaTurmaCadastradaNesteCurso", {}, locale)}
+                  createLabel={t("common.novaTurma")}
                   onCreateClick={() => setCreateModal("classes")}
                 />
               ) : (
@@ -619,7 +623,7 @@ export function ManageEntities() {
                           })
                         }
                         linksIcon={<BookOpen className="h-3 w-3" />}
-                        linksLabel="Grade"
+                        linksLabel={t("admin.curriculum")}
                         onDelete={() =>
                           setDeleteTarget({
                             id: cls._id,
@@ -637,8 +641,8 @@ export function ManageEntities() {
             {tab === "disciplines" &&
               (disciplines.length === 0 ? (
                 <EmptyTab
-                  message="Nenhuma disciplina cadastrada neste curso."
-                  createLabel="Nova Disciplina"
+                  message={t("admin.nenhumaDisciplinaCadastradaNesteCurso", {}, locale)}
+                  createLabel={t("common.novaDisciplina")}
                   onCreateClick={() => setCreateModal("disciplines")}
                 />
               ) : (
@@ -671,7 +675,7 @@ export function ManageEntities() {
                           })
                         }
                         linksIcon={<Users className="h-3 w-3" />}
-                        linksLabel="Professores"
+                        linksLabel={t("common.professores")}
                         onDelete={() =>
                           setDeleteTarget({
                             id: disc._id,
@@ -689,8 +693,8 @@ export function ManageEntities() {
             {tab === "professors" &&
               (professors.length === 0 ? (
                 <EmptyTab
-                  message="Nenhum professor cadastrado neste curso."
-                  createLabel="Novo Professor"
+                  message={t("admin.nenhumProfessorCadastradoNesteCurso", {}, locale)}
+                  createLabel={t("common.novoProfessor")}
                   onCreateClick={() => setCreateModal("professors")}
                 />
               ) : (
@@ -811,8 +815,8 @@ export function ManageEntities() {
           wide
           title={
             linksModal.type === "class-disciplines"
-              ? `Disciplinas — ${linksModal.label}`
-              : `Professores & Alunos — ${linksModal.label}`
+              ? t("admin.disciplinasValue0", { value0: linksModal.label }, locale)
+              : t("admin.professoresAlunosValue0", { value0: linksModal.label }, locale)
           }
           icon={
             linksModal.type === "class-disciplines" ? (
@@ -845,8 +849,8 @@ export function ManageEntities() {
       <AppModal
         isOpen={!!deleteTarget}
         type="delete"
-        title={`Excluir "${deleteTarget?.name}"`}
-        description="Esta ação não pode ser desfeita. O registro será removido permanentemente."
+        title={t("common.excluirValue0", { value0: deleteTarget?.name }, locale)}
+        description={t("admin.estaAcaoNaoPodeSerDesfeitaO", {}, locale)}
         onConfirm={() =>
           deleteTarget &&
           deleteMutation.mutate({

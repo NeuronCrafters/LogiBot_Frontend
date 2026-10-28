@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -25,12 +26,33 @@ interface AcademicFilterProps {
   };
 }
 
-export function AcademicFilter({
+const normalizeToId = (v: unknown): string => {
+    if (typeof v === "string") return v.trim();
+    if (v && typeof v === "object") {
+      const obj = v as Record<string, any>;
+      return (obj.id || obj._id || obj.$oid || "").toString().trim();
+    }
+    return "";
+  };
+
+const collectIds = (input: unknown): string[] => {
+    const arr = Array.isArray(input) ? input : input ? [input] : [];
+    return [
+      ...new Set(
+        arr.map(normalizeToId).filter((id): id is string => id.length > 0),
+      ),
+    ];
+  };
+
+
+function AcademicFilterContent({
   entityType,
   multiple = false,
   onSelect,
   additionalParams,
 }: AcademicFilterProps) {
+  const locale = useLocale();
+
   const { user } = useAuth();
   const [searchTerm] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -41,7 +63,6 @@ export function AcademicFilter({
     staleTime: 0,
   });
 
-  if (!user) return null;
 
   const roles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = roles.includes("admin");
@@ -51,24 +72,6 @@ export function AcademicFilter({
   const first = <T,>(v: T | T[]) =>
     Array.isArray(v) ? (v.length ? v[0] : undefined) : v;
   const userUniversityId = (first(user.schoolId) as string) || "";
-
-  const normalizeToId = (v: unknown): string => {
-    if (typeof v === "string") return v.trim();
-    if (v && typeof v === "object") {
-      const obj = v as Record<string, any>;
-      return (obj.id || obj._id || obj.$oid || "").toString().trim();
-    }
-    return "";
-  };
-
-  const collectIds = (input: unknown): string[] => {
-    const arr = Array.isArray(input) ? input : input ? [input] : [];
-    return [
-      ...new Set(
-        arr.map(normalizeToId).filter((id): id is string => id.length > 0),
-      ),
-    ];
-  };
 
   const userCourseIds = collectIds(
     user?.courses?.length ? user.courses : user.courseId,
@@ -80,7 +83,7 @@ export function AcademicFilter({
   const userDisciplineIds = useMemo(() => {
     if (!isProfessor) return [];
     return collectIds(user.disciplines ?? user.disciplineId ?? user.discipline);
-  }, [user, isProfessor, user?._id]);
+  }, [user, isProfessor]);
 
   const [selectedUniversity, setSelectedUniversity] = useState(
     additionalParams?.universityId || userUniversityId,
@@ -98,7 +101,7 @@ export function AcademicFilter({
     const all = data?.data?.universities ?? [];
     if (isAdmin) return all;
     return all.filter((u) => u._id === userUniversityId);
-  }, [data, isAdmin, userUniversityId, user?._id]);
+  }, [data, isAdmin, userUniversityId]);
 
   const courses = useMemo(() => {
     const uni = universities.find((u) => u._id === selectedUniversity);
@@ -114,7 +117,6 @@ export function AcademicFilter({
     isCoordinator,
     isProfessor,
     userCourseIds,
-    user?._id,
   ]);
 
   const classes = useMemo(() => {
@@ -136,7 +138,6 @@ export function AcademicFilter({
     isProfessor,
     userClassIds,
     userDisciplineIds,
-    user?._id,
   ]);
 
   const disciplines = useMemo(() => {
@@ -163,7 +164,6 @@ export function AcademicFilter({
     isProfessor,
     userClassIds,
     userDisciplineIds,
-    user?._id,
   ]);
 
   const entities = useMemo(() => {
@@ -212,7 +212,6 @@ export function AcademicFilter({
     isAdmin,
     isCoordinator,
     isProfessor,
-    user?._id,
     selectedDiscipline,
   ]);
 
@@ -298,7 +297,7 @@ export function AcademicFilter({
     });
   };
 
-  if (error) return <div className="text-red-500">Erro ao carregar dados</div>;
+  if (error) return <div className="text-red-500">{t("academic.erroAoCarregarDados", {}, locale)}</div>;
 
   return (
     <div className="w-full">
@@ -315,7 +314,7 @@ export function AcademicFilter({
               setSelectedIds([]);
               onSelect([], { universityId: v });
             }}
-            placeholder={isAdmin ? "Selecione a Universidade" : universities[0]?.name || "Universidade"}
+            placeholder={isAdmin ? t("academic.selecioneAUniversidade", {}, locale) : universities[0]?.name || t("common.universidade", {}, locale)}
             options={universities.map((u) => ({ value: u._id, label: u.name }))}
           />
         )}
@@ -331,7 +330,7 @@ export function AcademicFilter({
               setSelectedIds([]);
               onSelect([], { universityId: selectedUniversity, courseId: v });
             }}
-            placeholder={!selectedUniversity ? "Selecione a Universidade..." : courses.length === 0 ? "Nenhum curso disponível" : "Selecione o Curso"}
+            placeholder={!selectedUniversity ? t("academic.selecioneAUniversidade_10", {}, locale) : courses.length === 0 ? t("academic.nenhumCursoDisponivel", {}, locale) : t("academic.selecioneOCurso", {}, locale)}
             options={courses.map((c) => ({ value: c._id, label: c.name }))}
           />
         )}
@@ -341,7 +340,7 @@ export function AcademicFilter({
             disabled={!isCourseEnabled || isLoading}
             value={selectedDiscipline}
             onChange={handleDisciplineChange}
-            placeholder="Selecione a Disciplina"
+            placeholder={t("academic.selecioneADisciplina", {}, locale)}
             options={disciplines.map((d) => ({ value: d._id, label: d.name }))}
           />
         )}
@@ -355,7 +354,7 @@ export function AcademicFilter({
               setSelectedIds([]);
               onSelect([], { universityId: selectedUniversity, courseId: selectedCourse, classId: v });
             }}
-            placeholder={!selectedCourse ? "Selecione o Curso..." : classes.length === 0 ? "Nenhuma turma disponível" : "Selecione a Turma"}
+            placeholder={!selectedCourse ? t("academic.selecioneOCurso_14", {}, locale) : classes.length === 0 ? t("academic.nenhumaTurmaDisponivel", {}, locale) : t("academic.selecioneATurma", {}, locale)}
             options={classes.map((c) => ({ value: c._id, label: c.name }))}
           />
         )}
@@ -365,7 +364,7 @@ export function AcademicFilter({
             disabled={!canShowEntitySelector() || isLoading}
             value={selectedIds[0] ?? ""}
             onChange={(v) => { if (v) toggleItem(v); }}
-            placeholder={isLoading ? "Carregando..." : `Selecione ${entityType === "student" ? "o aluno" : entityType === "discipline" ? "a disciplina" : entityType === "class" ? "a turma" : entityType === "course" ? "o curso" : "a universidade"}`}
+            placeholder={isLoading ? t("common.carregando", {}, locale) : t(({ student: "academic.selectStudent", discipline: "academic.selectSubject", class: "academic.selectClass", course: "academic.selectProgram", university: "academic.selectUniversity" } as const)[entityType], {}, locale)}
             options={filteredEntities.map((item) => ({ value: item._id, label: item.name }))}
           />
         )}
@@ -380,6 +379,7 @@ export function AcademicFilter({
             >
               <span className="truncate max-w-[200px]">{name}</span>
               <button
+                aria-label={t("common.removeSelection", { name })}
                 className="ml-2 hover:text-white/90 shrink-0"
                 onClick={() => toggleItem(selectedIds[idx])}
               >
@@ -391,4 +391,9 @@ export function AcademicFilter({
       )}
     </div>
   );
+}
+
+export function AcademicFilter(props: AcademicFilterProps) {
+  const { user } = useAuth();
+  return user ? <AcademicFilterContent {...props} /> : null;
 }

@@ -1,3 +1,5 @@
+import { useDialogFocus } from "@/shared/hooks/useDialogFocus";
+import { t, useLocale } from "@/i18n";
 import { useState, useMemo } from "react";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -40,20 +42,20 @@ type EntityType =
   | "student";
 
 const ENTITY_LABEL: Record<string, string> = {
-  university: "universidade",
-  course: "curso",
-  discipline: "disciplina",
-  class: "turma",
-  professor: "professor",
-  student: "aluno",
+  get university() { return t("common.universidade").toLocaleLowerCase(); },
+  get course() { return t("admin.curso"); },
+  get discipline() { return t("admin.disciplina"); },
+  get class() { return t("admin.turma"); },
+  get professor() { return t("common.professor").toLocaleLowerCase(); },
+  get student() { return t("admin.aluno"); },
 };
 
 const EDIT_META: Record<string, { label: string; icon: ReactNode }> = {
-  university: { label: "Editar Universidade", icon: <School className="h-5 w-5" /> },
-  course: { label: "Editar Curso", icon: <BookOpen className="h-5 w-5" /> },
-  class: { label: "Editar Turma", icon: <Users className="h-5 w-5" /> },
-  discipline: { label: "Editar Disciplina", icon: <Library className="h-5 w-5" /> },
-  professor: { label: "Editar Professor", icon: <GraduationCap className="h-5 w-5" /> },
+  university: { get label() { return t("admin.editarUniversidade"); }, icon: <School className="h-5 w-5" /> },
+  course: { get label() { return t("admin.editarCurso"); }, icon: <BookOpen className="h-5 w-5" /> },
+  class: { get label() { return t("common.editarTurma"); }, icon: <Users className="h-5 w-5" /> },
+  discipline: { get label() { return t("common.editarDisciplina"); }, icon: <Library className="h-5 w-5" /> },
+  professor: { get label() { return t("common.editarProfessor"); }, icon: <GraduationCap className="h-5 w-5" /> },
 };
 
 function FormModal({
@@ -67,8 +69,12 @@ function FormModal({
   onClose: () => void;
   children: ReactNode;
 }) {
+  useLocale();
+  const dialogRef = useDialogFocus<HTMLDivElement>(true, onClose);
+
   return (
     <div
+      ref={dialogRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
       className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -87,6 +93,7 @@ function FormModal({
                 </h2>
               </div>
               <button
+                aria-label={t("common.fechar")}
                 onClick={onClose}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
               >
@@ -102,6 +109,8 @@ function FormModal({
 }
 
 export function EntityList() {
+  const locale = useLocale();
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [currentFilter, setCurrentFilter] = useState<FilterData | null>(null);
@@ -134,7 +143,7 @@ export function EntityList() {
         return await searchEntitiesByFilter(userRole, currentFilter);
       } catch (error) {
         logger.error("Admin", "Erro na busca.", error);
-        throw new Error("Falha ao buscar entidades");
+        throw new Error(t("admin.falhaAoBuscarEntidades", {}, locale));
       }
     },
     enabled: !!currentFilter,
@@ -239,15 +248,15 @@ export function EntityList() {
         data,
       );
       if (data.items.length === 0)
-        toast("Nenhum resultado encontrado para os filtros selecionados.");
+        toast({ key: "admin.nenhumResultadoEncontradoParaOsFiltrosSelecionados", params: {} });
       else
         toast.success(
-          `${data.items.length} ${ENTITY_LABEL[data.entity] ?? "registro"}(s) encontrado(s).`,
+          { key: "admin.value0Value1SEncontradoS", params: { value0: data.items.length, value1: ENTITY_LABEL[data.entity] ?? t("common.records", { count: 1 }).replace(/^1 /, "") } },
         );
     },
     onError: (error) => {
       logger.error("Admin", "Erro na busca.", error);
-      toast.error("Erro ao buscar registros. Tente novamente.");
+      toast.error({ key: "admin.erroAoBuscarRegistrosTenteNovamente", params: {} });
     },
   });
 
@@ -259,11 +268,11 @@ export function EntityList() {
         ["university", "course", "class", "discipline"].includes(displayEntity)
       )
         await academicApi.delete(displayEntity as any, id);
-      else throw new Error(`Nao e possivel deletar: ${displayEntity}`);
+      else throw new Error(t("admin.naoEPossivelDeletarValue0", { value0: displayEntity }, locale));
       return id;
     },
     onSuccess: () => {
-      toast.success("Registro excluido com sucesso.");
+      toast.success({ key: "admin.registroExcluidoComSucesso", params: {} });
       queryClient.invalidateQueries({
         queryKey: ["searchEntities", userRole, currentFilter],
       });
@@ -272,7 +281,7 @@ export function EntityList() {
     },
     onError: (error) => {
       logger.error("Admin", "Erro ao deletar.", error);
-      toast.error("Erro ao excluir registro.");
+      toast.error({ key: "admin.erroAoExcluirRegistro", params: {} });
     },
   });
 
@@ -284,13 +293,13 @@ export function EntityList() {
       entityType: EntityType;
       item: any;
     }) => {
-      if (!editTarget?.id) throw new Error("ID ausente");
+      if (!editTarget?.id) throw new Error(t("admin.idAusente", {}, locale));
       if (entityType === "professor")
         return adminApi.updateProfessor(editTarget.id, item);
       return academicApi.update(entityType as any, editTarget.id, item);
     },
     onSuccess: () => {
-      toast.success("Registro atualizado com sucesso.");
+      toast.success({ key: "admin.registroAtualizadoComSucesso", params: {} });
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
       queryClient.invalidateQueries({ queryKey: ["searchEntities"] });
       setEditTarget(null);
@@ -298,7 +307,7 @@ export function EntityList() {
     },
     onError: (error) => {
       logger.error("Admin", "Erro ao atualizar registro.", error);
-      toast.error("Erro ao atualizar. Verifique os dados e tente novamente.");
+      toast.error({ key: "admin.erroAoAtualizarVerifiqueOsDadosE", params: {} });
     },
   });
 
@@ -327,20 +336,15 @@ export function EntityList() {
               </div>
               <div>
                 <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                  Listar entidades
-                </h1>
+                  {t("common.listarEntidades", {}, locale)}</h1>
                 <p className="mt-1 font-[Poppins] text-sm text-zinc-400">
-                  Pesquise, visualize e gerencie registros academicos do
-                  sistema.
-                </p>
+                  {t("admin.pesquiseVisualizeEGerencieRegistrosAcademicosDo", {}, locale)}</p>
               </div>
             </div>
             {items.length > 0 && !isLoading && (
               <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-2 font-[Poppins] text-sm text-zinc-300">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                {items.length} {ENTITY_LABEL[displayEntity] ?? "registro"}
-                {items.length !== 1 ? "s" : ""} encontrado
-                {items.length !== 1 ? "s" : ""}
+                {t(({ university: "admin.found.university", course: "admin.found.course", class: "admin.found.class", discipline: "admin.found.discipline", professor: "admin.found.professor", student: "admin.found.student" } as const)[displayEntity as EntityType] || "admin.found.record", { count: items.length })}
               </div>
             )}
           </div>
@@ -355,11 +359,9 @@ export function EntityList() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-medium text-white">
-                Buscando registros...
-              </p>
+                {t("admin.buscandoRegistros", {}, locale)}</p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-600">
-                Isso pode levar alguns segundos
-              </p>
+                {t("admin.issoPodeLevarAlgunsSegundos", {}, locale)}</p>
             </div>
           </div>
         )}
@@ -371,11 +373,9 @@ export function EntityList() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Erro ao buscar registros
-              </p>
+                {t("admin.erroAoBuscarRegistros", {}, locale)}</p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Verifique sua conexao e tente novamente.
-              </p>
+                {t("admin.verifiqueSuaConexaoETenteNovamente", {}, locale)}</p>
             </div>
             <button
               onClick={() => refetchSearch()}
@@ -385,8 +385,7 @@ export function EntityList() {
               <RefreshCw
                 className={`h-3.5 w-3.5 ${isSearching ? "animate-spin" : ""}`}
               />
-              Tentar novamente
-            </button>
+              {t("common.tentarNovamente", {}, locale)}</button>
           </div>
         )}
 
@@ -406,19 +405,16 @@ export function EntityList() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Nenhum resultado encontrado
-              </p>
+                {t("admin.nenhumResultadoEncontrado", {}, locale)}</p>
               <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-                Tente ajustar os filtros de busca.
-              </p>
+                {t("admin.tenteAjustarOsFiltrosDeBusca", {}, locale)}</p>
             </div>
             <button
               onClick={handleResetList}
               className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <RefreshCw className="h-3.5 w-3.5" />
-              Limpar filtros
-            </button>
+              {t("admin.limparFiltros", {}, locale)}</button>
           </div>
         )}
 
@@ -429,19 +425,15 @@ export function EntityList() {
             </div>
             <div className="text-center">
               <p className="font-[Poppins] text-sm font-semibold text-white">
-                Pronto para buscar
-              </p>
+                {t("admin.prontoParaBuscar", {}, locale)}</p>
               <p className="mt-1 max-w-xs font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                Configure os filtros acima e clique em{" "}
-                <span className="text-zinc-400">Buscar</span> para listar os
-                registros do sistema.
-              </p>
+                {t("admin.configureOsFiltrosAcimaECliqueEm", {}, locale)}{" "}
+                <span className="text-zinc-400">{t("admin.buscar", {}, locale)}</span> {t("admin.paraListarOsRegistrosDoSistema", {}, locale)}</p>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-2.5">
               <SlidersHorizontal className="h-3.5 w-3.5 text-zinc-600" />
               <span className="font-[Poppins] text-xs text-zinc-600">
-                Tipo de filtro - Selecionar - Buscar
-              </span>
+                {t("admin.tipoDeFiltroSelecionarBuscar", {}, locale)}</span>
             </div>
           </div>
         )}
@@ -449,15 +441,14 @@ export function EntityList() {
 
       {editTarget && (
         <FormModal
-          title={EDIT_META[editTarget.entityType]?.label ?? "Editar"}
+          title={EDIT_META[editTarget.entityType]?.label ?? t("common.editar", {}, locale)}
           icon={EDIT_META[editTarget.entityType]?.icon ?? <School className="h-5 w-5" />}
           onClose={() => setEditTarget(null)}
         >
           {isLoadingAcademic || !editInitialData ? (
             <div className="flex items-center gap-2 py-6 font-[Poppins] text-sm text-zinc-500">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Carregando dados...
-            </div>
+              {t("common.carregandoDados", {}, locale)}</div>
           ) : (
             <>
               {editTarget.entityType === "university" && (

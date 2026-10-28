@@ -1,3 +1,5 @@
+import { ContentLanguageLabel } from "@/i18n/ContentLanguage";
+import { percent, t, useLocale, type Language } from "@/i18n";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,7 +20,7 @@ import { QUIZ_TOPICS } from "@/features/quiz/types";
 import type { AttemptDetail, QuizAttemptResult } from "@/features/quiz/types";
 import { toast } from "@/shared/lib/toast";
 
-const TOPIC_LABEL: Record<string, string> = Object.fromEntries(
+const TOPIC_LABEL = (): Record<string, string> => Object.fromEntries(
   QUIZ_TOPICS.map((t) => [t.value, t.label]),
 );
 
@@ -28,13 +30,17 @@ const LETTERS = ["A", "B", "C", "D", "E"] as const;
 
 function ResultView({
   result,
+  language,
   onRetry,
   onBack,
 }: {
   result: QuizAttemptResult;
+  language?: Language | null;
   onRetry: () => void;
   onBack: () => void;
 }) {
+  useLocale();
+
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const pct = Math.round((result.score / result.totalQuestions) * 100);
 
@@ -43,23 +49,22 @@ function ResultView({
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="flex flex-col items-center gap-1 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 py-6">
           <span className="font-[Poppins] text-4xl font-bold text-white">
-            {pct}%
+            {percent(pct / 100, { maximumFractionDigits: 0 })}
           </span>
           <span className="font-[Poppins] text-xs text-indigo-300">
-            Aproveitamento
-          </span>
+            {t("common.aproveitamento")}</span>
         </div>
         <div className="flex flex-col items-center gap-1 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 py-6">
           <span className="font-[Poppins] text-4xl font-bold text-emerald-400">
             {result.score}
           </span>
-          <span className="font-[Poppins] text-xs text-emerald-400">Acertos</span>
+          <span className="font-[Poppins] text-xs text-emerald-400">{t("common.acertos")}</span>
         </div>
         <div className="flex flex-col items-center gap-1 rounded-2xl border border-red-500/20 bg-red-500/10 py-6">
           <span className="font-[Poppins] text-4xl font-bold text-red-400">
             {result.totalQuestions - result.score}
           </span>
-          <span className="font-[Poppins] text-xs text-red-400">Erros</span>
+          <span className="font-[Poppins] text-xs text-red-400">{t("common.erros")}</span>
         </div>
       </div>
 
@@ -85,7 +90,7 @@ function ResultView({
                 )}
               </div>
               <span className="flex-1 font-[Poppins] text-sm text-white">
-                {i + 1}. {detail.question}
+                {i + 1}. <span lang={language || undefined}>{detail.question}</span>
               </span>
               {openIndex === i ? (
                 <ChevronUp className="h-4 w-4 shrink-0 text-zinc-500" />
@@ -101,10 +106,10 @@ function ResultView({
                     <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
                     <div>
                       <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-red-400">
-                        Sua resposta ({detail.selected})
+                        {t("quiz.suaResposta")}{detail.selected})
                       </p>
                       <p className="mt-0.5 font-[Poppins] text-sm text-zinc-300">
-                        {detail.selectedText}
+                        <span lang={language || undefined}>{detail.selectedText}</span>
                       </p>
                     </div>
                   </div>
@@ -113,17 +118,17 @@ function ResultView({
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                   <div>
                     <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-emerald-400">
-                      Resposta correta ({detail.correct})
+                      {t("quiz.respostaCorreta_653")}{detail.correct})
                     </p>
                     <p className="mt-0.5 font-[Poppins] text-sm text-zinc-300">
-                      {detail.correctText}
+                      <span lang={language || undefined}>{detail.correctText}</span>
                     </p>
                   </div>
                 </div>
                 {detail.explanation && (
                   <div className="rounded-lg border border-white/5 bg-white/5 p-3">
                     <p className="font-[Poppins] text-xs leading-relaxed text-zinc-400">
-                      {detail.explanation}
+                      <span lang={language || undefined}>{detail.explanation}</span>
                     </p>
                   </div>
                 )}
@@ -138,14 +143,12 @@ function ResultView({
           onClick={onRetry}
           className="h-11 flex-1 rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
         >
-          Tentar novamente
-        </button>
+          {t("common.tentarNovamente")}</button>
         <button
           onClick={onBack}
           className="h-11 flex-1 rounded-lg border border-white/10 bg-white/5 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
-          Voltar aos quizzes
-        </button>
+          {t("quiz.voltarAosQuizzes")}</button>
       </div>
     </div>
   );
@@ -154,6 +157,8 @@ function ResultView({
 // ── Main page ──────────────────────────────────────────────────────────────────
 
 export function QuizAttempt() {
+  useLocale();
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -178,7 +183,7 @@ export function QuizAttempt() {
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ["studentQuizHub"] });
     },
-    onError: () => toast.error("Erro ao enviar respostas. Tente novamente."),
+    onError: () => toast.error({ key: "quiz.erroAoEnviarRespostasTenteNovamente", params: {} }),
   });
 
   const handleSelect = (questionId: string, letter: string) => {
@@ -207,14 +212,12 @@ export function QuizAttempt() {
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
         <AlertCircle className="h-10 w-10 text-red-400" />
         <p className="font-[Poppins] text-sm text-zinc-400">
-          Quiz não encontrado.
-        </p>
+          {t("quiz.quizNaoEncontrado")}</p>
         <button
           onClick={() => navigate("/quiz")}
           className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-[Poppins] text-sm text-zinc-300 hover:bg-white/10"
         >
-          Voltar
-        </button>
+          {t("common.voltar")}</button>
       </main>
     );
   }
@@ -231,7 +234,7 @@ export function QuizAttempt() {
               </div>
               <div>
                 <h1 className="font-[Poppins] text-xl font-semibold text-white">
-                  {quiz.title}
+                  <span lang={quiz.language || undefined}>{quiz.title}</span>
                 </h1>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-xs text-indigo-400">
@@ -239,12 +242,13 @@ export function QuizAttempt() {
                     {quiz.disciplineName}
                   </span>
                   <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-xs text-zinc-500">
-                    {TOPIC_LABEL[quiz.topic] ?? quiz.topic}
+                    {TOPIC_LABEL()[quiz.topic] ?? quiz.topic}
+                    <ContentLanguageLabel language={quiz.language} />
                   </span>
                 </div>
                 {quiz.description && (
                   <p className="mt-2 font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                    {quiz.description}
+                    <span lang={quiz.language || undefined}>{quiz.description}</span>
                   </p>
                 )}
               </div>
@@ -255,8 +259,7 @@ export function QuizAttempt() {
                 className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar
-              </button>
+                {t("common.voltar")}</button>
             )}
           </div>
         </section>
@@ -266,6 +269,7 @@ export function QuizAttempt() {
           {result ? (
             <ResultView
               result={result}
+              language={quiz.language}
               onRetry={handleRetry}
               onBack={() => navigate("/quiz")}
             />
@@ -282,10 +286,10 @@ export function QuizAttempt() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-[Poppins] text-xs text-zinc-500">
-                      Questão {currentIndex + 1} de {total}
+                      {t("quiz.progress", { current: currentIndex + 1, total })}
                     </span>
                     <span className="font-[Poppins] text-xs text-zinc-600">
-                      {Object.keys(answers).length}/{total} respondidas
+                      {t("quiz.answeredCount", { answered: Object.keys(answers).length, total })}
                     </span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
@@ -299,7 +303,7 @@ export function QuizAttempt() {
                 {/* Question */}
                 <div className="space-y-3">
                   <p className="font-[Poppins] text-base font-medium leading-relaxed text-white">
-                    {q.question}
+                    <span lang={quiz.language || undefined}>{q.question}</span>
                   </p>
                   <div className="space-y-2">
                     {q.options.map((opt, oi) => {
@@ -325,7 +329,7 @@ export function QuizAttempt() {
                             {letter}
                           </span>
                           <span className="font-[Poppins] text-sm leading-relaxed">
-                            {opt}
+                            <span lang={quiz.language || undefined}>{opt}</span>
                           </span>
                         </button>
                       );
@@ -341,8 +345,7 @@ export function QuizAttempt() {
                     className="flex h-10 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-4 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Anterior
-                  </button>
+                    {t("quiz.anterior")}</button>
 
                   <div className="flex flex-1 justify-center gap-1">
                     {quiz.questions.map((_, qi) => (
@@ -370,8 +373,7 @@ export function QuizAttempt() {
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <>
-                          Finalizar
-                          <CheckCircle2 className="h-4 w-4" />
+                          {t("quiz.finalizar")}<CheckCircle2 className="h-4 w-4" />
                         </>
                       )}
                     </button>
@@ -381,8 +383,7 @@ export function QuizAttempt() {
                       disabled={!answered}
                       className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Próxima
-                      <ArrowRight className="h-4 w-4" />
+                      {t("quiz.proxima")}<ArrowRight className="h-4 w-4" />
                     </button>
                   )}
                 </div>

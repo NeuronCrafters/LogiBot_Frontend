@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 ﻿import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { logger } from "@/shared/lib/logger";
 import {
@@ -86,13 +87,13 @@ function useChatHistory({ userId, enabled = true }: UseChatHistoryOptions) {
 export function usePrefetchChatHistory() {
   const queryClient = useQueryClient();
 
-  return (userId: string) => {
+  return useCallback((userId: string) => {
     queryClient.prefetchQuery({
       queryKey: ["chatHistory", userId],
       queryFn: () => historyService.getChatSessions(userId),
       staleTime: 5 * 60 * 1000,
     });
-  };
+  }, [queryClient]);
 }
 
 export { useChatHistory };

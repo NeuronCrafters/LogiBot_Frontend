@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import React, { ChangeEvent, useState } from "react";
 import { Typograph } from "@/shared/components/Typography";
 import { Input as ShadcnInput } from "@/components/ui/input";
@@ -27,6 +28,8 @@ export function Input({
   required,
   ...props
 }: InputProps) {
+  useLocale();
+
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -35,10 +38,10 @@ export function Input({
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
   const defaultPlaceholder = {
-    name: "Nome",
-    email: "E-mail",
-    password: "Senha",
-    text: "Digite aqui...",
+    name: t("common.nome"),
+    email: t("common.email"),
+    password: t("common.senha"),
+    text: t("common.digiteAqui"),
   };
 
   return (
@@ -47,6 +50,7 @@ export function Input({
     >
       <div className="mr-3">{InputIcons[type]}</div>
       <ShadcnInput
+        aria-label={placeholder || defaultPlaceholder[type]}
         type={type === "password" && !showPassword ? "password" : "text"}
         value={value}
         onChange={onChange}
@@ -58,6 +62,7 @@ export function Input({
       />
       {type === "password" && (
         <button
+          aria-label={t(showPassword ? "auth.ocultarSenha" : "auth.mostrarSenha")}
           type="button"
           onClick={togglePasswordVisibility}
           className="absolute right-6 text-gray-400 hover:text-white focus:outline-none"

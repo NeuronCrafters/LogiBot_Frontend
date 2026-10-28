@@ -1,9 +1,10 @@
+import { t, type Language } from "@/i18n";
 export const QUIZ_TOPICS = [
-  { value: "variaveis", label: "Variáveis" },
-  { value: "listas", label: "Listas" },
-  { value: "condicionais", label: "Condicionais" },
-  { value: "funcoes", label: "Funções" },
-  { value: "operadores_logicos", label: "Operadores Lógicos" },
+  { value: "variaveis", get label() { return t("common.variaveis"); } },
+  { value: "listas", get label() { return t("common.listas"); } },
+  { value: "condicionais", get label() { return t("common.condicionais"); } },
+  { value: "funcoes", get label() { return t("common.funcoes"); } },
+  { value: "operadores_logicos", get label() { return t("quiz.operadoresLogicos"); } },
 ] as const;
 
 export type QuizTopic = (typeof QUIZ_TOPICS)[number]["value"];
@@ -13,6 +14,7 @@ export type QuizStatus = "draft" | "published";
 export type GenerationSource = "manual" | "ai";
 
 export interface ProfessorQuiz {
+  language?: Language | null;
   id: string;
   title: string;
   topic: QuizTopic;
@@ -27,6 +29,7 @@ export interface ProfessorQuiz {
 }
 
 export interface AiQuizGenerationInput {
+  language?: Language;
   disciplineId: string;
   theme: string;
   questionCount: number;

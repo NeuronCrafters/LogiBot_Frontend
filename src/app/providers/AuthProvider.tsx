@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { useLocale, applyAccountLanguage, clearAccountLanguage } from "@/i18n";
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@/shared/lib/logger";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +9,11 @@ import { useCategoryClickTracker } from "@/features/chat/hooks/useCategoryClickT
 import { useQueryClient } from "@tanstack/react-query";
 import { usePrefetchChatHistory } from "@/features/chat/hooks/useChatHistory";
 
+const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  useLocale();
+
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -35,12 +41,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate("/home");
       }
     } catch (error: any) {
-      const message = error?.response?.data?.message || "erro ao autenticar";
+      const message = apiError(error, "common.erroAoAutenticar");
       throw new Error(message);
     }
   }
 
-  async function getUser() {
+  const getUser = useCallback(async () => {
     try {
       const response = await api.get("/auth/me", { withCredentials: true });
       const data = response.data;
@@ -58,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       localStorage.setItem("has_session", "1");
+      applyAccountLanguage(data.preferredLanguage ?? null);
       setUser(safeUser);
 
       if (safeUser._id) {
@@ -68,9 +75,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logger.error("Auth", "Erro ao obter usuário.", error);
       }
       localStorage.removeItem("has_session");
+      clearAccountLanguage();
       setUser(null);
     }
-  }
+  }, [prefetchChatHistory]);
 
   const logout = useCallback(async () => {
     try {
@@ -81,13 +89,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       localStorage.removeItem("has_session");
       queryClient.clear();
+      clearAccountLanguage(true);
       setUser(null);
       navigate("/signin");
     }
   }, [flushClicks, queryClient, navigate]);
 
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
-  const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000;
 
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimer.current) {
@@ -125,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [getUser]);
 
   const contextValue: AuthContextData = {
     user,

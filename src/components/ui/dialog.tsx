@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import * as React from "react"
 import { X } from "lucide-react"
 import { cn } from "@/shared/lib/cn"
@@ -13,6 +14,8 @@ const DialogContext = React.createContext<DialogContextValue>({
 });
 
 function Dialog({ children }: { children: React.ReactNode }) {
+  useLocale();
+
   const [open, setOpen] = React.useState(false);
   return (
     <DialogContext.Provider value={{ open, setOpen }}>
@@ -36,6 +39,8 @@ const DialogContent = React.forwardRef<
   HTMLDivElement,
   { className?: string; children?: React.ReactNode }
 >(({ className, children }, ref) => {
+  useLocale();
+
   const { open, setOpen } = React.useContext(DialogContext);
   return (
     <>
@@ -58,7 +63,7 @@ const DialogContent = React.forwardRef<
               className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none"
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
+              <span className="sr-only">{t("common.fechar")}</span>
             </button>
           </div>
         </>
@@ -69,6 +74,8 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = "DialogContent";
 
 function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  useLocale();
+
   return (
     <div
       className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)}
@@ -79,6 +86,8 @@ function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DialogHeader.displayName = "DialogHeader";
 
 function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  useLocale();
+
   return (
     <div
       className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
@@ -91,25 +100,25 @@ DialogFooter.displayName = "DialogFooter";
 const DialogTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
+>(({ className, ...props }, ref) => { useLocale(); return ((
   <h2
     ref={ref}
     className={cn("text-lg font-semibold leading-none tracking-tight", className)}
     {...props}
   />
-));
+)); });
 DialogTitle.displayName = "DialogTitle";
 
 const DialogDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
+>(({ className, ...props }, ref) => { useLocale(); return ((
   <p
     ref={ref}
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-));
+)); });
 DialogDescription.displayName = "DialogDescription";
 
 export {

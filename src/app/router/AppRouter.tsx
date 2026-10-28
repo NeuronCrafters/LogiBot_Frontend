@@ -1,3 +1,4 @@
+import { PasswordRecoveryPage } from "@/features/auth/pages/PasswordRecoveryPage";
 import React, { Suspense } from "react";
 import { Navigate, Routes, Route } from "react-router-dom";
 import { Home } from "@/features/home/pages/HomePage";
@@ -63,6 +64,8 @@ export default function AppRouter() {
       <Route path="/" element={<Home />} />
       <Route path="/signin" element={<AuthPage mode="signin" />} />
       <Route path="/signup" element={<AuthPage mode="signup" />} />
+      <Route path="/forgot-password" element={<PasswordRecoveryPage />} />
+      <Route path="/reset-password" element={<PasswordRecoveryPage reset />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>

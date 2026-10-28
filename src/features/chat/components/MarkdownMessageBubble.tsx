@@ -1,3 +1,4 @@
+import { t, useLocale, type Language } from "@/i18n";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Copy, Check, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
@@ -16,6 +17,8 @@ const CodeBlock = memo(function CodeBlock({
   language: string;
   children: string;
 }) {
+  useLocale();
+
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -37,13 +40,11 @@ const CodeBlock = memo(function CodeBlock({
           {copied ? (
             <>
               <Check size={14} />
-              Copiado
-            </>
+              {t("common.copiado")}</>
           ) : (
             <>
               <Copy size={14} />
-              Copiar
-            </>
+              {t("common.copiar")}</>
           )}
         </button>
       </div>
@@ -178,12 +179,15 @@ const markdownComponents = {
 };
 
 interface MarkdownMessageBubbleProps {
+  outputLanguage?: Language;
   text: string;
   sender: "user" | "bot";
   retrievedChunks?: RetrievedChunk[];
 }
 
 const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedChunk[] }) {
+  useLocale();
+
   const [expanded, setExpanded] = useState(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -195,7 +199,7 @@ const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedC
         className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-[Poppins]"
       >
         <BookOpen size={13} />
-        {chunks.length} {chunks.length === 1 ? "fonte usada" : "fontes usadas"}
+        {t("common.sources", { count: chunks.length })}
         {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
       </button>
 
@@ -216,7 +220,7 @@ const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedC
                     {chunk.score}%
                   </span>
                   <span className="truncate text-xs text-zinc-400 font-[Poppins]">
-                    {chunk.documentTitle} · trecho {chunk.chunkIndex + 1}
+                    {chunk.documentTitle} {t("chat.trecho")}{" "}{chunk.chunkIndex + 1}
                   </span>
                 </div>
                 {openIndex === index ? (
@@ -240,10 +244,13 @@ const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedC
 });
 
 export const MarkdownMessageBubble = memo(function MarkdownMessageBubble({
+  outputLanguage,
   text,
   sender,
   retrievedChunks,
 }: MarkdownMessageBubbleProps) {
+  useLocale();
+
   const isUser = sender === "user";
 
   if (isUser) {
@@ -262,13 +269,15 @@ export const MarkdownMessageBubble = memo(function MarkdownMessageBubble({
     <div className="flex gap-3 mb-6 px-2">
       <div className="flex-shrink-0 mt-1">
         <div className="w-7 h-7 rounded-full bg-neutral-900 border border-neutral-700 p-0.5 flex items-center justify-center shadow">
-          <img src={logo} alt="Bot" className="w-full h-full object-contain" />
+          <img src={logo} alt={t("common.bot")} className="w-full h-full object-contain" />
         </div>
       </div>
       <div className="flex-1 min-w-0 text-sm font-[Poppins]">
+        <div lang={outputLanguage}>
         <Markdown remarkPlugins={remarkPlugins} components={markdownComponents}>
           {text}
         </Markdown>
+        </div>
         {retrievedChunks && retrievedChunks.length > 0 && (
           <SourcesPanel chunks={retrievedChunks} />
         )}

@@ -1,3 +1,6 @@
+import { apiError } from "@/shared/lib/apiError";
+import { ContentLanguageSelect } from "@/i18n/ContentLanguage";
+import { t, useLocale, getLanguage } from "@/i18n";
 import { useState, useMemo } from "react";
 import { useQueries, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -31,10 +34,13 @@ type Props = {
 };
 
 export function AiQuizForm({ onClose }: Props) {
+  const locale = useLocale();
+
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const [disciplineId, setDisciplineId] = useState("");
+  const [language, setLanguage] = useState(getLanguage);
   const [theme, setTheme] = useState("");
   const [questionCount, setQuestionCount] = useState(5);
   const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
@@ -114,8 +120,8 @@ export function AiQuizForm({ onClose }: Props) {
       }
     }
     // Group by class: sort so docs from the same class are together
-    return result.sort((a, b) => a.className.localeCompare(b.className));
-  }, [docQueries]);
+    return result.sort((a, b) => a.className.localeCompare(b.className, locale));
+  }, [docQueries, locale]);
 
   // Group docs by class name for display
   const docsByClass = useMemo(() => {
@@ -131,13 +137,12 @@ export function AiQuizForm({ onClose }: Props) {
     mutationFn: professorQuizApi.generateAiQuiz,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["professorQuizzes"] });
-      toast.success("Quiz gerado como rascunho. Revise antes de publicar.");
+      toast.success({ key: "quiz.quizGeradoComoRascunhoReviseAntesDe", params: {} });
       onClose();
     },
     onError: (err: any) => {
       const msg =
-        err?.response?.data?.message ??
-        "Erro ao gerar quiz com IA. Tente novamente.";
+        apiError(err, "quiz.erroAoGerarQuizComIaTente");
       toast.error(msg);
     },
   });
@@ -153,12 +158,13 @@ export function AiQuizForm({ onClose }: Props) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!disciplineId) return toast.error("Selecione uma disciplina.");
-    if (!theme.trim()) return toast.error("Informe o tema do quiz.");
-    if (theme.trim().length > 180) return toast.error("Tema deve ter no máximo 180 caracteres.");
-    if (!selectedDocIds.size) return toast.error("Selecione ao menos um documento.");
+    if (!disciplineId) return toast.error({ key: "quiz.selecioneUmaDisciplina", params: {} });
+    if (!theme.trim()) return toast.error({ key: "quiz.informeOTemaDoQuiz", params: {} });
+    if (theme.trim().length > 180) return toast.error({ key: "quiz.temaDeveTerNoMaximo180Caracteres", params: {} });
+    if (!selectedDocIds.size) return toast.error({ key: "quiz.selecioneAoMenosUmDocumento", params: {} });
 
     generateMutation.mutate({
+      language,
       disciplineId,
       theme: theme.trim(),
       questionCount,
@@ -172,11 +178,12 @@ export function AiQuizForm({ onClose }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <ContentLanguageSelect value={language} onChange={setLanguage} />
       {/* Disciplina */}
       <div>
-        <label className={labelCls}>Disciplina</label>
+        <label className={labelCls}>{t("common.disciplina", {}, locale)}</label>
         {disciplines.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma disciplina disponível.</p>
+          <p className="text-sm text-zinc-500">{t("quiz.nenhumaDisciplinaDisponivel", {}, locale)}</p>
         ) : (
           <select
             value={disciplineId}
@@ -185,7 +192,7 @@ export function AiQuizForm({ onClose }: Props) {
             disabled={isPending}
             required
           >
-            <option value="">Selecionar disciplina…</option>
+            <option value="">{t("quiz.selecionarDisciplina", {}, locale)}</option>
             {disciplines.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}
@@ -198,14 +205,14 @@ export function AiQuizForm({ onClose }: Props) {
       {/* Tema */}
       <div>
         <label className={labelCls}>
-          Tema do quiz{" "}
+          {t("quiz.temaDoQuiz", {}, locale)}{" "}
           <span className="normal-case text-zinc-600">({theme.length}/180)</span>
         </label>
         <input
           value={theme}
           onChange={(e) => setTheme(e.target.value)}
           maxLength={180}
-          placeholder="Ex: variáveis e tipos de dados em Python"
+          placeholder={t("quiz.exVariaveisETiposDeDadosEm", {}, locale)}
           className={inputCls}
           disabled={isPending}
           required
@@ -214,7 +221,7 @@ export function AiQuizForm({ onClose }: Props) {
 
       {/* Quantidade de perguntas */}
       <div>
-        <label className={labelCls}>Número de perguntas</label>
+        <label className={labelCls}>{t("quiz.numeroDePerguntas", {}, locale)}</label>
         <div className="flex gap-2">
           {[3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
             <button
@@ -237,23 +244,20 @@ export function AiQuizForm({ onClose }: Props) {
       {/* Documentos RAG de todas as turmas */}
       <div>
         <label className={labelCls}>
-          Documentos RAG{" "}
+          {t("quiz.documentosRag", {}, locale)}{" "}
           <span className="normal-case font-normal text-zinc-600">
-            (todas as turmas gerenciáveis)
-          </span>
+            {t("quiz.todasAsTurmasGerenciaveis", {}, locale)}</span>
         </label>
 
         {loadingDocs ? (
           <div className="flex items-center gap-2 text-zinc-500 text-sm">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Carregando documentos…
-          </div>
+            {t("quiz.carregandoDocumentos", {}, locale)}</div>
         ) : readyDocs.length === 0 ? (
           <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
             <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
             <p className="font-[Poppins] text-xs text-amber-300">
-              Nenhum documento pronto encontrado. Processe documentos na área de RAG primeiro.
-            </p>
+              {t("quiz.nenhumDocumentoProntoEncontradoProcesseDocumentosNa", {}, locale)}</p>
           </div>
         ) : (
           <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
@@ -304,25 +308,25 @@ export function AiQuizForm({ onClose }: Props) {
 
       {/* Título e descrição (opcionais) */}
       <div>
-        <label className={labelCls}>Título do quiz (opcional)</label>
+        <label className={labelCls}>{t("quiz.tituloDoQuizOpcional", {}, locale)}</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={120}
-          placeholder="Deixe em branco para a IA sugerir"
+          placeholder={t("quiz.deixeEmBrancoParaAIaSugerir", {}, locale)}
           className={inputCls}
           disabled={isPending}
         />
       </div>
 
       <div>
-        <label className={labelCls}>Descrição (opcional)</label>
+        <label className={labelCls}>{t("common.descricaoOpcional", {}, locale)}</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={500}
           rows={2}
-          placeholder="Descrição curta do quiz"
+          placeholder={t("quiz.descricaoCurtaDoQuiz", {}, locale)}
           className="w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-indigo-500/60 placeholder:text-zinc-600 disabled:opacity-40 resize-none"
           disabled={isPending}
         />
@@ -332,9 +336,7 @@ export function AiQuizForm({ onClose }: Props) {
       <div className="flex items-start gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3">
         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-400" />
         <p className="font-[Poppins] text-xs leading-relaxed text-indigo-300">
-          O quiz será criado como rascunho. Revise as perguntas e explicações
-          antes de publicar.
-        </p>
+          {t("quiz.oQuizSeraCriadoComoRascunhoRevise", {}, locale)}</p>
       </div>
 
       <button
@@ -350,13 +352,11 @@ export function AiQuizForm({ onClose }: Props) {
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Gerando quiz com IA…
-          </>
+            {t("quiz.gerandoQuizComIa", {}, locale)}</>
         ) : (
           <>
             <Sparkles className="h-4 w-4" />
-            Gerar Quiz com IA
-          </>
+            {t("quiz.gerarQuizComIa", {}, locale)}</>
         )}
       </button>
     </form>

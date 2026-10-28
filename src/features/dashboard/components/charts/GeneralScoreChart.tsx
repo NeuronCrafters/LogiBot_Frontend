@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { t, useLocale, number } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import {
   BarChart,
@@ -21,7 +23,7 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Nota geral de 0 a 10 calculada pela taxa de acerto média em todos os tópicos do quiz. Quanto maior, melhor o domínio do conteúdo. 0–4,99 Insuficiente · 5–6,99 Regular · 7–8,99 Bom · 9–10 Excelente.";
+  () => (t("dashboard.notaGeralDe0A10Calculada"));
 
 const SCORE_COLORS = {
   ruim: "#ef4444",
@@ -41,6 +43,8 @@ interface ChartProps {
 }
 
 function useScoreData(filters: ChartProps["filters"]) {
+  useLocale();
+
   return useQuery({
     queryKey: ["topicPerformance", filters],
     queryFn: async () => {
@@ -54,7 +58,7 @@ function useScoreData(filters: ChartProps["filters"]) {
         (t: any) => t.successPercentage > 0 || t.errorPercentage > 0,
       );
       if (active.length === 0)
-        return { score: 0, status: "Sem Dados", color: "#444" };
+        return { score: 0, status: t("dashboard.semDados"), color: "#444" };
       const avg =
         active.reduce(
           (acc: number, curr: any) => acc + curr.successPercentage,
@@ -62,29 +66,31 @@ function useScoreData(filters: ChartProps["filters"]) {
         ) / active.length;
       const score = avg / 10;
       if (score >= 9)
-        return { score, status: "Excelente", color: SCORE_COLORS.excelente };
-      if (score >= 7) return { score, status: "Bom", color: SCORE_COLORS.bom };
+        return { score, status: t("common.excelente"), color: SCORE_COLORS.excelente };
+      if (score >= 7) return { score, status: t("common.bom"), color: SCORE_COLORS.bom };
       if (score >= 5)
-        return { score, status: "Regular", color: SCORE_COLORS.regular };
-      return { score, status: "Insuficiente", color: SCORE_COLORS.ruim };
+        return { score, status: t("common.regular"), color: SCORE_COLORS.regular };
+      return { score, status: t("common.insuficiente"), color: SCORE_COLORS.ruim };
     },
   });
 }
 
 export function GeneralScoreChart({ filters }: ChartProps) {
+  useLocale();
+
   const { data, isLoading, isError, error, refetch } = useScoreData(filters);
   const hasRequired = !!filters.universityId;
   const hasData = data && data.score > 0;
   const refetchTyped = refetch as () => void;
   const errorMessage =
-    error instanceof Error ? error.message : "Erro ao calcular nota.";
-  const chartData = [{ category: "Nota", score: data?.score ?? 0 }];
+    apiError(error, "common.erroAoCarregarDados");
+  const chartData = [{ category: t("dashboard.nota"), score: data?.score ?? 0 }];
 
   const bands = [
-    { label: "0–4,99", desc: "Insuficiente", color: "text-red-400" },
-    { label: "5–6,99", desc: "Regular", color: "text-amber-400" },
-    { label: "7–8,99", desc: "Bom", color: "text-blue-400" },
-    { label: "9–10", desc: "Excelente", color: "text-emerald-400" },
+    { label: number(0) + "–" + number(4.99), desc: t("common.insuficiente"), color: "text-red-400" },
+    { label: number(5) + "–" + number(6.99), desc: t("common.regular"), color: "text-amber-400" },
+    { label: number(7) + "–" + number(8.99), desc: t("common.bom"), color: "text-blue-400" },
+    { label: number(9) + "–" + number(10), desc: t("common.excelente"), color: "text-emerald-400" },
   ];
 
   return (
@@ -96,21 +102,19 @@ export function GeneralScoreChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Avaliação Geral de Desempenho
-            </CardTitle>
+              {t("dashboard.avaliacaoGeralDeDesempenho")}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Média baseada na proficiência dos tópicos do Quiz (Escala 0–10)
-            </CardDescription>
+              {t("dashboard.mediaBaseadaNaProficienciaDosTopicosDo")}</CardDescription>
           </div>
         </div>
         <div className="absolute top-5 right-4 z-40">
           <ChartDownloadButton
             containerId="general-score-card"
-            fileName="nota_geral"
-            info={CHART_INFO}
+            fileName={t("dashboard.export.nota_geral")}
+            info={CHART_INFO()}
             insight={{
               chart: "general-score",
-              title: "Avaliação geral de desempenho",
+              title: t("dashboard.avaliacaoGeralDeDesempenho_443"),
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -121,10 +125,10 @@ export function GeneralScoreChart({ filters }: ChartProps) {
       <CardContent className="flex flex-1 min-h-[260px] items-center justify-center px-2 sm:p-6">
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
-            <p>Selecione uma universidade.</p>
+            <p>{t("dashboard.selecioneUmaUniversidade")}</p>
           </NoData>
         )}
-        {hasRequired && isLoading && <ChartLoader text="Calculando nota..." />}
+        {hasRequired && isLoading && <ChartLoader text={t("dashboard.calculandoNota")} />}
         {hasRequired && isError && (
           <ChartError message={errorMessage} onRetry={refetchTyped} />
         )}
@@ -136,7 +140,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                 className="font-[Poppins] text-6xl font-bold tabular-nums"
                 style={{ color: data.color }}
               >
-                {data.score.toFixed(2).replace(".", ",")}
+                {number(data.score, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
               <span
                 className="rounded-full px-3 py-0.5 font-[Poppins] text-sm font-semibold uppercase tracking-wider"
@@ -200,7 +204,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
 
         {!isLoading && !isError && hasRequired && !hasData && (
           <NoData onRetry={refetchTyped}>
-            <p>Sem dados suficientes para calcular a nota.</p>
+            <p>{t("dashboard.semDadosSuficientesParaCalcularANota")}</p>
           </NoData>
         )}
       </CardContent>
@@ -209,8 +213,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
         <CardFooter className="flex justify-between border-t border-white/10 px-6 py-4">
           <div className="flex flex-col">
             <span className="font-[Poppins] text-xs uppercase tracking-wider text-zinc-600">
-              Classificação
-            </span>
+              {t("dashboard.classificacao")}</span>
             <span
               className="mt-0.5 font-[Poppins] text-lg font-bold"
               style={{ color: data.color }}
@@ -220,10 +223,9 @@ export function GeneralScoreChart({ filters }: ChartProps) {
           </div>
           <div className="flex flex-col text-right">
             <span className="font-[Poppins] text-xs uppercase tracking-wider text-zinc-600">
-              Nota Final
-            </span>
+              {t("dashboard.notaFinal")}</span>
             <span className="mt-0.5 font-[Poppins] text-lg font-bold text-white">
-              {data.score.toFixed(2).replace(".", ",")}
+              {number(data.score, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               <span className="ml-1 font-[Poppins] text-sm font-normal text-zinc-600">
                 / 10
               </span>

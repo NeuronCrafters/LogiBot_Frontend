@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { percent, t, useLocale } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import {
   PolarAngleAxis,
@@ -24,10 +26,10 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Nível de acerto médio (%) por assunto no quiz. Quanto maior a área preenchida, maior o domínio naquele tópico. Ajuda a identificar onde concentrar os esforços de ensino.";
+  () => (t("dashboard.nivelDeAcertoMedioPorAssuntoNo"));
 
 const chartConfig = {
-  score: { label: "Acerto", color: "#3b82f6" },
+  score: { get label() { return t("dashboard.acerto"); }, color: "#3b82f6" },
 } satisfies ChartConfig;
 
 interface ChartProps {
@@ -41,6 +43,8 @@ interface ChartProps {
 }
 
 function useProficiencyData(filters: ChartProps["filters"]) {
+  useLocale();
+
   return useQuery({
     queryKey: ["proficiencyRadar", filters],
     queryFn: () => dashboardApi.getProficiencyRadar(filters),
@@ -65,7 +69,7 @@ function useProficiencyData(filters: ChartProps["filters"]) {
             keys.some((k) => l.toLowerCase() === k.toLowerCase()),
           ) ?? -1;
         return {
-          subject: label,
+          subject: ({ Variáveis: t("common.variaveis"), Listas: t("common.listas"), Condicionais: t("common.condicionais"), Funções: t("common.funcoes"), "Op. Lógicos": t("dashboard.opLogicos") } as Record<string, string>)[label] || label,
           score: index !== -1 ? (apiData.data?.[index] ?? 0) : 0,
         };
       });
@@ -99,13 +103,15 @@ function useProficiencyData(filters: ChartProps["filters"]) {
 }
 
 export function ProficiencyRadarChart({ filters }: ChartProps) {
+  useLocale();
+
   const { data, isLoading, isError, refetch, error } =
     useProficiencyData(filters);
   const hasRequired = !!filters.universityId;
   const hasData = data?.hasPerformanceData ?? false;
   const refetchTyped = refetch as () => void;
   const errorMessage =
-    error instanceof Error ? error.message : "Erro ao carregar dados.";
+    apiError(error, "common.erroAoCarregarDados");
 
   return (
     <Card
@@ -116,21 +122,19 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Proficiência por Assunto: Quiz
-            </CardTitle>
+              {t("dashboard.proficienciaPorAssuntoQuiz")}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Nível de acerto médio em cada assunto principal
-            </CardDescription>
+              {t("dashboard.nivelDeAcertoMedioEmCadaAssunto")}</CardDescription>
           </div>
         </div>
         <div className="absolute top-5 right-4 z-40">
           <ChartDownloadButton
             containerId="proficiency-radar-chart"
-            fileName="proficiencia_radar"
-            info={CHART_INFO}
+            fileName={t("dashboard.export.proficiencia_radar")}
+            info={CHART_INFO()}
             insight={{
               chart: "proficiency-radar",
-              title: "Proficiência por assunto",
+              title: t("dashboard.proficienciaPorAssunto"),
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -142,12 +146,10 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
             <p>
-              Selecione uma universidade para visualizar o radar de
-              proficiência.
-            </p>
+              {t("dashboard.selecioneUmaUniversidadeParaVisualizarORadar")}</p>
           </NoData>
         )}
-        {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
+        {hasRequired && isLoading && <ChartLoader text={t("common.carregandoDados")} />}
         {hasRequired && isError && (
           <ChartError message={errorMessage} onRetry={refetchTyped} />
         )}
@@ -172,9 +174,9 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                           {entry.subject}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Acerto:{" "}
+                          {t("dashboard.acerto_479")}{" "}
                           <span className="font-medium text-white">
-                            {entry.score.toFixed(1)}%
+                            {percent((entry.score) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                           </span>
                         </p>
                       </div>
@@ -210,7 +212,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         )}
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>
-            <p>Nenhum dado de proficiência disponível.</p>
+            <p>{t("dashboard.nenhumDadoDeProficienciaDisponivel")}</p>
           </NoData>
         )}
       </CardContent>
@@ -219,26 +221,26 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex items-center gap-4">
             <span className="font-[Poppins] text-sm text-zinc-400">
-              Média:{" "}
+              {t("common.media")}{" "}
               <span className="font-semibold text-white">
-                {data!.metrics?.average.toFixed(1)}%
+                {percent((data!.metrics?.average) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
               </span>
             </span>
             <span className="text-white/20">|</span>
             <span className="font-[Poppins] text-sm text-zinc-400">
-              Melhor:{" "}
+              {t("dashboard.melhor")}{" "}
               <span className="font-semibold text-white">
                 {data!.metrics?.best.subject}
               </span>
             </span>
             <span className="text-white/20">|</span>
             <span className="font-[Poppins] text-sm text-zinc-400">
-              A melhorar:{" "}
+              {t("dashboard.aMelhorar")}{" "}
               <span className="font-semibold text-white">
                 {data!.metrics?.worst.subject}
               </span>{" "}
               <span className="text-zinc-600">
-                ({data!.metrics?.worst.score.toFixed(1)}%)
+                ({percent((data!.metrics?.worst.score) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })})
               </span>
             </span>
           </div>

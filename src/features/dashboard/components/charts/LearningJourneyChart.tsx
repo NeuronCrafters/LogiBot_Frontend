@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { percent, t, useLocale, number } from "@/i18n";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -23,7 +25,7 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Mostra a evolucao da taxa de acerto por quiz concluido. Para turmas, cursos ou universidade, cada ponto representa a media do quiz correspondente entre os alunos.";
+  () => (t("dashboard.mostraAEvolucaoDaTaxaDeAcerto"));
 
 interface ApiData {
   labels: string[];
@@ -46,6 +48,8 @@ interface ChartProps {
 }
 
 function useChartData(filters: ChartProps["filters"]) {
+  useLocale();
+
   return useQuery<ApiData, Error, ChartData[]>({
     queryKey: ["learningJourney", filters],
     queryFn: () =>
@@ -58,7 +62,7 @@ function useChartData(filters: ChartProps["filters"]) {
         const performance = apiData.data[i] ?? 0;
         return {
           name: label,
-          shortName: label.replace("Quiz ", "Q"),
+          shortName: label.replace(/^Quiz (?=\d+$)/, "Q"),
           performance,
           deltaFromPrevious:
             i === 0
@@ -71,10 +75,12 @@ function useChartData(filters: ChartProps["filters"]) {
 }
 
 export function LearningJourneyChart({ filters }: ChartProps) {
+  const locale = useLocale();
+
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
   const hasRequiredIds = !!filters.universityId;
-  const scopeLabel = filters.studentId ? "do estudante" : "media do grupo";
+  const scopeLabel = filters.studentId ? t("dashboard.doEstudante", {}, locale) : t("dashboard.mediaDoGrupo_453", {}, locale);
 
   const summary = useMemo(() => {
     if (!data?.length) return null;
@@ -92,9 +98,9 @@ export function LearningJourneyChart({ filters }: ChartProps) {
       (data[data.length - 1].performance - data[0].performance).toFixed(1),
     );
     const trend =
-      evolution > 0 ? "em alta" : evolution < 0 ? "em queda" : "estavel";
+      evolution > 0 ? t("dashboard.emAlta", {}, locale) : evolution < 0 ? t("dashboard.emQueda", {}, locale) : "estavel";
     return { average: Number(average.toFixed(1)), peak, low, evolution, trend };
-  }, [data]);
+  }, [data, locale]);
 
   return (
     <Card
@@ -105,21 +111,20 @@ export function LearningJourneyChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Jornada de Aprendizagem
-            </CardTitle>
+              {t("dashboard.jornadaDeAprendizagem", {}, locale)}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Evolucao da taxa de acerto por quiz concluido: {scopeLabel}
+              {t("dashboard.evolucaoDaTaxaDeAcertoPorQuiz", {}, locale)}{" "}{scopeLabel}
             </CardDescription>
           </div>
         </div>
         <div className="absolute top-5 right-4 z-40">
           <ChartDownloadButton
             containerId="learning-journey-chart"
-            fileName="jornada_aprendizagem"
-            info={CHART_INFO}
+            fileName={t("dashboard.export.jornada_aprendizagem")}
+            info={CHART_INFO()}
             insight={{
               chart: "learning-journey",
-              title: "Jornada de aprendizagem",
+              title: t("dashboard.jornadaDeAprendizagem_458", {}, locale),
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -131,16 +136,14 @@ export function LearningJourneyChart({ filters }: ChartProps) {
         {!hasRequiredIds && (
           <NoData onRetry={refetch}>
             <p>
-              Selecione uma universidade para visualizar a Jornada de
-              Aprendizagem.
-            </p>
+              {t("dashboard.selecioneUmaUniversidadeParaVisualizarAJornada", {}, locale)}</p>
           </NoData>
         )}
         {hasRequiredIds && isLoading && (
-          <ChartLoader text="Carregando dados..." />
+          <ChartLoader text={t("common.carregandoDados", {}, locale)} />
         )}
         {hasRequiredIds && isError && (
-          <ChartError message={(error as Error)?.message} onRetry={refetch} />
+          <ChartError message={apiError(error, "common.erroAoCarregarDados")} onRetry={refetch} />
         )}
         {hasRequiredIds && !isLoading && !isError && hasData && summary && (
           <div className="h-[300px]">
@@ -165,7 +168,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                   tickLine={false}
                   axisLine={false}
                   tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
-                  tickFormatter={(v) => `${v}%`}
+                  tickFormatter={(v) => percent(v / 100)}
                 />
                 <Tooltip
                   cursor={{
@@ -177,21 +180,21 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                     const item = payload[0].payload as ChartData;
                     const delta =
                       item.deltaFromPrevious === null
-                        ? "primeiro quiz"
-                        : `${item.deltaFromPrevious > 0 ? "+" : ""}${item.deltaFromPrevious.toFixed(1)} p.p. vs. quiz anterior`;
+                        ? t("dashboard.primeiroQuiz", {}, locale)
+                        : t("dashboard.value0value1PPVsQuizAnterior", { value0: item.deltaFromPrevious > 0 ? "+" : "", value1: number(item.deltaFromPrevious, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale);
                     return (
                       <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl">
                         <p className="mb-1 font-[Poppins] font-bold text-white">
                           {item.name}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Taxa de acerto:{" "}
+                          {t("dashboard.taxaDeAcerto", {}, locale)}{" "}
                           <span className="font-medium text-white">
-                            {item.performance.toFixed(1)}%
+                            {percent((item.performance) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                           </span>
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Variacao:{" "}
+                          {t("dashboard.variacao", {}, locale)}{" "}
                           <span className="font-medium text-white">
                             {delta}
                           </span>
@@ -205,7 +208,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                   stroke="rgba(255,255,255,0.35)"
                   strokeDasharray="4 4"
                   label={{
-                    value: `Media ${summary.average.toFixed(1)}%`,
+                    value: t("common.mediaValue0", { value0: number(summary.average, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
                     fill: "rgba(255,255,255,0.55)",
                     fontSize: 11,
                     position: "insideTopLeft",
@@ -230,7 +233,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
-            <p>Nenhum dado de jornada disponivel para esta entidade.</p>
+            <p>{t("dashboard.nenhumDadoDeJornadaDisponivelParaEsta", {}, locale)}</p>
           </NoData>
         )}
       </CardContent>
@@ -238,41 +241,40 @@ export function LearningJourneyChart({ filters }: ChartProps) {
       {summary && (
         <CardFooter className="grid grid-cols-1 gap-4 border-t border-white/10 px-6 py-4 sm:grid-cols-4">
           <div>
-            <p className="font-[Poppins] text-xs text-zinc-500">Media Geral</p>
+            <p className="font-[Poppins] text-xs text-zinc-500">{t("dashboard.mediaGeral", {}, locale)}</p>
             <p className="mt-0.5 font-[Poppins] font-bold text-white">
-              {summary.average.toFixed(1)}%
+              {percent((summary.average) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
             </p>
           </div>
           <div>
-            <p className="font-[Poppins] text-xs text-zinc-500">Evolucao</p>
+            <p className="font-[Poppins] text-xs text-zinc-500">{t("dashboard.evolucao", {}, locale)}</p>
             <p
               className="mt-0.5 font-[Poppins] font-bold"
               style={{ color: summary.evolution >= 0 ? "#10b981" : "#ef4444" }}
             >
               {summary.evolution > 0 ? "+" : ""}
-              {summary.evolution.toFixed(1)} p.p.
+              {number(summary.evolution, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}{t("common.percentagePoints")}
               <span className="ml-1 font-normal text-zinc-500 text-sm">
                 {summary.trend}
               </span>
             </p>
           </div>
           <div>
-            <p className="font-[Poppins] text-xs text-zinc-500">Melhor Quiz</p>
+            <p className="font-[Poppins] text-xs text-zinc-500">{t("dashboard.melhorQuiz", {}, locale)}</p>
             <p className="mt-0.5 font-[Poppins] font-bold text-white">
               {summary.peak.name}
               <span className="ml-1.5 font-normal text-zinc-500 text-sm">
-                {summary.peak.performance.toFixed(1)}%
+                {percent((summary.peak.performance) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
               </span>
             </p>
           </div>
           <div>
             <p className="font-[Poppins] text-xs text-zinc-500">
-              Ponto Critico
-            </p>
+              {t("dashboard.pontoCritico", {}, locale)}</p>
             <p className="mt-0.5 font-[Poppins] font-bold text-white">
               {summary.low.name}
               <span className="ml-1.5 font-normal text-zinc-500 text-sm">
-                {summary.low.performance.toFixed(1)}%
+                {percent((summary.low.performance) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
               </span>
             </p>
           </div>

@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import logo from "@/assets/logo.svg";
 import type { ChatStreamStage } from "@/features/chat/api/chatApi";
 
@@ -7,28 +8,30 @@ interface ChatTypingDotsProps {
 
 function getStageLabel(streamStage?: ChatStreamStage) {
   if (streamStage === "queued") {
-    return "Aguardando na fila";
+    return t("chat.aguardandoNaFila");
   }
   if (streamStage === "history") {
-    return "Carregando contexto";
+    return t("chat.carregandoContexto");
   }
   if (streamStage === "rag") {
-    return "Consultando materiais";
+    return t("chat.consultandoMateriais");
   }
   if (streamStage === "agent") {
-    return "Gerando resposta";
+    return t("chat.gerandoResposta");
   }
   return null;
 }
 
 export function ChatTypingDots({ streamStage }: ChatTypingDotsProps) {
+  useLocale();
+
   const stageLabel = getStageLabel(streamStage);
 
   return (
     <div className="flex gap-3 mb-6 px-2">
       <div className="flex-shrink-0 mt-1">
         <div className="w-7 h-7 rounded-full bg-neutral-900 border border-neutral-700 p-0.5 flex items-center justify-center shadow">
-          <img src={logo} alt="Bot" className="w-full h-full object-contain" />
+          <img src={logo} alt={t("common.bot")} className="w-full h-full object-contain" />
         </div>
       </div>
       <div className="bg-[#2a2a2a] border border-neutral-700 px-4 py-3 rounded-2xl rounded-bl-sm">

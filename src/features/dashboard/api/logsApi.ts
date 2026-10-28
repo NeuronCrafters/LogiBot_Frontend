@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { api } from "@/shared/api/httpClient";
 import { LOG_ROUTES, PROFESSOR_LOG_ROUTES } from "@/services/api/api_routes";
 import {
@@ -70,7 +71,7 @@ export const logApi = {
       LogApiResponse<UserAnalysisLog> | UserAnalysisLog
     >(LOG_ROUTES.summary.filteredStudent, params);
     if (isFailedEnvelope(response))
-      throw new Error(response.error || "Erro ao buscar dados de usuário");
+      throw new Error(response.error || t("dashboard.erroAoBuscarDadosDeUsuario"));
     return unwrapLogResponse(response);
   },
 
@@ -154,7 +155,7 @@ export const logApi = {
           studentId: id,
         });
       default:
-        throw new Error(`Entidade inválida: ${entity}`);
+        throw new Error(t("dashboard.entidadeInvalidaValue0", { value0: entity }));
     }
   },
 
@@ -172,7 +173,7 @@ export const logApi = {
       case "subjects":
         return logApi.getSubjectsData(entity, id, filters);
       default:
-        throw new Error(`Métrica inválida: ${metric}`);
+        throw new Error(t("dashboard.metricaInvalidaValue0", { value0: metric }));
     }
   },
 };

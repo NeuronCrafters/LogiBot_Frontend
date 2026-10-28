@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
@@ -41,31 +42,28 @@ const ENTITY_META: Record<
   { title: string; description: string; icon: ReactNode }
 > = {
   university: {
-    title: "Nova Universidade",
-    description:
-      "Cadastre uma instituicao para organizar cursos, turmas e usuarios.",
+    get title() { return t("common.novaUniversidade"); },
+    get description() { return t("admin.cadastreUmaInstituicaoParaOrganizarCursosTurmas"); },
     icon: <School className="h-5 w-5" />,
   },
   course: {
-    title: "Novo Curso",
-    description: "Crie um curso dentro de uma universidade ja cadastrada.",
+    get title() { return t("common.novoCurso"); },
+    get description() { return t("admin.crieUmCursoDentroDeUmaUniversidade"); },
     icon: <BookOpen className="h-5 w-5" />,
   },
   class: {
-    title: "Nova Turma",
-    description:
-      "Crie uma turma, defina sua grade e gere um codigo unico de acesso para os alunos.",
+    get title() { return t("common.novaTurma"); },
+    get description() { return t("admin.crieUmaTurmaDefinaSuaGradeE"); },
     icon: <Users className="h-5 w-5" />,
   },
   discipline: {
-    title: "Nova Disciplina",
-    description:
-      "Crie uma disciplina e vincule turmas ou professores quando fizer sentido.",
+    get title() { return t("common.novaDisciplina"); },
+    get description() { return t("admin.crieUmaDisciplinaEVinculeTurmasOu"); },
     icon: <Library className="h-5 w-5" />,
   },
   professor: {
-    title: "Novo Professor",
-    description: "Crie o acesso de professor e vincule ao curso correto.",
+    get title() { return t("common.novoProfessor"); },
+    get description() { return t("admin.crieOAcessoDeProfessorEVincule"); },
     icon: <GraduationCap className="h-5 w-5" />,
   },
 };
@@ -80,31 +78,33 @@ function getCreatedEntity(response: ApiResponse, entity: string) {
 }
 
 function PermissionDenied() {
+  useLocale();
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-zinc-600">
         <ShieldOff className="h-6 w-6" />
       </div>
       <p className="font-[Poppins] text-sm text-zinc-500">
-        Voce nao tem permissao para acessar esta pagina.
-      </p>
+        {t("admin.voceNaoTemPermissaoParaAcessarEsta")}</p>
     </div>
   );
 }
 
 function NextActions({ entity }: { entity: EntityType }) {
+  useLocale();
+
   const actions = [
     ...(["class", "discipline", "professor"].includes(entity)
-      ? [{ to: "/entities/manage", label: "Gerenciar vínculos" }]
+      ? [{ to: "/entities/manage", label: t("admin.gerenciarVinculos") }]
       : []),
-    { to: "/entities", label: "Listar entidades" },
+    { to: "/entities", label: t("common.listarEntidades") },
   ];
 
   return (
     <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <p className="font-[Poppins] text-sm font-semibold text-white">
-        Proximas acoes
-      </p>
+        {t("admin.proximasAcoes")}</p>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {actions.map((action) => (
           <Link
@@ -120,14 +120,15 @@ function NextActions({ entity }: { entity: EntityType }) {
   );
 }
 
-export function CreateEntities() {
+function CreateEntitiesContent() {
+  useLocale();
+
   const { user } = useAuth();
   const { entityType } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
 
-  if (!user) return null;
 
   const roles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = roles.includes("admin");
@@ -142,14 +143,9 @@ export function CreateEntities() {
     ? (entityType as EntityType)
     : undefined;
 
-  if (!routeEntity) return <Navigate to="/entities/manage" replace />;
-  if (!isAdmin && !isCoordinator) return <PermissionDenied />;
-  if (!isAdmin && ["university", "course"].includes(routeEntity))
-    return <PermissionDenied />;
-
   const createMutation = useMutation({
     mutationFn: async ({ entity, item }: { entity: EntityType; item: any }) => {
-      logger.info("Admin", `Enviando ${entity}.`, item);
+      logger.info("Admin", t("admin.enviandoValue0", { value0: entity }), item);
       const response: ApiResponse =
         entity === "professor"
           ? await adminApi.createProfessor<ApiResponse>({
@@ -176,7 +172,7 @@ export function CreateEntities() {
           response?.id ||
           response?._id ||
           `temp-${Date.now()}`,
-        name: created?.name || item.name || "Item sem nome",
+        name: created?.name || item.name || t("admin.itemSemNome"),
         type: entity,
         action: "create",
         registrationCode,
@@ -186,15 +182,20 @@ export function CreateEntities() {
       queryClient.invalidateQueries({ queryKey: ["searchEntities"] });
       toast.success(
         registrationCode
-          ? "Turma criada. Codigo de acesso gerado."
-          : "Cadastro realizado com sucesso!",
+          ? t("admin.turmaCriadaCodigoDeAcessoGerado")
+          : t("admin.cadastroRealizadoComSucesso"),
       );
     },
     onError: (error) => {
       logger.error("Admin", "Erro ao enviar dados.", error);
-      toast.error("Erro ao cadastrar. Verifique os dados e tente novamente.");
+      toast.error({ key: "admin.erroAoCadastrarVerifiqueOsDadosE", params: {} });
     },
   });
+
+  if (!routeEntity) return <Navigate to="/entities/manage" replace />;
+  if (!isAdmin && !isCoordinator) return <PermissionDenied />;
+  if (!isAdmin && ["university", "course"].includes(routeEntity))
+    return <PermissionDenied />;
 
   const meta = ENTITY_META[routeEntity];
 
@@ -221,8 +222,7 @@ export function CreateEntities() {
               className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <TableProperties className="h-4 w-4" />
-              Gestao
-            </Link>
+              {t("admin.gestao")}</Link>
           </div>
         </section>
 
@@ -241,4 +241,9 @@ export function CreateEntities() {
       </div>
     </main>
   );
+}
+
+export function CreateEntities() {
+  const { user } = useAuth();
+  return user ? <CreateEntitiesContent /> : null;
 }

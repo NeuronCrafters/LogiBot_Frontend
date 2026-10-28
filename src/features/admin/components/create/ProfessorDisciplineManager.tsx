@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,6 +28,8 @@ function SearchField({
   onChange: (value: string) => void;
   placeholder: string;
 }) {
+  useLocale();
+
   return (
     <div className="relative">
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
@@ -41,6 +44,8 @@ function SearchField({
 }
 
 function EmptyList({ message }: { message: string }) {
+  useLocale();
+
   return (
     <p className="px-4 py-6 text-center font-[Poppins] text-sm text-zinc-600">
       {message}
@@ -57,6 +62,8 @@ function PersonList({
   emptyText: string;
   action?: (item: Person) => ReactNode;
 }) {
+  useLocale();
+
   return (
     <div className="overflow-hidden rounded-xl border border-white/10">
       {items.length === 0 ? (
@@ -96,6 +103,8 @@ export function ProfessorDisciplineManager({
   initialDisciplineId?: string;
   inModal?: boolean;
 } = {}) {
+  const locale = useLocale();
+
   const queryClient = useQueryClient();
   const [selectedUniversity, setSelectedUniversity] =
     useState(initialUniversityId);
@@ -178,10 +187,10 @@ export function ProfessorDisciplineManager({
     mutationFn: async (professorId: string) =>
       academicApi.attachProfessorToDiscipline(selectedDiscipline, professorId),
     onSuccess: () => {
-      toast.success("Professor vinculado a disciplina.");
+      toast.success({ key: "admin.professorVinculadoADisciplina", params: {} });
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
     },
-    onError: () => toast.error("Nao foi possivel vincular o professor."),
+    onError: () => toast.error({ key: "admin.naoFoiPossivelVincularOProfessor", params: {} }),
   });
 
   const detachProfessorMutation = useMutation({
@@ -191,10 +200,10 @@ export function ProfessorDisciplineManager({
         professorId,
       ),
     onSuccess: () => {
-      toast.success("Professor desvinculado da disciplina.");
+      toast.success({ key: "admin.professorDesvinculadoDaDisciplina", params: {} });
       queryClient.invalidateQueries({ queryKey: ["academicData"] });
     },
-    onError: () => toast.error("Nao foi possivel desvincular o professor."),
+    onError: () => toast.error({ key: "admin.naoFoiPossivelDesvincularOProfessor", params: {} }),
   });
 
   const resetAfterUniversity = (universityId: string) => {
@@ -221,8 +230,7 @@ export function ProfessorDisciplineManager({
   const loader = (
     <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
       <Loader2 className="h-4 w-4 animate-spin" />
-      Carregando vinculos...
-    </div>
+      {t("common.carregandoVinculos", {}, locale)}</div>
   );
 
   const body = (
@@ -230,12 +238,9 @@ export function ProfessorDisciplineManager({
       {!inModal && (
         <div className="mb-5">
           <h2 className="font-[Poppins] text-base font-semibold text-white">
-            Gerenciar disciplina
-          </h2>
+            {t("admin.gerenciarDisciplina", {}, locale)}</h2>
           <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-            Vincule professores e acompanhe os alunos das turmas com esta
-            disciplina.
-          </p>
+            {t("admin.vinculeProfessoresEAcompanheOsAlunosDas", {}, locale)}</p>
         </div>
       )}
 
@@ -243,36 +248,33 @@ export function ProfessorDisciplineManager({
         <div className="grid gap-4 md:grid-cols-3">
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Universidade
-            </label>
+              {t("common.universidade", {}, locale)}</label>
             <Select
               value={selectedUniversity}
               onChange={(v) => resetAfterUniversity(v)}
               options={(academicData?.universities ?? []).map((university) => ({ value: university._id, label: university.name }))}
-              placeholder="Selecione"
+              placeholder={t("common.selecione_92", {}, locale)}
             />
           </div>
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Curso
-            </label>
+              {t("common.curso", {}, locale)}</label>
             <Select
               value={selectedCourse}
               onChange={(v) => resetAfterCourse(v)}
               options={courses.map((item) => ({ value: item._id, label: item.name }))}
-              placeholder="Selecione"
+              placeholder={t("common.selecione_92", {}, locale)}
               disabled={!selectedUniversity}
             />
           </div>
           <div>
             <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Disciplina
-            </label>
+              {t("common.disciplina", {}, locale)}</label>
             <Select
               value={selectedDiscipline}
               onChange={(v) => resetAfterDiscipline(v)}
               options={(course?.disciplines ?? []).map((item) => ({ value: item._id, label: item.name }))}
-              placeholder="Selecione"
+              placeholder={t("common.selecione_92", {}, locale)}
               disabled={!selectedCourse}
             />
           </div>
@@ -287,15 +289,13 @@ export function ProfessorDisciplineManager({
               onClick={() => setActiveTab("professors")}
               className={`flex-1 rounded-lg px-3 py-2 font-[Poppins] text-sm transition-colors ${activeTab === "professors" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
             >
-              Professores
-            </button>
+              {t("common.professores", {}, locale)}</button>
             <button
               type="button"
               onClick={() => setActiveTab("students")}
               className={`flex-1 rounded-lg px-3 py-2 font-[Poppins] text-sm transition-colors ${activeTab === "students" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
             >
-              Alunos
-            </button>
+              {t("common.alunos", {}, locale)}</button>
           </div>
 
           {activeTab === "professors" && (
@@ -303,21 +303,20 @@ export function ProfessorDisciplineManager({
               <SearchField
                 value={professorSearch}
                 onChange={setProfessorSearch}
-                placeholder="Buscar professor por nome ou email..."
+                placeholder={t("admin.buscarProfessorPorNomeOuEmail", {}, locale)}
               />
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Professores disponiveis
-                  </h3>
+                    {t("admin.professoresDisponiveis", {}, locale)}</h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredAvailableProfessors.length}
                   </span>
                 </div>
                 <PersonList
                   items={filteredAvailableProfessors}
-                  emptyText="Nenhum professor disponivel."
+                  emptyText={t("admin.noAvailableInstructors")}
                   action={(professor) => (
                     <button
                       type="button"
@@ -327,8 +326,7 @@ export function ProfessorDisciplineManager({
                       }
                       className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 font-[Poppins] text-xs text-blue-300 transition-colors hover:bg-blue-500/20 disabled:opacity-50"
                     >
-                      Vincular
-                    </button>
+                      {t("common.vincular", {}, locale)}</button>
                   )}
                 />
               </div>
@@ -336,15 +334,14 @@ export function ProfessorDisciplineManager({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Professores vinculados
-                  </h3>
+                    {t("admin.professoresVinculados", {}, locale)}</h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredLinkedProfessors.length}
                   </span>
                 </div>
                 <PersonList
                   items={filteredLinkedProfessors}
-                  emptyText="Nenhum professor vinculado."
+                  emptyText={t("admin.noLinkedInstructors")}
                   action={(professor) => (
                     <button
                       type="button"
@@ -355,8 +352,7 @@ export function ProfessorDisciplineManager({
                       className="flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 font-[Poppins] text-xs text-red-300 transition-colors hover:bg-red-500/20 disabled:opacity-50"
                     >
                       <UserMinus className="h-3.5 w-3.5" />
-                      Remover
-                    </button>
+                      {t("common.remover", {}, locale)}</button>
                   )}
                 />
               </div>
@@ -368,20 +364,17 @@ export function ProfessorDisciplineManager({
               <SearchField
                 value={studentSearch}
                 onChange={setStudentSearch}
-                placeholder="Buscar aluno por nome ou email..."
+                placeholder={t("common.buscarAlunoPorNomeOuEmail", {}, locale)}
               />
 
               <div className="rounded-xl border border-white/10 bg-neutral-950/40 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-emerald-400" />
                   <p className="font-[Poppins] text-sm font-semibold text-white">
-                    Acesso por turma
-                  </p>
+                    {t("admin.acessoPorTurma", {}, locale)}</p>
                 </div>
                 <p className="mt-1 font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                  Para adicionar aluno nesta lista, adicione o aluno a uma turma
-                  que tenha esta disciplina na grade.
-                </p>
+                  {t("admin.paraAdicionarAlunoNestaListaAdicioneO", {}, locale)}</p>
                 {linkedClasses.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {linkedClasses.map((classItem) => (
@@ -399,15 +392,14 @@ export function ProfessorDisciplineManager({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-[Poppins] text-sm font-semibold text-white">
-                    Alunos com acesso
-                  </h3>
+                    {t("admin.alunosComAcesso", {}, locale)}</h3>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-400">
                     {filteredStudents.length}
                   </span>
                 </div>
                 <PersonList
                   items={filteredStudents}
-                  emptyText="Nenhum aluno em turmas com esta disciplina."
+                  emptyText={t("admin.noStudentsWithSubject")}
                 />
               </div>
             </div>

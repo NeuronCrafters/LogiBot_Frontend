@@ -1,3 +1,4 @@
+import { t, useLocale, getLanguage } from "@/i18n";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -23,40 +24,42 @@ const TYPE_META: Record<
   { label: string; icon: React.ReactNode; color: string; bg: string }
 > = {
   GERAL: {
-    label: "Geral",
+    get label() { return t("common.geral"); },
     icon: <MessageCircle className="h-3.5 w-3.5" />,
     color: "text-blue-400",
     bg: "bg-blue-500/10 border-blue-500/20",
   },
   SUGESTAO: {
-    label: "Sugestão",
+    get label() { return t("common.sugestao"); },
     icon: <Lightbulb className="h-3.5 w-3.5" />,
     color: "text-yellow-400",
     bg: "bg-yellow-500/10 border-yellow-500/20",
   },
   BUG: {
-    label: "Bug",
+    get label() { return t("feedback.bug"); },
     icon: <Bug className="h-3.5 w-3.5" />,
     color: "text-red-400",
     bg: "bg-red-500/10 border-red-500/20",
   },
   ELOGIO: {
-    label: "Elogio",
+    get label() { return t("common.elogio"); },
     icon: <Heart className="h-3.5 w-3.5" />,
     color: "text-pink-400",
     bg: "bg-pink-500/10 border-pink-500/20",
   },
   general: {
-    label: "Geral",
+    get label() { return t("common.geral"); },
     icon: <MessageCircle className="h-3.5 w-3.5" />,
     color: "text-blue-400",
     bg: "bg-blue-500/10 border-blue-500/20",
   },
 };
 
-const FILTER_OPTIONS = ["Todos", "GERAL", "SUGESTAO", "BUG", "ELOGIO"];
+const FILTER_OPTIONS = () => ([t("common.todos"), "GERAL", "SUGESTAO", "BUG", "ELOGIO"]);
 
 function TypeBadge({ type }: { type: string }) {
+  useLocale();
+
   const meta = TYPE_META[type] ?? {
     label: type,
     icon: <AlertCircle className="h-3.5 w-3.5" />,
@@ -74,7 +77,7 @@ function TypeBadge({ type }: { type: string }) {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR", {
+  return new Date(iso).toLocaleString(getLanguage(), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -84,6 +87,8 @@ function formatDate(iso: string) {
 }
 
 function FeedbackCard({ item }: { item: FeedbackItem }) {
+  useLocale();
+
   return (
     <div className="rounded-2xl border border-white/10 bg-neutral-900 p-5 flex flex-col gap-3 hover:border-white/15 transition-colors">
       <div className="flex items-start justify-between gap-3">
@@ -104,7 +109,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
         </div>
         <div className="min-w-0">
           <p className="text-xs font-medium text-zinc-300 font-[Poppins] truncate">
-            {item.authorName ?? "Usuário removido"}
+            {item.authorName ?? t("feedback.usuarioRemovido")}
           </p>
           <p className="text-xs text-zinc-500 font-[Poppins] truncate">
             {item.authorEmail ?? "—"}
@@ -116,9 +121,11 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
 }
 
 export function FeedbackManagementPage() {
+  const locale = useLocale();
+
   const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("Todos");
+  const [typeFilter, setTypeFilter] = useState(t("common.todos", {}, locale));
 
   const isAdmin = Array.isArray(user?.role)
     ? user.role.includes("admin")
@@ -159,7 +166,7 @@ export function FeedbackManagementPage() {
   if (!isAdmin) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-zinc-500 font-[Poppins] text-sm">Acesso restrito.</p>
+        <p className="text-zinc-500 font-[Poppins] text-sm">{t("feedback.acessoRestrito", {}, locale)}</p>
       </div>
     );
   }
@@ -169,17 +176,15 @@ export function FeedbackManagementPage() {
     <div className="mx-auto w-full max-w-5xl font-[Poppins]">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">
-          Feedbacks dos Alunos
-        </h1>
+          {t("feedback.feedbacksDosAlunos", {}, locale)}</h1>
         <p className="mt-1 text-sm text-zinc-400">
-          Veja o que os alunos estão reportando sobre a plataforma.
-        </p>
+          {t("feedback.vejaOQueOsAlunosEstaoReportando", {}, locale)}</p>
       </div>
 
       {/* Filters */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
-          {FILTER_OPTIONS.map((opt) => (
+          {FILTER_OPTIONS().map((opt) => (
             <button
               key={opt}
               onClick={() => setTypeFilter(opt)}
@@ -194,7 +199,7 @@ export function FeedbackManagementPage() {
               ) : (
                 TYPE_META[opt]?.icon
               )}
-              {opt === "Todos" ? "Todos" : (TYPE_META[opt]?.label ?? opt)}
+              {opt === "Todos" ? t("common.todos", {}, locale) : (TYPE_META[opt]?.label ?? opt)}
               {counts[opt] !== undefined && (
                 <span className="ml-0.5 tabular-nums opacity-70">
                   {counts[opt]}
@@ -208,7 +213,7 @@ export function FeedbackManagementPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
           <input
             type="text"
-            placeholder="Buscar por mensagem ou aluno..."
+            placeholder={t("feedback.buscarPorMensagemOuAluno", {}, locale)}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-9 w-full rounded-xl border border-white/10 bg-neutral-950/60 pl-9 pr-3 text-sm text-white placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 sm:w-72"
@@ -226,8 +231,7 @@ export function FeedbackManagementPage() {
       {isError && (
         <div className="flex items-center justify-center gap-2 py-20 text-sm text-red-400">
           <AlertCircle className="h-5 w-5" />
-          Erro ao carregar feedbacks.
-        </div>
+          {t("feedback.erroAoCarregarFeedbacks", {}, locale)}</div>
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
@@ -235,8 +239,8 @@ export function FeedbackManagementPage() {
           <MessageSquare className="h-10 w-10 opacity-40" />
           <p className="text-sm">
             {feedbacks.length === 0
-              ? "Nenhum feedback recebido ainda."
-              : "Nenhum resultado para os filtros aplicados."}
+              ? t("feedback.nenhumFeedbackRecebidoAinda", {}, locale)
+              : t("feedback.nenhumResultadoParaOsFiltrosAplicados", {}, locale)}
           </p>
         </div>
       )}

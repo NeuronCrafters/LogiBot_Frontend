@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, Brain, GraduationCap, Loader2, Plus } from "lucide-react";
@@ -11,6 +12,8 @@ interface QuizHistoryProps {
 }
 
 export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
+  useLocale();
+
   const navigate = useNavigate();
 
   const { data: quizzes = [], isLoading, isError } = useQuery({
@@ -35,8 +38,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
       <div className="flex h-40 flex-col items-center justify-center gap-2">
         <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
         <span className="font-[Poppins] text-xs text-zinc-500">
-          Carregando histórico...
-        </span>
+          {t("quiz.carregandoHistorico")}</span>
       </div>
     );
   }
@@ -48,22 +50,19 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
         className="mb-1 h-9 w-full px-3 gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600 font-[Poppins] text-xs font-medium text-white transition-colors hover:bg-indigo-500"
       >
         <Plus size={14} />
-        Ver quizzes
-      </Button>
+        {t("quiz.verQuizzes")}</Button>
 
       {isError ? (
         <div className="flex h-32 flex-col items-center justify-center gap-2 px-4 text-center">
           <AlertCircle className="h-5 w-5 text-red-500" />
           <span className="font-[Poppins] text-xs text-zinc-500">
-            Erro ao carregar histórico.
-          </span>
+            {t("common.erroAoCarregarHistorico")}</span>
         </div>
       ) : quizzes.length === 0 ? (
         <div className="flex h-32 flex-col items-center justify-center gap-2 px-4 text-center">
           <Brain className="h-5 w-5 text-zinc-700" />
           <span className="font-[Poppins] text-xs text-zinc-500">
-            Nenhum quiz respondido.
-          </span>
+            {t("quiz.nenhumQuizRespondido")}</span>
         </div>
       ) : (
         <div className="flex flex-col gap-0.5">
@@ -79,7 +78,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
               />
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate font-[Poppins] text-xs leading-snug text-zinc-300 transition-colors group-hover:text-white">
-                  {quiz.title || "Quiz"}
+                  {quiz.title || t("common.quiz")}
                 </span>
                 <div className="flex items-center gap-2 leading-snug">
                   <span className="font-[Poppins] text-[11px] text-zinc-600">

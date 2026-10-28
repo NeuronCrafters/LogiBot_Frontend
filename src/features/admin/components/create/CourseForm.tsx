@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import React, { useCallback, useEffect, useState } from "react";
 import { logger } from "@/shared/lib/logger";
 import { academicFiltersApi } from "@/services/apiClient";
@@ -22,6 +23,8 @@ const inputCls =
   "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
 
 function CourseForm({ onSubmit, initialData }: CourseFormProps) {
+  const locale = useLocale();
+
   const [academicData, setAcademicData] = useState<{
     universities: University[];
   } | null>(null);
@@ -63,23 +66,23 @@ function CourseForm({ onSubmit, initialData }: CourseFormProps) {
   return (
     <form onSubmit={handleSubmit} className="mt-5 space-y-4">
       <div>
-        <label className={labelCls}>Nome do Curso</label>
+        <label className={labelCls}>{t("admin.nomeDoCurso", {}, locale)}</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Ciencia da Computacao"
+          placeholder={t("admin.exCienciaDaComputacao", {}, locale)}
           required
           className={inputCls}
         />
       </div>
       <div>
-        <label className={labelCls}>Universidade</label>
+        <label className={labelCls}>{t("common.universidade", {}, locale)}</label>
         <Select
           value={universityId}
           onChange={(v) => setUniversityId(v)}
           options={(academicData?.universities ?? []).map((uni) => ({ value: uni._id, label: uni.name }))}
-          placeholder="Selecione a universidade"
+          placeholder={t("common.selecioneAUniversidade", {}, locale)}
         />
       </div>
       <div className="pt-1">

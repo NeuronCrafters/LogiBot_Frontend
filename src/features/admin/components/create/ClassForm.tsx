@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import React, { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -36,6 +37,8 @@ function CheckboxList({
   onToggle: (id: string) => void;
   emptyText: string;
 }) {
+  useLocale();
+
   if (items.length === 0)
     return (
       <p className="px-3 py-2 text-sm text-zinc-600 font-[Poppins]">
@@ -65,6 +68,8 @@ function CheckboxList({
 }
 
 function ClassForm({ onSubmit, initialData }: ClassFormProps) {
+  const locale = useLocale();
+
   const { user } = useAuth();
   const roles = Array.isArray(user?.role) ? user.role : [user?.role];
   const isAdmin = roles.includes("admin");
@@ -195,34 +200,32 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
       selectedDisciplineIds,
       onSubmit,
       isAdmin,
-      initialData,
-    ],
+      initialData,],
   );
 
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
         <Loader2 className="w-4 h-4 animate-spin" />
-        Carregando dados acadêmicos...
-      </div>
+        {t("common.carregandoDadosAcademicos", {}, locale)}</div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelCls}>Nome da Turma</label>
+        <label className={labelCls}>{t("admin.nomeDaTurma", {}, locale)}</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Turma A — 2024"
+          placeholder={t("admin.exTurmaA2024", {}, locale)}
           required
           className={inputCls}
         />
       </div>
       <div>
-        <label className={labelCls}>Universidade</label>
+        <label className={labelCls}>{t("common.universidade", {}, locale)}</label>
         <Select
           value={selectedUniversity}
           onChange={(v) => {
@@ -231,12 +234,12 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
             setSelectedDisciplineIds([]);
           }}
           options={filteredUniversities.map((uni) => ({ value: uni._id, label: uni.name }))}
-          placeholder="Selecione a universidade"
+          placeholder={t("common.selecioneAUniversidade", {}, locale)}
         />
       </div>
       {selectedUniversity && (
         <div>
-          <label className={labelCls}>Curso</label>
+          <label className={labelCls}>{t("common.curso", {}, locale)}</label>
           <Select
             value={selectedCourse}
             onChange={(v) => {
@@ -244,18 +247,17 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
               setSelectedDisciplineIds([]);
             }}
             options={availableCourses.map((course) => ({ value: course._id, label: course.name }))}
-            placeholder="Selecione o curso"
+            placeholder={t("common.selecioneOCurso", {}, locale)}
           />
         </div>
       )}
       {selectedCourse && (
         <div>
           <label className={labelCls}>
-            Disciplinas vinculadas{" "}
+            {t("common.disciplinasVinculadas", {}, locale)}{" "}
             {selectedDisciplineIds.length > 0 && (
               <span className="normal-case tracking-normal text-blue-400 ml-1">
-                ({selectedDisciplineIds.length} selecionada
-                {selectedDisciplineIds.length !== 1 ? "s" : ""})
+                ({t("common.selected", { count: selectedDisciplineIds.length })})
               </span>
             )}
           </label>
@@ -263,12 +265,10 @@ function ClassForm({ onSubmit, initialData }: ClassFormProps) {
             items={availableDisciplines}
             selected={selectedDisciplineIds}
             onToggle={toggleDiscipline}
-            emptyText="Nenhuma disciplina disponível para este curso. Você pode criar a turma sem disciplinas e vincular depois."
+            emptyText={t("admin.noSubjectsForProgram")}
           />
           <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">
-            A turma gera um codigo unico de acesso; as disciplinas selecionadas
-            formam a grade da turma.
-          </p>
+            {t("admin.aTurmaGeraUmCodigoUnicoDe", {}, locale)}</p>
         </div>
       )}
       <div className="pt-1">

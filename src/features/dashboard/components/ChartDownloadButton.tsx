@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { toPng } from "html-to-image";
 import { Download, Info, Sparkles, X } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
@@ -24,7 +25,7 @@ async function downloadChartAsPng(
   fileName: string,
 ): Promise<void> {
   const container = document.getElementById(containerId);
-  if (!container) throw new Error(`Container '${containerId}' não encontrado.`);
+  if (!container) throw new Error(t("dashboard.containerValue0NaoEncontrado", { value0: containerId }));
 
   const dataUrl = await toPng(container, {
     backgroundColor: "#1f1f1f",
@@ -47,6 +48,8 @@ export function ChartDownloadButton({
   className,
   insight,
 }: ChartDownloadButtonProps) {
+  useLocale();
+
   const dashboardInsights = useDashboardInsights();
   const [downloading, setDownloading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -81,7 +84,7 @@ export function ChartDownloadButton({
         <div ref={infoRef} className="relative">
           <button
             type="button"
-            aria-label="Informações sobre o gráfico"
+            aria-label={t("dashboard.informacoesSobreOGrafico")}
             onClick={() => setShowInfo((v) => !v)}
             className={`rounded-lg border p-2 transition-colors ${
               showInfo
@@ -96,9 +99,9 @@ export function ChartDownloadButton({
             <div className="absolute right-0 top-11 z-50 w-72 rounded-xl border border-white/10 bg-[#141414] p-4 shadow-2xl shadow-black/60">
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Sobre este gráfico
-                </span>
+                  {t("dashboard.sobreEsteGrafico")}</span>
                 <button
+                  aria-label={t("common.fechar")}
                   onClick={() => setShowInfo(false)}
                   className="text-zinc-600 transition-colors hover:text-zinc-400"
                 >
@@ -116,8 +119,8 @@ export function ChartDownloadButton({
       {insight && (
         <button
           type="button"
-          aria-label={`Gerar insight de IA para ${insight.title}`}
-          title="Analisar com IA"
+          aria-label={t("dashboard.gerarInsightDeIaParaValue0", { value0: insight.title })}
+          title={t("dashboard.analisarComIa")}
           disabled={insight.disabled}
           onClick={() =>
             dashboardInsights.openChart(
@@ -134,8 +137,8 @@ export function ChartDownloadButton({
 
       <button
         type="button"
-        aria-label="Baixar gráfico como PNG"
-        title="Baixar como PNG"
+        aria-label={t("dashboard.baixarGraficoComoPng")}
+        title={t("dashboard.baixarComoPng")}
         disabled={downloading}
         onClick={handleDownload}
         className="rounded-lg border border-white/10 bg-white/5 p-2 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40"

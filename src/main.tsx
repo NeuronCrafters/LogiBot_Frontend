@@ -1,3 +1,6 @@
+import { LocalizedValidation } from "@/i18n/LocalizedValidation";
+import "@/i18n";
+import { LanguagePreferenceSync } from "@/i18n/LanguagePreferenceSync";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -13,6 +16,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <LanguagePreferenceSync />
+          <LocalizedValidation />
           <App />
         </AuthProvider>
       </QueryClientProvider>

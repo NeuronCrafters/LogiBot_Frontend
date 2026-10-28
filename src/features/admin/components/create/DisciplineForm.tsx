@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import React, { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -36,6 +37,8 @@ function CheckboxList({
   onToggle: (id: string) => void;
   emptyText: string;
 }) {
+  useLocale();
+
   if (items.length === 0)
     return (
       <p className="px-3 py-2 text-sm text-zinc-600 font-[Poppins]">
@@ -65,6 +68,8 @@ function CheckboxList({
 }
 
 function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
+  const locale = useLocale();
+
   const { data: academicData, isLoading } = useQuery({
     queryKey: ["academicData"],
     queryFn: async () => {
@@ -159,33 +164,31 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
       selectedClassIds,
       selectedProfessorIds,
       onSubmit,
-      initialData,
-    ],
+      initialData,],
   );
 
   if (isLoading)
     return (
       <div className="flex items-center gap-2 text-zinc-500 font-[Poppins] text-sm">
         <Loader2 className="w-4 h-4 animate-spin" />
-        Carregando dados acadêmicos...
-      </div>
+        {t("common.carregandoDadosAcademicos", {}, locale)}</div>
     );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelCls}>Nome da Disciplina</label>
+        <label className={labelCls}>{t("admin.nomeDaDisciplina", {}, locale)}</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Algoritmos e Programação"
+          placeholder={t("admin.exAlgoritmosEProgramacao", {}, locale)}
           required
           className={inputCls}
         />
       </div>
       <div>
-        <label className={labelCls}>Universidade</label>
+        <label className={labelCls}>{t("common.universidade", {}, locale)}</label>
         <Select
           value={selectedUniversity}
           onChange={(v) => {
@@ -195,12 +198,12 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
             setSelectedProfessorIds([]);
           }}
           options={(academicData?.universities ?? []).map((uni) => ({ value: uni._id, label: uni.name }))}
-          placeholder="Selecione a universidade"
+          placeholder={t("common.selecioneAUniversidade", {}, locale)}
         />
       </div>
       {selectedUniversity && (
         <div>
-          <label className={labelCls}>Curso</label>
+          <label className={labelCls}>{t("common.curso", {}, locale)}</label>
           <Select
             value={selectedCourse}
             onChange={(v) => {
@@ -209,7 +212,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               setSelectedProfessorIds([]);
             }}
             options={availableCourses.map((course) => ({ value: course._id, label: course.name }))}
-            placeholder="Selecione o curso"
+            placeholder={t("common.selecioneOCurso", {}, locale)}
           />
         </div>
       )}
@@ -217,11 +220,10 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
         <>
           <div>
             <label className={labelCls}>
-              Turmas{" "}
+              {t("common.turmas", {}, locale)}{" "}
               {selectedClassIds.length > 0 && (
                 <span className="normal-case tracking-normal text-blue-400 ml-1">
-                  ({selectedClassIds.length} selecionada
-                  {selectedClassIds.length !== 1 ? "s" : ""})
+                  ({t("common.selected", { count: selectedClassIds.length })})
                 </span>
               )}
             </label>
@@ -229,16 +231,15 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               items={availableClasses}
               selected={selectedClassIds}
               onToggle={toggleClass}
-              emptyText="Nenhuma turma disponível para este curso."
+              emptyText={t("admin.noClassesForProgram")}
             />
           </div>
           <div>
             <label className={labelCls}>
-              Professores{" "}
+              {t("common.professores", {}, locale)}{" "}
               {selectedProfessorIds.length > 0 && (
                 <span className="normal-case tracking-normal text-blue-400 ml-1">
-                  ({selectedProfessorIds.length} selecionado
-                  {selectedProfessorIds.length !== 1 ? "s" : ""})
+                  ({t("common.selectedMale", { count: selectedProfessorIds.length })})
                 </span>
               )}
             </label>
@@ -246,7 +247,7 @@ function DisciplineForm({ onSubmit, initialData }: DisciplineFormProps) {
               items={availableProfessors}
               selected={selectedProfessorIds}
               onToggle={toggleProfessor}
-              emptyText="Nenhum professor disponível para este curso."
+              emptyText={t("admin.noInstructorsForProgram")}
             />
           </div>
         </>

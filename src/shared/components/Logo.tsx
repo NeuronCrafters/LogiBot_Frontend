@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import logoSimples from "@/assets/logo.svg";
 import logoSAEL from "@/assets/logoSAEL.svg";
 
@@ -7,6 +8,8 @@ interface LogoProps {
 }
 
 export function Logo({ className, type }: LogoProps) {
+  useLocale();
+
   const logos = { mascote: logoSimples, withName: logoSAEL };
   return (
     <a href="/" className={`flex items-center ${className}`}>
@@ -14,8 +17,8 @@ export function Logo({ className, type }: LogoProps) {
         src={logos[type]}
         alt={
           type === "mascote"
-            ? "Logo Mascote do LogiBot"
-            : "Logo Completa do LogiBot"
+            ? t("common.logoMascoteDoLogibot")
+            : t("common.logoCompletaDoLogibot")
         }
         className="object-contain"
       />

@@ -1,4 +1,5 @@
-﻿import { useState, useCallback, useEffect } from "react";
+import { t, useLocale } from "@/i18n";
+﻿import { useState, useCallback, useEffect, useRef } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -18,9 +19,10 @@ interface DashboardFilterProps {
   ) => void;
 }
 
-export function DashboardFilter({ onChange }: DashboardFilterProps) {
+function DashboardFilterContent({ onChange }: DashboardFilterProps) {
+  const locale = useLocale();
+
   const { user } = useAuth();
-  if (!user) return null;
 
   const userRoles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = userRoles.includes("admin");
@@ -74,9 +76,12 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
     [onChange],
   );
 
+  const currentFilter = useRef({ entityType, selectedIds, mode, hierarchyParams });
+  currentFilter.current = { entityType, selectedIds, mode, hierarchyParams };
   useEffect(() => {
-    notifyParent(entityType, selectedIds, mode, hierarchyParams, dateRange);
-  }, [dateRange]);
+    const current = currentFilter.current;
+    notifyParent(current.entityType, current.selectedIds, current.mode, current.hierarchyParams, dateRange);
+  }, [dateRange, notifyParent]);
 
   const handleEntityTypeChange = useCallback(
     (value: string) => {
@@ -105,28 +110,27 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
     [entityType, mode, notifyParent, dateRange],
   );
 
-  const getEntityTypeTitle = (t: LogEntityType) => {
-    switch (t) {
+  const getEntityTypeTitle = (type: LogEntityType) => {
+    switch (type) {
       case "student":
-        return "Aluno";
+        return t("common.aluno", {}, locale);
       case "discipline":
-        return "Disciplina";
+        return t("common.disciplina", {}, locale);
       case "class":
-        return "Turma";
+        return t("common.turma", {}, locale);
       case "course":
-        return "Curso";
+        return t("common.curso", {}, locale);
       case "university":
-        return "Universidade";
+        return t("common.universidade", {}, locale);
       default:
-        return "Entidade";
+        return t("dashboard.entidade", {}, locale);
     }
   };
 
   return (
     <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <h3 className="font-[Poppins] text-base font-semibold text-white">
-        Filtros
-      </h3>
+        {t("dashboard.filtros", {}, locale)}</h3>
 
       <div className="mt-5 w-full space-y-5">
         <div className="flex flex-col md:flex-row gap-6 w-full">
@@ -135,12 +139,11 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
               htmlFor="entity-type"
               className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500"
             >
-              Analisar por
-            </Label>
+              {t("dashboard.analisarPor", {}, locale)}</Label>
             <Select
               value={entityType}
               onChange={handleEntityTypeChange}
-              placeholder="Selecione uma Entidade"
+              placeholder={t("dashboard.selecioneUmaEntidade", {}, locale)}
               options={allowedEntityTypes.map((type) => ({
                 value: type,
                 label: getEntityTypeTitle(type),
@@ -160,4 +163,9 @@ export function DashboardFilter({ onChange }: DashboardFilterProps) {
       </div>
     </div>
   );
+}
+
+export function DashboardFilter(props: DashboardFilterProps) {
+  const { user } = useAuth();
+  return user ? <DashboardFilterContent {...props} /> : null;
 }

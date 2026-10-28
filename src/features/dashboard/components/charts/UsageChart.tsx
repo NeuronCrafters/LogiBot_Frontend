@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { t, useLocale, getLanguage } from "@/i18n";
 ﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -36,6 +38,8 @@ interface UsageChartProps {
 }
 
 function useUsageData(filter: UsageChartProps["filter"]) {
+  useLocale();
+
   const validIds = Array.isArray(filter.ids)
     ? filter.ids.filter((id) => typeof id === "string" && id.trim() !== "")
     : [];
@@ -57,7 +61,7 @@ function useUsageData(filter: UsageChartProps["filter"]) {
     ],
     queryFn: async () => {
       if (!mainId)
-        throw new Error(`IDs insuficientes para tipo: ${filter.type}`);
+        throw new Error(t("dashboard.idsInsuficientesParaTipoValue0", { value0: filter.type }));
       if (isStudent) {
         const response = await api.post("/logs/students/summary", {
           universityId,
@@ -81,7 +85,7 @@ function useUsageData(filter: UsageChartProps["filter"]) {
       };
       const url = urls[filter.type];
       if (!url)
-        throw new Error(`Tipo de entidade não suportado: ${filter.type}`);
+        throw new Error(t("dashboard.tipoDeEntidadeNaoSuportadoValue0", { value0: filter.type }));
       const response = await api.get(url);
       return {
         totalUsageTime: response.data.usageTimeInSeconds,
@@ -99,6 +103,8 @@ function useUsageData(filter: UsageChartProps["filter"]) {
 }
 
 export function UsageChart({ filter }: UsageChartProps) {
+  const locale = useLocale();
+
   const {
     data: usageData,
     isLoading,
@@ -108,8 +114,8 @@ export function UsageChart({ filter }: UsageChartProps) {
   } = useUsageData(filter);
   const hasRequiredIds = !!filter.hierarchyParams.universityId;
   const chartConfig = useMemo(
-    () => ({ usage: { label: "Minutos", color: "#3b82f6" } }),
-    [],
+    () => ({ usage: { label: t("dashboard.minutos", {}, locale), color: "#3b82f6" } }),
+    [locale],
   );
   const chartData = useMemo(() => {
     if (
@@ -137,17 +143,14 @@ export function UsageChart({ filter }: UsageChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Tempo de Uso Diário
-            </CardTitle>
+              {t("dashboard.tempoDeUsoDiario", {}, locale)}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Minutos de utilização nos últimos dias
-            </CardDescription>
+              {t("dashboard.minutosDeUtilizacaoNosUltimosDias", {}, locale)}</CardDescription>
           </div>
         </div>
         <div className="border-t border-white/10 px-6 py-4">
           <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-            Tempo Total
-          </p>
+            {t("dashboard.tempoTotal", {}, locale)}</p>
           <p className="mt-1 font-[Poppins] text-2xl font-bold text-white sm:text-3xl">
             {hasData ? formattedTime : "—"}
           </p>
@@ -155,11 +158,11 @@ export function UsageChart({ filter }: UsageChartProps) {
         <div className="absolute top-5 right-4 z-40">
           <ChartDownloadButton
             containerId="usage-chart"
-            fileName="tempo_de_uso"
-            info="Exibe o tempo de uso diário em minutos para o período analisado."
+            fileName={t("dashboard.export.tempo_de_uso")}
+            info={t("dashboard.dailyUsageInfo")}
             insight={{
               chart: "usage",
-              title: "Tempo de uso diário",
+              title: t("dashboard.tempoDeUsoDiario_490", {}, locale),
               filters: dashboardFiltersFromLegacy(filter),
               disabled: isLoading || !hasData,
             }}
@@ -170,15 +173,15 @@ export function UsageChart({ filter }: UsageChartProps) {
       <CardContent className="px-2 sm:p-6">
         {!hasRequiredIds && (
           <NoData>
-            <p>Selecione uma entidade para visualizar dados.</p>
+            <p>{t("dashboard.selecioneUmaEntidadeParaVisualizarDados", {}, locale)}</p>
           </NoData>
         )}
         {hasRequiredIds && isLoading && (
-          <ChartLoader text="Carregando dados..." />
+          <ChartLoader text={t("common.carregandoDados", {}, locale)} />
         )}
         {hasRequiredIds && isError && (
           <ChartError
-            message={error instanceof Error ? error.message : undefined}
+            message={apiError(error, "common.erroAoCarregarDados")}
             onRetry={refetch}
           />
         )}
@@ -208,7 +211,7 @@ export function UsageChart({ filter }: UsageChartProps) {
                   minTickGap={32}
                   stroke="#666"
                   tickFormatter={(v: string) =>
-                    new Date(v).toLocaleDateString("pt-BR", {
+                    new Date(v).toLocaleDateString(getLanguage(), {
                       day: "2-digit",
                       month: "2-digit",
                       timeZone: "UTC",
@@ -220,7 +223,7 @@ export function UsageChart({ filter }: UsageChartProps) {
                   content={(props) => {
                     if (!props.active || !props.payload?.[0]) return null;
                     const d = props.payload[0].payload as any;
-                    const date = new Date(d.date).toLocaleDateString("pt-BR", {
+                    const date = new Date(d.date).toLocaleDateString(getLanguage(), {
                       day: "2-digit",
                       month: "2-digit",
                       year: "numeric",
@@ -233,14 +236,14 @@ export function UsageChart({ filter }: UsageChartProps) {
                           {date}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Tempo:{" "}
+                          {t("dashboard.tempo", {}, locale)}{" "}
                           <span className="font-medium text-white">
                             {formatTimeWithDays(secs)}
                           </span>
                         </p>
                         {d.sessions?.length > 0 && (
                           <p className="font-[Poppins] text-zinc-400">
-                            Sessões:{" "}
+                            {t("dashboard.sessoes", {}, locale)}{" "}
                             <span className="font-medium text-white">
                               {d.sessions.length}
                             </span>
@@ -262,7 +265,7 @@ export function UsageChart({ filter }: UsageChartProps) {
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
-            <p>Nenhum dado de uso disponível para esta entidade.</p>
+            <p>{t("dashboard.nenhumDadoDeUsoDisponivelParaEsta", {}, locale)}</p>
           </NoData>
         )}
       </CardContent>

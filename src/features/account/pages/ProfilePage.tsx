@@ -1,3 +1,6 @@
+import { apiError } from "@/shared/lib/apiError";
+import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { t, useLocale } from "@/i18n";
 ﻿import { useState, type ReactNode } from "react";
 import { logger } from "@/shared/lib/logger";
 import {
@@ -30,11 +33,11 @@ interface DisciplineObject {
 
 const translateRole = (r: string) =>
   ({
-    student: "Estudante",
-    professor: "Professor",
-    teacher: "Professor",
-    "course-coordinator": "Coordenador de Curso",
-    admin: "Administrador",
+    student: t("common.estudante"),
+    professor: t("common.professor"),
+    teacher: t("common.professor"),
+    "course-coordinator": t("common.coordenadorDeCurso"),
+    admin: t("common.administrador"),
   })[r] ?? r;
 
 function isDisciplineObj(d: unknown): d is DisciplineObject {
@@ -55,6 +58,8 @@ function getNames(value: unknown): string {
 }
 
 export function Profile() {
+  useLocale();
+
   const { user, setUser, loading } = useAuth();
   const [showEditName, setShowEditName] = useState(false);
   const [showEditEmail, setShowEditEmail] = useState(false);
@@ -65,7 +70,7 @@ export function Profile() {
       <div className="flex min-h-full items-center justify-center bg-neutral-900">
         <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] px-4 py-3 text-zinc-400 shadow-lg">
           <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-          <span className="font-[Poppins] text-sm">Carregando perfil...</span>
+          <span className="font-[Poppins] text-sm">{t("account.carregandoPerfil")}</span>
         </div>
       </div>
     );
@@ -74,7 +79,7 @@ export function Profile() {
     return (
       <div className="flex min-h-full items-center justify-center bg-neutral-900 px-4">
         <Typograph
-          text="Erro ao carregar os dados."
+          text={t("account.erroAoCarregarOsDados")}
           colorText="text-red-400"
           variant="text5"
           weight="medium"
@@ -112,10 +117,10 @@ export function Profile() {
       });
       if (setUser && response.data.user)
         setUser({ ...user, ...response.data.user });
-      toast.success("Nome atualizado com sucesso!");
+      toast.success({ key: "account.nomeAtualizadoComSucesso", params: {} });
     } catch (error: any) {
       logger.error("Profile", "Erro ao atualizar nome.", error);
-      toast.error(error.response?.data?.message || "Erro ao atualizar nome.");
+      toast.error(apiError(error, "account.erroAoAtualizarNome"));
       throw error;
     }
   };
@@ -128,10 +133,10 @@ export function Profile() {
       });
       if (setUser && response.data.user)
         setUser({ ...user, ...response.data.user });
-      toast.success("E-mail atualizado com sucesso!");
+      toast.success({ key: "account.eMailAtualizadoComSucesso", params: {} });
     } catch (error: any) {
       logger.error("Profile", "Erro ao atualizar e-mail.", error);
-      toast.error(error.response?.data?.message || "Erro ao atualizar e-mail.");
+      toast.error(apiError(error, "account.erroAoAtualizarEMail"));
       throw error;
     }
   };
@@ -142,10 +147,10 @@ export function Profile() {
         currentPassword: currentPass,
         newPassword: newPass,
       });
-      toast.success("Senha alterada com sucesso!");
+      toast.success({ key: "account.senhaAlteradaComSucesso", params: {} });
     } catch (error: any) {
       logger.error("Profile", "Erro ao alterar senha.", error);
-      toast.error(error.response?.data?.error || "Erro ao alterar senha.");
+      toast.error(error.response?.data?.error || t("account.erroAoAlterarSenha"));
       throw error;
     }
   };
@@ -166,8 +171,7 @@ export function Profile() {
                 </div>
                 <div className="min-w-0">
                   <p className="mb-2 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Perfil da conta
-                  </p>
+                    {t("account.perfilDaConta")}</p>
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="break-words font-[Poppins] text-2xl font-semibold text-white sm:text-3xl">
                       {user.name}
@@ -183,8 +187,7 @@ export function Profile() {
               </div>
               <div className="rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 lg:w-72">
                 <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Identificador
-                </div>
+                  {t("account.identificador")}</div>
                 <p className="mt-1 max-w-[18rem] truncate font-mono text-xs text-zinc-300">
                   {user._id.toUpperCase()}
                 </p>
@@ -192,60 +195,63 @@ export function Profile() {
             </div>
           </section>
 
+          <section className="rounded-xl border border-white/10 bg-neutral-950/60 p-5">
+            <h2 className="mb-3 font-semibold text-white">{t("language.label")}</h2>
+            <LanguageSwitcher details />
+          </section>
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
             <div className="space-y-5">
               <Panel
                 icon={<UserIcon className="h-5 w-5 text-blue-400" />}
-                title="Informações pessoais"
-                subtitle="Dados principais usados na sua conta."
+                title={t("account.informacoesPessoais")}
+                subtitle={t("account.dadosPrincipaisUsadosNaSuaConta")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <InfoTile
-                    label="Nome completo"
+                    label={t("common.nomeCompleto")}
                     value={user.name}
-                    actionLabel="Editar nome"
+                    actionLabel={t("account.editName")}
                     onAction={() => setShowEditName(true)}
                   />
                   <InfoTile
-                    label="E-mail"
+                    label={t("common.email")}
                     value={user.email}
-                    actionLabel="Editar e-mail"
+                    actionLabel={t("account.editEmail")}
                     onAction={() => setShowEditEmail(true)}
                   />
-                  <InfoTile label="Ocupação principal" value={occupation} />
+                  <InfoTile label={t("account.ocupacaoPrincipal")} value={occupation} />
                 </div>
               </Panel>
 
               {!isAdmin && (
                 <Panel
                   icon={<GraduationCap className="h-5 w-5 text-emerald-400" />}
-                  title="Dados acadêmicos"
-                  subtitle="Vínculos carregados a partir da sua instituição."
+                  title={t("account.dadosAcademicos")}
+                  subtitle={t("account.vinculosCarregadosAPartirDaSuaInstituicao")}
                 >
                   <div className="grid gap-3 sm:grid-cols-2">
                     <InfoTile
                       icon={<School className="h-4 w-4 text-emerald-400" />}
-                      label="Instituição"
+                      label={t("account.instituicao")}
                       value={schoolName}
                     />
                     {isProfessor ? (
                       <>
                         <InfoTile
                           icon={<BookOpen className="h-4 w-4 text-blue-400" />}
-                          label="Cursos ministrados"
+                          label={t("account.cursosMinistrados")}
                           value={profCourses}
                         />
                         <InfoTile
                           icon={<Users className="h-4 w-4 text-indigo-400" />}
-                          label="Turmas"
+                          label={t("common.turmas")}
                           value={profClasses}
                         />
                         <div className="rounded-xl border border-white/10 bg-neutral-950/60 p-4 sm:col-span-2">
                           <div className="mb-2 flex items-center gap-2">
                             <BookOpen className="h-4 w-4 text-emerald-400" />
                             <span className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                              Disciplinas
-                            </span>
+                              {t("common.disciplinas")}</span>
                           </div>
                           {disciplineObjects.length > 0 ? (
                             <DisciplineCode
@@ -263,12 +269,12 @@ export function Profile() {
                       <>
                         <InfoTile
                           icon={<BookOpen className="h-4 w-4 text-blue-400" />}
-                          label="Curso"
+                          label={t("common.curso")}
                           value={courseName}
                         />
                         <InfoTile
                           icon={<Users className="h-4 w-4 text-indigo-400" />}
-                          label="Turma"
+                          label={t("common.turma")}
                           value={className}
                         />
                       </>
@@ -281,8 +287,8 @@ export function Profile() {
             <aside className="space-y-5">
               <Panel
                 icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
-                title="Segurança"
-                subtitle="Mantenha o acesso da conta protegido."
+                title={t("account.seguranca")}
+                subtitle={t("account.mantenhaOAcessoDaContaProtegido")}
               >
                 <div className="rounded-xl border border-white/10 bg-neutral-950/60 p-4">
                   <div className="flex items-start gap-3">
@@ -291,11 +297,9 @@ export function Profile() {
                     </div>
                     <div className="min-w-0">
                       <p className="font-[Poppins] text-sm font-semibold text-white">
-                        Senha de acesso
-                      </p>
+                        {t("common.senhaDeAcesso")}</p>
                       <p className="mt-1 font-[Poppins] text-xs leading-relaxed text-zinc-500">
-                        Use uma senha forte e diferente das outras contas.
-                      </p>
+                        {t("account.useUmaSenhaForteEDiferenteDas")}</p>
                     </div>
                   </div>
                   <Button
@@ -304,8 +308,7 @@ export function Profile() {
                     onClick={() => setShowEditPassword(true)}
                   >
                     <KeyRound className="h-4 w-4" />
-                    Alterar senha
-                  </Button>
+                    {t("account.alterarSenha_73")}</Button>
                 </div>
               </Panel>
             </aside>
@@ -345,6 +348,8 @@ function Panel({
   subtitle: string;
   children: ReactNode;
 }) {
+  useLocale();
+
   return (
     <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10">
       <div className="mb-5 flex items-start gap-3">
@@ -378,6 +383,8 @@ function InfoTile({
   actionLabel?: string;
   onAction?: () => void;
 }) {
+  useLocale();
+
   return (
     <div className="rounded-xl border border-white/10 bg-neutral-950/60 p-4">
       <div className="mb-2 flex items-start justify-between gap-3">

@@ -1,3 +1,4 @@
+import type { Language } from "@/i18n";
 import { api } from "@/shared/api/httpClient";
 
 export interface ChatSession {
@@ -7,6 +8,7 @@ export interface ChatSession {
 }
 
 export interface HistoryMessage {
+  metadata?: { outputLanguage?: Language; requestLanguage?: Language; retrievedChunks?: unknown[] };
   _id?: string;
   role: "user" | "assistant";
   content: string;

@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { useCallback, useEffect, useState } from "react";
 import { addDays, formatISODate } from "@/shared/lib/formatDate";
 import { BarChart2, Filter, MousePointer2, Sparkles } from "lucide-react";
@@ -22,6 +23,8 @@ import {
 type DateRange = { from?: Date; to?: Date };
 
 function DashboardContent() {
+  const locale = useLocale();
+
   const insights = useDashboardInsights();
   const [dashboardFilters, setDashboardFilters] =
     useState<DashboardFilterParams>({});
@@ -103,11 +106,9 @@ function DashboardContent() {
               </div>
               <div>
                 <h1 className="font-[Poppins] text-2xl font-semibold text-white">
-                  Dashboard de atividades
-                </h1>
+                  {t("dashboard.dashboardDeAtividades", {}, locale)}</h1>
                 <p className="mt-2 font-[Poppins] text-sm leading-relaxed text-zinc-400">
-                  Visualize métricas detalhadas por entidade e período.
-                </p>
+                  {t("dashboard.visualizeMetricasDetalhadasPorEntidadeEPeriodo", {}, locale)}</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -118,13 +119,11 @@ function DashboardContent() {
                   className="inline-flex items-center gap-2 rounded-lg border border-violet-500/25 bg-violet-500/10 px-3 py-2 font-[Poppins] text-xs font-semibold text-violet-300 transition-colors hover:border-violet-500/40 hover:bg-violet-500/15"
                 >
                   <Sparkles className="h-4 w-4" />
-                  Gerar análise geral
-                </button>
+                  {t("dashboard.gerarAnaliseGeral", {}, locale)}</button>
               )}
               <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 font-[Poppins] text-xs font-medium text-zinc-400">
                 <Filter className="h-4 w-4 text-blue-400" />
-                Filtros obrigatórios
-              </div>
+                {t("dashboard.filtrosObrigatorios", {}, locale)}</div>
             </div>
           </div>
         </section>
@@ -137,7 +136,7 @@ function DashboardContent() {
               <MousePointer2 className="h-5 w-5" />
             </div>
             <Typograph
-              text="Selecione uma entidade para visualizar os dados"
+              text={t("dashboard.selecioneUmaEntidadeParaVisualizarOsDados", {}, locale)}
               variant="text7"
               colorText="text-zinc-400"
               weight="medium"
@@ -174,6 +173,8 @@ function DashboardContent() {
 }
 
 export function Dashboard() {
+  useLocale();
+
   return (
     <DashboardInsightProvider>
       <DashboardContent />

@@ -1,3 +1,4 @@
+import { t, useLocale, getLanguage, type Language } from "@/i18n";
 import { useState, useCallback } from "react";
 import {
   chatApi,
@@ -13,6 +14,7 @@ export type ChatMessage = {
   type: "text" | "typing";
   retrievedChunks?: RetrievedChunk[];
   streamStage?: ChatStreamStage;
+  outputLanguage?: Language;
 };
 
 type Mode = "none" | "chat";
@@ -22,6 +24,8 @@ interface UseChatFlowOptions {
 }
 
 export function useChatFlow(_options: UseChatFlowOptions) {
+  const locale = useLocale();
+
   const [mode, setMode] = useState<Mode>("none");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
@@ -42,6 +46,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
         type: "text",
       };
       const typingMsg: ChatMessage = {
+        outputLanguage: getLanguage(),
         id: `typing-${now}`,
         text: "",
         sender: "bot",
@@ -127,7 +132,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
                 ? {
                     ...message,
                     type: "text",
-                    text: streamedText || "Resposta concluida.",
+                    text: streamedText || t("chat.respostaConcluida", {}, locale),
                     streamStage: undefined,
                     retrievedChunks: result.retrievedChunks?.length
                       ? result.retrievedChunks
@@ -144,14 +149,14 @@ export function useChatFlow(_options: UseChatFlowOptions) {
             .filter((m) => m.id !== typingMsg.id)
             .concat({
               id: `error-${Date.now()}`,
-              text: "Erro ao processar mensagem. Tente novamente.",
+              text: t("chat.erroAoProcessarMensagemTenteNovamente", {}, locale),
               sender: "bot",
               type: "text",
             }),
         );
       }
     },
-    [sessionId],
+    [sessionId, locale],
   );
 
   return {

@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from "react";
+import { t, useLocale } from "@/i18n";
+﻿import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Select } from "@/components/ui/select";
 import { UniversityForm } from "./UniversityForm";
@@ -45,14 +46,14 @@ interface EntityCreateFormProps {
 }
 
 const ENTITY_LABELS: Record<EntityType, string> = {
-  university: "Universidade",
-  course: "Curso",
-  class: "Turma",
-  professor: "Professor",
-  discipline: "Disciplina",
+  get university() { return t("common.universidade"); },
+  get course() { return t("common.curso"); },
+  get class() { return t("common.turma"); },
+  get professor() { return t("common.professor"); },
+  get discipline() { return t("common.disciplina"); },
 };
 
-export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
+const EntityCreateFormContent: React.FC<EntityCreateFormProps> = ({
   onSubmit,
   initialData,
   onEntityChange,
@@ -60,18 +61,18 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
   defaultEntity,
   lockEntity = false,
 }) => {
+  useLocale();
+
   const { user } = useAuth();
-  if (!user) return null;
 
   const roles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = roles.includes("admin");
   const isCoordinator = roles.includes("course-coordinator");
 
-  if (!isAdmin && !isCoordinator) return null;
 
-  const allowedEntities: EntityType[] = isAdmin
+  const allowedEntities = useMemo<EntityType[]>(() => isAdmin
     ? ["university", "course", "class", "professor", "discipline"]
-    : ["class", "discipline", "professor"];
+    : ["class", "discipline", "professor"], [isAdmin]);
 
   const [selectedEntity, setSelectedEntity] = useState<EntityType | "">(
     defaultEntity && allowedEntities.includes(defaultEntity)
@@ -97,23 +98,20 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
     <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <div className="mb-5">
         <h2 className="font-[Poppins] text-base font-semibold text-white">
-          Nova entidade
-        </h2>
+          {t("admin.novaEntidade")}</h2>
         <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-          Selecione o tipo de registro e preencha as informações abaixo.
-        </p>
+          {t("admin.selecioneOTipoDeRegistroEPreencha")}</p>
       </div>
 
       {!lockEntity && (
         <div>
           <label className="block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Tipo de entidade
-          </label>
+            {t("admin.tipoDeEntidade")}</label>
           <Select
             value={selectedEntity}
             onChange={(v) => setSelectedEntity(v as EntityType)}
             options={allowedEntities.map((ent) => ({ value: ent, label: ENTITY_LABELS[ent] }))}
-            placeholder="Selecione o tipo"
+            placeholder={t("admin.selecioneOTipo")}
           />
         </div>
       )}
@@ -156,3 +154,9 @@ export const EntityCreateForm: React.FC<EntityCreateFormProps> = ({
     </div>
   );
 };
+
+export function EntityCreateForm(props: EntityCreateFormProps) {
+  const { user } = useAuth();
+  const roles = user ? (Array.isArray(user.role) ? user.role : [user.role]) : [];
+  return roles.some(role => role === "admin" || role === "course-coordinator") ? <EntityCreateFormContent {...props} /> : null;
+}

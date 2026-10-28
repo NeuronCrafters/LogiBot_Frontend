@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Plus,
@@ -25,41 +26,41 @@ interface EntityActionButtonProps {
 
 const actionConfig = {
   create: {
-    label: "Criar",
+    get label() { return t("admin.criar"); },
     icon: <Plus className="w-5 h-5" />,
     color:
       "bg-blue-600 hover:bg-blue-700 border-blue-400/40 shadow-blue-900/30",
   },
   delete: {
-    label: "Deletar",
+    get label() { return t("admin.deletar"); },
     icon: <Trash className="w-5 h-5" />,
     color: "bg-red-600 hover:bg-red-700 border-red-400/40 shadow-red-900/30",
   },
   list: {
-    label: "Listar",
+    get label() { return t("admin.listar"); },
     icon: <List className="w-5 h-5" />,
     color: "bg-white/5 hover:bg-white/10 border-white/10",
   },
   search: {
-    label: "Pesquisar",
+    get label() { return t("admin.pesquisar"); },
     icon: <Search className="w-5 h-5" />,
     color:
       "bg-blue-600 hover:bg-blue-700 border-blue-400/40 shadow-blue-900/30",
   },
   update: {
-    label: "Atualizar",
+    get label() { return t("common.atualizar"); },
     icon: <Pencil className="w-5 h-5 rounded-md" />,
     color:
       "bg-amber-600 hover:bg-amber-700 border-amber-400/40 shadow-amber-900/30",
   },
   details: {
-    label: "Detalhes",
+    get label() { return t("admin.detalhes"); },
     icon: <Eye className="w-5 h-5" />,
     color:
       "bg-indigo-600 hover:bg-indigo-700 border-indigo-400/40 shadow-indigo-900/30",
   },
   reload: {
-    label: "Recarregar",
+    get label() { return t("admin.recarregar"); },
     icon: <RotateCcw className="w-5 h-5" />,
     color: "bg-white/5 hover:bg-white/10 border-white/10",
   },
@@ -71,10 +72,13 @@ export function EntityActionButton({
   compact = false,
   disabled = false,
 }: EntityActionButtonProps) {
+  useLocale();
+
   const { label, icon, color } = actionConfig[action];
 
   return (
     <Button
+      aria-label={label}
       onClick={onClick}
       disabled={disabled}
       className={`

@@ -1,27 +1,32 @@
+import { t, type MessageKey } from "@/i18n";
+
+export type ToastMessage = string | { key: MessageKey; params?: Record<string, unknown> };
+export function resolveToastMessage(message: ToastMessage) { return typeof message === "string" ? message : t(message.key, message.params); }
+
 export type ToastType = "success" | "error" | "warn" | "info";
 
 export interface ToastEvent {
   id: string;
   type: ToastType;
-  message: string;
+  message: ToastMessage;
 }
 
 type Listener = (event: ToastEvent) => void;
 
 const listeners = new Set<Listener>();
 
-function emit(type: ToastType, message: string) {
+function emit(type: ToastType, message: ToastMessage) {
   const event: ToastEvent = { id: crypto.randomUUID(), type, message };
   listeners.forEach((l) => l(event));
 }
 
-function toastFn(message: string) {
+function toastFn(message: ToastMessage) {
   emit("info", message);
 }
-toastFn.success = (message: string) => emit("success", message);
-toastFn.error = (message: string) => emit("error", message);
-toastFn.warn = (message: string) => emit("warn", message);
-toastFn.info = (message: string) => emit("info", message);
+toastFn.success = (message: ToastMessage) => emit("success", message);
+toastFn.error = (message: ToastMessage) => emit("error", message);
+toastFn.warn = (message: ToastMessage) => emit("warn", message);
+toastFn.info = (message: ToastMessage) => emit("info", message);
 
 export const toast = toastFn;
 

@@ -1,3 +1,4 @@
+import type { Language } from "@/i18n";
 import { api } from "@/shared/api/httpClient";
 import type {
   AiQuizGenerationInput,
@@ -21,6 +22,7 @@ export const professorQuizApi = {
   },
 
   async createQuiz(data: {
+    language?: Language;
     title: string;
     disciplineId: string;
     topic: string;

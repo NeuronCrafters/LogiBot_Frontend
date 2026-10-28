@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,8 @@ interface DisciplineCodeProps {
 }
 
 export function DisciplineCode({ text, disciplines }: DisciplineCodeProps) {
+  useLocale();
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -36,8 +39,7 @@ export function DisciplineCode({ text, disciplines }: DisciplineCodeProps) {
       <DialogContent className="max-w-md border border-white/10 bg-[#1f1f1f] text-white font-[Poppins]">
         <DialogHeader>
           <DialogTitle className="text-base text-white">
-            Disciplinas vinculadas
-          </DialogTitle>
+            {t("common.disciplinasVinculadas")}</DialogTitle>
         </DialogHeader>
         <div className="mt-4 space-y-3">
           {disciplines.map((disc) => (

@@ -1,8 +1,10 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { CheckCircle, XCircle, Info, AlertTriangle, X } from "lucide-react";
-import { subscribeToToast, type ToastEvent, type ToastType } from "@/shared/lib/toast";
+import { subscribeToToast, resolveToastMessage, type ToastEvent, type ToastType } from "@/shared/lib/toast";
 
+const translateDismiss = () => t("common.dismiss");
 const DURATION = 3500;
 
 const ICONS: Record<ToastType, React.ReactNode> = {
@@ -13,6 +15,7 @@ const ICONS: Record<ToastType, React.ReactNode> = {
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  useLocale();
   const [toasts, setToasts] = useState<ToastEvent[]>([]);
 
   useEffect(() => {
@@ -39,8 +42,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 className="pointer-events-auto flex items-center gap-3 rounded-lg bg-[#333] px-4 py-3 text-sm text-white shadow-lg"
               >
                 {ICONS[t.type]}
-                <span className="flex-1 font-[Poppins] leading-snug">{t.message}</span>
+                <span className="flex-1 font-[Poppins] leading-snug">{resolveToastMessage(t.message)}</span>
                 <button
+                  aria-label={translateDismiss()}
                   onClick={() => dismiss(t.id)}
                   className="text-zinc-400 hover:text-white transition-colors"
                 >

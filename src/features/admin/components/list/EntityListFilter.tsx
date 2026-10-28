@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { useState, useEffect, useMemo } from "react";
 import { logger } from "@/shared/lib/logger";
 import { Select } from "@/components/ui/select";
@@ -32,9 +33,10 @@ interface EntityListFilterProps {
   onReset: () => void;
 }
 
-export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
+function EntityListFilterContent({ onSearch, onReset }: EntityListFilterProps) {
+  const locale = useLocale();
+
   const { user } = useAuth();
-  if (!user) return null;
 
   const roles = Array.isArray(user.role) ? user.role : [user.role];
   const isAdmin = roles.includes("admin");
@@ -155,8 +157,7 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
     fixedUniversity,
     isAdmin,
     isCoordinator,
-    isProfessor,
-  ]);
+    isProfessor,]);
 
   const disciplines: Discipline[] = useMemo(() => {
     if (selectedCourse)
@@ -232,13 +233,12 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
   if (error)
     return (
       <div className="p-4 mb-4 border rounded-xl bg-red-600/20 border-red-600/50">
-        <p className="mb-2 text-red-300">Erro ao carregar filtros</p>
+        <p className="mb-2 text-red-300">{t("admin.erroAoCarregarFiltros", {}, locale)}</p>
         <button
           onClick={() => refetch()}
           className="text-sm text-red-200 underline hover:text-red-100"
         >
-          Tentar novamente
-        </button>
+          {t("common.tentarNovamente", {}, locale)}</button>
       </div>
     );
 
@@ -246,35 +246,31 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
     <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
       <div className="mb-5">
         <h2 className="font-[Poppins] text-base font-semibold text-white">
-          Filtros de busca
-        </h2>
+          {t("admin.filtrosDeBusca", {}, locale)}</h2>
         <p className="mt-1 font-[Poppins] text-xs text-zinc-500">
-          Selecione os critérios e clique em buscar para listar os registros.
-        </p>
+          {t("admin.selecioneOsCriteriosECliqueEmBuscar", {}, locale)}</p>
       </div>
 
       {loading && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3">
           <div className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-blue-400/30 border-t-blue-400" />
           <p className="font-[Poppins] text-sm text-blue-300">
-            Carregando filtros...
-          </p>
+            {t("admin.carregandoFiltros", {}, locale)}</p>
         </div>
       )}
 
       <div className="mb-5 grid gap-4">
         <div className="flex-1 min-w-[200px]">
           <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Tipo de filtro
-          </label>
+            {t("admin.tipoDeFiltro", {}, locale)}</label>
           <Select
             value={filterType}
             onChange={(v) => setFilterType(v as FilterType)}
             disabled={loading}
-            placeholder="Selecione"
+            placeholder={t("common.selecione_92", {}, locale)}
             options={allowedFilters.map((ft) => ({
               value: ft,
-              label: ({ universities: "Universidades", courses: "Cursos", disciplines: "Disciplinas", classes: "Turmas", professors: "Professores", students: "Alunos do Sistema", "students-course": "Alunos por Curso", "students-discipline": "Alunos por Disciplina", "students-class": "Alunos por Turma" } as Record<string, string>)[ft] || ft,
+              label: ({ universities: t("common.universidades", {}, locale), courses: t("common.cursos", {}, locale), disciplines: t("common.disciplinas", {}, locale), classes: t("common.turmas", {}, locale), professors: t("common.professores", {}, locale), students: t("admin.alunosDoSistema", {}, locale), "students-course": t("admin.alunosPorCurso", {}, locale), "students-discipline": t("admin.alunosPorDisciplina", {}, locale), "students-class": t("admin.alunosPorTurma", {}, locale) } as Record<string, string>)[ft] || ft,
             }))}
           />
         </div>
@@ -282,13 +278,12 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         {showUniversitySelect && (
           <div>
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Universidade
-            </label>
+              {t("common.universidade", {}, locale)}</label>
             <Select
               value={selectedUniversity}
               onChange={(v) => { setSelectedUniversity(v); setSelectedCourse(""); setSelectedDiscipline(""); setSelectedClass(""); }}
               disabled={loading}
-              placeholder="Selecione a universidade"
+              placeholder={t("common.selecioneAUniversidade", {}, locale)}
               options={universities.map((u) => ({ value: u._id, label: u.name }))}
             />
           </div>
@@ -297,13 +292,12 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         {showCourseSelect && (
           <div>
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Curso
-            </label>
+              {t("common.curso", {}, locale)}</label>
             <Select
               value={selectedCourse}
               onChange={(v) => { setSelectedCourse(v); setSelectedDiscipline(""); setSelectedClass(""); }}
               disabled={loading || courses.length === 0}
-              placeholder="Selecione o curso"
+              placeholder={t("common.selecioneOCurso", {}, locale)}
               options={courses.map((c) => ({ value: c._id, label: c.name }))}
             />
           </div>
@@ -312,13 +306,12 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         {showStudentDisciplineSelect && (
           <div>
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Disciplina
-            </label>
+              {t("common.disciplina", {}, locale)}</label>
             <Select
               value={selectedDiscipline}
               onChange={setSelectedDiscipline}
               disabled={loading || disciplines.length === 0}
-              placeholder="Selecione a disciplina"
+              placeholder={t("common.selecioneADisciplina", {}, locale)}
               options={disciplines.map((d) => ({ value: d._id, label: d.name }))}
             />
           </div>
@@ -327,13 +320,12 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
         {showStudentClassSelect && (
           <div>
             <label className="mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Turma
-            </label>
+              {t("common.turma", {}, locale)}</label>
             <Select
               value={selectedClass}
               onChange={setSelectedClass}
               disabled={loading || classes.length === 0}
-              placeholder="Selecione a turma"
+              placeholder={t("admin.selecioneATurma", {}, locale)}
               options={classes.map((c) => ({ value: c._id, label: c.name }))}
             />
           </div>
@@ -354,4 +346,9 @@ export function EntityListFilter({ onSearch, onReset }: EntityListFilterProps) {
       </div>
     </div>
   );
+}
+
+export function EntityListFilter(props: EntityListFilterProps) {
+  const { user } = useAuth();
+  return user ? <EntityListFilterContent {...props} /> : null;
 }

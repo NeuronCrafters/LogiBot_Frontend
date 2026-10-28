@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { t, useLocale } from "@/i18n";
+import { useEffect, useRef, useState, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, Check } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
@@ -23,10 +24,13 @@ export function Select({
   value,
   onChange,
   options,
-  placeholder = "Selecione...",
+  placeholder = t("common.selecione"),
   className,
   disabled = false,
 }: SelectProps) {
+  const locale = useLocale();
+  const listboxId = useId();
+
   const [open, setOpen] = useState(false);
   const [rect, setRect] = useState<DropdownRect | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -121,7 +125,9 @@ export function Select({
       ? createPortal(
           <ul
             ref={dropdownRef}
+            id={listboxId}
             role="listbox"
+            aria-label={placeholder}
             style={{
               position: "fixed",
               top: rect.top,
@@ -188,8 +194,7 @@ export function Select({
             })}
             {options.length === 0 && (
               <li className="px-3 py-2.5 text-sm font-[Poppins] text-zinc-600">
-                Nenhuma opção disponível.
-              </li>
+                {t("common.nenhumaOpcaoDisponivel", {}, locale)}</li>
             )}
           </ul>,
           document.body,
@@ -200,6 +205,11 @@ export function Select({
     <div className={cn("relative w-full", className)}>
       <button
         ref={buttonRef}
+        role="combobox"
+        aria-label={selected?.label || placeholder}
+        aria-expanded={open}
+        aria-controls={listboxId}
+        aria-haspopup="listbox"
         type="button"
         disabled={disabled}
         onClick={handleOpen}

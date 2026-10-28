@@ -1,8 +1,9 @@
+import { requestLanguageHeaders } from "@/i18n";
 ﻿import axios from "axios";
 import { logger } from "@/shared/lib/logger";
 
 export const apiKey =
-  import.meta.env.VITE_API_KEY || "YCQHmf3Zvti8FIi4PC38T4ert4v8zIOp";
+  import.meta.env.VITE_API_KEY || "";
 const configuredBaseURL = import.meta.env.VITE_API_BASE_URL?.trim();
 export const baseURL =
   configuredBaseURL &&
@@ -21,6 +22,13 @@ export const publicApi = axios.create({
   withCredentials: false,
   headers: { "x-api-key": apiKey },
 });
+
+for (const client of [api, publicApi]) {
+  client.interceptors.request.use(config => {
+    for (const [header, value] of Object.entries(requestLanguageHeaders())) { if (!config.headers.has(header)) config.headers.set(header, value); }
+    return config;
+  });
+}
 
 api.interceptors.response.use(
   (response) => response,

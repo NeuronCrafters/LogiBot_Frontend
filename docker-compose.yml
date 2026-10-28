@@ -1,0 +1,44 @@
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+        VITE_API_KEY: ${VITE_API_KEY:-}
+    environment:
+      API_UPSTREAM: ${API_UPSTREAM:-http://backend:43187}
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:5190"
+    networks:
+      - default
+      - api
+    restart: unless-stopped
+
+  tests:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    environment:
+      NODE_ENV: test
+
+  browser-tests:
+    profiles: [browser]
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    network_mode: host
+    volumes:
+      - ./test-results:/app/test-results
+    environment:
+      CI: "true"
+      HOME: /tmp
+      E2E_API_KEY: ${VITE_API_KEY:-}
+      E2E_BASE_URL: http://localhost:${FRONTEND_PORT:-5173}
+
+networks:
+  api:
+    external: true
+    name: ${API_DOCKER_NETWORK:-logibot_backend_default}
+

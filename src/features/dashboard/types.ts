@@ -1,3 +1,4 @@
+import type { Language } from "@/i18n";
 export interface TopicPerformanceData {
   topic: string;
   successPercentage: number;
@@ -47,6 +48,7 @@ export type DashboardInsightChart =
   | "access-pattern";
 
 export interface DashboardInsightResponse {
+  language: Language;
   insight: string;
   generatedAt: string;
   cached: boolean;

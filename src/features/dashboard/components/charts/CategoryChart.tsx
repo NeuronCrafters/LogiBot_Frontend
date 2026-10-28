@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { percent, t, useLocale } from "@/i18n";
 ﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -27,10 +29,10 @@ import { ChartDownloadButton } from "../ChartDownloadButton";
 import { dashboardFiltersFromLegacy } from "../../insightFilters";
 
 const CHART_INFO =
-  "Frequência de acesso por categoria de conteúdo no chat (Variáveis, Funções, Listas…). Indica quais assuntos de lógica de programação geram mais dúvidas entre os estudantes.";
+  () => (t("dashboard.frequenciaDeAcessoPorCategoriaDeConteudo"));
 
 const chartConfig = {
-  acessos: { label: "Acessos", color: "#3b82f6" },
+  acessos: { get label() { return t("dashboard.acessos"); }, color: "#3b82f6" },
 } satisfies ChartConfig;
 
 interface CategoryChartProps {
@@ -45,6 +47,8 @@ interface CategoryChartProps {
 }
 
 function useSubjectsData(filter: CategoryChartProps["filter"]) {
+  useLocale();
+
   const validIds = Array.isArray(filter.ids)
     ? filter.ids.filter((id) => typeof id === "string" && id.trim() !== "")
     : [];
@@ -65,7 +69,7 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
     ],
     queryFn: async () => {
       if (!targetId)
-        throw new Error("Selecione todos os filtros para visualizar");
+        throw new Error(t("dashboard.selecioneTodosOsFiltrosParaVisualizar"));
       if (filter.type === "student")
         return logApi.getFilteredStudentSummary({
           universityId: universityId!,
@@ -81,7 +85,7 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
         discipline: () => logApi.getDisciplineSummary(targetId),
       };
       const fn = calls[filter.type];
-      if (!fn) throw new Error(`Tipo inválido: ${filter.type}`);
+      if (!fn) throw new Error(t("common.tipoInvalidoValue0", { value0: filter.type }));
       return fn();
     },
     enabled: hasRequired,
@@ -90,15 +94,15 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
     select: (raw: any) => {
       const counts = raw.subjectCounts ?? {};
       const chartData = [
-        { category: "Variáveis", acessos: counts.variaveis ?? 0 },
-        { category: "Listas", acessos: counts.listas ?? 0 },
+        { category: t("common.variaveis"), acessos: counts.variaveis ?? 0 },
+        { category: t("common.listas"), acessos: counts.listas ?? 0 },
         {
-          category: "Condicionais",
+          category: t("common.condicionais"),
           acessos: (counts.condicionais ?? 0) + (counts.verificacoes ?? 0),
         },
-        { category: "Op. Lógicos", acessos: counts.operadores_logicos ?? 0 },
-        { category: "Funções", acessos: counts.funcoes ?? 0 },
-        { category: "Repetição", acessos: counts.repeticao ?? 0 },
+        { category: t("dashboard.opLogicos"), acessos: counts.operadores_logicos ?? 0 },
+        { category: t("common.funcoes"), acessos: counts.funcoes ?? 0 },
+        { category: t("dashboard.repeticao"), acessos: counts.repeticao ?? 0 },
       ];
       const totalAccesses = chartData.reduce((s, d) => s + d.acessos, 0);
       return { chartData, totalAccesses };
@@ -107,6 +111,8 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
 }
 
 export function CategoryChart({ filter }: CategoryChartProps) {
+  const locale = useLocale();
+
   const { data, isLoading, isError, refetch, error } = useSubjectsData(filter);
   const hasRequired = !!filter.hierarchyParams.universityId;
   const hasData = useMemo(() => (data?.totalAccesses ?? 0) > 0, [data]);
@@ -125,7 +131,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
   }, [data]);
   const refetchTyped = refetch as () => void;
   const errorMessage =
-    error instanceof Error ? error.message : "Erro ao carregar dados.";
+    apiError(error, "common.erroAoCarregarDados");
 
   return (
     <Card
@@ -136,21 +142,19 @@ export function CategoryChart({ filter }: CategoryChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Assuntos Mais Acessados: Chat
-            </CardTitle>
+              {t("dashboard.assuntosMaisAcessadosChat", {}, locale)}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Acessos por categoria de conteúdo
-            </CardDescription>
+              {t("dashboard.acessosPorCategoriaDeConteudo", {}, locale)}</CardDescription>
           </div>
         </div>
         <div className="absolute top-5 right-4 z-40">
           <ChartDownloadButton
             containerId="category-chart"
-            fileName="assuntos_acessados"
-            info={CHART_INFO}
+            fileName={t("dashboard.export.assuntos_acessados")}
+            info={CHART_INFO()}
             insight={{
               chart: "chat-topics",
-              title: "Assuntos mais acessados no chat",
+              title: t("dashboard.assuntosMaisAcessadosNoChat", {}, locale),
               filters: dashboardFiltersFromLegacy(filter),
               disabled: isLoading || !hasData,
             }}
@@ -161,10 +165,10 @@ export function CategoryChart({ filter }: CategoryChartProps) {
       <CardContent className="flex flex-1 flex-col min-h-0 px-2 sm:p-6">
         {!hasRequired && (
           <NoData onRetry={refetchTyped}>
-            <p>Selecione uma entidade para visualizar dados.</p>
+            <p>{t("dashboard.selecioneUmaEntidadeParaVisualizarDados", {}, locale)}</p>
           </NoData>
         )}
-        {hasRequired && isLoading && <ChartLoader text="Carregando dados..." />}
+        {hasRequired && isLoading && <ChartLoader text={t("common.carregandoDados", {}, locale)} />}
         {hasRequired && isError && (
           <ChartError message={errorMessage} onRetry={refetchTyped} />
         )}
@@ -189,7 +193,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                           {entry.category}
                         </p>
                         <p className="font-[Poppins] text-zinc-400">
-                          Acessos:{" "}
+                          {t("dashboard.acessos_399", {}, locale)}{" "}
                           <span className="font-medium text-white">
                             {entry.acessos}
                           </span>
@@ -227,7 +231,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
         )}
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>
-            <p>Nenhum dado de categorias disponível.</p>
+            <p>{t("dashboard.nenhumDadoDeCategoriasDisponivel", {}, locale)}</p>
           </NoData>
         )}
       </CardContent>
@@ -236,7 +240,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex items-center gap-4">
             <span className="font-[Poppins] text-sm text-zinc-400">
-              Total de acessos:{" "}
+              {t("dashboard.totalDeAcessos", {}, locale)}{" "}
               <span className="font-semibold text-white">
                 {data!.totalAccesses}
               </span>
@@ -245,12 +249,12 @@ export function CategoryChart({ filter }: CategoryChartProps) {
               <>
                 <span className="text-white/20">|</span>
                 <span className="font-[Poppins] text-sm text-zinc-400">
-                  Mais acessado:{" "}
+                  {t("dashboard.maisAcessado", {}, locale)}{" "}
                   <span className="font-semibold text-white">
                     {topCategory.name}
                   </span>
                   <span className="ml-1.5 text-zinc-600">
-                    ({topCategory.percentage}%)
+                    ({percent(topCategory.percentage / 100)})
                   </span>
                 </span>
               </>

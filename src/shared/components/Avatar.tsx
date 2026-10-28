@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/i18n";
 ﻿import { useMemo } from "react";
 import { cn } from "@/shared/lib/cn";
 
@@ -18,12 +19,13 @@ export function Avatar({
     return `https://api.dicebear.com/9.x/bottts/svg?seed=${fullSeed}&size=160`;
   }, [seed]);
 
+  useLocale();
   return (
     <div
       className={cn("overflow-hidden rounded-full", className)}
       style={{ backgroundColor }}
     >
-      <img src={avatarUrl} alt="avatar" className="block h-full w-full" />
+      <img src={avatarUrl} alt={t("common.avatar")} className="block h-full w-full" />
     </div>
   );
 }

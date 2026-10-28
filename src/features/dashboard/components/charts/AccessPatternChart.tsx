@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { t, useLocale } from "@/i18n";
 ﻿import { useQuery } from "@tanstack/react-query";
 import {
   Scatter,
@@ -24,7 +26,7 @@ import { formatDateTime, formatDuration } from "@/shared/lib/formatDate";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  "Cada ponto representa uma sessão de uso. O eixo horizontal mostra o horário do dia e o eixo vertical o dia da semana — revela quando os usuários estão mais ativos.";
+  () => (t("dashboard.cadaPontoRepresentaUmaSessaoDeUso"));
 
 interface SessionData {
   startTime: string;
@@ -41,33 +43,37 @@ interface ChartProps {
   filters: DashboardFilterParams;
 }
 
-const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const DAYS = () => ([t("dashboard.dom"), t("dashboard.seg"), t("dashboard.ter"), t("dashboard.qua"), t("dashboard.qui"), t("dashboard.sex"), t("dashboard.sab")]);
 
 const CustomTooltip = ({ active, payload }: any) => {
+  useLocale();
+
   if (!active || !payload?.length) return null;
   const d: ProcessedSession = payload[0].payload;
   return (
     <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl space-y-1">
       <p className="font-[Poppins] text-zinc-400">
-        Entrada:{" "}
+        {t("dashboard.entrada")}{" "}
         <span className="font-medium text-white">
           {formatDateTime(d.startTime)}
         </span>
       </p>
       <p className="font-[Poppins] text-zinc-400">
-        Saída:{" "}
+        {t("dashboard.saida")}{" "}
         <span className="font-medium text-white">
           {formatDateTime(d.endTime)}
         </span>
       </p>
       <p className="border-t border-white/10 pt-1 font-[Poppins] text-zinc-400">
-        Duração: <span className="font-medium text-white">{d.duration}</span>
+        {t("dashboard.duracao")}{" "}<span className="font-medium text-white">{d.duration}</span>
       </p>
     </div>
   );
 };
 
 function useSessionData(filters: ChartProps["filters"]) {
+  useLocale();
+
   return useQuery({
     queryKey: ["individualSessions", filters],
     queryFn: () =>
@@ -95,6 +101,8 @@ function useSessionData(filters: ChartProps["filters"]) {
 }
 
 export function AccessPatternChart({ filters }: ChartProps) {
+  useLocale();
+
   const {
     data: sessions,
     isLoading,
@@ -117,21 +125,19 @@ export function AccessPatternChart({ filters }: ChartProps) {
         <div className="flex items-start justify-between px-6 py-5 pr-36">
           <div>
             <CardTitle className="text-white font-[Poppins]">
-              Detalhes de Acesso por Sessão
-            </CardTitle>
+              {t("dashboard.detalhesDeAcessoPorSessao")}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
-              Cada ponto é uma sessão — passe o mouse para ver os detalhes
-            </CardDescription>
+              {t("dashboard.cadaPontoEUmaSessaoPasseO")}</CardDescription>
           </div>
         </div>
         <div className="absolute top-5 right-4 z-40">
           <ChartDownloadButton
             containerId="access-pattern-chart"
-            fileName="padrao_acesso"
-            info={CHART_INFO}
+            fileName={t("dashboard.export.padrao_acesso")}
+            info={CHART_INFO()}
             insight={{
               chart: "access-pattern",
-              title: "Padrão de acesso",
+              title: t("dashboard.padraoDeAcesso"),
               filters,
               disabled: isLoading || !hasData,
             }}
@@ -143,16 +149,14 @@ export function AccessPatternChart({ filters }: ChartProps) {
         {!hasRequiredIds && (
           <NoData onRetry={refetch}>
             <p>
-              Selecione um aluno, turma ou curso para visualizar os detalhes de
-              acesso.
-            </p>
+              {t("dashboard.selecioneUmAlunoTurmaOuCursoPara")}</p>
           </NoData>
         )}
         {hasRequiredIds && isLoading && (
-          <ChartLoader text="Carregando dados..." />
+          <ChartLoader text={t("common.carregandoDados")} />
         )}
         {hasRequiredIds && isError && (
-          <ChartError message={(error as Error)?.message} onRetry={refetch} />
+          <ChartError message={apiError(error, "common.erroAoCarregarDados")} onRetry={refetch} />
         )}
         {hasRequiredIds && !isLoading && !isError && hasData && (
           <div className="h-[300px]">
@@ -177,7 +181,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
                   name="Dia"
                   domain={[-0.5, 6.5]}
                   ticks={[0, 1, 2, 3, 4, 5, 6]}
-                  tickFormatter={(d) => DAYS[d]}
+                  tickFormatter={(d) => DAYS()[d]}
                   stroke="rgba(255,255,255,0.3)"
                   tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
                 />
@@ -197,7 +201,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
-            <p>Nenhum dado de sessão disponível para esta entidade.</p>
+            <p>{t("dashboard.nenhumDadoDeSessaoDisponivelParaEsta")}</p>
           </NoData>
         )}
       </CardContent>

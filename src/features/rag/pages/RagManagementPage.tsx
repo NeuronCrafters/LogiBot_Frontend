@@ -1,3 +1,5 @@
+import { apiError } from "@/shared/lib/apiError";
+import { t, useLocale, getLanguage } from "@/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -36,23 +38,23 @@ const inputCls =
 /* ── Status badge ── */
 const STATUS_META: Record<string, { label: string; className: string }> = {
   uploaded: {
-    label: "Na fila",
+    get label() { return t("rag.naFila"); },
     className: "border-blue-500/20 bg-blue-500/10 text-blue-300",
   },
   processing: {
-    label: "Processando",
+    get label() { return t("rag.processando"); },
     className: "border-amber-500/20 bg-amber-500/10 text-amber-300",
   },
   ready: {
-    label: "Pronto",
+    get label() { return t("rag.pronto"); },
     className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
   },
   error: {
-    label: "Erro",
+    get label() { return t("common.erro"); },
     className: "border-red-500/20 bg-red-500/10 text-red-300",
   },
   deleted: {
-    label: "Removido",
+    get label() { return t("rag.removido"); },
     className: "border-white/10 bg-white/5 text-zinc-500",
   },
 };
@@ -60,8 +62,8 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
 function formatBytes(value: number) {
   if (!Number.isFinite(value)) return "-";
   if (value < 1024) return `${value} B`;
-  if (value < 1024 * 1024) return `${Math.round(value / 102.4) / 10} KB`;
-  return `${Math.round(value / 1024 / 102.4) / 10} MB`;
+  if (value < 1024 * 1024) return t("rag.value0Kb", { value0: Math.round(value / 102.4) / 10 });
+  return t("rag.value0Mb", { value0: Math.round(value / 1024 / 102.4) / 10 });
 }
 
 /* ── Tab bar ── */
@@ -76,6 +78,8 @@ function TabBar({
   ragMode?: RagMode;
   onChange: (t: Tab) => void;
 }) {
+  useLocale();
+
   const tabs: {
     id: Tab;
     label: string;
@@ -84,18 +88,18 @@ function TabBar({
   }[] = [
     {
       id: "settings",
-      label: "Configurações",
+      label: t("rag.configuracoes"),
       icon: <Settings className="h-4 w-4" />,
     },
     {
       id: "documents",
-      label: "Documentos",
+      label: t("common.documentos"),
       icon: <FileText className="h-4 w-4" />,
       locked: ragMode === "none",
     },
     {
       id: "chat",
-      label: "Chat de Teste",
+      label: t("common.chatDeTeste"),
       icon: <MessageSquare className="h-4 w-4" />,
       locked: ragMode === "none",
     },
@@ -106,6 +110,8 @@ function TabBar({
       {tabs.map((tab) => (
         <button
           key={tab.id}
+          aria-label={tab.label}
+          aria-pressed={active === tab.id}
           type="button"
           onClick={() => onChange(tab.id)}
           className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 font-[Poppins] text-sm font-medium transition-colors ${
@@ -137,6 +143,8 @@ function ModeButton({
   description: string;
   onClick: (mode: RagMode) => void;
 }) {
+  useLocale();
+
   const active = current === value;
   return (
     <button
@@ -170,6 +178,8 @@ function SettingsTab({
   isSaving: boolean;
   onSave: (input: { ragMode: RagMode; topK: number; minScore: number }) => void;
 }) {
+  useLocale();
+
   const [ragMode, setRagMode] = useState<RagMode>("none");
   const [topK, setTopK] = useState(4);
   const [minScore, setMinScore] = useState(40);
@@ -185,40 +195,38 @@ function SettingsTab({
     <Panel className="space-y-6">
       <div>
         <h2 className="font-[Poppins] text-base font-semibold text-white">
-          Modo RAG
-        </h2>
+          {t("rag.modoRag")}</h2>
         <p className="mt-1 font-[Poppins] text-sm text-zinc-500">
-          Define como a IA irá recuperar informações dos documentos.
-        </p>
+          {t("rag.defineComoAIaIraRecuperarInformacoes")}</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <ModeButton
           value="none"
           current={ragMode}
-          label="Nenhum"
-          description="IA responde sem usar documentos."
+          label={t("rag.nenhum")}
+          description={t("rag.iaRespondeSemUsarDocumentos")}
           onClick={setRagMode}
         />
         <ModeButton
           value="context"
           current={ragMode}
-          label="Context"
-          description="Sempre busca nos documentos antes de responder."
+          label={t("common.context")}
+          description={t("rag.sempreBuscaNosDocumentosAntesDeResponder")}
           onClick={setRagMode}
         />
         <ModeButton
           value="self"
           current={ragMode}
-          label="Self"
-          description="IA decide se precisa buscar antes de responder."
+          label={t("common.self")}
+          description={t("rag.iaDecideSePrecisaBuscarAntesDe")}
           onClick={setRagMode}
         />
         <ModeButton
           value="hybrid"
           current={ragMode}
-          label="Hybrid"
-          description="Busca por significado e por palavras-chave ao mesmo tempo."
+          label={t("common.hybrid")}
+          description={t("rag.buscaPorSignificadoEPorPalavrasChave")}
           onClick={setRagMode}
         />
       </div>
@@ -226,7 +234,7 @@ function SettingsTab({
       {ragMode !== "none" && (
         <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Top K</label>
+          <label className={labelCls}>{t("rag.topK")}</label>
           <input
             type="number"
             min={1}
@@ -236,11 +244,10 @@ function SettingsTab({
             className={inputCls}
           />
           <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">
-            Quantidade máxima de trechos recuperados.
-          </p>
+            {t("rag.quantidadeMaximaDeTrechosRecuperados")}</p>
         </div>
         <div>
-          <label className={labelCls}>Score mínimo</label>
+          <label className={labelCls}>{t("rag.scoreMinimo")}</label>
           <input
             type="number"
             min={0}
@@ -250,8 +257,7 @@ function SettingsTab({
             className={inputCls}
           />
           <p className="mt-1.5 font-[Poppins] text-xs text-zinc-600">
-            Relevância mínima para aceitar um trecho (0–100).
-          </p>
+            {t("rag.relevanciaMinimaParaAceitarUmTrecho0100")}</p>
         </div>
         </div>
       )}
@@ -267,8 +273,7 @@ function SettingsTab({
         ) : (
           <Save className="h-4 w-4" />
         )}
-        Salvar configurações
-      </button>
+        {t("rag.salvarConfiguracoes")}</button>
     </Panel>
   );
 }
@@ -287,6 +292,8 @@ function DocumentRow({
   isDeleting: boolean;
   isReprocessing: boolean;
 }) {
+  useLocale();
+
   const meta = STATUS_META[document.status] ?? STATUS_META.uploaded;
   return (
     <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-3 min-w-0">
@@ -303,7 +310,7 @@ function DocumentRow({
         </p>
         <p className="font-[Poppins] text-xs text-zinc-600 truncate">
           {document.sourceType.toUpperCase()} · {formatBytes(document.fileSize)}{" "}
-          · {new Date(document.createdAt).toLocaleDateString("pt-BR")}
+          · {new Date(document.createdAt).toLocaleDateString(getLanguage())}
         </p>
         {document.errorMessage && (
           <p className="mt-1 line-clamp-1 font-[Poppins] text-xs text-red-400">
@@ -323,7 +330,7 @@ function DocumentRow({
           onClick={() => onReprocess(document.id)}
           disabled={isReprocessing || document.status === "processing"}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-          title="Reprocessar"
+          title={t("rag.reprocessar")}
         >
           {isReprocessing ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -336,7 +343,7 @@ function DocumentRow({
           onClick={() => onDelete(document.id)}
           disabled={isDeleting}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
-          title="Remover"
+          title={t("common.remover")}
         >
           {isDeleting ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -381,6 +388,8 @@ function DocumentsTab({
   deletingId?: string;
   reprocessingId?: string;
 }) {
+  useLocale();
+
   const locked = ragMode === "none";
 
   return (
@@ -392,15 +401,12 @@ function DocumentsTab({
           </div>
           <div className="text-center px-8">
             <p className="font-[Poppins] text-sm font-semibold text-zinc-200">
-              Documentos desativados
-            </p>
+              {t("rag.documentosDesativados")}</p>
             <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
-              Ative o modo{" "}
-              <span className="text-blue-400 font-medium">Context</span>,{" "}
-              <span className="text-blue-400 font-medium">Self</span> ou{" "}
-              <span className="text-blue-400 font-medium">Hybrid</span> na aba
-              de Configurações.
-            </p>
+              {t("common.ativeOModo")}{" "}
+              <span className="text-blue-400 font-medium">{t("common.context")}</span>,{" "}
+              <span className="text-blue-400 font-medium">{t("common.self")}</span>{" "}{t("common.or")}{" "}
+              <span className="text-blue-400 font-medium">{t("common.hybrid")}</span> {t("rag.naAbaDeConfiguracoes")}</p>
           </div>
         </div>
       )}
@@ -409,8 +415,7 @@ function DocumentsTab({
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="font-[Poppins] text-base font-semibold text-white">
-              Documentos
-            </h2>
+              {t("common.documentos")}</h2>
             <p className="mt-0.5 font-[Poppins] text-sm text-zinc-500">
               {classLabel}
             </p>
@@ -426,13 +431,12 @@ function DocumentsTab({
           className="rounded-xl bg-neutral-950/50 p-4"
         >
           <p className="mb-3 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Novo documento
-          </p>
+            {t("rag.novoDocumento")}</p>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <label className="flex h-10 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-xl border border-white/10 bg-neutral-800/50 px-4 transition-colors hover:bg-neutral-800/80">
               <Upload className="h-4 w-4 shrink-0 text-zinc-400" />
               <span className="truncate font-[Poppins] text-sm text-zinc-400">
-                {uploadFile ? uploadFile.name : "Selecionar arquivo (.pdf, .txt, .docx)"}
+                {uploadFile ? uploadFile.name : t("rag.selecionarArquivoPdfTxtDocx")}
               </span>
               <input
                 type="file"
@@ -444,7 +448,7 @@ function DocumentsTab({
             <input
               value={uploadTitle}
               onChange={(e) => onTitleChange(e.target.value)}
-              placeholder="Título (opcional)"
+              placeholder={t("rag.tituloOpcional")}
               className="h-10 rounded-xl border border-white/10 bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 sm:w-48"
             />
             <button
@@ -453,8 +457,7 @@ function DocumentsTab({
               className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              Enviar
-            </button>
+              {t("rag.enviar")}</button>
           </div>
         </form>
 
@@ -479,8 +482,7 @@ function DocumentsTab({
         ) : (
           <div className="rounded-xl border border-dashed border-white/10 py-12 text-center">
             <p className="font-[Poppins] text-sm text-zinc-500">
-              Nenhum documento enviado para esta turma.
-            </p>
+              {t("rag.nenhumDocumentoEnviadoParaEstaTurma")}</p>
           </div>
         )}
       </Panel>
@@ -510,6 +512,8 @@ function ChatTab({
   messages: TestChatMsg[];
   ragMode?: RagMode;
 }) {
+  useLocale();
+
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -553,15 +557,12 @@ function ChatTab({
           </div>
           <div className="text-center px-8">
             <p className="font-[Poppins] text-sm font-semibold text-zinc-200">
-              Chat desativado
-            </p>
+              {t("rag.chatDesativado")}</p>
             <p className="mt-1.5 font-[Poppins] text-xs text-zinc-500 leading-relaxed">
-              Ative o modo{" "}
-              <span className="text-blue-400 font-medium">Context</span>,{" "}
-              <span className="text-blue-400 font-medium">Self</span> ou{" "}
-              <span className="text-blue-400 font-medium">Hybrid</span> para
-              testar o RAG.
-            </p>
+              {t("common.ativeOModo")}{" "}
+              <span className="text-blue-400 font-medium">{t("common.context")}</span>,{" "}
+              <span className="text-blue-400 font-medium">{t("common.self")}</span>{" "}{t("common.or")}{" "}
+              <span className="text-blue-400 font-medium">{t("common.hybrid")}</span> {t("rag.paraTestarORag")}</p>
           </div>
         </div>
       )}
@@ -571,11 +572,10 @@ function ChatTab({
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-zinc-500" />
           <span className="font-[Poppins] text-sm font-medium text-zinc-300">
-            Chat de Teste
-          </span>
+            {t("common.chatDeTeste")}</span>
           {settings && (
             <span className="ml-auto rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-[Poppins] text-xs text-zinc-500">
-              modo: {settings.ragMode}
+              {t("rag.mode", { value: settings.ragMode })}
             </span>
           )}
         </div>
@@ -589,8 +589,7 @@ function ChatTab({
         {messages.length === 0 && !isTesting && (
           <div className="flex h-full items-center justify-center">
             <p className="font-[Poppins] text-sm text-zinc-600">
-              Digite uma pergunta para testar o RAG desta turma...
-            </p>
+              {t("rag.digiteUmaPerguntaParaTestarORag")}</p>
           </div>
         )}
 
@@ -637,7 +636,7 @@ function ChatTab({
             value={input}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
-            placeholder="Digite sua pergunta... (Enter para enviar)"
+            placeholder={t("rag.digiteSuaPerguntaEnterParaEnviar")}
             rows={1}
             disabled={isTesting || locked}
             className="flex-1 resize-none overflow-hidden rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 disabled:opacity-50"
@@ -663,6 +662,8 @@ function ChatTab({
 
 /* ── Main page ── */
 export function RagManagementPage() {
+  const locale = useLocale();
+
   const queryClient = useQueryClient();
   const [selectedClassId, setSelectedClassId] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -709,15 +710,15 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragSettings", selectedClassId],
       });
-      toast.success("Configuração RAG salva.");
+      toast.success({ key: "rag.configuracaoRagSalva", params: {} });
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao salvar RAG."),
+      toast.error(apiError(error, "rag.erroAoSalvarRag")),
   });
 
   const uploadMutation = useMutation({
     mutationFn: () => {
-      if (!uploadFile) throw new Error("Selecione um arquivo.");
+      if (!uploadFile) throw new Error(t("rag.selecioneUmArquivo", {}, locale));
       return ragApi.uploadDocument(selectedClassId, uploadFile, uploadTitle);
     },
     onSuccess: () => {
@@ -726,10 +727,10 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragDocuments", selectedClassId],
       });
-      toast.success("Documento enviado para processamento.");
+      toast.success({ key: "rag.documentoEnviadoParaProcessamento", params: {} });
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao enviar arquivo."),
+      toast.error(apiError(error, "rag.erroAoEnviarArquivo")),
   });
 
   const deleteMutation = useMutation({
@@ -738,10 +739,10 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragDocuments", selectedClassId],
       });
-      toast.success("Documento removido.");
+      toast.success({ key: "rag.documentoRemovido", params: {} });
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao remover."),
+      toast.error(apiError(error, "rag.erroAoRemover")),
   });
 
   const reprocessMutation = useMutation({
@@ -750,10 +751,10 @@ export function RagManagementPage() {
       queryClient.invalidateQueries({
         queryKey: ["ragDocuments", selectedClassId],
       });
-      toast.success("Reprocessamento agendado.");
+      toast.success({ key: "rag.reprocessamentoAgendado", params: {} });
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message ?? "Erro ao reprocessar."),
+      toast.error(apiError(error, "rag.erroAoReprocessar")),
   });
 
   const testChatMutation = useMutation({
@@ -784,7 +785,7 @@ export function RagManagementPage() {
     },
     onError: (error: any) => {
       setChatMessages((prev) => prev.filter((m) => m.id !== "typing"));
-      toast.error(error?.response?.data?.message ?? "Erro ao testar RAG.");
+      toast.error(apiError(error, "rag.erroAoTestarRag"));
     },
   });
 
@@ -801,17 +802,16 @@ export function RagManagementPage() {
       <div className="mx-auto w-full max-w-4xl space-y-5">
         <PageHeader
           icon={<Database className="h-5 w-5" />}
-          title="Base RAG"
-          description="Configure a recuperação de materiais por turma."
+          title={t("common.baseRag", {}, locale)}
+          description={t("rag.configureARecuperacaoDeMateriaisPorTurma", {}, locale)}
         />
 
         {/* Class selector */}
         <Panel>
-          <label className={labelCls}>Turma</label>
+          <label className={labelCls}>{t("common.turma", {}, locale)}</label>
           {classesLoading ? (
             <div className="flex h-11 items-center gap-2 font-[Poppins] text-sm text-zinc-500">
-              <Loader2 className="h-4 w-4 animate-spin" /> Carregando turmas...
-            </div>
+              <Loader2 className="h-4 w-4 animate-spin" /> {t("rag.carregandoTurmas", {}, locale)}</div>
           ) : classes.length ? (
             <Select
               value={selectedClassId}
@@ -820,8 +820,7 @@ export function RagManagementPage() {
             />
           ) : (
             <p className="font-[Poppins] text-sm text-zinc-500">
-              Nenhuma turma disponível.
-            </p>
+              {t("rag.nenhumaTurmaDisponivel", {}, locale)}</p>
           )}
         </Panel>
 
