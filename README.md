@@ -36,9 +36,11 @@ A rede externa e os containers da API permanecem disponíveis.
 ## Validação sem dependências locais
 
 ```bash
-docker compose --profile test run --build --rm tests sh -c 'npm run build && npm run check:i18n && npm test && npm run lint'
-docker compose --profile browser run --build --rm browser-tests
+docker compose -f docker-compose.test.yml --profile test run --build --rm tests sh -c 'npm run build && npm run check:i18n && npm test && npm run lint'
+docker compose -f docker-compose.test.yml --profile browser run --build --rm browser-tests
 ```
+
+O `docker-compose.yml` contém somente o serviço `frontend`. Os três serviços de teste ficam exclusivamente em `docker-compose.test.yml`, carregado explicitamente nos comandos de validação. O projeto Compose de testes tem nome próprio (`logibot-frontend-tests`), separando também seus containers e sua rede padrão dos da aplicação.
 
 O primeiro comando verifica TypeScript, bundle, catálogos, testes Vitest e ESLint com zero avisos permitidos. O segundo executa Playwright em Chromium desktop e emulação mobile. O frontend precisa estar disponível em `localhost:5173`; os testes usam a rede do host Linux para acessar a porta publicada. Se o usuário local não tiver UID/GID 1000, defina `LOCAL_UID` e `LOCAL_GID` no `.env` para gravar os resultados com o proprietário correto.
 
@@ -49,7 +51,7 @@ Capturas, PNGs exportados e traces de falhas ficam em `test-results/artifacts`, 
 Preencha `E2E_ADMIN_EMAIL` e `E2E_ADMIN_PASSWORD` no `.env` local com uma conta administrativa do ambiente de teste. Esses valores não são argumentos do build nem entram no bundle. API, worker, Embedding e ChromaDB precisam estar funcionando antes da execução.
 
 ```bash
-docker compose --profile real run --build --rm real-tests sh -c 'npm exec tsc -- -p tsconfig.e2e.json && npm run test:e2e:real'
+docker compose -f docker-compose.test.yml --profile real run --build --rm real-tests sh -c 'npm exec tsc -- -p tsconfig.e2e.json && npm run test:e2e:real'
 ```
 
 A suíte aceita apenas `localhost` ou `127.0.0.1`. Cria universidade, vínculos e contas temporárias com prefixo único, testa os fluxos pela interface e remove seus dados em `finally`, inclusive quando uma asserção falha. Uma interrupção forçada do container pode impedir essa limpeza. A preferência original da conta administrativa é restaurada. As contas de demonstração existentes são preservadas.
@@ -59,7 +61,7 @@ São verificados cadastro e consentimento, edição de nome/e-mail/senha, confli
 Os relatórios e artefatos dessa suíte ficam em `test-results/real` e `test-results/real-report.json`. Para executar somente os fluxos sem geração de IA:
 
 ```bash
-docker compose --profile real run --build --rm real-tests npm run test:e2e:real -- account.spec.ts academic.spec.ts entities.spec.ts quiz.spec.ts
+docker compose -f docker-compose.test.yml --profile real run --build --rm real-tests npm run test:e2e:real -- account.spec.ts academic.spec.ts entities.spec.ts quiz.spec.ts
 ```
 
 Os testes de layout incluem os quatro perfis, os três idiomas, topo/fim do perfil alcançáveis, telas baixas, navegação por teclado, retorno de foco e auditoria axe de WCAG A/AA. A recuperação de senha por e-mail e a implantação na VPS não fazem parte desta homologação.

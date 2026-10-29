@@ -1,0 +1,44 @@
+name: logibot-frontend-tests
+
+services:
+  tests:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    environment:
+      NODE_ENV: test
+
+  browser-tests:
+    profiles: [browser]
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    network_mode: host
+    volumes:
+      - ./test-results:/app/test-results
+    environment:
+      CI: "true"
+      HOME: /tmp
+      E2E_API_KEY: ${VITE_API_KEY:-}
+      E2E_BASE_URL: http://localhost:${FRONTEND_PORT:-5173}
+
+  real-tests:
+    profiles: [real]
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    network_mode: host
+    volumes:
+      - ./test-results:/app/test-results
+    environment:
+      CI: "true"
+      HOME: /tmp
+      E2E_REAL_API: "1"
+      E2E_API_KEY: ${VITE_API_KEY:-}
+      E2E_BASE_URL: http://localhost:${FRONTEND_PORT:-5173}
+      E2E_ADMIN_EMAIL: ${E2E_ADMIN_EMAIL:-}
+      E2E_ADMIN_PASSWORD: ${E2E_ADMIN_PASSWORD:-}
+    command: ["npm", "run", "test:e2e:real"]

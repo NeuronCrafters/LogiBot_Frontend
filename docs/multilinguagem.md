@@ -81,7 +81,7 @@ Nenhum arquivo fonte, logo ou mídia original foi excluído. Os comentários exi
 - Chave do frontend conferida com a API local, sem literais de credenciais nos arquivos versionáveis.
 - `git diff --check` aprovado; nenhum arquivo original excluído, nenhuma alteração em linhas de comentários existentes e repositório do backend sem alterações.
 
-Os comandos para reproduzir a validação estão no README. Os resultados respeitam o alcance descrito acima; a matriz automatizada não equivale a uma certificação de todos os dados e cenários possíveis da aplicação.
+Os comandos para reproduzir a validação estão no README. O Compose principal contém somente o frontend; os serviços de teste ficam no arquivo separado `docker-compose.test.yml`. Os resultados respeitam o alcance descrito acima; a matriz automatizada não equivale a uma certificação de todos os dados e cenários possíveis da aplicação.
 
 ## Fechamento das pendências autorizadas
 
