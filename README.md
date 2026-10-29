@@ -1,81 +1,178 @@
-# LogiBots
+# LogiBots Frontend
 
-Frontend React/TypeScript com interface em português do Brasil (`pt-BR`), inglês (`en-US`) e espanhol (`es-ES`).
+[Português (Brasil)](README.BR.MD)
 
-## Execução local em Docker
+React and TypeScript interface for the LogiBots educational platform. It provides programming assistance through chat, student quizzes, teaching material management, academic administration, and activity dashboards. The interface supports Brazilian Portuguese, English, and Spanish.
 
-É necessário ter Docker Compose e a API já executando na rede `logibot_backend_default`. Este Compose inicia somente o frontend; não altera nem recria os serviços da API, Embedding ou ChromaDB.
+## Technology stack
 
-O `.env` local foi ajustado para este ambiente. Em outra máquina, copie `.env.example` para `.env` e preencha `VITE_API_KEY` com o mesmo valor de `API_KEY` da API.
-
-| Variável | Valor local / finalidade |
+| Layer | Technologies |
 |---|---|
-| `VITE_API_BASE_URL` | `/api`, proxy na mesma origem do frontend |
-| `VITE_API_KEY` | Chave exigida pela API; incorporada ao bundle público pelo Vite |
-| `FRONTEND_PORT` | `5173` |
-| `API_UPSTREAM` | `http://backend:43187`, endereço interno da API na rede Docker |
-| `API_DOCKER_NETWORK` | `logibot_backend_default`, rede externa já existente |
+| Application | React, TypeScript, Vite |
+| Routing | React Router |
+| Server state | TanStack Query |
+| API communication | Axios and Fetch with Server-Sent Events (SSE) |
+| Interface | Tailwind CSS, Lucide icons |
+| Content rendering | React Markdown, remark-gfm, syntax highlighting |
+| Charts and export | Recharts, html-to-image |
+| Internationalization | i18next, react-i18next, browser Intl APIs |
+| Validation | TypeScript, ESLint, Vitest, Testing Library, Playwright, axe-core |
+| Container runtime | Nginx serving the compiled single-page application |
+
+## Interface functionality
+
+| Module | Functionality |
+|---|---|
+| Authentication | Sign-in, registration with a class access code and terms consent, session restoration, logout, and password recovery/reset forms |
+| Account | Name, email, and password updates; language preference; academic information associated with the account |
+| Student chat | Streaming responses, conversation history, Markdown and code rendering, processing indicators, and retrieved material references |
+| Student quizzes | Available quizzes, question navigation, answer selection, attempt submission, results, and history |
+| Quiz management | Manual or AI-assisted creation, content language selection, question editing, publication, unpublication, and student results |
+| RAG knowledge base | Class selection, PDF/TXT/DOCX uploads, processing status, reprocessing, deletion, retrieval settings, and a test chat |
+| Academic administration | Universities, courses, classes, subjects, professors, class access codes, entity searches, and class/subject/professor associations |
+| Dashboards | Academic filters, usage time, accuracy, topic performance, proficiency, learning progress, access sessions, effort/performance charts, AI insights, and PNG export |
+| Feedback | Categorized feedback submission and an administrative feedback listing |
+
+Navigation adapts to student, professor, course coordinator, and administrator roles. The API authorizes operations and determines the academic records available to each account. The layout includes desktop navigation, a mobile menu, keyboard-accessible controls, and dialogs with focus management.
+
+### Main routes
+
+| Route | Interface |
+|---|---|
+| `/` | Public home page |
+| `/signin`, `/signup` | Authentication and registration |
+| `/forgot-password`, `/reset-password?token=...` | Password recovery and reset |
+| `/home` | Authenticated entry point |
+| `/chat` | Student chat |
+| `/quiz`, `/quiz/:id` | Student quizzes and attempts |
+| `/quiz/manage` | Quiz management |
+| `/rag` | Teaching materials and RAG settings |
+| `/dashboard` | Activity dashboards and insights |
+| `/entities/manage` | Academic entity and association management |
+| `/entities/create/:entityType` | Entity creation |
+| `/entities` | Entity search, editing, and deletion |
+| `/profile` | Account and language settings |
+| `/feedback` | Feedback submission |
+| `/admin/feedbacks` | Administrative feedback listing |
+
+Authenticated routes use a shared layout. Feature pages and API permissions determine the operations available within each route.
+
+## Language behavior
+
+Supported locales are `pt-BR`, `en-US`, and `es-ES`. The language selector is available on public pages, authentication screens, the authenticated menu, and the profile page.
+
+- **Follow browser** reads `navigator.languages`, normalizes variants such as `en-GB` and `es-MX`, and falls back to `pt-BR`.
+- An explicit selection made during the current session takes precedence over the account preference. Otherwise, the authenticated account preference applies; a null preference follows the browser.
+- Visitors use their saved local preference or the browser language. Logout clears session precedence so another account can restore its own preference.
+- Account preferences use `PATCH /account/preferences`; returning to browser detection sends `{"language":null}`. Failed saves retain the local selection and expose a retry action.
+- API requests send `Accept-Language`; explicit choices also use `X-Language`. Chat generations retain the language captured when the request starts, and insight caches distinguish languages.
+- Switching the interface preserves entered values, existing materials, names, questions, answers, and conversation history. New quizzes can use a content language selected independently of the interface.
+- Dates, numbers, percentages, durations, and plurals follow the active locale. Known content languages are exposed through HTML `lang` attributes.
+
+Catalogs are stored in `src/i18n/catalogs`. `npm run check:i18n` checks key and interpolation parity, preserved Portuguese text fixtures, and uncatalogued interface text. Implementation details are available in [docs/multilinguagem.md](docs/multilinguagem.md).
+
+## Source organization
+
+```text
+src/
+  app/          Application providers and routing
+  assets/       Static interface assets
+  components/   Shared UI primitives
+  features/     Account, authentication, chat, quizzes, RAG, administration,
+                academic filters, dashboards, feedback, and public pages
+  i18n/         Catalogs, negotiation, persistence, and localization helpers
+  services/     Shared API clients and endpoint adapters
+  shared/       Layouts, dialogs, HTTP transport, hooks, and formatting
+scripts/        Internationalization checks
+tests/          Browser tests, API integration scenarios, and fixtures
+```
+
+Feature modules group their pages, components, API adapters, hooks, and types. TanStack Query handles remote data and caching. Authenticated HTTP requests use API session cookies; chat streaming uses Fetch/SSE.
+
+## Configuration
+
+Copy the environment template and set values for the target API:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Purpose | Default / example |
+|---|---|---|
+| `VITE_API_BASE_URL` | Browser API base URL; `/api` uses the Nginx proxy | `/api` |
+| `VITE_API_KEY` | API key expected by the backend | Set to the backend `API_KEY` |
+| `FRONTEND_PORT` | Host port published on the loopback interface | `5173` |
+| `API_UPSTREAM` | Backend URL reachable from the Nginx container | `http://backend:43187` |
+| `API_DOCKER_NETWORK` | Existing Docker network shared with the backend | `logibot_backend_default` |
+| `E2E_ADMIN_EMAIL` | Administrative account for local API integration tests | Set in the local test environment |
+| `E2E_ADMIN_PASSWORD` | Password for that test account | Set in the local test environment |
+| `LOCAL_UID`, `LOCAL_GID` | Browser test container ownership for generated artifacts | `1000`, `1000` |
+
+`VITE_*` values are embedded in the public browser bundle at build time. Rebuild the frontend after changing them. Provider credentials and session secrets belong to the backend. `API_UPSTREAM` is substituted when Nginx starts. `E2E_*` credentials are passed only to the API integration test service.
+
+The `.env` file is excluded from Git and the Docker build context. The build receives only its declared arguments.
+
+## Run with Docker
+
+Requirements: Docker Engine, Docker Compose, a running compatible API, and the external network specified by `API_DOCKER_NETWORK`. API generation, material processing, and retrieval also require the backend worker, model provider, Embedding service, and ChromaDB to be configured in their own services.
 
 ```bash
 docker compose up -d --build --wait --wait-timeout 120
 docker compose ps
 ```
 
-Abra **http://localhost:5173**. Use esse hostname para manter a origem já permitida pela API local. O proxy encaminha cookies, headers de idioma, uploads e streaming SSE, sem buffering. As rotas do React Router funcionam também em acesso direto e recarga.
+Open [http://localhost:5173](http://localhost:5173), or the port configured through `FRONTEND_PORT`. The API must allow the browser origin and support the required session cookies.
 
-As variáveis `VITE_*` são resolvidas durante o build. Depois de alterá-las, reconstrua o container. `API_UPSTREAM` é resolvido ao iniciar o Nginx. O `.env` é ignorado pelo Git e pelo contexto do Docker; o build recebe somente os argumentos declarados. Credenciais do OpenRouter e segredos de sessão pertencem à API.
+The container serves the compiled application on port `5190`, published as `127.0.0.1:FRONTEND_PORT`. Nginx provides an SPA route fallback and a `/health` endpoint. With `VITE_API_BASE_URL=/api`, requests under `/api/` are forwarded to `API_UPSTREAM` with that prefix removed. The proxy supports session cookies, uploads, and unbuffered SSE responses.
 
-Para encerrar somente este frontend:
+The final runtime image contains compiled assets and Nginx configuration. Node.js, build tools, and browser test dependencies remain in build/test images. Host-side Node.js, npm, and browser installations are unnecessary for this workflow.
 
 ```bash
 docker compose down
 ```
 
-A rede externa e os containers da API permanecem disponíveis.
+This stops the frontend project. The external API network and backend services remain managed by their own projects.
 
-## Validação sem dependências locais
+## Validation
+
+`docker-compose.yml` defines only `frontend`. Test services are defined separately in `docker-compose.test.yml`, using the Compose project name `logibot-frontend-tests`. Run the suites sequentially to limit resource contention with the application services.
+
+### Build, catalogs, unit tests, and lint
 
 ```bash
 docker compose -f docker-compose.test.yml --profile test run --build --rm tests sh -c 'npm run build && npm run check:i18n && npm test && npm run lint'
+```
+
+This checks TypeScript, the Vite bundle, locale catalogs, Vitest tests, and ESLint with zero warnings allowed. Dependencies are installed with `npm ci` inside the image.
+
+### Browser interface tests
+
+Start the frontend before running:
+
+```bash
 docker compose -f docker-compose.test.yml --profile browser run --build --rm browser-tests
 ```
 
-O `docker-compose.yml` contém somente o serviço `frontend`. Os três serviços de teste ficam exclusivamente em `docker-compose.test.yml`, carregado explicitamente nos comandos de validação. O projeto Compose de testes tem nome próprio (`logibot-frontend-tests`), separando também seus containers e sua rede padrão dos da aplicação.
+Playwright runs Chromium desktop and mobile emulation against controlled API responses. Coverage includes language switching, retained input, request contracts, role-based navigation, profile scrolling, low-height dialogs, dropdown placement, charts, PNG export, and axe accessibility checks.
 
-O primeiro comando verifica TypeScript, bundle, catálogos, testes Vitest e ESLint com zero avisos permitidos. O segundo executa Playwright em Chromium desktop e emulação mobile. O frontend precisa estar disponível em `localhost:5173`; os testes usam a rede do host Linux para acessar a porta publicada. Se o usuário local não tiver UID/GID 1000, defina `LOCAL_UID` e `LOCAL_GID` no `.env` para gravar os resultados com o proprietário correto.
+The browser test services use Linux host networking to access the frontend port. Artifacts are written to `test-results/artifacts`; `LOCAL_UID` and `LOCAL_GID` control file ownership.
 
-Capturas, PNGs exportados e traces de falhas ficam em `test-results/artifacts`, ignorado pelo Git. Os perfis de teste instalam dependências com `npm ci` dentro das imagens. Não é necessário instalar Node, npm ou browsers na máquina. Execute as suítes em sequência, sem builds concorrentes, para evitar disputa de memória com os serviços locais.
+### Local API integration tests
 
-## Homologação contra a API local
-
-Preencha `E2E_ADMIN_EMAIL` e `E2E_ADMIN_PASSWORD` no `.env` local com uma conta administrativa do ambiente de teste. Esses valores não são argumentos do build nem entram no bundle. API, worker, Embedding e ChromaDB precisam estar funcionando antes da execução.
+Configure `E2E_ADMIN_EMAIL` and `E2E_ADMIN_PASSWORD`, and start the application and its API dependencies:
 
 ```bash
 docker compose -f docker-compose.test.yml --profile real run --build --rm real-tests sh -c 'npm exec tsc -- -p tsconfig.e2e.json && npm run test:e2e:real'
 ```
 
-A suíte aceita apenas `localhost` ou `127.0.0.1`. Cria universidade, vínculos e contas temporárias com prefixo único, testa os fluxos pela interface e remove seus dados em `finally`, inclusive quando uma asserção falha. Uma interrupção forçada do container pode impedir essa limpeza. A preferência original da conta administrativa é restaurada. As contas de demonstração existentes são preservadas.
+This suite accepts only `localhost` or `127.0.0.1`. It creates uniquely prefixed academic records and accounts, exercises account changes, feedback, academic CRUD, coordinator permissions, and quiz publication/attempt/results workflows across all three languages on desktop and mobile. Cleanup runs in `finally` and restores the original administrator language preference; forcibly terminating the container may interrupt cleanup.
 
-São verificados cadastro e consentimento, edição de nome/e-mail/senha, conflito de e-mail, preferência persistida, feedback, CRUD acadêmico, permissões de coordenador e o ciclo de publicação, resolução e resultados de quizzes em PT/EN/ES, no desktop e mobile. O cenário `generation.provider.spec.ts` também processa e reprocessa um TXT real, gera quiz com fontes, recebe streaming de chat, gera insights e exporta PNG. Ele roda somente no desktop e faz chamadas ao provedor configurado na API, com seu consumo normal.
+The desktop-only `generation.provider.spec.ts` also uploads and reprocesses a TXT document, generates a quiz with retrieved sources, receives chat streaming, requests an AI insight, exports PNG, and deletes the material. These scenarios call the backend's configured provider and consume its normal API quota.
 
-Os relatórios e artefatos dessa suíte ficam em `test-results/real` e `test-results/real-report.json`. Para executar somente os fluxos sem geração de IA:
+To run only workflows without AI generation:
 
 ```bash
 docker compose -f docker-compose.test.yml --profile real run --build --rm real-tests npm run test:e2e:real -- account.spec.ts academic.spec.ts entities.spec.ts quiz.spec.ts
 ```
 
-Os testes de layout incluem os quatro perfis, os três idiomas, topo/fim do perfil alcançáveis, telas baixas, navegação por teclado, retorno de foco e auditoria axe de WCAG A/AA. A recuperação de senha por e-mail e a implantação na VPS não fazem parte desta homologação.
-
-## Idiomas e preservação
-
-O seletor aparece na página pública, autenticação, menu autenticado e perfil. A opção **Seguir o navegador** acompanha `navigator.languages`; variantes como `en-GB` e `es-MX` são normalizadas. O fallback é português do Brasil.
-
-A escolha explícita feita na sessão tem prioridade sobre a preferência da conta. Sem escolha recente, a conta autenticada define o idioma; preferência da conta nula significa seguir o navegador. Para visitantes, vale a escolha local anterior e, na ausência dela, o navegador. Logout encerra a prioridade da escolha da sessão e a próxima conta pode restaurar sua própria preferência.
-
-A preferência autenticada usa `PATCH /account/preferences` e o campo `preferredLanguage`. Restaurar o navegador envia `{"language":null}`. Falhas de gravação mantêm a escolha local e mostram a opção de tentar novamente. Requisições de gravação são ordenadas, e respostas antigas não substituem escolhas recentes ou o estado de outra conta.
-
-A interface muda sem recarregar a aplicação. Conteúdos cadastrados, nomes, perguntas, alternativas, respostas do chat, históricos, materiais e códigos técnicos permanecem no idioma original. O idioma de um novo quiz pode ser escolhido separadamente da interface. Quizzes legados sem metadados apresentam idioma desconhecido.
-
-Os catálogos ficam em `src/i18n/catalogs`. O verificador compara todas as chaves e interpolações, confere os textos originais do fixture português e detecta textos JSX e atributos operacionais fora dos catálogos. Os testes também verificam plurais, datas, números e percentuais. Marcas e unidades técnicas universais permanecem inalteradas.
-
-O detalhamento da implementação e dos limites da validação está em [docs/multilinguagem.md](docs/multilinguagem.md).
+Integration artifacts are written to `test-results/real` and `test-results/real-report.json`. Test outputs are excluded from Git.
