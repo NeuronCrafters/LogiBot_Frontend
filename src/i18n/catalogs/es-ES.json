@@ -871,5 +871,7 @@
   "dashboard.entities": "Entidades",
   "dashboard.pointDescription": "{{name}}: rendimiento {{performance}}, esfuerzo {{effort}} min",
   "dashboard.scoreFormula": "Media simple de los porcentajes de acierto de {{count}} temas, dividida por 10. Cada tema tiene el mismo peso, independientemente del número de respuestas.",
-  "dashboard.unassessedCount": "{{count}} alumno(s) no tienen respuestas de cuestionario en este período. No reciben clasificación de rendimiento."
+  "dashboard.unassessedCount": "{{count}} alumno(s) no tienen respuestas de cuestionario en este período. No reciben clasificación de rendimiento.",
+  "dashboard.proficiencyCoverage": "Los ejes incluyen temas de cuestionarios publicados y temas históricos del curso o de la universidad. Los temas sin respuestas no tienen área ni punto de rendimiento y no se incluyen en la media. Cero por ciento indica respuestas sin aciertos.",
+  "dashboard.noQuizAnswers": "Sin respuestas"
 }

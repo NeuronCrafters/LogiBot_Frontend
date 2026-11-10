@@ -871,5 +871,7 @@
   "dashboard.entities": "Entities",
   "dashboard.pointDescription": "{{name}}: performance {{performance}}, effort {{effort}} min",
   "dashboard.scoreFormula": "Simple average of the accuracy percentages of {{count}} topics, divided by 10. Each topic has equal weight regardless of its number of answers.",
-  "dashboard.unassessedCount": "{{count}} student(s) have no quiz answers in this period. They are not assigned a performance classification."
+  "dashboard.unassessedCount": "{{count}} student(s) have no quiz answers in this period. They are not assigned a performance classification.",
+  "dashboard.proficiencyCoverage": "Axes include topics from published quizzes and historical topics in the course or university. Topics without answers have no performance area or point and are excluded from the average. Zero percent means answers were submitted but none were correct.",
+  "dashboard.noQuizAnswers": "No answers"
 }

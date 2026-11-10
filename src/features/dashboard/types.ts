@@ -23,7 +23,7 @@ export interface EffortMatrixData {
 
 export interface ProficiencyRadarData {
   labels: string[];
-  data: number[];
+  data: (number | null)[];
 }
 
 export interface LearningJourneyData {

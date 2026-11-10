@@ -26,7 +26,7 @@ import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 
 const CHART_INFO =
-  () => (t("dashboard.nivelDeAcertoMedioPorAssuntoNo"));
+  () => `${t("dashboard.nivelDeAcertoMedioPorAssuntoNo")} ${t("dashboard.proficiencyCoverage")}`;
 
 const chartConfig = {
   score: { get label() { return t("dashboard.acerto"); }, color: "#3b82f6" },
@@ -58,12 +58,18 @@ function useProficiencyData(filters: ChartProps["filters"]) {
         funcoes: t("common.funcoes"), operadores_logicos: t("dashboard.opLogicos"),
         loops: t("dashboard.repeticao"), repeticao: t("dashboard.repeticao"),
       };
-      const chartData = apiData.labels.map((label, index) => ({
-        subject: subjectNames[label] || label,
-        score: apiData.data[index] ?? 0,
-      }));
-      const hasPerformanceData = chartData.length > 0;
-      const interacted = chartData;
+      const labels = apiData.labels;
+      const chartData = labels.map((label) => {
+        const index = apiData.labels.indexOf(label);
+        const hasResponses = index >= 0 && Number.isFinite(apiData.data[index]);
+        return {
+          subject: subjectNames[label] || label,
+          score: hasResponses ? apiData.data[index] : 0,
+          hasResponses,
+        };
+      });
+      const interacted = chartData.filter((item) => item.hasResponses);
+      const hasPerformanceData = interacted.length > 0;
       const avg =
         interacted.length > 0
           ? interacted.reduce((s, d) => s + d.score, 0) / interacted.length
@@ -97,7 +103,8 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
   const { data, isLoading, isError, refetch, error } =
     useProficiencyData(filters);
   const hasRequired = !!filters.universityId;
-  const hasData = data?.hasPerformanceData ?? false;
+  const hasData = !!data?.chartData.length;
+  const hasAnswers = data?.hasPerformanceData ?? false;
   const refetchTyped = refetch as () => void;
   const errorMessage =
     apiError(error, "common.erroAoCarregarDados");
@@ -125,7 +132,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
               chart: "proficiency-radar",
               title: t("dashboard.proficienciaPorAssunto"),
               filters,
-              disabled: isLoading || !hasData,
+              disabled: isLoading || !hasAnswers,
             }}
           />
         </div>
@@ -165,7 +172,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                         <p className="font-[Poppins] text-zinc-400">
                           {t("dashboard.acerto_479")}{" "}
                           <span className="font-medium text-white">
-                            {percent((entry.score) / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                            {entry.hasResponses ? percent(entry.score / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : t("dashboard.noQuizAnswers")}
                           </span>
                         </p>
                       </div>
@@ -193,7 +200,9 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                   fillOpacity={0.25}
                   stroke="#3b82f6"
                   strokeWidth={2}
-                  dot={{ fill: "#3b82f6", strokeWidth: 0, r: 4 }}
+                  dot={(props: any) => props.payload?.payload?.hasResponses
+                    ? <circle key={props.index} cx={props.cx} cy={props.cy} r={4} fill="#3b82f6" />
+                    : <g key={props.index} />}
                 />
               </RadarChart>
             </ChartContainer>
@@ -206,7 +215,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         )}
       </CardContent>
 
-      {hasData && (
+      {hasAnswers && (
         <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
           <div className="flex items-center gap-4">
             <span className="font-[Poppins] text-sm text-zinc-400">

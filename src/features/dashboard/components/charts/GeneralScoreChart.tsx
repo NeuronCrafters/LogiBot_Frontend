@@ -111,7 +111,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
           <ChartDownloadButton
             containerId="general-score-card"
             fileName={t("dashboard.export.nota_geral")}
-            info={CHART_INFO()}
+            info={hasData ? t("dashboard.scoreFormula", { count: data.topicCount }) : CHART_INFO()}
             insight={{
               chart: "general-score",
               title: t("dashboard.avaliacaoGeralDeDesempenho_443"),
@@ -170,10 +170,6 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                 <span>10</span>
               </div>
             </div>
-
-            <p className="text-center font-[Poppins] text-xs leading-relaxed text-zinc-400">
-              {t("dashboard.scoreFormula", { count: data.topicCount })}
-            </p>
 
             <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">
               {bands.map((b) => (
