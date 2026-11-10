@@ -8,12 +8,13 @@ export interface TopicPerformanceData {
 export interface EffortMatrixData {
   points: {
     name: string;
-    performance: number;
+    performance: number | null;
     effort: number;
     originalPerformance?: number;
     originalEffort?: number;
     isAverage?: boolean;
   }[];
+  unassessedCount?: number;
   averages: {
     avgPerformance: number;
     avgEffort: number;

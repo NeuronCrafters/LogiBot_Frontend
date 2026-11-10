@@ -228,7 +228,7 @@ function AcademicFilterContent({
         : [id];
       setSelectedIds(updated);
       const hierarchy = {
-        universityId: selectedUniversity || undefined,
+        universityId: entityType === "university" ? id : selectedUniversity || undefined,
         courseId: selectedCourse || undefined,
         classId: selectedClass || undefined,
         disciplineId:

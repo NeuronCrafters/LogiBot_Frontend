@@ -428,7 +428,7 @@
   "dashboard.altoDesempenhoBaixoEsforco": "High performance, low effort",
   "dashboard.baixoDesempenhoAltoEsforco": "Low performance, high effort",
   "dashboard.baixoDesempenhoBaixoEsforco": "Low performance, low effort",
-  "dashboard.notaGeralDe0A10Calculada": "Overall score from 0 to 10 calculated from average accuracy across all quiz topics. Higher scores mean better mastery. 0–4.99 Insufficient · 5–6.99 Fair · 7–8.99 Good · 9–10 Excellent.",
+  "dashboard.notaGeralDe0A10Calculada": "The score is the simple average of topic accuracy percentages divided by 10. Overall accuracy counts each individual answer. A zero score is valid when answers exist but none are correct.",
   "dashboard.semDados": "No Data",
   "common.excelente": "Excellent",
   "common.bom": "Good",
@@ -437,7 +437,7 @@
   "dashboard.erroAoCalcularNota": "Error calculating the score.",
   "dashboard.nota": "Score",
   "dashboard.avaliacaoGeralDeDesempenho": "Overall Performance Assessment",
-  "dashboard.mediaBaseadaNaProficienciaDosTopicosDo": "Average based on quiz topic proficiency (Scale 0–10)",
+  "dashboard.mediaBaseadaNaProficienciaDosTopicosDo": "Score from the average of assessed topics (0–10)",
   "dashboard.avaliacaoGeralDeDesempenho_443": "Overall performance assessment",
   "dashboard.selecioneUmaUniversidade": "Select a university.",
   "dashboard.calculandoNota": "Calculating score...",
@@ -869,5 +869,7 @@
   "dashboard.axisEffort": "Effort",
   "dashboard.axisPerformance": "Performance",
   "dashboard.entities": "Entities",
-  "dashboard.pointDescription": "{{name}}: performance {{performance}}, effort {{effort}} min"
+  "dashboard.pointDescription": "{{name}}: performance {{performance}}, effort {{effort}} min",
+  "dashboard.scoreFormula": "Simple average of the accuracy percentages of {{count}} topics, divided by 10. Each topic has equal weight regardless of its number of answers.",
+  "dashboard.unassessedCount": "{{count}} student(s) have no quiz answers in this period. They are not assigned a performance classification."
 }

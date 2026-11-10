@@ -1,6 +1,6 @@
 import { t, useLocale } from "@/i18n";
-﻿import { useCallback, useEffect, useState } from "react";
-import { addDays, formatISODate } from "@/shared/lib/formatDate";
+﻿import { useCallback, useState } from "react";
+import { dashboardFiltersFromLegacy } from "../insightFilters";
 import { BarChart2, Filter, MousePointer2, Sparkles } from "lucide-react";
 import { Typograph } from "@/shared/components/Typography";
 import { DashboardFilter } from "@/features/dashboard/components/DashboardFilter";
@@ -20,7 +20,6 @@ import {
   useDashboardInsights,
 } from "@/features/dashboard/components/DashboardInsightProvider";
 
-type DateRange = { from?: Date; to?: Date };
 
 function DashboardContent() {
   const locale = useLocale();
@@ -33,44 +32,7 @@ function DashboardContent() {
       hierarchyParams: Omit<DashboardFilterParams, "startDate" | "endDate">;
     }
   >({ type: "student", ids: [], mode: "individual", hierarchyParams: {} });
-  const [dateRange] = useState<DateRange | undefined>({
-    from: addDays(new Date(), -30),
-    to: new Date(),
-  });
   const [hasSelection, setHasSelection] = useState(false);
-  const [, setKey] = useState(0);
-
-  const updateAllFilters = useCallback(
-    (
-      currentLegacyFilter: typeof legacyFilter,
-      currentDateRange: typeof dateRange,
-    ) => {
-      const validIds = currentLegacyFilter.ids.filter(
-        (id) => id && id.trim() !== "",
-      );
-      const mainId = validIds[0] || "";
-      const newDashboardFilters: DashboardFilterParams = {
-        ...currentLegacyFilter.hierarchyParams,
-        startDate: currentDateRange?.from
-          ? formatISODate(currentDateRange.from)
-          : undefined,
-        endDate: currentDateRange?.to
-          ? formatISODate(currentDateRange.to)
-          : undefined,
-      };
-      if (currentLegacyFilter.type === "student") {
-        newDashboardFilters.studentId = mainId;
-      } else if (mainId) {
-        newDashboardFilters[
-          `${currentLegacyFilter.type}Id` as keyof DashboardFilterParams
-        ] = mainId;
-      }
-      setDashboardFilters(newDashboardFilters);
-      setHasSelection(!!mainId);
-      setKey((k) => k + 1);
-    },
-    [],
-  );
 
   const handleEntityFilterChange = useCallback(
     (
@@ -86,14 +48,11 @@ function DashboardContent() {
         hierarchyParams: hierarchyParams || {},
       };
       setLegacyFilter(newLegacyFilter);
-      updateAllFilters(newLegacyFilter, dateRange);
+      setDashboardFilters(dashboardFiltersFromLegacy(newLegacyFilter));
+      setHasSelection(newLegacyFilter.ids.length > 0);
     },
-    [dateRange, updateAllFilters],
+    [],
   );
-
-  useEffect(() => {
-    if (hasSelection) updateAllFilters(legacyFilter, dateRange);
-  }, [dateRange, hasSelection, legacyFilter, updateAllFilters]);
 
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">

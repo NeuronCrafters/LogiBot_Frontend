@@ -40,61 +40,14 @@ interface UsageChartProps {
 function useUsageData(filter: UsageChartProps["filter"]) {
   useLocale();
 
-  const validIds = Array.isArray(filter.ids)
-    ? filter.ids.filter((id) => typeof id === "string" && id.trim() !== "")
-    : [];
-  const mainId = validIds[0] || "";
-  const isStudent = filter.type === "student";
-  const { universityId, courseId, classId, disciplineId } =
-    filter.hierarchyParams;
-  const hasRequiredIds = !!universityId;
-
+  const filters = dashboardFiltersFromLegacy(filter);
   return useQuery({
-    queryKey: [
-      "usage",
-      filter.type,
-      mainId,
-      universityId,
-      courseId,
-      classId,
-      disciplineId,
-    ],
+    queryKey: ["useUsageData", filters],
     queryFn: async () => {
-      if (!mainId)
-        throw new Error(t("dashboard.idsInsuficientesParaTipoValue0", { value0: filter.type }));
-      if (isStudent) {
-        const response = await api.post("/logs/students/summary", {
-          universityId,
-          courseId,
-          classId,
-          studentId: mainId,
-          disciplineId,
-        });
-        return {
-          totalUsageTime: response.data.usageTimeInSeconds,
-          usageTime: response.data.usageTime,
-          dailyUsage: response.data.dailyUsage || [],
-          sessions: response.data.sessions || [],
-        };
-      }
-      const urls: Record<string, string> = {
-        university: `/logs/universities/${mainId}/summary`,
-        course: `/logs/courses/${mainId}/summary`,
-        class: `/logs/classes/${mainId}/summary`,
-        discipline: `/logs/disciplines/${mainId}/summary`,
-      };
-      const url = urls[filter.type];
-      if (!url)
-        throw new Error(t("dashboard.tipoDeEntidadeNaoSuportadoValue0", { value0: filter.type }));
-      const response = await api.get(url);
-      return {
-        totalUsageTime: response.data.usageTimeInSeconds,
-        usageTime: response.data.usageTime,
-        dailyUsage: response.data.dailyUsage || [],
-        sessions: response.data.sessions || [],
-      };
+      const { data } = await api.post("/logs/students/summary", filters);
+      return { totalUsageTime: data.usageTimeInSeconds, dailyUsage: data.dailyUsage || [], sessions: data.sessions || [] };
     },
-    enabled: hasRequiredIds,
+    enabled: !!filters.universityId,
     staleTime: 15 * 60 * 1_000,
     gcTime: 30 * 60 * 1_000,
     refetchOnWindowFocus: false,
@@ -112,7 +65,7 @@ export function UsageChart({ filter }: UsageChartProps) {
     error,
     refetch,
   } = useUsageData(filter);
-  const hasRequiredIds = !!filter.hierarchyParams.universityId;
+  const hasRequiredIds = !!dashboardFiltersFromLegacy(filter).universityId;
   const chartConfig = useMemo(
     () => ({ usage: { label: t("dashboard.minutos", {}, locale), color: "#3b82f6" } }),
     [locale],

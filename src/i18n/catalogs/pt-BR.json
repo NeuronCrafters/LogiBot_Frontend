@@ -428,7 +428,7 @@
   "dashboard.altoDesempenhoBaixoEsforco": "Alto desempenho, baixo esforco",
   "dashboard.baixoDesempenhoAltoEsforco": "Baixo desempenho, alto esforco",
   "dashboard.baixoDesempenhoBaixoEsforco": "Baixo desempenho, baixo esforco",
-  "dashboard.notaGeralDe0A10Calculada": "Nota geral de 0 a 10 calculada pela taxa de acerto média em todos os tópicos do quiz. Quanto maior, melhor o domínio do conteúdo. 0–4,99 Insuficiente · 5–6,99 Regular · 7–8,99 Bom · 9–10 Excelente.",
+  "dashboard.notaGeralDe0A10Calculada": "A nota é a média simples dos percentuais de acerto por assunto, dividida por 10. A precisão geral considera cada resposta individualmente. Uma nota zero é válida quando há respostas e nenhum acerto.",
   "dashboard.semDados": "Sem Dados",
   "common.excelente": "Excelente",
   "common.bom": "Bom",
@@ -437,7 +437,7 @@
   "dashboard.erroAoCalcularNota": "Erro ao calcular nota.",
   "dashboard.nota": "Nota",
   "dashboard.avaliacaoGeralDeDesempenho": "Avaliação Geral de Desempenho",
-  "dashboard.mediaBaseadaNaProficienciaDosTopicosDo": "Média baseada na proficiência dos tópicos do Quiz (Escala 0–10)",
+  "dashboard.mediaBaseadaNaProficienciaDosTopicosDo": "Nota pela média dos assuntos avaliados (0–10)",
   "dashboard.avaliacaoGeralDeDesempenho_443": "Avaliação geral de desempenho",
   "dashboard.selecioneUmaUniversidade": "Selecione uma universidade.",
   "dashboard.calculandoNota": "Calculando nota...",
@@ -869,5 +869,7 @@
   "dashboard.axisEffort": "Esforco",
   "dashboard.axisPerformance": "Desempenho",
   "dashboard.entities": "Entidades",
-  "dashboard.pointDescription": "{{name}}: desempenho {{performance}}, esforço {{effort}} min"
+  "dashboard.pointDescription": "{{name}}: desempenho {{performance}}, esforço {{effort}} min",
+  "dashboard.scoreFormula": "Média simples dos percentuais de acerto de {{count}} assuntos, dividida por 10. Cada assunto tem o mesmo peso, independentemente do número de respostas.",
+  "dashboard.unassessedCount": "{{count}} aluno(s) sem respostas de quiz no período. Eles não recebem classificação de desempenho."
 }

@@ -21,28 +21,13 @@ interface CorrectWrongChartProps {
 function useAccuracyData(filter: CorrectWrongChartProps["filter"]) {
   useLocale();
 
-  const validIds = Array.isArray(filter.ids) ? filter.ids.filter((id) => typeof id === "string" && id.trim() !== "") : [];
-  const targetId = validIds[0] || "";
-  const { universityId, courseId, classId, disciplineId } = filter.hierarchyParams;
-  const isStudent = filter.type === "student";
-  const hasRequired = !!universityId;
-
+  const filters = dashboardFiltersFromLegacy(filter);
   return useQuery({
-    queryKey: ["accuracy", filter.type, targetId, universityId, courseId, classId, disciplineId],
+    queryKey: ["useAccuracyData", filters],
     queryFn: async () => {
-      if (!targetId) throw new Error(t("dashboard.filtrosIncompletos"));
-      if (isStudent) return logApi.getFilteredStudentSummary({ universityId: universityId!, courseId, classId, studentId: targetId, disciplineId } as any);
-      const calls: Record<string, () => Promise<any>> = {
-        university: () => logApi.getUniversitySummary(targetId),
-        course: () => logApi.getCourseSummary(targetId),
-        class: () => logApi.getClassSummary(targetId),
-        discipline: () => logApi.getDisciplineSummary(targetId),
-      };
-      const fn = calls[filter.type];
-      if (!fn) throw new Error(t("common.tipoInvalidoValue0", { value0: filter.type }));
-      return fn();
+      return logApi.getFilteredStudentSummary(filters as any);
     },
-    enabled: hasRequired,
+    enabled: !!filters.universityId,
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     select: (rawData: any) => {
@@ -59,7 +44,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
   useLocale();
 
   const { data: accuracyData, isLoading, isError, error, refetch } = useAccuracyData(filter);
-  const hasRequired = !!filter.hierarchyParams.universityId;
+  const hasRequired = !!dashboardFiltersFromLegacy(filter).universityId;
   const hasData = !!accuracyData && (accuracyData.totalCorrect > 0 || accuracyData.totalWrong > 0);
   const refetchTyped = refetch as () => void;
   const errorMessage = apiError(error, "common.erroAoCarregarDados");

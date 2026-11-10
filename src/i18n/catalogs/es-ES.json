@@ -428,7 +428,7 @@
   "dashboard.altoDesempenhoBaixoEsforco": "Alto rendimiento, bajo esfuerzo",
   "dashboard.baixoDesempenhoAltoEsforco": "Bajo rendimiento, alto esfuerzo",
   "dashboard.baixoDesempenhoBaixoEsforco": "Bajo rendimiento, bajo esfuerzo",
-  "dashboard.notaGeralDe0A10Calculada": "Nota general de 0 a 10 calculada según la tasa de acierto media en todos los temas del cuestionario. Una nota mayor indica un mejor dominio. 0–4,99 Insuficiente · 5–6,99 Aceptable · 7–8,99 Bueno · 9–10 Excelente.",
+  "dashboard.notaGeralDe0A10Calculada": "La nota es la media simple de los porcentajes de acierto por tema, dividida por 10. La precisión general considera cada respuesta individual. Una nota cero es válida cuando hay respuestas y ningún acierto.",
   "dashboard.semDados": "Sin datos",
   "common.excelente": "Excelente",
   "common.bom": "Bueno",
@@ -437,7 +437,7 @@
   "dashboard.erroAoCalcularNota": "Error al calcular la nota.",
   "dashboard.nota": "Nota",
   "dashboard.avaliacaoGeralDeDesempenho": "Evaluación general de rendimiento",
-  "dashboard.mediaBaseadaNaProficienciaDosTopicosDo": "Media basada en la competencia por tema del cuestionario (escala 0–10)",
+  "dashboard.mediaBaseadaNaProficienciaDosTopicosDo": "Nota por la media de los temas evaluados (0–10)",
   "dashboard.avaliacaoGeralDeDesempenho_443": "Evaluación general de rendimiento",
   "dashboard.selecioneUmaUniversidade": "Selecciona una universidad.",
   "dashboard.calculandoNota": "Calculando nota...",
@@ -869,5 +869,7 @@
   "dashboard.axisEffort": "Esfuerzo",
   "dashboard.axisPerformance": "Rendimiento",
   "dashboard.entities": "Entidades",
-  "dashboard.pointDescription": "{{name}}: rendimiento {{performance}}, esfuerzo {{effort}} min"
+  "dashboard.pointDescription": "{{name}}: rendimiento {{performance}}, esfuerzo {{effort}} min",
+  "dashboard.scoreFormula": "Media simple de los porcentajes de acierto de {{count}} temas, dividida por 10. Cada tema tiene el mismo peso, independientemente del número de respuestas.",
+  "dashboard.unassessedCount": "{{count}} alumno(s) no tienen respuestas de cuestionario en este período. No reciben clasificación de rendimiento."
 }

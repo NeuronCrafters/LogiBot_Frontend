@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 export const ids = {university:"00000000-0000-4000-8000-000000000001",course:"00000000-0000-4000-8000-000000000002",class:"00000000-0000-4000-8000-000000000003",discipline:"00000000-0000-4000-8000-000000000004",quiz:"00000000-0000-4000-8000-000000000005"};
 export const quiz={id:ids.quiz,title:"Quiz original em português",topic:"variaveis",description:"Descrição original",disciplineId:ids.discipline,disciplineName:"Lógica original",questionCount:1,status:"published",language:"pt-BR",createdAt:"2026-10-28T12:00:00Z",questions:[{id:"question",question:"Qual é o valor original?",options:["Valor original A","Valor original B","Valor original C","Valor original D"],orderIndex:0}]};
 
-export async function mockApi(page:Page,role:string="student"){
+export async function mockApi(page:Page,role:string="student",userOverrides:Record<string,unknown>={}){
  const requests:{path:string;language:string;body:any}[]=[];
  let preference:string|null=null;
  await page.addInitScript(()=>{localStorage.setItem("has_session","1");});
@@ -12,7 +12,7 @@ export async function mockApi(page:Page,role:string="student"){
   const language=request.headers()['x-language']||request.headers()['accept-language']||'pt-BR';
   let body:any;try{body=request.postDataJSON();}catch{}
   requests.push({path:pathname,language,body});
-  const user={id:"test-user",_id:"test-user",name:"João da Silva",email:"joao@example.invalid",role:role==='course-coordinator'?['professor',role]:[role],preferredLanguage:preference,school:ids.university,schoolId:[ids.university],schoolName:["Universidade original"],courseId:[ids.course],courseName:["Curso original"],classId:[ids.class],className:["Turma original"],courses:[ids.course],classes:[ids.class],disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original"}],disciplineId:[ids.discipline]};
+  const user={id:"test-user",_id:"test-user",name:"João da Silva",email:"joao@example.invalid",role:role==='course-coordinator'?['professor',role]:[role],preferredLanguage:preference,school:ids.university,schoolId:[ids.university],schoolName:["Universidade original"],courseId:[ids.course],courseName:["Curso original"],classId:[ids.class],className:["Turma original"],courses:[ids.course],classes:[ids.class],disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original"}],disciplineId:[ids.discipline],...userOverrides};
   const university={id:ids.university,_id:ids.university,name:"Universidade original",courses:[{id:ids.course,_id:ids.course,name:"Curso original",classes:[{id:ids.class,_id:ids.class,name:"Turma original",disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original"}],students:[user]}],disciplines:[{id:ids.discipline,_id:ids.discipline,name:"Lógica original",professors:[{id:"test-user",_id:"test-user",name:user.name}]}]}]};
   let data:any=[];
   if(pathname==='/auth/me')data=user;

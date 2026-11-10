@@ -1,14 +1,12 @@
 import { t, useLocale } from "@/i18n";
-﻿import { useState, useCallback, useEffect, useRef } from "react";
+﻿import { useState, useCallback } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { addDays, formatISODate } from "@/shared/lib/formatDate";
 import type { LogEntityType, LogModeType } from "@/services/api/api_routes";
 import { DashboardFilterParams } from "@/features/dashboard/api/dashboardApi";
 import { AcademicFilter } from "@/features/academic/components/AcademicFilter";
 
-type DateRange = { from?: Date; to?: Date };
 
 interface DashboardFilterProps {
   onChange: (
@@ -44,70 +42,33 @@ function DashboardFilterContent({ onChange }: DashboardFilterProps) {
   const allowedEntityTypes = getAllowedEntityTypes();
   const [entityType, setEntityType] = useState<LogEntityType | "">("");
   const [mode] = useState<LogModeType>("individual");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [hierarchyParams, setHierarchyParams] = useState<
-    Omit<DashboardFilterParams, "startDate" | "endDate">
-  >({});
-  const [dateRange, _setDateRange] = useState<DateRange | undefined>({
-    from: addDays(new Date(), -30),
-    to: new Date(),
-  });
-
   const notifyParent = useCallback(
-    (
-      currentType: LogEntityType | "",
-      currentIds: string[],
-      currentMode: LogModeType,
-      currentHierarchy?: typeof hierarchyParams,
-      currentDateRange?: DateRange,
-    ) => {
-      const validIds = currentIds.filter((i) => i && i.trim() !== "");
-      const allParams: DashboardFilterParams = {
-        ...currentHierarchy,
-        startDate: currentDateRange?.from
-          ? formatISODate(currentDateRange.from)
-          : undefined,
-        endDate: currentDateRange?.to
-          ? formatISODate(currentDateRange.to)
-          : undefined,
-      };
-      onChange(currentType, validIds, currentMode, allParams);
+    (currentType: LogEntityType | "", currentIds: string[], currentMode: LogModeType,
+      currentHierarchy?: DashboardFilterParams) => {
+      onChange(currentType, currentIds.filter((id) => id && id.trim() !== ""), currentMode, currentHierarchy || {});
     },
     [onChange],
   );
-
-  const currentFilter = useRef({ entityType, selectedIds, mode, hierarchyParams });
-  currentFilter.current = { entityType, selectedIds, mode, hierarchyParams };
-  useEffect(() => {
-    const current = currentFilter.current;
-    notifyParent(current.entityType, current.selectedIds, current.mode, current.hierarchyParams, dateRange);
-  }, [dateRange, notifyParent]);
 
   const handleEntityTypeChange = useCallback(
     (value: string) => {
       if (value === "") {
         setEntityType("");
-        setSelectedIds([]);
-        setHierarchyParams({});
-        notifyParent("", [], mode, {}, dateRange);
+        notifyParent("", [], mode, {});
         return;
       }
       const newType = value as LogEntityType;
       setEntityType(newType);
-      setSelectedIds([]);
-      setHierarchyParams({});
-      notifyParent(newType, [], mode, {}, dateRange);
+      notifyParent(newType, [], mode, {});
     },
-    [mode, notifyParent, dateRange],
+    [mode, notifyParent],
   );
 
   const handleEntitySelection = useCallback(
-    (ids: string[], params?: typeof hierarchyParams) => {
-      setSelectedIds(ids);
-      if (params) setHierarchyParams(params);
-      notifyParent(entityType, ids, mode, params, dateRange);
+    (ids: string[], params?: DashboardFilterParams) => {
+      notifyParent(entityType, ids, mode, params);
     },
-    [entityType, mode, notifyParent, dateRange],
+    [entityType, mode, notifyParent],
   );
 
   const getEntityTypeTitle = (type: LogEntityType) => {

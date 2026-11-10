@@ -58,7 +58,7 @@ function useScoreData(filters: ChartProps["filters"]) {
         (t: any) => t.successPercentage > 0 || t.errorPercentage > 0,
       );
       if (active.length === 0)
-        return { score: 0, status: t("dashboard.semDados"), color: "#444" };
+        return { score: 0, topicCount: 0, status: t("dashboard.semDados"), color: "#444" };
       const avg =
         active.reduce(
           (acc: number, curr: any) => acc + curr.successPercentage,
@@ -66,11 +66,11 @@ function useScoreData(filters: ChartProps["filters"]) {
         ) / active.length;
       const score = avg / 10;
       if (score >= 9)
-        return { score, status: t("common.excelente"), color: SCORE_COLORS.excelente };
-      if (score >= 7) return { score, status: t("common.bom"), color: SCORE_COLORS.bom };
+        return { score, topicCount: active.length, status: t("common.excelente"), color: SCORE_COLORS.excelente };
+      if (score >= 7) return { score, topicCount: active.length, status: t("common.bom"), color: SCORE_COLORS.bom };
       if (score >= 5)
-        return { score, status: t("common.regular"), color: SCORE_COLORS.regular };
-      return { score, status: t("common.insuficiente"), color: SCORE_COLORS.ruim };
+        return { score, topicCount: active.length, status: t("common.regular"), color: SCORE_COLORS.regular };
+      return { score, topicCount: active.length, status: t("common.insuficiente"), color: SCORE_COLORS.ruim };
     },
   });
 }
@@ -80,7 +80,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
 
   const { data, isLoading, isError, error, refetch } = useScoreData(filters);
   const hasRequired = !!filters.universityId;
-  const hasData = data && data.score > 0;
+  const hasData = data && data.topicCount > 0;
   const refetchTyped = refetch as () => void;
   const errorMessage =
     apiError(error, "common.erroAoCarregarDados");
@@ -170,6 +170,10 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                 <span>10</span>
               </div>
             </div>
+
+            <p className="text-center font-[Poppins] text-xs leading-relaxed text-zinc-400">
+              {t("dashboard.scoreFormula", { count: data.topicCount })}
+            </p>
 
             <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">
               {bands.map((b) => (

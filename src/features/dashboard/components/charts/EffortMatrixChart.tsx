@@ -72,25 +72,26 @@ export function EffortMatrixChart({ filters }: ChartProps) {
   const locale = useLocale();
 
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
-  const hasData = data && data.points.length > 0;
-  const showReferenceLines = data && data.points.length > 1;
+  const hasData = data && data.points.some((point) => point.performance !== null);
+  const showReferenceLines = data && data.points.filter((point) => point.performance !== null).length > 1;
 
   const matrix = useMemo(() => {
-    if (!data?.points?.length) return null;
+    const assessed = data?.points.filter((point) => point.performance !== null) ?? [];
+    if (!data || !assessed.length) return null;
     const avgPerformance = data.averages.avgPerformance;
     const avgEffort = data.averages.avgEffort;
     const maxEffort = Math.max(
-      ...data.points.map((p) => p.originalEffort ?? p.effort),
+      ...assessed.map((p) => p.originalEffort ?? p.effort),
       avgEffort,
       1,
     );
     const effortDomainMax = Math.max(1, Math.ceil(maxEffort * 1.15));
-    const points = data.points.map((point) => {
+    const points = assessed.map((point) => {
       const effort = Math.max(0, point.effort);
-      const performance = Math.min(100, Math.max(0, point.performance));
+      const performance = Math.min(100, Math.max(0, point.performance!));
       const originalEffort = point.originalEffort ?? point.effort;
       const originalPerformance =
-        point.originalPerformance ?? point.performance;
+        point.originalPerformance ?? point.performance!;
       const quadrant = point.isAverage
         ? "average"
         : originalPerformance >= avgPerformance && originalEffort >= avgEffort
@@ -152,6 +153,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
       </CardHeader>
 
       <CardContent className="px-2 sm:p-6">
+        {!!data?.unassessedCount && <p className="mb-3 text-sm text-zinc-400">{t("dashboard.unassessedCount", { count: data.unassessedCount }, locale)}</p>}
         {isLoading && <ChartLoader text={t("common.carregandoDados", {}, locale)} />}
         {isError && (
           <ChartError message={apiError(error, "common.erroAoCarregarDados")} onRetry={refetch} />

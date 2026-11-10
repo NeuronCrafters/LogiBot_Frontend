@@ -52,29 +52,18 @@ function useProficiencyData(filters: ChartProps["filters"]) {
     staleTime: 1000 * 60 * 5,
     select: (response) => {
       const apiData = response.data;
-      const subjectMap: Record<string, string[]> = {
-        Variáveis: ["variáveis", "variaveis"],
-        Listas: ["listas"],
-        Condicionais: [
-          "condicionais",
-          "o_que_são_condicionais",
-          "verificacoes",
-        ],
-        Funções: ["funções", "funcoes"],
-        "Op. Lógicos": ["operadores_lógicos", "operadores_logicos"],
+      const subjectNames: Record<string, string> = {
+        variaveis: t("common.variaveis"), listas: t("common.listas"),
+        verificacoes: t("common.condicionais"), condicionais: t("common.condicionais"),
+        funcoes: t("common.funcoes"), operadores_logicos: t("dashboard.opLogicos"),
+        loops: t("dashboard.repeticao"), repeticao: t("dashboard.repeticao"),
       };
-      const chartData = Object.entries(subjectMap).map(([label, keys]) => {
-        const index =
-          apiData.labels?.findIndex((l: string) =>
-            keys.some((k) => l.toLowerCase() === k.toLowerCase()),
-          ) ?? -1;
-        return {
-          subject: ({ Variáveis: t("common.variaveis"), Listas: t("common.listas"), Condicionais: t("common.condicionais"), Funções: t("common.funcoes"), "Op. Lógicos": t("dashboard.opLogicos") } as Record<string, string>)[label] || label,
-          score: index !== -1 ? (apiData.data?.[index] ?? 0) : 0,
-        };
-      });
-      const hasPerformanceData = chartData.some((d) => d.score > 0);
-      const interacted = chartData.filter((d) => d.score > 0);
+      const chartData = apiData.labels.map((label, index) => ({
+        subject: subjectNames[label] || label,
+        score: apiData.data[index] ?? 0,
+      }));
+      const hasPerformanceData = chartData.length > 0;
+      const interacted = chartData;
       const avg =
         interacted.length > 0
           ? interacted.reduce((s, d) => s + d.score, 0) / interacted.length
@@ -194,7 +183,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                 />
                 <PolarRadiusAxis
                   angle={90}
-                  domain={[0, "dataMax"]}
+                  domain={[0, 100]}
                   tick={false}
                   axisLine={false}
                 />
