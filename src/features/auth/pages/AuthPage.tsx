@@ -15,6 +15,7 @@ import {
   User,
 } from "lucide-react";
 import { AnimatedLogo } from "@/shared/components/AnimatedLogo";
+import logoMascote from "@/assets/logo.svg";
 import { AppModal } from "@/shared/components/feedback/AppModal";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { api } from "@/shared/api/httpClient";
@@ -105,8 +106,8 @@ export function AuthPage({ mode }: AuthPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      <div className="flex justify-end px-4 py-3"><LanguageSwitcher /></div>
+    <div className="flex min-h-[100dvh] min-w-0 flex-col bg-neutral-950 font-[Poppins] text-white">
+      <div className="flex min-w-0 justify-end px-4 py-3 sm:px-6"><LanguageSwitcher /></div>
       <AppModal
         isOpen={showConsent}
         type="consent"
@@ -116,9 +117,9 @@ export function AuthPage({ mode }: AuthPageProps) {
         onClose={() => setShowConsent(false)}
       />
 
-      <main className="flex min-h-screen font-[Poppins] sm:items-center sm:justify-center sm:px-6 sm:py-8">
-        <div className="grid w-full sm:max-w-4xl overflow-hidden sm:rounded-2xl sm:border sm:border-white/10 bg-[#1f1f1f] sm:shadow-2xl sm:shadow-black/30 lg:grid-cols-[0.9fr_1fr]">
-          <section className="relative hidden min-h-[560px] flex-col items-center justify-center overflow-hidden border-r border-white/10 bg-neutral-950/60 p-8 lg:flex">
+      <main className="flex w-full min-w-0 flex-1 items-start justify-center px-4 pb-6 pt-3 sm:items-center sm:px-6 sm:py-8">
+        <div className="grid w-full min-w-0 max-w-lg grid-cols-1 overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-2xl shadow-black/30 lg:max-w-4xl lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]">
+          <section className="relative hidden min-h-[560px] min-w-0 flex-col items-center justify-center overflow-hidden border-r border-white/10 bg-neutral-950/60 p-8 lg:flex">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-blue-500/10 blur-3xl" />
             <Link
               to="/"
@@ -139,14 +140,19 @@ export function AuthPage({ mode }: AuthPageProps) {
             </div>
           </section>
 
-          <section className="flex flex-1 min-h-screen sm:min-h-[560px] items-center justify-center p-6 sm:p-8">
-            <div className="w-full max-w-sm">
-              <div className="mb-8 lg:hidden">
+          <section className="flex min-w-0 items-center justify-center px-4 py-6 sm:min-h-[560px] sm:p-8">
+            <div className="w-full min-w-0 max-w-sm">
+              <div className="mb-6 lg:hidden">
                 <Link
                   to="/"
-                  className="mx-auto flex w-fit items-center gap-2 text-lg font-bold text-white"
+                  className="mx-auto flex w-fit flex-col items-center gap-2 text-lg font-bold text-white"
                 >
-                  LogiBot.AI
+                  <img
+                    src={logoMascote}
+                    alt={t("common.logoMascoteDoLogibot")}
+                    className="h-16 w-16 shrink-0 object-contain"
+                  />
+                  <span>LogiBot.AI</span>
                 </Link>
               </div>
 
@@ -161,7 +167,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-3">
+              <form onSubmit={handleSubmit} className="min-w-0 space-y-3">
                 {isSignup && (
                   <AuthInput
                     id="signup-name-input"
@@ -283,8 +289,8 @@ function AuthInput({
   const inputType = type === "password" && showPassword ? "text" : type;
 
   return (
-    <div className="flex h-12 items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/60 px-3 text-zinc-400 transition-colors focus-within:border-blue-500/60 focus-within:text-blue-400">
-      {icon}
+    <div className="flex h-12 w-full min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/60 px-3 text-zinc-400 transition-colors focus-within:border-blue-500/60 focus-within:text-blue-400">
+      <span className="shrink-0">{icon}</span>
       <input
         id={id}
         type={inputType}
@@ -293,14 +299,15 @@ function AuthInput({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         required={required}
-        className="h-full min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-zinc-600"
+        className="h-full w-full min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-zinc-600 sm:text-sm"
       />
       {type === "password" && (
         <button
           type="button"
           aria-label={showPassword ? t("auth.ocultarSenha") : t("auth.mostrarSenha")}
+          aria-pressed={showPassword}
           onClick={() => setShowPassword((current) => !current)}
-          className="rounded-md p-1 text-zinc-500 transition-colors hover:text-white"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-zinc-500 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400"
         >
           {showPassword ? (
             <EyeOff className="h-4 w-4" />
