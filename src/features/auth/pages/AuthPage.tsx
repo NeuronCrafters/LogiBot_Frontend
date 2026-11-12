@@ -106,8 +106,8 @@ export function AuthPage({ mode }: AuthPageProps) {
   };
 
   return (
-    <div className="flex min-h-[100dvh] min-w-0 flex-col bg-neutral-950 font-[Poppins] text-white">
-      <div className="flex min-w-0 justify-end px-4 py-3 sm:px-6"><LanguageSwitcher /></div>
+    <div className="relative flex min-h-[100dvh] min-w-0 flex-col bg-neutral-950 font-[Poppins] text-white">
+      <div className="absolute inset-x-0 top-0 flex min-w-0 justify-end px-4 py-3 sm:px-6"><LanguageSwitcher /></div>
       <AppModal
         isOpen={showConsent}
         type="consent"
@@ -117,8 +117,8 @@ export function AuthPage({ mode }: AuthPageProps) {
         onClose={() => setShowConsent(false)}
       />
 
-      <main className="flex w-full min-w-0 flex-1 items-start justify-center px-4 pb-6 pt-3 sm:items-center sm:px-6 sm:py-8">
-        <div className="grid w-full min-w-0 max-w-lg grid-cols-1 overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-2xl shadow-black/30 lg:max-w-4xl lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]">
+      <main className="flex w-full min-w-0 flex-1 flex-col px-4 py-16 sm:px-6">
+        <div className="my-auto grid w-full min-w-0 max-w-lg grid-cols-1 self-center overflow-hidden rounded-3xl border border-white/10 bg-[#1f1f1f] shadow-2xl shadow-black/30 lg:max-w-4xl lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]">
           <section className="relative hidden min-h-[560px] min-w-0 flex-col items-center justify-center overflow-hidden border-r border-white/10 bg-neutral-950/60 p-8 lg:flex">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-blue-500/10 blur-3xl" />
             <Link
@@ -140,7 +140,7 @@ export function AuthPage({ mode }: AuthPageProps) {
             </div>
           </section>
 
-          <section className="flex min-w-0 items-center justify-center px-4 py-6 sm:min-h-[560px] sm:p-8">
+          <section className="flex min-w-0 items-center justify-center px-5 py-8 sm:min-h-[560px] sm:p-10">
             <div className="w-full min-w-0 max-w-sm">
               <div className="mb-6 lg:hidden">
                 <Link
@@ -150,13 +150,15 @@ export function AuthPage({ mode }: AuthPageProps) {
                   <img
                     src={logoMascote}
                     alt={t("common.logoMascoteDoLogibot")}
-                    className="h-16 w-16 shrink-0 object-contain"
+                    width={121}
+                    height={123}
+                    className="h-auto w-24 max-w-full shrink-0 object-contain"
                   />
                   <span>LogiBot.AI</span>
                 </Link>
               </div>
 
-              <div className="mb-6">
+              <div className="mb-6 text-center lg:text-left">
                 <h2 className="text-2xl font-semibold text-white">
                   {isSignup ? t("common.criarConta") : t("common.entrar")}
                 </h2>
@@ -220,7 +222,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                   }
                   type="submit"
                   disabled={loading}
-                  className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-blue-400/40 bg-blue-600 text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading
                     ? isSignup
@@ -289,7 +291,7 @@ function AuthInput({
   const inputType = type === "password" && showPassword ? "text" : type;
 
   return (
-    <div className="flex h-12 w-full min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/60 px-3 text-zinc-400 transition-colors focus-within:border-blue-500/60 focus-within:text-blue-400">
+    <div className="flex h-14 w-full min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-neutral-950/60 px-3 text-zinc-400 transition-colors focus-within:border-blue-500/60 focus-within:text-blue-400">
       <span className="shrink-0">{icon}</span>
       <input
         id={id}
