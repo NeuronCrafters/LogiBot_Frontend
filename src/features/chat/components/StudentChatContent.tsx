@@ -17,6 +17,7 @@ import {
   useLayoutEffect,
 } from "react";
 import { useSearchParams } from "react-router-dom";
+import { usePreferences, useReducedMotion } from "@/shared/preferences";
 import logo from "@/assets/logo.svg";
 import { MarkdownMessageBubble } from "./MarkdownMessageBubble";
 import { ChatTypingDots } from "./ChatTypingDots";
@@ -32,12 +33,13 @@ const ChatMessageList = memo(function ChatMessageList({
   messages: ChatMessage[];
 }) {
   useLocale();
+  const { chatDisplay } = usePreferences();
 
   return (
     <>
       {messages.map((msg, index) =>
-        msg.type === "typing" ? (
-          <ChatTypingDots key={msg.id || index} streamStage={msg.streamStage} />
+        msg.type === "typing" || (chatDisplay === "complete" && msg.streaming) ? (
+          <ChatTypingDots key={msg.id || index} streamStage={msg.streaming ? "agent" : msg.streamStage} />
         ) : (
           <MarkdownMessageBubble
             key={msg.id || index}
@@ -103,13 +105,18 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const followBottomRef = useRef(true);
+  const [announcement, setAnnouncement] = useState("");
+  const wasWaitingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldJumpToHistoryBottomRef = useRef(false);
 
   const scrollToBottom = useCallback((smooth = true) => {
     const container = containerRef.current;
     if (container) {
-      if (smooth) {
+      followBottomRef.current = true;
+      if (smooth && !reduceMotion) {
         container.scrollTo({
           top: container.scrollHeight,
           behavior: "smooth",
@@ -119,7 +126,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
       }
       setShowScrollButton(false);
     }
-  }, []);
+  }, [reduceMotion]);
 
   useEffect(() => {
     async function loadHistory() {
@@ -181,6 +188,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     if (containerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      followBottomRef.current = isNearBottom;
       setShowScrollButton(!isNearBottom);
     }
   }, []);
@@ -191,6 +199,11 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     if (shouldJumpToHistoryBottomRef.current) {
       shouldJumpToHistoryBottomRef.current = false;
       scrollToBottom(false);
+      return;
+    }
+
+    if (!followBottomRef.current) {
+      setShowScrollButton(true);
       return;
     }
 
@@ -218,6 +231,12 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
     [scrollToBottom, sendMessage],
   );
 
+  useEffect(() => {
+    if (wasWaitingRef.current && !isWaitingResponse) setAnnouncement(t("chat.respostaRecebida", {}, locale));
+    if (isWaitingResponse) setAnnouncement("");
+    wasWaitingRef.current = isWaitingResponse;
+  }, [isWaitingResponse, locale]);
+
   const isNewConversation =
     !sessionIdFromUrl && mode === "chat" && messages.length === 0;
 
@@ -235,6 +254,9 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
 
   return (
     <div className="flex-1 relative min-h-0">
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </div>
       {isNewConversation ? (
         <div className="absolute inset-0 flex items-center justify-center px-4 pb-16">
           <div className="w-full max-w-3xl">
@@ -243,7 +265,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
                 <img
                   src={logo}
                   alt={t("common.logibot", {}, locale)}
-                  className="h-full w-full object-contain"
+                  className="brand-mark h-full w-full object-contain"
                 />
               </div>
               <h1 className="font-[Poppins] text-2xl sm:text-3xl font-semibold text-white">
@@ -286,10 +308,13 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
 
       {!isNewConversation && showScrollButton && (
         <button
+          type="button"
+          aria-label={t("chat.irParaUltimaMensagem", {}, locale)}
+          title={t("chat.irParaUltimaMensagem", {}, locale)}
           onClick={() => scrollToBottom(true)}
           className="absolute bottom-36 left-0 right-0 mx-auto w-fit z-20 p-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-full shadow-lg border border-neutral-600 transition-colors cursor-pointer"
         >
-          <ArrowDown size={16} />
+          <ArrowDown size={16} aria-hidden="true" />
         </button>
       )}
     </div>

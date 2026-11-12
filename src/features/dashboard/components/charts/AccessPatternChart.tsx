@@ -1,4 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
+import { chartLine, chartText } from "../../chartColors";
+import { getResolvedPreferences } from "@/shared/preferences";
 import { t, useLocale } from "@/i18n";
 ﻿import { useQuery } from "@tanstack/react-query";
 import {
@@ -52,7 +54,7 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d: ProcessedSession = payload[0].payload;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl space-y-1">
+    <div className="rounded-xl border border-white/10 bg-surface-sunken px-3 py-2.5 text-sm shadow-xl space-y-1">
       <p className="font-[Poppins] text-zinc-400">
         {t("dashboard.entrada")}{" "}
         <span className="font-medium text-white">
@@ -120,7 +122,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
   return (
     <Card
       id="access-pattern-chart"
-      className="bg-[#1f1f1f] border-white/10 flex flex-col"
+      className="bg-surface border-white/10 flex flex-col"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
         <div className="flex items-start justify-between px-6 py-5 pr-36">
@@ -165,7 +167,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
               <ScatterChart
                 margin={{ top: 10, right: 20, bottom: 10, left: 0 }}
               >
-                <CartesianGrid stroke="rgba(255,255,255,0.08)" />
+                <CartesianGrid stroke={chartLine(0.08)} />
                 <XAxis
                   type="number"
                   dataKey="hour"
@@ -173,8 +175,8 @@ export function AccessPatternChart({ filters }: ChartProps) {
                   domain={[0, 24]}
                   ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
                   tickFormatter={(h) => `${Math.floor(h)}h`}
-                  stroke="rgba(255,255,255,0.3)"
-                  tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
+                  stroke={chartLine(0.3)}
+                  tick={{ fill: chartText(0.5), fontSize: 12 }}
                 />
                 <YAxis
                   type="number"
@@ -183,16 +185,16 @@ export function AccessPatternChart({ filters }: ChartProps) {
                   domain={[-0.5, 6.5]}
                   ticks={[0, 1, 2, 3, 4, 5, 6]}
                   tickFormatter={(d) => DAYS()[d]}
-                  stroke="rgba(255,255,255,0.3)"
-                  tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
+                  stroke={chartLine(0.3)}
+                  tick={{ fill: chartText(0.5), fontSize: 12 }}
                 />
                 <Tooltip
                   cursor={{ strokeDasharray: "3 3" }}
                   content={<CustomTooltip />}
                 />
-                <Scatter
+                <Scatter isAnimationActive={!getResolvedPreferences().reduceMotion}
                   data={sessions}
-                  fill="#8b5cf6"
+                  fill="rgb(var(--c-violet-500))"
                   fillOpacity={0.75}
                   shape={(point: any) => (
                     <>

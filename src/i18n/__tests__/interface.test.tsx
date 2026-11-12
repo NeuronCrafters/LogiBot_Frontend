@@ -26,15 +26,15 @@ describe("interface reativa e preservação",()=>{
   });
   it("preserva os campos do cadastro e a senha ao trocar o idioma",async()=>{
     const user=userEvent.setup();render(<AuthPage mode="signup"/>,{wrapper});
-    await user.type(screen.getByPlaceholderText("Nome completo"),"João da Silva");
-    await user.type(screen.getByPlaceholderText("E-mail"),"joao@example.invalid");
-    await user.type(screen.getByPlaceholderText("Senha"),"senha-original-123");
-    await user.type(screen.getByPlaceholderText("Código de acesso"),"TURMA-739");
+    await user.type(screen.getByLabelText("Nome completo"),"João da Silva");
+    await user.type(screen.getByLabelText("E-mail"),"joao@example.invalid");
+    await user.type(screen.getByLabelText("Senha"),"senha-original-123");
+    await user.type(screen.getByLabelText("Código de acesso"),"TURMA-739");
     await user.selectOptions(screen.getByRole("combobox",{name:"Idioma"}),"en-US");
-    expect(screen.getByPlaceholderText("Full name")).toHaveValue("João da Silva");
-    expect(screen.getByPlaceholderText("Email")).toHaveValue("joao@example.invalid");
-    expect(screen.getByPlaceholderText("Password")).toHaveValue("senha-original-123");
-    expect(screen.getByPlaceholderText("Access code")).toHaveValue("TURMA-739");
+    expect(screen.getByLabelText("Full name")).toHaveValue("João da Silva");
+    expect(screen.getByLabelText("Email")).toHaveValue("joao@example.invalid");
+    expect(screen.getByLabelText("Password")).toHaveValue("senha-original-123");
+    expect(screen.getByLabelText("Access code")).toHaveValue("TURMA-739");
   });
   it("atualiza rótulos de assuntos sem mudar seus códigos",()=>{
     const codes=QUIZ_TOPICS.map(item=>item.value);

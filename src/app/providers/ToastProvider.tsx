@@ -40,7 +40,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <div
                 key={t.id}
                 role={t.type === "error" ? "alert" : "status"}
-                className="pointer-events-auto flex items-center gap-3 rounded-lg bg-[#333] px-4 py-3 text-sm text-white shadow-lg"
+                className="pointer-events-auto flex items-center gap-3 rounded-lg bg-surface-raised px-4 py-3 text-sm text-white shadow-lg"
               >
                 {ICONS[t.type]}
                 <span className="flex-1 font-[Poppins] leading-snug">{resolveToastMessage(t.message)}</span>

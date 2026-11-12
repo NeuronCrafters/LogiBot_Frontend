@@ -1,4 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
+import { chartLine, chartText } from "../../chartColors";
+import { getResolvedPreferences } from "@/shared/preferences";
 import { percent, t, useLocale, number } from "@/i18n";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -32,11 +34,11 @@ const CHART_INFO =
   () => (t("dashboard.relacionaOEsforcoTempoDeUsoEm"));
 
 const MATRIX_COLORS = {
-  highHigh: "#10b981",
-  highLow: "#3b82f6",
-  lowHigh: "#f59e0b",
-  lowLow: "#ef4444",
-  average: "#f8fafc",
+  highHigh: "rgb(var(--c-emerald-500))",
+  highLow: "rgb(var(--c-blue-500))",
+  lowHigh: "rgb(var(--c-amber-500))",
+  lowLow: "rgb(var(--c-red-500))",
+  average: "rgb(var(--c-white))",
 };
 const QUADRANT_LABELS = {
   get highHigh() { return t("dashboard.acimaDaMediaEmDesempenhoEEsforco"); },
@@ -126,7 +128,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
   return (
     <Card
       id="effort-matrix-chart"
-      className="bg-[#1f1f1f] border-white/10 flex flex-col"
+      className="bg-surface border-white/10 flex flex-col"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
         <div className="flex items-start justify-between px-6 py-5 pr-36">
@@ -207,7 +209,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                 )}
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="rgba(255,255,255,0.08)"
+                  stroke={chartLine(0.08)}
                 />
                 <XAxis
                   type="number"
@@ -215,8 +217,8 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                   name={t("dashboard.axisEffort")}
                   unit=" min"
                   domain={[0, matrix.effortDomainMax]}
-                  stroke="rgba(255,255,255,0.3)"
-                  tick={{ fontSize: 12, fill: "rgba(255,255,255,0.5)" }}
+                  stroke={chartLine(0.3)}
+                  tick={{ fontSize: 12, fill: chartText(0.5) }}
                 />
                 <YAxis
                   type="number"
@@ -224,8 +226,8 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                   name={t("dashboard.axisPerformance")}
                   unit="%"
                   domain={[0, 100]}
-                  stroke="rgba(255,255,255,0.3)"
-                  tick={{ fontSize: 12, fill: "rgba(255,255,255,0.5)" }}
+                  stroke={chartLine(0.3)}
+                  tick={{ fontSize: 12, fill: chartText(0.5) }}
                 />
                 <ZAxis dataKey="size" range={[42, 70]} />
                 <Tooltip
@@ -234,7 +236,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                     if (!active || !payload?.length) return null;
                     const d = payload[0].payload;
                     return (
-                      <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl">
+                      <div className="rounded-xl border border-white/10 bg-surface-sunken px-3 py-2.5 text-sm shadow-xl">
                         <p className="mb-1 font-[Poppins] font-bold text-white">
                           {d.name}
                         </p>
@@ -268,29 +270,29 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                   <>
                     <ReferenceLine
                       y={matrix.avgPerformance}
-                      stroke="rgba(255,255,255,0.35)"
+                      stroke={chartLine(0.35)}
                       strokeDasharray="4 4"
                       label={{
                         value: t("common.mediaValue0", { value0: number(matrix.avgPerformance, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
-                        fill: "rgba(255,255,255,0.55)",
+                        fill: chartText(0.55),
                         fontSize: 11,
                         position: "insideTopLeft",
                       }}
                     />
                     <ReferenceLine
                       x={matrix.avgEffort}
-                      stroke="rgba(255,255,255,0.35)"
+                      stroke={chartLine(0.35)}
                       strokeDasharray="4 4"
                       label={{
                         value: t("dashboard.value0Min", { value0: number(matrix.avgEffort, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
-                        fill: "rgba(255,255,255,0.55)",
+                        fill: chartText(0.55),
                         fontSize: 11,
                         position: "insideTopRight",
                       }}
                     />
                   </>
                 )}
-                <Scatter name={t("dashboard.entities")} data={matrix.points} shape={(point: any) => (
+                <Scatter isAnimationActive={!getResolvedPreferences().reduceMotion} name={t("dashboard.entities")} data={matrix.points} shape={(point: any) => (
                   <>
                     <title>{t("dashboard.pointDescription", {
                       name: point.payload.name,
@@ -305,7 +307,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                       key={`cell-${i}`}
                       fill={point.fill}
                       fillOpacity={point.isAverage ? 1 : 0.9}
-                      stroke={point.isAverage ? "#111827" : "transparent"}
+                      stroke={point.isAverage ? "rgb(var(--c-neutral-900))" : "transparent"}
                       strokeWidth={point.isAverage ? 2 : 0}
                     />
                   ))}

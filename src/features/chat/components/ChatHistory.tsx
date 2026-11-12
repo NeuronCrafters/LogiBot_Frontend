@@ -57,7 +57,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
     <div className="flex flex-col w-full gap-1">
       <Button
         onClick={handleNewChat}
-        className="w-full h-9 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-[Poppins] font-medium rounded-lg border border-blue-500/30 transition-colors gap-1.5 mb-1"
+        className="w-full h-9 px-3 bg-blue-600 hover:bg-blue-500 text-on-accent text-xs font-[Poppins] font-medium rounded-lg border border-blue-500/30 transition-colors gap-1.5 mb-1"
       >
         <Plus size={14} />
         {t("chat.novaConversa")}</Button>
@@ -94,7 +94,7 @@ function ChatHistory({ userId, closeMenu }: ChatHistoryProps) {
                 <span className={`text-xs font-[Poppins] truncate leading-snug transition-colors ${session.sessionId === activeSessionId ? "text-white" : "text-zinc-300 group-hover:text-white"}`}>
                   {session.title || t("chat.novaInteracao")}
                 </span>
-                <span className="text-[11px] text-zinc-600 font-[Poppins] leading-snug">
+                <span className="text-xs text-zinc-600 font-[Poppins] leading-snug">
                   {session.lastActivityAt
                     ? formatRelativeTime(new Date(session.lastActivityAt))
                     : ""}

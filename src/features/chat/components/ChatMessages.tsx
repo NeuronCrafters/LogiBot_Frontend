@@ -134,7 +134,7 @@ const markdownComponents = {
   ),
   a: ({ node, ...props }: any) => (
     <a
-      className="break-all transition-colors text-primary hover:underline"
+      className="break-all text-blue-400 underline underline-offset-2 transition-colors hover:text-blue-300"
       {...props}
     />
   ),
@@ -223,15 +223,15 @@ function ChatMessages({ messages, userId }: ChatMessagesProps) {
                 <img
                   src={logo}
                   alt={t("common.bot")}
-                  className="w-10 h-10 p-1 bg-white rounded-full"
+                  className="brand-mark w-10 h-10 p-1 bg-white rounded-full"
                 />
               </div>
             )}
             <div
               className={`px-4 py-2 rounded-xl max-w-[80%] text-sm leading-relaxed ${
                 isUser
-                  ? "bg-blue-600 text-white ml-auto rounded-br-none"
-                  : "bg-[#2a2a2a] text-white mr-auto rounded-bl-none"
+                  ? "bg-blue-600 text-on-accent ml-auto rounded-br-none"
+                  : "bg-surface-raised text-white mr-auto rounded-bl-none"
               }`}
             >
               {content}

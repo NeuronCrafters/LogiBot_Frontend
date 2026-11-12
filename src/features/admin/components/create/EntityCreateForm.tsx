@@ -95,7 +95,7 @@ const EntityCreateFormContent: React.FC<EntityCreateFormProps> = ({
     initialData?.type === selectedEntity ? initialData.data : undefined;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+    <div className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
       <div className="mb-5">
         <h2 className="font-[Poppins] text-base font-semibold text-white">
           {t("admin.novaEntidade")}</h2>

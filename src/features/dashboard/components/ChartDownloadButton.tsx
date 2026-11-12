@@ -28,7 +28,7 @@ async function downloadChartAsPng(
   if (!container) throw new Error(t("dashboard.containerValue0NaoEncontrado", { value0: containerId }));
 
   const dataUrl = await toPng(container, {
-    backgroundColor: "#1f1f1f",
+    backgroundColor: `rgb(${getComputedStyle(document.documentElement).getPropertyValue("--c-surface").trim() || "31 31 31"})`,
     pixelRatio: 2,
     cacheBust: true,
   });
@@ -96,7 +96,7 @@ export function ChartDownloadButton({
           </button>
 
           {showInfo && (
-            <div className="absolute right-0 top-11 z-50 w-72 rounded-xl border border-white/10 bg-[#141414] p-4 shadow-2xl shadow-black/60">
+            <div className="absolute right-0 top-11 z-50 w-72 rounded-xl border border-white/10 bg-surface-sunken p-4 shadow-2xl shadow-black/60">
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   {t("dashboard.sobreEsteGrafico")}</span>

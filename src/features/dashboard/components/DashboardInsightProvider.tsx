@@ -266,7 +266,7 @@ export function DashboardInsightProvider({
       {children}
       {request && (
         <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("dashboard.insightPedagogicoGeradoAPartirDosDados", {}, locale)} tabIndex={-1} className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-6">
-          <div className="flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] text-white shadow-2xl shadow-black/50">
+          <div className="flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-surface text-white shadow-2xl shadow-black/50">
             <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-gradient-to-r from-violet-500/[0.08] to-transparent p-5 sm:px-8 sm:py-6">
               <div className="flex items-start gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
@@ -348,7 +348,7 @@ export function DashboardInsightProvider({
                     type="button"
                     disabled={loading}
                     onClick={() => void load(request, true)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-on-accent hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

@@ -42,7 +42,7 @@ export function EditEmailModal({
     <>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4">
-          <div ref={dialogRef} role="dialog" aria-modal="true" aria-busy={isSaving} aria-label={t("account.alterarEMail")} tabIndex={-1} className="my-auto w-full max-w-md shrink-0 bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-busy={isSaving} aria-label={t("account.alterarEMail")} tabIndex={-1} className="my-auto w-full max-w-md shrink-0 bg-surface border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <div className="flex items-center gap-2">
                 <Mail size={18} className="text-purple-400" />
@@ -67,7 +67,7 @@ export function EditEmailModal({
               <div className="space-y-2">
                 <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">
                   {t("account.eMailAtual")}</label>
-                <div className="w-full bg-[#141414]/50 border border-zinc-800 rounded-lg p-3 text-zinc-400 cursor-not-allowed select-none">
+                <div className="w-full bg-surface-sunken/50 border border-zinc-800 rounded-lg p-3 text-zinc-400 cursor-not-allowed select-none">
                   {currentEmail}
                 </div>
               </div>
@@ -81,22 +81,22 @@ export function EditEmailModal({
                   onChange={(e) => setEmail(e.target.value)}
                   aria-label={t("account.novoEMail")}
                   placeholder={t("account.digiteONovoEMail")}
-                  className="w-full bg-[#141414] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500 transition-colors placeholder:text-zinc-600"
+                  className="w-full bg-surface-sunken border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500 transition-colors placeholder:text-zinc-600"
                 />
               </div>
             </div>
-            <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-[#1a1a1a]">
+            <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-surface-sunken">
               <Button
                 variant="ghost"
                 disabled={isSaving}
                 onClick={onClose}
-                className="text-zinc-400 hover:bg-red-600 hover:text-white"
+                className="text-zinc-400 hover:bg-red-600 hover:text-on-accent"
               >
                 {t("common.cancelar")}</Button>
               <Button
                 onClick={handleSave}
                 disabled={isSaving || !email.trim()}
-                className="bg-purple-600 hover:bg-purple-700 text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-purple-600 hover:bg-purple-700 text-on-accent gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={16} /> {t("common.salvar")}</Button>
             </div>

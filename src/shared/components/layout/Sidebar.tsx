@@ -1,4 +1,5 @@
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { PreferencesMenu } from "@/shared/preferences/PreferencesControls";
 import { t, useLocale } from "@/i18n";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -149,7 +150,7 @@ function SectionLabel({ label }: { label: string }) {
   useLocale();
 
   return (
-    <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-600 font-[Poppins]">
+    <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-600 font-[Poppins]">
       {label}
     </p>
   );
@@ -188,9 +189,9 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         <img
           src={logoMascote}
           alt={t("common.logibot")}
-          className="h-7 w-7 object-contain"
+          className="brand-mark h-7 w-7 object-contain"
         />
-        <span className="font-[Poppins] font-bold text-[16px] text-white leading-none">
+        <span className="font-[Poppins] font-bold text-base text-white leading-none">
           LogiBot.AI
         </span>
         {onMobileClose && (
@@ -204,7 +205,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         )}
       </div>
 
-      <div className="px-4 pb-3"><LanguageSwitcher /></div>
+      <div className="flex items-start gap-2 px-4 pb-3"><PreferencesMenu className="shrink-0" /><div className="min-w-0 flex-1"><LanguageSwitcher /></div></div>
       <nav id="header-menu-options" className="px-2 shrink-0 space-y-4">
         {sections.map((section, si) => (
           <div key={si}>

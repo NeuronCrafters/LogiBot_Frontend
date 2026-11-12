@@ -82,7 +82,7 @@ export function EntityActionButton({
       onClick={onClick}
       disabled={disabled}
       className={`
-        ${color} text-white border shadow-md
+        ${color} ${color.includes("bg-white/") ? "text-white" : "text-on-accent"} border shadow-md
         ${disabled ? "opacity-50 cursor-not-allowed" : ""}
         px-4 py-2 flex items-center gap-2 rounded-lg font-[Poppins] text-sm font-semibold transition-colors
         ${compact ? "w-10 h-10 justify-center" : "w-[128px]"}

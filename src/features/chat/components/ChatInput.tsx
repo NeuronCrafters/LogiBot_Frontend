@@ -88,7 +88,7 @@ export const ChatInput = memo(function ChatInput({
             isLocked
               ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"
               : canSend
-                ? "bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"
+                ? "bg-blue-600 hover:bg-blue-500 text-on-accent cursor-pointer"
                 : "bg-neutral-700 text-neutral-500 cursor-not-allowed"
           }`}
         >

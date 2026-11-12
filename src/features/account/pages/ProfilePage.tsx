@@ -1,5 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { PreferencesControls } from "@/shared/preferences/PreferencesControls";
 import { t, useLocale } from "@/i18n";
 ﻿import { useState, type ReactNode } from "react";
 import { logger } from "@/shared/lib/logger";
@@ -68,7 +69,7 @@ export function Profile() {
   if (loading)
     return (
       <div className="flex min-h-full items-center justify-center bg-neutral-900">
-        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] px-4 py-3 text-zinc-400 shadow-lg">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-surface px-4 py-3 text-zinc-400 shadow-lg">
           <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
           <span className="font-[Poppins] text-sm">{t("account.carregandoPerfil")}</span>
         </div>
@@ -159,7 +160,7 @@ export function Profile() {
     <>
       <main className="flex min-h-0 flex-1 items-start overflow-y-auto px-4 py-6 md:px-8 md:py-8">
         <div className="mx-auto my-auto flex w-full max-w-5xl flex-col gap-5">
-          <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+          <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="h-24 w-24 shrink-0 rounded-2xl border border-white/10 bg-neutral-950 p-2 shadow-lg shadow-black/20">
@@ -198,6 +199,10 @@ export function Profile() {
           <section className="rounded-xl border border-white/10 bg-neutral-950/60 p-5">
             <h2 className="mb-3 font-semibold text-white">{t("language.label")}</h2>
             <LanguageSwitcher details />
+          </section>
+          <section className="rounded-xl border border-white/10 bg-neutral-950/60 p-5">
+            <h2 className="mb-4 font-semibold text-white">{t("preferences.titulo")}</h2>
+            <PreferencesControls />
           </section>
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
             <div className="space-y-5">
@@ -351,7 +356,7 @@ function Panel({
   useLocale();
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10">
+    <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10">
       <div className="mb-5 flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
           {icon}

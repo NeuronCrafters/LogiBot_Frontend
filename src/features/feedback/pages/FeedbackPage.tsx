@@ -91,7 +91,7 @@ export function Feedback() {
     <>
       <main className="flex min-h-0 flex-1 items-start overflow-y-auto px-4 py-6 font-[Poppins] md:px-8 md:py-8">
         <div className="mx-auto my-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+          <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
               <MessageSquare className="h-6 w-6" />
             </div>
@@ -124,7 +124,7 @@ export function Feedback() {
 
           <form
             onSubmit={handleSubmit}
-            className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6"
+            className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6"
           >
             <div className="space-y-6">
               <div>
@@ -191,7 +191,7 @@ export function Feedback() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-11 w-full gap-2 rounded-lg border border-blue-400/40 bg-blue-600 text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700 disabled:opacity-60"
+                className="h-11 w-full gap-2 rounded-lg border border-blue-400/40 bg-blue-600 text-sm font-semibold text-on-accent shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700 disabled:opacity-60"
               >
                 {loading ? (
                   <>

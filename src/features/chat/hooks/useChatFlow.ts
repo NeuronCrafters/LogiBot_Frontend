@@ -14,6 +14,7 @@ export type ChatMessage = {
   type: "text" | "typing";
   retrievedChunks?: RetrievedChunk[];
   streamStage?: ChatStreamStage;
+  streaming?: boolean;
   outputLanguage?: Language;
 };
 
@@ -99,6 +100,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
                       text: streamedText,
                       type: "text",
                       streamStage: undefined,
+                      streaming: true,
                     }
                   : message,
               ),
@@ -113,6 +115,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
                       type: "text",
                       text: streamedText || message.text,
                       streamStage: undefined,
+                      streaming: false,
                       retrievedChunks: event.retrievedChunks?.length
                         ? event.retrievedChunks
                         : message.retrievedChunks,
@@ -124,6 +127,13 @@ export function useChatFlow(_options: UseChatFlowOptions) {
         });
 
         if (result.sessionId) setSessionId(result.sessionId);
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === typingMsg.id && message.streaming
+              ? { ...message, streaming: false }
+              : message,
+          ),
+        );
 
         if (!receivedToken) {
           setMessages((prev) =>

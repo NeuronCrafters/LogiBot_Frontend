@@ -380,7 +380,7 @@ export function ProfessorDisciplineManager({
                     {linkedClasses.map((classItem) => (
                       <span
                         key={classItem._id}
-                        className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-[Poppins] text-[11px] text-emerald-300"
+                        className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-[Poppins] text-xs text-emerald-300"
                       >
                         {classItem.name}
                       </span>
@@ -412,7 +412,7 @@ export function ProfessorDisciplineManager({
   if (isLoading) {
     if (inModal) return loader;
     return (
-      <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+      <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
         {loader}
       </section>
     );
@@ -420,7 +420,7 @@ export function ProfessorDisciplineManager({
 
   if (inModal) return body;
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+    <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
       {body}
     </section>
   );

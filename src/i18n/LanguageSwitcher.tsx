@@ -9,11 +9,11 @@ export function LanguageSwitcher({ details = false }: { details?: boolean }) {
   const { user } = useAuth();
   const { selection, saveState, explicitVersion } = useLanguagePreference();
   return (
-    <div className="min-w-0 space-y-1 text-sm text-zinc-300">
+    <div className="flex min-w-0 flex-col gap-1 text-sm text-zinc-300">
       <label htmlFor={id} className="sr-only">{t("language.label")}</label>
       <select id={id} aria-label={t("language.label")} value={selection || "system"}
         onChange={event => chooseLanguage(event.target.value === "system" ? null : normalizeLanguage(event.target.value)!)}
-        className="w-full min-w-0 max-w-[15rem] rounded-lg border border-white/15 bg-neutral-900 px-2 py-2 text-xs text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400">
+        className="h-10 w-full min-w-0 max-w-[15rem] rounded-lg border border-white/15 bg-neutral-900 px-2 py-0 text-xs text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400">
         <option value="system">{t("language.system")}</option>
         <option value="pt-BR">{t("language.ptBR")}</option>
         <option value="en-US">{t("language.enUS")}</option>

@@ -9,7 +9,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ icon, title, description, action }: PageHeaderProps) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+    <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
           {icon && (

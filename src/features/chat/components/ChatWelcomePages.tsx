@@ -31,7 +31,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({
         />
       </div>
 
-      <div className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg">
+      <div className="bg-surface rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg">
         <div className="flex items-start gap-4 mb-4">
           <Lock className="mt-1 text-purple-500" size={24} />
           <div>
@@ -53,7 +53,7 @@ export const NonStudentWelcome: React.FC<{ userRoles: string[] }> = ({
           </div>
         </div>
 
-        <Alert className="bg-[#2a2a2a] border-purple-600 mt-4">
+        <Alert className="bg-surface-raised border-purple-600 mt-4">
           <Info className="w-5 h-5 text-purple-500" />
           <AlertTitle className="text-white">
             <Typograph
@@ -106,7 +106,7 @@ export const AdminWelcome: React.FC = () => {
         />
       </div>
 
-      <div className="bg-[#1f1f1f] rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg">
+      <div className="bg-surface rounded-lg p-6 mb-8 border border-neutral-800 shadow-lg">
         <div className="flex items-start gap-4 mb-4">
           <Info className="mt-1 text-fuchsia-400" size={24} />
           <div>
@@ -129,7 +129,7 @@ export const AdminWelcome: React.FC = () => {
         </div>
 
         <div className="p-[2px] rounded-lg bg-gradient-to-r from-fuchsia-500 to-orange-600">
-          <Alert className="bg-[#2a2a2a] rounded-lg">
+          <Alert className="bg-surface-raised rounded-lg">
             <Info className="w-5 h-5 text-fuchsia-400" />
             <AlertTitle className="text-white">
               <Typograph

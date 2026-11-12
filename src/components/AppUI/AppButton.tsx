@@ -12,11 +12,11 @@ interface AppButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<AppButtonVariant, string> = {
   primary:
-    "border-blue-400/40 bg-blue-600 text-white shadow-blue-900/30 hover:bg-blue-700",
+    "border-blue-400/40 bg-blue-600 text-on-accent shadow-blue-900/30 hover:bg-blue-700",
   secondary:
     "border-white/10 bg-white/5 text-zinc-200 shadow-black/10 hover:bg-white/10 hover:text-white",
   danger:
-    "border-red-400/40 bg-red-600 text-white shadow-red-900/30 hover:bg-red-700",
+    "border-red-400/40 bg-red-600 text-on-accent shadow-red-900/30 hover:bg-red-700",
   ghost:
     "border-transparent bg-transparent text-zinc-400 shadow-none hover:bg-white/5 hover:text-white",
 };

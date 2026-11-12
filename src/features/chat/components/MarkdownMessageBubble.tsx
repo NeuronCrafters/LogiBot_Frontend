@@ -100,7 +100,7 @@ const markdownComponents = {
 
     return (
       <pre
-        className="my-4 overflow-x-auto rounded-xl border border-neutral-700 bg-[#1e1e1e] p-4 shadow-lg [&_code]:block [&_code]:whitespace-pre-wrap [&_code]:break-words [&_code]:border-0 [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-gray-100 [&_code]:shadow-none"
+        className="my-4 overflow-x-auto rounded-xl border border-neutral-700 bg-surface p-4 shadow-lg [&_code]:block [&_code]:whitespace-pre-wrap [&_code]:break-words [&_code]:border-0 [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-gray-100 [&_code]:shadow-none"
         {...props}
       >
         {children}
@@ -218,7 +218,7 @@ const SourcesPanel = memo(function SourcesPanel({ chunks }: { chunks: RetrievedC
                 className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-neutral-800/40 transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="flex-shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold font-[Poppins] bg-blue-500/15 text-blue-300 border border-blue-500/20">
+                  <span className="flex-shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold font-[Poppins] bg-blue-500/15 text-blue-300 border border-blue-500/20">
                     {chunk.score}%
                   </span>
                   <span className="truncate text-xs text-zinc-400 font-[Poppins]">
@@ -271,7 +271,7 @@ export const MarkdownMessageBubble = memo(function MarkdownMessageBubble({
     <div className="flex gap-3 mb-6 px-2">
       <div className="flex-shrink-0 mt-1">
         <div className="w-7 h-7 rounded-full bg-neutral-900 border border-neutral-700 p-0.5 flex items-center justify-center shadow">
-          <img src={logo} alt={t("common.bot")} className="w-full h-full object-contain" />
+          <img src={logo} alt={t("common.bot")} className="brand-mark w-full h-full object-contain" />
         </div>
       </div>
       <div className="flex-1 min-w-0 text-sm font-[Poppins]">

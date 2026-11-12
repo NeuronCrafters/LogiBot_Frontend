@@ -1,4 +1,6 @@
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { getResolvedPreferences } from "@/shared/preferences";
+import { PreferencesMenu } from "@/shared/preferences/PreferencesControls";
 import { t, useLocale } from "@/i18n";
 ﻿import { type ReactNode } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -82,7 +84,7 @@ export function Home() {
               <img
                 src={logoMascote}
                 alt={t("common.logibot")}
-                className="h-6 w-6 object-contain"
+                className="brand-mark h-6 w-6 object-contain"
               />
             </span>
             <span className="hidden sm:inline font-[Poppins] text-base font-bold text-white">
@@ -97,11 +99,11 @@ export function Home() {
             <a href="#start" className="transition-colors hover:text-white">
               {t("home.comecar")}</a>
           </nav>
-          <div className="max-w-[7rem] sm:max-w-[15rem]"><LanguageSwitcher /></div>
+          <div className="ml-auto flex min-w-0 items-center gap-2"><PreferencesMenu className="shrink-0" /><div className="max-w-[7rem] sm:max-w-[15rem]"><LanguageSwitcher /></div></div>
           <button
             id="play-button"
             onClick={handleStart}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-on-accent shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700"
           >
             {t("common.entrar")}<ArrowRight className="h-4 w-4" />
           </button>
@@ -132,7 +134,7 @@ export function Home() {
               <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                 <button
                   onClick={handleStart}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-6 font-[Poppins] text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-6 font-[Poppins] text-sm font-semibold text-on-accent shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700"
                 >
                   {t("home.comecarAgora")}<Play className="h-4 w-4" />
                 </button>
@@ -140,7 +142,7 @@ export function Home() {
                   onClick={() =>
                     document
                       .getElementById("features")
-                      ?.scrollIntoView({ behavior: "smooth" })
+                      ?.scrollIntoView({ behavior: getResolvedPreferences().reduceMotion ? "auto" : "smooth" })
                   }
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-6 font-[Poppins] text-sm font-semibold text-zinc-200 transition-colors hover:bg-white/10 hover:text-white"
                 >
@@ -213,7 +215,7 @@ export function Home() {
         </SectionShell>
 
         <section id="start" className="px-4 py-16 sm:px-6">
-          <div className="mx-auto max-w-6xl rounded-2xl border border-white/10 bg-[#1f1f1f] p-6 shadow-lg shadow-black/10 sm:p-8">
+          <div className="mx-auto max-w-6xl rounded-2xl border border-white/10 bg-surface p-6 shadow-lg shadow-black/10 sm:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="max-w-2xl">
                 <h2 className="font-[Poppins] text-2xl font-semibold text-white sm:text-3xl">
@@ -223,7 +225,7 @@ export function Home() {
               </div>
               <button
                 onClick={handleStart}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-6 font-[Poppins] text-sm font-semibold text-white shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700 md:w-auto"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-6 font-[Poppins] text-sm font-semibold text-on-accent shadow-md shadow-blue-900/30 transition-colors hover:bg-blue-700 md:w-auto"
               >
                 {t("home.criarContaGratuita")}<ArrowRight className="h-4 w-4" />
               </button>
@@ -276,7 +278,7 @@ function InfoCard({ children }: { children: ReactNode }) {
   useLocale();
 
   return (
-    <article className="flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 transition-colors hover:bg-white/[0.06]">
+    <article className="flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 transition-colors hover:bg-white/[0.06]">
       {children}
     </article>
   );

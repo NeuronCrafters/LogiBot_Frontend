@@ -1,5 +1,6 @@
 import { LocalizedValidation } from "@/i18n/LocalizedValidation";
 import "@/i18n";
+import "@/shared/preferences";
 import { LanguagePreferenceSync } from "@/i18n/LanguagePreferenceSync";
 import React from "react";
 import ReactDOM from "react-dom/client";

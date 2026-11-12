@@ -74,7 +74,7 @@ function Modal({
     >
       <div className="flex min-h-full items-start justify-center px-4 py-10">
         <div className={`w-full ${wide ? "max-w-3xl" : "max-w-lg"}`}>
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1c1c1c] shadow-2xl">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
@@ -181,7 +181,7 @@ function QuizForm({
       <button
         type="submit"
         disabled={isPending || !title.trim() || !disciplineId || !topic}
-        className="h-11 w-full rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+        className="h-11 w-full rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-indigo-700 disabled:opacity-50"
       >
         {isPending ? (
           <span className="flex items-center justify-center gap-2">
@@ -300,7 +300,7 @@ function QuestionForm({
         <button
           type="submit"
           disabled={isPending}
-          className="h-9 flex-1 rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="h-9 flex-1 rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-on-accent hover:bg-indigo-700 disabled:opacity-50"
         >
           {isPending ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : initial?.id ? t("common.salvar") : t("quiz.adicionar")}
         </button>
@@ -411,7 +411,7 @@ function QuestionsPanel({ quizId, language }: { quizId: string; language?: Langu
                 {q.options.map((opt, oi) => (
                   <span
                     key={oi}
-                    className={`rounded-md px-2 py-0.5 font-[Poppins] text-[10px] ${
+                    className={`rounded-md px-2 py-0.5 font-[Poppins] text-xs ${
                       LETTERS[oi] === q.correctOption
                         ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                         : "border border-white/10 bg-white/5 text-zinc-600"
@@ -422,7 +422,7 @@ function QuestionsPanel({ quizId, language }: { quizId: string; language?: Langu
                 ))}
               </div>
               {q.explanation && (
-                <p className="mt-2 font-[Poppins] text-[11px] leading-relaxed text-zinc-500">
+                <p className="mt-2 font-[Poppins] text-xs leading-relaxed text-zinc-500">
                   <span className="font-semibold text-zinc-400">{t("quiz.explicacao")}{" "}</span>
                   <span lang={language || undefined}>{q.explanation}</span>
                 </p>
@@ -544,7 +544,7 @@ function ResultsModal({
                       (h) => (
                         <th
                           key={h}
-                          className="px-4 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600"
+                          className="px-4 py-3 text-left font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-600"
                         >
                           {h}
                         </th>
@@ -626,7 +626,7 @@ function QuizCard({
 
   return (
     <div
-      className={`overflow-hidden rounded-2xl border bg-[#1f1f1f] shadow-md shadow-black/10 transition-colors hover:border-white/20 ${
+      className={`overflow-hidden rounded-2xl border bg-surface shadow-md shadow-black/10 transition-colors hover:border-white/20 ${
         isDraft ? "border-white/10" : "border-emerald-500/20"
       }`}
     >
@@ -641,29 +641,29 @@ function QuizCard({
             </p>
             <ContentLanguageLabel language={quiz.language} />
             {isDraft ? (
-              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-amber-400">
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-amber-400">
                 {t("quiz.rascunho")}</span>
             ) : (
-              <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-emerald-400">
+              <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-emerald-400">
                 <CheckCircle2 className="h-3 w-3" />
                 {t("quiz.publicado")}</span>
             )}
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-indigo-400">
+            <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-indigo-400">
               <BookOpen className="h-3 w-3" />
               {quiz.disciplineName}
             </span>
-            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-[10px] text-zinc-500">
+            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-xs text-zinc-500">
               {TOPIC_LABEL()[quiz.topic] ?? quiz.topic}
             </span>
             {quiz.generationSource === "ai" && (
-              <span className="flex items-center gap-1 rounded-md border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-purple-400">
+              <span className="flex items-center gap-1 rounded-md border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-purple-400">
                 <Sparkles className="h-2.5 w-2.5" />
                 {t("common.ai")}
               </span>
             )}
-            <span className="font-[Poppins] text-[10px] text-zinc-600">
+            <span className="font-[Poppins] text-xs text-zinc-600">
               {t("common.questions", { count: quiz.questionCount })}
             </span>
           </div>
@@ -849,7 +849,7 @@ export function ProfessorQuizPage() {
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
         {/* Header */}
-        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
@@ -871,7 +871,7 @@ export function ProfessorQuizPage() {
                 {t("common.criarComIa", {}, locale)}</button>
               <button
                 onClick={() => setCreateModal(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-indigo-700"
               >
                 <Plus className="h-4 w-4" />
                 {t("common.criarQuiz", {}, locale)}</button>
@@ -899,7 +899,7 @@ export function ProfessorQuizPage() {
         )}
 
         {!isLoading && !error && quizzes.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-20">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-surface py-20">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-neutral-950/60 text-zinc-700">
               <Brain className="h-7 w-7" />
             </div>
@@ -918,7 +918,7 @@ export function ProfessorQuizPage() {
                 {t("common.criarComIa", {}, locale)}</button>
               <button
                 onClick={() => setCreateModal(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white hover:bg-indigo-700"
+                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-on-accent hover:bg-indigo-700"
               >
                 <Plus className="h-4 w-4" />
                 {t("common.criarQuiz", {}, locale)}</button>

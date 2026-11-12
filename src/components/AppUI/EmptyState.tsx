@@ -8,7 +8,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description }: EmptyStateProps) {
   return (
-    <div className="flex min-h-[12rem] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] p-8 text-center">
+    <div className="flex min-h-[12rem] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-surface p-8 text-center">
       {icon && (
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-500">
           {icon}

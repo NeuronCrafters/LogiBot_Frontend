@@ -47,7 +47,7 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
     <div className="flex w-full flex-col gap-1">
       <Button
         onClick={handleNewQuiz}
-        className="mb-1 h-9 w-full px-3 gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600 font-[Poppins] text-xs font-medium text-white transition-colors hover:bg-indigo-500"
+        className="mb-1 h-9 w-full px-3 gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600 font-[Poppins] text-xs font-medium text-on-accent transition-colors hover:bg-indigo-500"
       >
         <Plus size={14} />
         {t("quiz.verQuizzes")}</Button>
@@ -81,10 +81,10 @@ export function QuizHistory({ userId, closeMenu }: QuizHistoryProps) {
                   {quiz.title || t("common.quiz")}
                 </span>
                 <div className="flex items-center gap-2 leading-snug">
-                  <span className="font-[Poppins] text-[11px] text-zinc-600">
+                  <span className="font-[Poppins] text-xs text-zinc-600">
                     {formatRelativeTime(new Date(quiz.completedAt))}
                   </span>
-                  <span className="font-[Poppins] text-[11px] font-semibold text-emerald-400">
+                  <span className="font-[Poppins] text-xs font-semibold text-emerald-400">
                     {quiz.score}/{quiz.totalQuestions}
                   </span>
                 </div>

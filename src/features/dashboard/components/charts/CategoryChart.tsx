@@ -1,4 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
+import { chartLine, chartText } from "../../chartColors";
+import { getResolvedPreferences } from "@/shared/preferences";
 import { percent, t, useLocale } from "@/i18n";
 ﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -32,7 +34,7 @@ const CHART_INFO =
   () => (t("dashboard.frequenciaDeAcessoPorCategoriaDeConteudo"));
 
 const chartConfig = {
-  acessos: { get label() { return t("dashboard.acessos"); }, color: "#3b82f6" },
+  acessos: { get label() { return t("dashboard.acessos"); }, color: "rgb(var(--c-blue-500))" },
 } satisfies ChartConfig;
 
 interface CategoryChartProps {
@@ -103,7 +105,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
   return (
     <Card
       id="category-chart"
-      className="bg-[#1f1f1f] border-white/10 flex flex-col h-full"
+      className="bg-surface border-white/10 flex flex-col h-full"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
         <div className="flex items-start justify-between px-6 py-5 pr-36">
@@ -155,7 +157,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                     if (!active || !payload?.[0]) return null;
                     const entry = payload[0].payload;
                     return (
-                      <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl">
+                      <div className="rounded-xl border border-white/10 bg-surface-sunken px-3 py-2.5 text-sm shadow-xl">
                         <p className="mb-1 font-[Poppins] font-semibold text-white">
                           {entry.category}
                         </p>
@@ -171,12 +173,12 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                 />
                 <PolarGrid
                   gridType="polygon"
-                  stroke="rgba(255,255,255,0.1)"
+                  stroke={chartLine(0.1)}
                   strokeDasharray="2 2"
                 />
                 <PolarAngleAxis
                   dataKey="category"
-                  tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 11 }}
+                  tick={{ fill: chartText(0.6), fontSize: 11 }}
                 />
                 <PolarRadiusAxis
                   angle={90}
@@ -184,13 +186,13 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                   tick={false}
                   axisLine={false}
                 />
-                <Radar
+                <Radar isAnimationActive={!getResolvedPreferences().reduceMotion}
                   dataKey="acessos"
-                  fill="#3b82f6"
+                  fill="rgb(var(--c-blue-500))"
                   fillOpacity={0.25}
-                  stroke="#3b82f6"
+                  stroke="rgb(var(--c-blue-500))"
                   strokeWidth={2}
-                  dot={{ fill: "#3b82f6", strokeWidth: 0, r: 4 }}
+                  dot={{ fill: "rgb(var(--c-blue-500))", strokeWidth: 0, r: 4 }}
                 />
               </RadarChart>
             </ChartContainer>

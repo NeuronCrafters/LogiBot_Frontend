@@ -32,7 +32,7 @@ export function TypingBubble({ onDone, text }: TypingBubbleProps) {
 
   return (
     <div className="flex items-end w-full mb-3 justify-start animate-fade-in">
-      <div className="bg-[#2c2c2c] text-gray-200 px-4 py-2 rounded-xl rounded-bl-none shadow max-w-[75%]">
+      <div className="bg-surface-raised text-gray-200 px-4 py-2 rounded-xl rounded-bl-none shadow max-w-[75%]">
         <Typograph
           text={showText ? text : t("chat.soUmMomentovalue0", { value0: ".".repeat(dotCount) })}
           variant="text8"

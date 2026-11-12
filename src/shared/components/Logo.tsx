@@ -20,7 +20,7 @@ export function Logo({ className, type }: LogoProps) {
             ? t("common.logoMascoteDoLogibot")
             : t("common.logoCompletaDoLogibot")
         }
-        className="object-contain"
+        className="brand-mark object-contain"
       />
     </a>
   );

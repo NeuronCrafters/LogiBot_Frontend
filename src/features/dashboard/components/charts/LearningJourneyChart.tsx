@@ -1,4 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
+import { chartLine, chartText } from "../../chartColors";
+import { getResolvedPreferences } from "@/shared/preferences";
 import { percent, t, useLocale, number } from "@/i18n";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -105,7 +107,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
   return (
     <Card
       id="learning-journey-chart"
-      className="bg-[#1f1f1f] border-white/10 flex flex-col"
+      className="bg-surface border-white/10 flex flex-col"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
         <div className="flex items-start justify-between px-6 py-5 pr-36">
@@ -154,25 +156,25 @@ export function LearningJourneyChart({ filters }: ChartProps) {
               >
                 <CartesianGrid
                   vertical={false}
-                  stroke="rgba(255,255,255,0.08)"
+                  stroke={chartLine(0.08)}
                 />
                 <XAxis
                   dataKey="shortName"
                   tickLine={false}
                   axisLine={false}
                   tickMargin={12}
-                  tick={{ fill: "rgba(255,255,255,0.55)", fontSize: 11 }}
+                  tick={{ fill: chartText(0.55), fontSize: 11 }}
                 />
                 <YAxis
                   domain={[0, 100]}
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
+                  tick={{ fill: chartText(0.5), fontSize: 11 }}
                   tickFormatter={(v) => percent(v / 100)}
                 />
                 <Tooltip
                   cursor={{
-                    stroke: "rgba(255,255,255,0.15)",
+                    stroke: chartLine(0.15),
                     strokeDasharray: "4 4",
                   }}
                   content={({ active, payload }) => {
@@ -183,7 +185,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                         ? t("dashboard.primeiroQuiz", {}, locale)
                         : t("dashboard.value0value1PPVsQuizAnterior", { value0: item.deltaFromPrevious > 0 ? "+" : "", value1: number(item.deltaFromPrevious, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale);
                     return (
-                      <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl">
+                      <div className="rounded-xl border border-white/10 bg-surface-sunken px-3 py-2.5 text-sm shadow-xl">
                         <p className="mb-1 font-[Poppins] font-bold text-white">
                           {item.name}
                         </p>
@@ -205,27 +207,27 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                 />
                 <ReferenceLine
                   y={summary.average}
-                  stroke="rgba(255,255,255,0.35)"
+                  stroke={chartLine(0.35)}
                   strokeDasharray="4 4"
                   label={{
                     value: t("common.mediaValue0", { value0: number(summary.average, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
-                    fill: "rgba(255,255,255,0.55)",
+                    fill: chartText(0.55),
                     fontSize: 11,
                     position: "insideTopLeft",
                   }}
                 />
-                <Line
+                <Line isAnimationActive={!getResolvedPreferences().reduceMotion}
                   type="monotone"
                   dataKey="performance"
-                  stroke="#10b981"
+                  stroke="rgb(var(--c-emerald-500))"
                   strokeWidth={2.75}
                   dot={{
                     r: 4,
                     strokeWidth: 2,
-                    stroke: "#1f1f1f",
-                    fill: "#10b981",
+                    stroke: "rgb(var(--c-surface))",
+                    fill: "rgb(var(--c-emerald-500))",
                   }}
-                  activeDot={{ r: 6, strokeWidth: 2, stroke: "#1f1f1f" }}
+                  activeDot={{ r: 6, strokeWidth: 2, stroke: "rgb(var(--c-surface))" }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -250,7 +252,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
             <p className="font-[Poppins] text-xs text-zinc-500">{t("dashboard.evolucao", {}, locale)}</p>
             <p
               className="mt-0.5 font-[Poppins] font-bold"
-              style={{ color: summary.evolution >= 0 ? "#10b981" : "#ef4444" }}
+              style={{ color: summary.evolution >= 0 ? "rgb(var(--c-emerald-500))" : "rgb(var(--c-red-500))" }}
             >
               {summary.evolution > 0 ? "+" : ""}
               {number(summary.evolution, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}{t("common.percentagePoints")}

@@ -2,6 +2,7 @@ import { PasswordRecoveryPage } from "@/features/auth/pages/PasswordRecoveryPage
 import React, { Suspense } from "react";
 import { Navigate, Routes, Route } from "react-router-dom";
 import { Home } from "@/features/home/pages/HomePage";
+import { NotFoundPage } from "@/features/home/pages/NotFoundPage";
 import { AuthPage } from "@/features/auth/pages/AuthPage";
 import ProtectedRoute from "@/app/router/ProtectedRoute";
 import { AppLayout } from "@/shared/components/layout/AppLayout";
@@ -184,6 +185,7 @@ export default function AppRouter() {
           />
         </Route>
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

@@ -57,7 +57,7 @@ function DashboardContent() {
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
-        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
@@ -90,7 +90,7 @@ function DashboardContent() {
         <DashboardFilter onChange={handleEntityFilterChange} />
 
         {!hasSelection ? (
-          <div className="flex min-h-[16rem] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] p-8 text-center">
+          <div className="flex min-h-[16rem] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-surface p-8 text-center">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-500">
               <MousePointer2 className="h-5 w-5" />
             </div>

@@ -1,4 +1,5 @@
 import { apiError } from "@/shared/lib/apiError";
+import { getResolvedPreferences } from "@/shared/preferences";
 import { t, useLocale, number } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -26,10 +27,10 @@ const CHART_INFO =
   () => (t("dashboard.notaGeralDe0A10Calculada"));
 
 const SCORE_COLORS = {
-  ruim: "#ef4444",
-  regular: "#f59e0b",
-  bom: "#3b82f6",
-  excelente: "#10b981",
+  ruim: "rgb(var(--c-red-500))",
+  regular: "rgb(var(--c-amber-500))",
+  bom: "rgb(var(--c-blue-500))",
+  excelente: "rgb(var(--c-emerald-500))",
 };
 
 interface ChartProps {
@@ -58,7 +59,7 @@ function useScoreData(filters: ChartProps["filters"]) {
         (t: any) => t.successPercentage > 0 || t.errorPercentage > 0,
       );
       if (active.length === 0)
-        return { score: 0, topicCount: 0, status: t("dashboard.semDados"), color: "#444" };
+        return { score: 0, topicCount: 0, status: t("dashboard.semDados"), color: "rgb(var(--c-neutral-600))" };
       const avg =
         active.reduce(
           (acc: number, curr: any) => acc + curr.successPercentage,
@@ -96,7 +97,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
   return (
     <Card
       id="general-score-card"
-      className="bg-[#1f1f1f] border-white/10 flex flex-col h-full"
+      className="bg-surface border-white/10 flex flex-col h-full"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
         <div className="flex items-start justify-between px-6 py-5 pr-36">
@@ -146,8 +147,8 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                 className="rounded-full px-3 py-0.5 font-[Poppins] text-sm font-semibold uppercase tracking-wider"
                 style={{
                   color: data.color,
-                  backgroundColor: `${data.color}18`,
-                  border: `1px solid ${data.color}30`,
+                  backgroundColor: `color-mix(in srgb, ${data.color} 9%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${data.color} 19%, transparent)`,
                 }}
               >
                 {data.status}
@@ -164,7 +165,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                   }}
                 />
               </div>
-              <div className="mt-1.5 flex justify-between font-[Poppins] text-[10px] text-zinc-700">
+              <div className="mt-1.5 flex justify-between font-[Poppins] text-xs text-zinc-700">
                 <span>0</span>
                 <span>5</span>
                 <span>10</span>
@@ -175,7 +176,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
               {bands.map((b) => (
                 <span
                   key={b.label}
-                  className="font-[Poppins] text-[11px] text-zinc-600"
+                  className="font-[Poppins] text-xs text-zinc-600"
                 >
                   {b.label}: <span className={b.color}>{b.desc}</span>
                 </span>
@@ -193,7 +194,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                   <XAxis type="number" domain={[0, 10]} hide />
                   <YAxis type="category" dataKey="category" hide />
                   <Tooltip cursor={false} content={() => null} />
-                  <Bar dataKey="score" radius={[4, 4, 4, 4]}>
+                  <Bar isAnimationActive={!getResolvedPreferences().reduceMotion} dataKey="score" radius={[4, 4, 4, 4]}>
                     <Cell fill={data.color} />
                   </Bar>
                 </BarChart>

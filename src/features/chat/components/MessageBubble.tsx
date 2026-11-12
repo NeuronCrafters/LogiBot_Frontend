@@ -28,8 +28,8 @@ export function MessageBubble({ text, sender }: MessageBubbleProps) {
         <div
           className={`px-4 py-3 rounded-2xl shadow-md text-sm md:text-base ${
             isUser
-              ? "bg-blue-600 text-white rounded-tr-none"
-              : "bg-[#2c2c2c] text-gray-200 rounded-tl-none"
+              ? "bg-blue-600 text-on-accent rounded-tr-none"
+              : "bg-surface-raised text-gray-200 rounded-tl-none"
           }`}
         >
           <Typograph

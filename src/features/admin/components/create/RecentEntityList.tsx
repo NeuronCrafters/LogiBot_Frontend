@@ -62,13 +62,13 @@ function TypeBadge({ type }: { type: string }) {
   const meta = TYPE_META[type];
   if (!meta)
     return (
-      <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-[10px] text-zinc-500">
+      <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-xs text-zinc-500">
         {type}
       </span>
     );
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-[Poppins] text-[10px] font-medium ${meta.color}`}
+      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-[Poppins] text-xs font-medium ${meta.color}`}
     >
       {meta.icon}
       {meta.label}
@@ -101,7 +101,7 @@ export function RecentEntityList({
 
   return (
     <>
-      <div className="rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-lg shadow-black/10">
+      <div className="rounded-2xl border border-white/10 bg-surface shadow-lg shadow-black/10">
         <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
           <div>
             <p className="font-[Poppins] text-sm font-semibold text-white">
@@ -169,15 +169,15 @@ export function RecentEntityList({
                       </p>
                       <div className="mt-1 flex items-center gap-2">
                         <TypeBadge type={item.type} />
-                        <span className="font-[Poppins] text-[10px] text-zinc-700">
+                        <span className="font-[Poppins] text-xs text-zinc-700">
                           {item.action === "update" ? t("admin.editado") : t("admin.criado")}
                         </span>
                       </div>
                       {item.registrationCode ? (
                         <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                          <span className="font-[Poppins] text-[10px] text-zinc-600">
+                          <span className="font-[Poppins] text-xs text-zinc-600">
                             {t("common.codigoDaTurma")}</span>
-                          <span className="rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-mono text-[11px] text-blue-300">
+                          <span className="rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-mono text-xs text-blue-300">
                             {item.registrationCode}
                           </span>
                         </div>

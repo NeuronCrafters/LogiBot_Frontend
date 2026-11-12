@@ -530,7 +530,7 @@ export function ClassDisciplineManager({
   if (isLoading) {
     if (inModal) return loader;
     return (
-      <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+      <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
         {loader}
       </section>
     );
@@ -538,7 +538,7 @@ export function ClassDisciplineManager({
 
   if (inModal) return body;
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+    <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
       {body}
     </section>
   );

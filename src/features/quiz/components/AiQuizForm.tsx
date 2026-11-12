@@ -233,7 +233,7 @@ export function AiQuizForm({ onClose }: Props) {
               disabled={isPending}
               className={`h-9 w-9 rounded-lg border font-[Poppins] text-sm font-semibold transition-colors ${
                 questionCount === n
-                  ? "border-indigo-500 bg-indigo-600 text-white"
+                  ? "border-indigo-500 bg-indigo-600 text-on-accent"
                   : "border-white/10 bg-neutral-950/60 text-zinc-400 hover:border-indigo-500/40 hover:text-white"
               }`}
             >
@@ -265,7 +265,7 @@ export function AiQuizForm({ onClose }: Props) {
           <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
             {docsByClass.map(([className, docs]) => (
               <div key={className}>
-                <p className="mb-1 font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
+                <p className="mb-1 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-600">
                   {className}
                 </p>
                 <div className="space-y-1.5">
@@ -350,7 +350,7 @@ export function AiQuizForm({ onClose }: Props) {
           !selectedDocIds.size ||
           !theme.trim()
         }
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {isPending ? (
           <>

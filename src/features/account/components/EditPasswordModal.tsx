@@ -58,7 +58,7 @@ export function EditPasswordModal({
     <>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4">
-          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("account.alterarSenha")} tabIndex={-1} className="my-auto w-full max-w-md shrink-0 bg-[#1f1f1f] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("account.alterarSenha")} tabIndex={-1} className="my-auto w-full max-w-md shrink-0 bg-surface border border-zinc-800 rounded-xl shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <div className="flex items-center gap-2">
                 <KeyRound size={18} className="text-orange-400" />
@@ -126,18 +126,18 @@ export function EditPasswordModal({
                 {showPassword ? t("account.ocultarSenhas") : t("account.mostrarSenhas")}
               </button>
             </div>
-            <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-[#1a1a1a]">
+            <div className="p-4 border-t border-zinc-800 flex justify-end gap-2 bg-surface-sunken">
               <Button
                 variant="ghost"
                 onClick={onClose}
                 disabled={isLoading}
-                className="text-zinc-400 hover:bg-red-600 hover:text-white transition-colors"
+                className="text-zinc-400 hover:bg-red-600 hover:text-on-accent transition-colors"
               >
                 {t("common.cancelar")}</Button>
               <Button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="bg-orange-700 hover:bg-orange-800 text-white gap-2 min-w-[100px]"
+                className="bg-orange-700 hover:bg-orange-800 text-on-accent gap-2 min-w-[100px]"
               >
                 {isLoading ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -173,7 +173,7 @@ function PasswordInput({
       onChange={(e) => onChange(e.target.value)}
       aria-label={placeholder}
       placeholder={placeholder}
-      className="w-full bg-[#141414] border border-zinc-700 rounded-lg p-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-orange-500 transition-colors text-sm"
+      className="w-full bg-surface-sunken border border-zinc-700 rounded-lg p-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-orange-500 transition-colors text-sm"
     />
   );
 }

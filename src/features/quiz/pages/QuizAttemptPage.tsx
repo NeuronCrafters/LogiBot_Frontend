@@ -105,7 +105,7 @@ function ResultView({
                   <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
                     <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
                     <div>
-                      <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-red-400">
+                      <p className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-red-400">
                         {t("quiz.suaResposta")}{detail.selected})
                       </p>
                       <p className="mt-0.5 font-[Poppins] text-sm text-zinc-300">
@@ -117,7 +117,7 @@ function ResultView({
                 <div className="flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                   <div>
-                    <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-emerald-400">
+                    <p className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-emerald-400">
                       {t("quiz.respostaCorreta_653")}{detail.correct})
                     </p>
                     <p className="mt-0.5 font-[Poppins] text-sm text-zinc-300">
@@ -141,7 +141,7 @@ function ResultView({
       <div className="flex flex-col gap-3 pt-2 sm:flex-row">
         <button
           onClick={onRetry}
-          className="h-11 flex-1 rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+          className="h-11 flex-1 rounded-lg bg-indigo-600 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-indigo-700"
         >
           {t("common.tentarNovamente")}</button>
         <button
@@ -226,7 +226,7 @@ export function QuizAttempt() {
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         {/* Header */}
-        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
@@ -265,7 +265,7 @@ export function QuizAttempt() {
         </section>
 
         {/* Content */}
-        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
           {result ? (
             <ResultView
               result={result}
@@ -321,9 +321,9 @@ export function QuizAttempt() {
                           }`}
                         >
                           <span
-                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-[Poppins] text-[10px] font-bold transition-colors ${
+                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-[Poppins] text-xs font-bold transition-colors ${
                               selected
-                                ? "border-indigo-400 bg-indigo-500 text-white"
+                                ? "border-indigo-400 bg-indigo-500 text-on-accent"
                                 : "border-white/20 bg-white/5 text-zinc-500"
                             }`}
                           >
@@ -368,7 +368,7 @@ export function QuizAttempt() {
                     <button
                       onClick={() => submitMutation.mutate()}
                       disabled={!answered || submitMutation.isPending}
-                      className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {submitMutation.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -382,7 +382,7 @@ export function QuizAttempt() {
                     <button
                       onClick={() => setCurrentIndex((i) => Math.min(total - 1, i + 1))}
                       disabled={!answered}
-                      className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {t("quiz.proxima")}<ArrowRight className="h-4 w-4" />
                     </button>

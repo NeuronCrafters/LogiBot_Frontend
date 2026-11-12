@@ -35,7 +35,7 @@ function QuizCard({
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 text-left shadow-md shadow-black/10 transition-all hover:border-white/20 hover:bg-[#252525]"
+      className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface p-5 text-left shadow-md shadow-black/10 transition-all hover:border-white/20 hover:bg-surface-raised"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
@@ -65,14 +65,14 @@ function QuizCard({
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 border-t border-white/5 pt-3">
-        <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-[10px] font-medium text-indigo-400">
+        <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-indigo-400">
           <BookOpen className="h-3 w-3" />
           {quiz.disciplineName}
         </span>
-        <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-[10px] text-zinc-500">
+        <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-xs text-zinc-500">
           {TOPIC_LABEL()[quiz.topic] ?? quiz.topic}
         </span>
-        <span className="ml-auto flex items-center gap-1 font-[Poppins] text-[10px] text-zinc-600">
+        <span className="ml-auto flex items-center gap-1 font-[Poppins] text-xs text-zinc-600">
           {t("common.questions", { count: quiz.questionCount })}
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
         </span>
@@ -100,7 +100,7 @@ export function Quiz() {
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
-        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
               <Brain className="h-5 w-5" />
@@ -115,7 +115,7 @@ export function Quiz() {
         </section>
 
         {isLoading && (
-          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-[#1f1f1f] py-20">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-surface py-20">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
             <p className="font-[Poppins] text-sm text-zinc-500">
               {t("quiz.carregandoQuizzes")}</p>
@@ -142,7 +142,7 @@ export function Quiz() {
         )}
 
         {!isLoading && !error && quizzes?.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-20">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-surface py-20">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-neutral-950/60 text-zinc-700">
               <Brain className="h-7 w-7" />
             </div>

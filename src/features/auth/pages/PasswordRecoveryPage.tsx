@@ -4,6 +4,7 @@ import { publicApi } from "@/shared/api/httpClient";
 import { apiError } from "@/shared/lib/apiError";
 import { t, useLocale, type MessageKey } from "@/i18n";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { PreferencesMenu } from "@/shared/preferences/PreferencesControls";
 
 export function PasswordRecoveryPage({ reset = false }: { reset?: boolean }) {
   useLocale();
@@ -34,10 +35,10 @@ export function PasswordRecoveryPage({ reset = false }: { reset?: boolean }) {
   }
 
   return <div className="min-h-screen bg-neutral-950 px-4 py-4 text-white">
-    <div className="flex justify-end"><LanguageSwitcher /></div>
+    <div className="flex items-start justify-end gap-2"><PreferencesMenu /><LanguageSwitcher /></div>
     <main className="mx-auto flex min-h-[80vh] max-w-md flex-col justify-center">
       <Link to="/" className="mb-6 text-xl font-bold">LogiBot.AI</Link>
-      <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-6">
+      <section className="rounded-2xl border border-white/10 bg-surface p-6">
         <h1 className="text-xl font-semibold">{t(reset ? "auth.recoveryNewPassword" : "auth.recoveryTitle")}</h1>
         <p className="mt-3 text-sm text-zinc-400">{t(reset ? "auth.recoveryResetDescription" : "auth.recoveryDescription")}</p>
         {invalidLink && <p role="alert" className="mt-4 text-sm text-red-300">{t("auth.recoveryInvalidLink")}</p>}

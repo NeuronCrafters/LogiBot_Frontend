@@ -102,7 +102,7 @@ function NextActions({ entity }: { entity: EntityType }) {
   ];
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+    <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
       <p className="font-[Poppins] text-sm font-semibold text-white">
         {t("admin.proximasAcoes")}</p>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -202,7 +202,7 @@ function CreateEntitiesContent() {
   return (
     <main className="flex-1 overflow-y-auto px-4 py-6 text-white md:px-8 md:py-8">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
-        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">

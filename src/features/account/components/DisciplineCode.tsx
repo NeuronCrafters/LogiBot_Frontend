@@ -36,7 +36,7 @@ export function DisciplineCode({ text, disciplines }: DisciplineCodeProps) {
           />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md border border-white/10 bg-[#1f1f1f] text-white font-[Poppins]">
+      <DialogContent className="max-w-md border border-white/10 bg-surface text-white font-[Poppins]">
         <DialogHeader>
           <DialogTitle className="text-base text-white">
             {t("common.disciplinasVinculadas")}</DialogTitle>

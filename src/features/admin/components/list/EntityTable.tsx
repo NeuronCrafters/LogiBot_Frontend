@@ -95,7 +95,7 @@ export function EntityTable({
   const headerSecondary = hasPeopleColumns ? t("common.email") : "ID";
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-lg shadow-black/10">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-lg shadow-black/10">
       <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
         <div>
           <p className="font-[Poppins] text-sm font-semibold text-white capitalize">
@@ -121,20 +121,20 @@ export function EntityTable({
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/5">
-              <th className="w-12 px-5 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
+              <th className="w-12 px-5 py-3 text-left font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-600">
                 {t("common.numberColumn")}
               </th>
-              <th className="px-5 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
+              <th className="px-5 py-3 text-left font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-600">
                 {t("common.nome")}</th>
-              <th className="px-5 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
+              <th className="px-5 py-3 text-left font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-600">
                 {headerSecondary}
               </th>
               {hasPeopleColumns && (
-                <th className="px-5 py-3 text-left font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
+                <th className="px-5 py-3 text-left font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-600">
                   {t("admin.cargo")}</th>
               )}
               {showActions && (
-                <th className="px-5 py-3 text-right font-[Poppins] text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
+                <th className="px-5 py-3 text-right font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-600">
                   {t("admin.acoes")}</th>
               )}
             </tr>

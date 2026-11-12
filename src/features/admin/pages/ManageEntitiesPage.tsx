@@ -93,7 +93,7 @@ function FormModal({
     >
       <div className="flex min-h-full items-start justify-center px-4 py-10">
         <div className={`w-full ${wide ? "max-w-4xl" : "max-w-lg"}`}>
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1c1c1c] shadow-2xl shadow-black/40">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-2xl shadow-black/40">
             <div className="flex items-center justify-between border-b border-white/10 p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
@@ -178,7 +178,7 @@ function EntityCard({
   useLocale();
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] p-4 shadow-md shadow-black/10 transition-colors hover:border-white/20">
+    <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface p-4 shadow-md shadow-black/10 transition-colors hover:border-white/20">
       <div>
         <p className="font-[Poppins] text-sm font-semibold text-white leading-snug">
           {name}
@@ -241,11 +241,11 @@ function EmptyTab({
   useLocale();
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-14">
+    <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-white/10 bg-surface py-14">
       <p className="font-[Poppins] text-sm text-zinc-500">{message}</p>
       <button
         onClick={onCreateClick}
-        className="flex items-center gap-1.5 rounded-lg bg-blue-600/80 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-600"
+        className="flex items-center gap-1.5 rounded-lg bg-blue-600/80 px-4 py-2 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-blue-600"
       >
         <Plus className="h-4 w-4" />
         {createLabel}
@@ -475,7 +475,7 @@ export function ManageEntities() {
     <main className="flex-1 overflow-y-auto px-4 py-6 text-white md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
         {/* Header */}
-        <section className="rounded-2xl border border-white/10 bg-[#1f1f1f] p-5 shadow-lg shadow-black/10 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
@@ -543,7 +543,7 @@ export function ManageEntities() {
         )}
 
         {!isLoading && needsCourseSelection && (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/10 bg-[#1f1f1f] py-16">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/10 bg-surface py-16">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-neutral-950/60 text-zinc-600">
               <BookOpen className="h-6 w-6" />
             </div>
@@ -559,7 +559,7 @@ export function ManageEntities() {
         {!isLoading && !needsCourseSelection && (
           <>
             {/* Tab bar + create button */}
-            <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1f1f1f] px-5 py-4 shadow-lg shadow-black/10 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface px-5 py-4 shadow-lg shadow-black/10 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex gap-0.5 overflow-x-auto">
                 {TABS.map((t) => (
                   <TabButton
@@ -574,7 +574,7 @@ export function ManageEntities() {
               </div>
               <button
                 onClick={() => setCreateModal(tab)}
-                className="flex items-center gap-1.5 self-start rounded-lg bg-blue-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 sm:self-auto"
+                className="flex items-center gap-1.5 self-start rounded-lg bg-blue-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-blue-700 sm:self-auto"
               >
                 <Plus className="h-4 w-4" />
                 {activeTab.createLabel}

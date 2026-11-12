@@ -46,7 +46,7 @@ export function Input({
 
   return (
     <div
-      className={`relative flex items-center bg-[#1f1f1f] border border-white/10 rounded-lg px-4 py-3 w-[341px] h-[64px] ${className}`}
+      className={`relative flex items-center bg-surface border border-white/10 rounded-lg px-4 py-3 w-[341px] h-[64px] ${className}`}
     >
       <div className="mr-3">{InputIcons[type]}</div>
       <ShadcnInput

@@ -1,4 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
+import { chartLine } from "../../chartColors";
+import { getResolvedPreferences } from "@/shared/preferences";
 import { t, useLocale, getLanguage } from "@/i18n";
 ﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -67,7 +69,7 @@ export function UsageChart({ filter }: UsageChartProps) {
   } = useUsageData(filter);
   const hasRequiredIds = !!dashboardFiltersFromLegacy(filter).universityId;
   const chartConfig = useMemo(
-    () => ({ usage: { label: t("dashboard.minutos", {}, locale), color: "#3b82f6" } }),
+    () => ({ usage: { label: t("dashboard.minutos", {}, locale), color: "rgb(var(--c-blue-500))" } }),
     [locale],
   );
   const chartData = useMemo(() => {
@@ -90,7 +92,7 @@ export function UsageChart({ filter }: UsageChartProps) {
   return (
     <Card
       id="usage-chart"
-      className="bg-[#1f1f1f] border-white/10 flex flex-col"
+      className="bg-surface border-white/10 flex flex-col"
     >
       <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
         <div className="flex items-start justify-between px-6 py-5 pr-36">
@@ -102,7 +104,7 @@ export function UsageChart({ filter }: UsageChartProps) {
           </div>
         </div>
         <div className="border-t border-white/10 px-6 py-4">
-          <p className="font-[Poppins] text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+          <p className="font-[Poppins] text-xs font-semibold uppercase tracking-widest text-zinc-600">
             {t("dashboard.tempoTotal", {}, locale)}</p>
           <p className="mt-1 font-[Poppins] text-2xl font-bold text-white sm:text-3xl">
             {hasData ? formattedTime : "—"}
@@ -152,9 +154,8 @@ export function UsageChart({ filter }: UsageChartProps) {
               >
                 <CartesianGrid
                   vertical={false}
-                  stroke="#333"
+                  stroke={chartLine(0.045)}
                   strokeDasharray="3 3"
-                  strokeOpacity={0.5}
                 />
                 <XAxis
                   dataKey="date"
@@ -162,7 +163,7 @@ export function UsageChart({ filter }: UsageChartProps) {
                   axisLine={false}
                   tickMargin={8}
                   minTickGap={32}
-                  stroke="#666"
+                  stroke="rgb(var(--c-neutral-500))"
                   tickFormatter={(v: string) =>
                     new Date(v).toLocaleDateString(getLanguage(), {
                       day: "2-digit",
@@ -184,7 +185,7 @@ export function UsageChart({ filter }: UsageChartProps) {
                     });
                     const secs = Math.round((d.usage ?? 0) * 60);
                     return (
-                      <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl">
+                      <div className="rounded-xl border border-white/10 bg-surface-sunken px-3 py-2.5 text-sm shadow-xl">
                         <p className="mb-1.5 font-[Poppins] font-semibold text-white">
                           {date}
                         </p>
@@ -206,9 +207,9 @@ export function UsageChart({ filter }: UsageChartProps) {
                     );
                   }}
                 />
-                <Bar
+                <Bar isAnimationActive={!getResolvedPreferences().reduceMotion}
                   dataKey="usage"
-                  fill="#3b82f6"
+                  fill="rgb(var(--c-blue-500))"
                   radius={[4, 4, 0, 0]}
                   fillOpacity={0.85}
                 />

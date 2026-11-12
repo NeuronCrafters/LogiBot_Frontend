@@ -1,4 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
+import { chartLine, chartText } from "../../chartColors";
+import { getResolvedPreferences } from "@/shared/preferences";
 import { percent, t, useLocale } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -29,7 +31,7 @@ const CHART_INFO =
   () => `${t("dashboard.nivelDeAcertoMedioPorAssuntoNo")} ${t("dashboard.proficiencyCoverage")}`;
 
 const chartConfig = {
-  score: { get label() { return t("dashboard.acerto"); }, color: "#3b82f6" },
+  score: { get label() { return t("dashboard.acerto"); }, color: "rgb(var(--c-blue-500))" },
 } satisfies ChartConfig;
 
 interface ChartProps {
@@ -112,7 +114,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
   return (
     <Card
       id="proficiency-radar-chart"
-      className="bg-[#1f1f1f] border-white/10 flex flex-col h-full"
+      className="bg-surface border-white/10 flex flex-col h-full"
     >
       <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
         <div className="flex items-start justify-between px-6 py-5 pr-36">
@@ -165,7 +167,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                     if (!active || !payload?.[0]) return null;
                     const entry = payload[0].payload;
                     return (
-                      <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2.5 text-sm shadow-xl">
+                      <div className="rounded-xl border border-white/10 bg-surface-sunken px-3 py-2.5 text-sm shadow-xl">
                         <p className="mb-1 font-[Poppins] font-semibold text-white">
                           {entry.subject}
                         </p>
@@ -181,12 +183,12 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                 />
                 <PolarGrid
                   gridType="polygon"
-                  stroke="rgba(255,255,255,0.1)"
+                  stroke={chartLine(0.1)}
                   strokeDasharray="2 2"
                 />
                 <PolarAngleAxis
                   dataKey="subject"
-                  tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 11 }}
+                  tick={{ fill: chartText(0.6), fontSize: 11 }}
                 />
                 <PolarRadiusAxis
                   angle={90}
@@ -194,14 +196,14 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                   tick={false}
                   axisLine={false}
                 />
-                <Radar
+                <Radar isAnimationActive={!getResolvedPreferences().reduceMotion}
                   dataKey="score"
-                  fill="#3b82f6"
+                  fill="rgb(var(--c-blue-500))"
                   fillOpacity={0.25}
-                  stroke="#3b82f6"
+                  stroke="rgb(var(--c-blue-500))"
                   strokeWidth={2}
                   dot={(props: any) => props.payload?.payload?.hasResponses
-                    ? <circle key={props.index} cx={props.cx} cy={props.cy} r={4} fill="#3b82f6" />
+                    ? <circle key={props.index} cx={props.cx} cy={props.cy} r={4} fill="rgb(var(--c-blue-500))" />
                     : <g key={props.index} />}
                 />
               </RadarChart>

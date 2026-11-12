@@ -1,4 +1,5 @@
 import { apiError } from "@/shared/lib/apiError";
+import { getResolvedPreferences } from "@/shared/preferences";
 import { t, useLocale, getLanguage } from "@/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -269,7 +270,7 @@ function SettingsTab({
         type="button"
         disabled={!settings || isSaving}
         onClick={() => onSave({ ragMode, topK, minScore })}
-        className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSaving ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -457,7 +458,7 @@ function DocumentsTab({
             <button
               type="submit"
               disabled={!uploadFile || isUploading}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               {t("rag.enviar")}</button>
@@ -523,7 +524,7 @@ function ChatTab({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: getResolvedPreferences().reduceMotion ? "auto" : "smooth" });
   }, [messages, isTesting]);
 
   const handleSubmit = () => {
@@ -618,8 +619,9 @@ function ChatTab({
           )}
 
           {isTesting && (
-            <div className="flex items-center gap-2 px-4 py-3">
-              <div className="flex gap-1">
+            <div role="status" className="flex items-center gap-2 px-4 py-3">
+              <span className="sr-only">{t("chat.gerandoResposta")}</span>
+              <div className="flex gap-1" aria-hidden="true">
                 <span className="h-2 w-2 animate-bounce rounded-full bg-zinc-500 [animation-delay:-0.3s]" />
                 <span className="h-2 w-2 animate-bounce rounded-full bg-zinc-500 [animation-delay:-0.15s]" />
                 <span className="h-2 w-2 animate-bounce rounded-full bg-zinc-500" />
@@ -649,7 +651,7 @@ function ChatTab({
             type="button"
             onClick={handleSubmit}
             disabled={!input.trim() || isTesting || locked}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-on-accent transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isTesting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
