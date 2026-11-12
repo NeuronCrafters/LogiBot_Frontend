@@ -1,3 +1,4 @@
+import { ChartTooltip as Tooltip } from "@/components/ui/chart";
 import { apiError } from "@/shared/lib/apiError";
 import { useChartPreferences } from "../../chartPreferences";
 import { subjectLabel } from "../../subjectLabels";
@@ -9,7 +10,6 @@ import {
   XAxis,
   YAxis,
   Cell,
-  Tooltip,
   ResponsiveContainer,
 } from "recharts";
 import {
@@ -93,7 +93,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
   const errorMessage =
     apiError(error, "common.erroAoCarregarDados");
   const chartData = [{ category: t("dashboard.nota"), score: data?.score ?? 0 }];
-  const { animate } = useChartPreferences();
+  const { animate, tooltipTrigger } = useChartPreferences();
 
   const bands = [
     { label: number(0) + "–" + number(4.99), desc: t("common.insuficiente"), color: "text-chart-negative-ink" },
@@ -105,10 +105,10 @@ export function GeneralScoreChart({ filters }: ChartProps) {
   return (
     <Card
       id="general-score-card"
-      className="bg-surface border-white/10 flex flex-col h-full"
+      className="dashboard-chart bg-surface border-white/10 flex flex-col h-full"
     >
-      <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-36">
+      <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
+        <div className="chart-heading min-w-0 px-4 py-5 sm:px-6">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               {t("dashboard.avaliacaoGeralDeDesempenho")}</CardTitle>
@@ -116,7 +116,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
               {t("dashboard.mediaBaseadaNaProficienciaDosTopicosDo")}</CardDescription>
           </div>
         </div>
-        <div className="absolute top-5 right-4 z-40">
+        <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
             containerId="general-score-card"
             fileName={t("dashboard.export.nota_geral")}
@@ -201,7 +201,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                 >
                   <XAxis type="number" domain={[0, 10]} hide />
                   <YAxis type="category" dataKey="category" hide />
-                  <Tooltip cursor={false} content={() => null} />
+                  <Tooltip trigger={tooltipTrigger} cursor={false} content={() => null} />
                   <Bar isAnimationActive={animate} dataKey="score" radius={[4, 4, 4, 4]}>
                     <Cell fill={data.color} />
                   </Bar>
@@ -247,7 +247,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
       )}
 
       {hasData && (
-        <CardFooter className="flex justify-between border-t border-white/10 px-6 py-4">
+        <CardFooter className="flex flex-wrap gap-4 justify-between border-t border-white/10 px-4 py-4 sm:px-6">
           <div className="flex flex-col">
             <span className="font-[Poppins] text-xs uppercase tracking-wider text-zinc-600">
               {t("dashboard.classificacao")}</span>

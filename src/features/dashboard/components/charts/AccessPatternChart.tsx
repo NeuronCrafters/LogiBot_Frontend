@@ -1,3 +1,4 @@
+import { ChartTooltip as Tooltip } from "@/components/ui/chart";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
@@ -10,7 +11,6 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
-  Tooltip,
   CartesianGrid,
 } from "recharts";
 import {
@@ -106,7 +106,7 @@ function useSessionData(filters: ChartProps["filters"]) {
 
 export function AccessPatternChart({ filters }: ChartProps) {
   useLocale();
-  const { animate, font, space } = useChartPreferences();
+  const { animate, font, space, tooltipTrigger } = useChartPreferences();
 
   const {
     data: sessions,
@@ -124,10 +124,10 @@ export function AccessPatternChart({ filters }: ChartProps) {
   return (
     <Card
       id="access-pattern-chart"
-      className="bg-surface border-white/10 flex flex-col"
+      className="dashboard-chart bg-surface border-white/10 flex flex-col"
     >
-      <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-36">
+      <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
+        <div className="chart-heading min-w-0 px-4 py-5 sm:px-6">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               {t("dashboard.detalhesDeAcessoPorSessao")}</CardTitle>
@@ -135,7 +135,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
               {t("dashboard.cadaPontoEUmaSessaoPasseO")}</CardDescription>
           </div>
         </div>
-        <div className="absolute top-5 right-4 z-40">
+        <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
             containerId="access-pattern-chart"
             fileName={t("dashboard.export.padrao_acesso")}
@@ -192,7 +192,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
                   width={space(60)}
                   tick={{ fill: chartText(0.5), fontSize: font(12) }}
                 />
-                <Tooltip
+                <Tooltip trigger={tooltipTrigger}
                   cursor={{ strokeDasharray: "3 3" }}
                   content={<CustomTooltip />}
                 />

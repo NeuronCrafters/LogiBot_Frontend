@@ -2,7 +2,9 @@ import { t, useLocale } from "@/i18n";
 ﻿import { toPng } from "html-to-image";
 import { Download, Info, Sparkles, X } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
+import { createPortal } from "react-dom";
+import { useFloatingPosition } from "@/shared/hooks/useFloatingPosition";
 import type { DashboardFilterParams } from "../api/dashboardApi";
 import type { DashboardInsightChart } from "../types";
 import { useDashboardInsights } from "./DashboardInsightProvider";
@@ -55,16 +57,42 @@ export function ChartDownloadButton({
   const [downloading, setDownloading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const infoId = useId();
+  const position = useFloatingPosition(showInfo, triggerRef, infoRef);
+
+  useEffect(() => {
+    if (!showInfo || position.visibility !== "visible") return;
+    let frame: number;
+    const focusWhenPainted = () => {
+      const close = closeRef.current;
+      if (!close) return;
+      if (getComputedStyle(close).visibility === "visible") close.focus({ preventScroll: true });
+      else frame = requestAnimationFrame(focusWhenPainted);
+    };
+    frame = requestAnimationFrame(focusWhenPainted);
+    return () => cancelAnimationFrame(frame);
+  }, [showInfo, position.visibility]);
 
   useEffect(() => {
     if (!showInfo) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (infoRef.current && !infoRef.current.contains(e.target as Node)) {
+    function handleClickOutside(e: Event) {
+      if (!infoRef.current?.contains(e.target as Node) && !triggerRef.current?.contains(e.target as Node)) {
         setShowInfo(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    function escape(e: KeyboardEvent) {
+      if (e.key === "Escape") { e.preventDefault(); setShowInfo(false); triggerRef.current?.focus({ preventScroll: true }); }
+    }
+    document.addEventListener("pointerdown", handleClickOutside);
+    document.addEventListener("focusin", handleClickOutside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", handleClickOutside);
+      document.removeEventListener("focusin", handleClickOutside);
+      document.removeEventListener("keydown", escape);
+    };
   }, [showInfo]);
 
   const handleDownload = async () => {
@@ -80,12 +108,16 @@ export function ChartDownloadButton({
   };
 
   return (
-    <div className={`flex items-center gap-1.5 ${className ?? ""}`}>
+    <div className={`flex min-w-0 max-w-full flex-wrap items-center gap-1.5 ${className ?? ""}`}>
       {info && (
-        <div ref={infoRef} className="relative">
+        <div className="relative">
           <button
+            ref={triggerRef}
             type="button"
             aria-label={t("dashboard.informacoesSobreOGrafico")}
+            aria-expanded={showInfo}
+            aria-controls={showInfo ? infoId : undefined}
+            aria-haspopup="dialog"
             onClick={() => setShowInfo((v) => !v)}
             className={`rounded-lg border p-2 transition-colors ${
               showInfo
@@ -96,15 +128,17 @@ export function ChartDownloadButton({
             <Info className="h-4 w-4" />
           </button>
 
-          {showInfo && (
-            <div className="absolute right-0 top-11 z-50 w-72 rounded-xl border border-white/10 bg-surface-sunken p-4 shadow-2xl shadow-black/60">
+          {showInfo && createPortal(
+            <div ref={infoRef} id={infoId} role="dialog" aria-label={t("dashboard.sobreEsteGrafico")} style={position} data-chart-info className="fixed z-[70] max-h-[calc(100dvh-2rem)] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-surface-sunken p-4 font-[Poppins] text-white shadow-2xl shadow-black/60 [overflow-wrap:anywhere]">
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   {t("dashboard.sobreEsteGrafico")}</span>
                 <button
+                  ref={closeRef}
+                  type="button"
                   aria-label={t("common.fechar")}
-                  onClick={() => setShowInfo(false)}
-                  className="text-zinc-600 transition-colors hover:text-zinc-400"
+                  onClick={() => { setShowInfo(false); triggerRef.current?.focus({ preventScroll: true }); }}
+                  className="-mr-2 -mt-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -113,7 +147,7 @@ export function ChartDownloadButton({
                 {info}
               </p>
             </div>
-          )}
+          , document.body)}
         </div>
       )}
 

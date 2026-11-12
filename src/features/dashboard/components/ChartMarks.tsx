@@ -6,8 +6,8 @@ export type MarkerShape = "circle" | "diamond" | "triangle" | "square" | "star" 
 export function HatchPattern({ id, color }: { id: string; color: string }) {
   return (
     <pattern id={id} patternUnits="userSpaceOnUse" width={6} height={6} patternTransform="rotate(45)">
-      <rect width={6} height={6} fill={color} />
-      <rect width={2} height={6} fill="rgb(var(--c-surface))" />
+      <rect className="chart-hatch-background" width={6} height={6} fill={color} />
+      <rect className="chart-hatch-line" width={2} height={6} fill="rgb(var(--c-surface))" />
     </pattern>
   );
 }
@@ -15,7 +15,7 @@ export function HatchPattern({ id, color }: { id: string; color: string }) {
 /** Legend swatch that reproduces the fill used by the chart, including patterns. */
 export function FillSwatch({ fill, size = 12 }: { fill: string; size?: number }) {
   return (
-    <svg aria-hidden="true" focusable="false" width={size} height={size} viewBox="0 0 12 12" className="shrink-0">
+    <svg aria-hidden="true" focusable="false" width={size} height={size} viewBox="0 0 12 12" className="chart-fill-swatch shrink-0">
       <rect x={0.5} y={0.5} width={11} height={11} rx={2} fill={fill} stroke="rgb(var(--c-control-border))" strokeWidth={1} />
     </svg>
   );

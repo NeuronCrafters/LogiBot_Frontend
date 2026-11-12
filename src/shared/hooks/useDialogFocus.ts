@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
+import { useModalScrollLock } from "./useModalScrollLock";
 
 export function useDialogFocus<T extends HTMLElement>(open: boolean, onClose?: () => void) {
   const ref = useRef<T>(null);
+  useModalScrollLock(open, ref);
   const close = useRef(onClose);
   close.current = onClose;
   useEffect(() => {

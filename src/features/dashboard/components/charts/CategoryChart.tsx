@@ -1,5 +1,6 @@
+import { RadarAxisTick, RadarLabels } from "../RadarLabels";
 import { apiError } from "@/shared/lib/apiError";
-import { chartLine, chartText } from "../../chartColors";
+import { chartLine } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
 import { number, percent, t, useLocale } from "@/i18n";
 ﻿import { useMemo } from "react";
@@ -102,15 +103,16 @@ export function CategoryChart({ filter }: CategoryChartProps) {
   const refetchTyped = refetch as () => void;
   const errorMessage =
     apiError(error, "common.erroAoCarregarDados");
-  const { animate, font, space } = useChartPreferences();
+  const { animate, font, space, tooltipTrigger } = useChartPreferences();
 
   return (
     <Card
       id="category-chart"
-      className="bg-surface border-white/10 flex flex-col h-full"
+      data-indexed-radar={data?.chartData.some(row => row.category.length > 22) || undefined}
+      className="dashboard-chart bg-surface border-white/10 flex flex-col h-full"
     >
-      <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-36">
+      <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
+        <div className="chart-heading min-w-0 px-4 py-5 sm:px-6">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               {t("dashboard.assuntosMaisAcessadosChat", {}, locale)}</CardTitle>
@@ -118,7 +120,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
               {t("dashboard.acessosPorCategoriaDeConteudo", {}, locale)}</CardDescription>
           </div>
         </div>
-        <div className="absolute top-5 right-4 z-40">
+        <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
             containerId="category-chart"
             fileName={t("dashboard.export.assuntos_acessados")}
@@ -153,7 +155,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                 data={data!.chartData}
                 margin={{ top: space(20), right: space(36), bottom: space(20), left: space(36) }}
               >
-                <ChartTooltip
+                <ChartTooltip trigger={tooltipTrigger}
                   cursor={false}
                   content={({ active, payload }) => {
                     if (!active || !payload?.[0]) return null;
@@ -180,7 +182,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                 />
                 <PolarAngleAxis
                   dataKey="category"
-                  tick={{ fill: chartText(0.6), fontSize: font(11) }}
+                  tick={(props) => <RadarAxisTick {...props} fontSize={font(11)} />}
                 />
                 <PolarRadiusAxis
                   angle={90}
@@ -200,6 +202,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             </ChartContainer>
           </div>
         )}
+        {hasRequired && !isLoading && !isError && hasData && <RadarLabels labels={data!.chartData.map(row => row.category)} />}
         {hasRequired && !isLoading && !isError && hasData && (
           <ChartDataTable
             title={t("dashboard.assuntosMaisAcessadosNoChat", {}, locale)}
@@ -225,8 +228,8 @@ export function CategoryChart({ filter }: CategoryChartProps) {
       </CardContent>
 
       {hasData && (
-        <CardFooter className="flex justify-between items-center px-6 py-4 border-t border-white/10">
-          <div className="flex items-center gap-4">
+        <CardFooter className="block px-4 py-4 border-t border-white/10 sm:px-6">
+          <div className="chart-metrics min-w-0">
             <span className="font-[Poppins] text-sm text-zinc-400">
               {t("dashboard.totalDeAcessos", {}, locale)}{" "}
               <span className="font-semibold text-white">
@@ -235,7 +238,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             </span>
             {topCategory && (
               <>
-                <span className="text-white/20">|</span>
+
                 <span className="font-[Poppins] text-sm text-zinc-400">
                   {t("dashboard.maisAcessado", {}, locale)}{" "}
                   <span className="font-semibold text-white">

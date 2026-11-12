@@ -1,7 +1,14 @@
 import { useResolvedPreferences, type TextSizePreference } from "@/shared/preferences";
+import { useSyncExternalStore } from "react";
 
 const BASE_FONT_SIZE = 16;
 const TEXT_SCALE: Record<TextSizePreference, number> = { default: 1, large: 1.125, larger: 1.25 };
+const touchQuery = typeof window !== "undefined" && typeof window.matchMedia === "function" ? window.matchMedia("(hover: none)") : null;
+const subscribeTouch = (listener: () => void) => {
+  touchQuery?.addEventListener("change", listener);
+  return () => touchQuery?.removeEventListener("change", listener);
+};
+const isTouch = () => touchQuery?.matches ?? false;
 
 /** Colors of the chart semantic tokens. They follow the theme and the chosen palette through CSS variables. */
 export const CHART_COLORS = {
@@ -36,6 +43,7 @@ export function scaleFont(size: number, scale: number) {
  */
 export function useChartPreferences() {
   const resolved = useResolvedPreferences();
+  const touch = useSyncExternalStore(subscribeTouch, isTouch, () => false);
   const scale = rootFontSize(resolved.textSize) / BASE_FONT_SIZE;
   return {
     animate: !resolved.reduceMotion,
@@ -43,5 +51,7 @@ export function useChartPreferences() {
     font: (size: number) => scaleFont(size, scale),
     space: (size: number) => Math.round(size * scale),
     palette: resolved.palette,
+    // Recharts must receive this on the chart child itself to register the right events.
+    tooltipTrigger: touch ? "click" as const : "hover" as const,
   };
 }

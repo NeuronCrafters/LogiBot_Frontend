@@ -1,3 +1,4 @@
+import { ChartTooltip as Tooltip } from "@/components/ui/chart";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
@@ -13,7 +14,6 @@ import {
   Scatter,
   ScatterChart,
   Symbols,
-  Tooltip,
   XAxis,
   YAxis,
   ZAxis,
@@ -84,7 +84,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
   const locale = useLocale();
 
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
-  const { animate, font, space } = useChartPreferences();
+  const { animate, font, space, tooltipTrigger } = useChartPreferences();
   const hasData = data && data.points.some((point) => point.performance !== null);
   const showReferenceLines = data && data.points.filter((point) => point.performance !== null).length > 1;
 
@@ -153,10 +153,10 @@ export function EffortMatrixChart({ filters }: ChartProps) {
   return (
     <Card
       id="effort-matrix-chart"
-      className="bg-surface border-white/10 flex flex-col"
+      className="dashboard-chart bg-surface border-white/10 flex flex-col"
     >
-      <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-36">
+      <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
+        <div className="chart-heading min-w-0 px-4 py-5 sm:px-6">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               {t("dashboard.matrizDesempenhoVsEsforco", {}, locale)}</CardTitle>
@@ -164,7 +164,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
               {t("dashboard.quadrantesPorMediaDeEsforcoETaxa", {}, locale)}</CardDescription>
           </div>
         </div>
-        <div className="absolute top-5 right-4 z-40">
+        <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
             containerId="effort-matrix-chart"
             fileName={t("dashboard.export.matriz_esforco")}
@@ -257,7 +257,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                   tick={{ fontSize: font(12), fill: chartText(0.5) }}
                 />
                 <ZAxis dataKey="size" range={[42, 70]} />
-                <Tooltip
+                <Tooltip trigger={tooltipTrigger}
                   cursor={{ strokeDasharray: "3 3" }}
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;

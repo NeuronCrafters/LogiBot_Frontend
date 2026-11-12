@@ -2,6 +2,7 @@ import { getLanguage, useLocale } from "@/i18n";
 ﻿import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import { cn } from "@/shared/lib/cn"
+import { ViewportChartTooltip } from "./viewport-chart-tooltip"
 
 const THEMES = { light: "", dark: ".dark" } as const
 
@@ -97,7 +98,17 @@ ${colorConfig
   )
 }
 
-const ChartTooltip = RechartsPrimitive.Tooltip
+function ChartTooltip({ content, ...props }: React.ComponentProps<typeof RechartsPrimitive.Tooltip>) {
+  return <RechartsPrimitive.Tooltip {...props} content={tooltip => (
+    <ViewportChartTooltip active={tooltip.active} interactive={props.trigger === "click"}>
+      {typeof content === "function" ? content(tooltip)
+        : React.isValidElement(content) ? React.cloneElement(content, tooltip)
+        : <RechartsPrimitive.DefaultTooltipContent {...tooltip} />}
+    </ViewportChartTooltip>
+  )} />
+}
+// Recharts discovers its special children by displayName before rendering them.
+ChartTooltip.displayName = "Tooltip"
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,

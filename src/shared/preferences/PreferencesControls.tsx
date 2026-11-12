@@ -75,7 +75,7 @@ function RadioGroup<K extends keyof Preferences>({ name, value }: { name: K; val
               key={String(option.value)}
               htmlFor={optionId}
               data-checked={checked || undefined}
-              className={`preference-option relative flex min-h-[44px] cursor-pointer items-center rounded-lg border px-3 text-sm transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-400 ${
+              className={`preference-option relative flex min-h-[44px] min-w-0 max-w-full cursor-pointer items-center rounded-lg border px-3 py-2 text-sm [overflow-wrap:anywhere] transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-400 ${
                 checked
                   ? "border-blue-400 bg-blue-500/15 font-semibold text-white"
                   : "border-control bg-neutral-950/60 text-zinc-300 hover:border-white/40 hover:text-white"
@@ -89,7 +89,7 @@ function RadioGroup<K extends keyof Preferences>({ name, value }: { name: K; val
                 checked={checked}
                 onChange={() => setPreference(name, option.value)}
               />
-              {checked && <span aria-hidden="true" className="preference-option-dot mr-1.5 h-2 w-2 rounded-full bg-blue-400" />}
+              {checked && <span aria-hidden="true" className="preference-option-dot mr-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-400" />}
               {t(option.label)}
             </label>
           );
@@ -144,7 +144,7 @@ export function PreferencesMenu({ className = "", trigger }: { className?: strin
         {trigger}
       </button>
       {open && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-end justify-center font-[Poppins] sm:items-center">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-[Poppins] sm:p-6">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div
             ref={dialog}
@@ -152,10 +152,10 @@ export function PreferencesMenu({ className = "", trigger }: { className?: strin
             aria-modal="true"
             aria-labelledby={titleId}
             tabIndex={-1}
-            className="relative max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-white/10 bg-surface p-5 font-[Poppins] text-white shadow-2xl shadow-black/40 sm:rounded-2xl"
+            className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-white/10 bg-surface font-[Poppins] text-white shadow-2xl shadow-black/40 sm:max-h-[calc(100dvh-3rem)]"
           >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <h2 id={titleId} className="text-lg font-semibold text-white">
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-white/10 p-4 sm:p-5">
+              <h2 id={titleId} className="min-w-0 text-lg font-semibold text-white [overflow-wrap:anywhere]">
                 {t("preferences.titulo")}
               </h2>
               <button
@@ -167,7 +167,9 @@ export function PreferencesMenu({ className = "", trigger }: { className?: strin
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
-            <PreferencesControls />
+            <div className="min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-5">
+              <PreferencesControls />
+            </div>
           </div>
         </div>,
         document.body,

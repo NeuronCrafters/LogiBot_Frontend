@@ -1,3 +1,4 @@
+import { ChartTooltip as Tooltip } from "@/components/ui/chart";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
@@ -11,7 +12,6 @@ import {
   LineChart,
   ReferenceLine,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -87,7 +87,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
   const hasRequiredIds = !!filters.universityId;
-  const { animate, font, space, scale } = useChartPreferences();
+  const { animate, font, space, scale, tooltipTrigger } = useChartPreferences();
   const scopeLabel = filters.studentId ? t("dashboard.doEstudante", {}, locale) : t("dashboard.mediaDoGrupo_453", {}, locale);
 
   const summary = useMemo(() => {
@@ -113,10 +113,10 @@ export function LearningJourneyChart({ filters }: ChartProps) {
   return (
     <Card
       id="learning-journey-chart"
-      className="bg-surface border-white/10 flex flex-col"
+      className="dashboard-chart bg-surface border-white/10 flex flex-col"
     >
-      <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-36">
+      <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
+        <div className="chart-heading min-w-0 px-4 py-5 sm:px-6">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               {t("dashboard.jornadaDeAprendizagem", {}, locale)}</CardTitle>
@@ -125,7 +125,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
             </CardDescription>
           </div>
         </div>
-        <div className="absolute top-5 right-4 z-40">
+        <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
             containerId="learning-journey-chart"
             fileName={t("dashboard.export.jornada_aprendizagem")}
@@ -180,7 +180,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                   tick={{ fill: chartText(0.5), fontSize: font(11) }}
                   tickFormatter={(v) => percent(v / 100)}
                 />
-                <Tooltip
+                <Tooltip trigger={tooltipTrigger}
                   cursor={{
                     stroke: chartLine(0.15),
                     strokeDasharray: "4 4",

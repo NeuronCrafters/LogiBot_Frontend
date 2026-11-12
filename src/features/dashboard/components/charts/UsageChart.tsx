@@ -72,7 +72,7 @@ export function UsageChart({ filter }: UsageChartProps) {
     refetch,
   } = useUsageData(filter);
   const hasRequiredIds = !!dashboardFiltersFromLegacy(filter).universityId;
-  const { animate, font, space } = useChartPreferences();
+  const { animate, font, space, tooltipTrigger } = useChartPreferences();
   const chartConfig = useMemo(
     () => ({ usage: { label: t("dashboard.minutos", {}, locale), color: CHART_COLORS.primary } }),
     [locale],
@@ -97,10 +97,10 @@ export function UsageChart({ filter }: UsageChartProps) {
   return (
     <Card
       id="usage-chart"
-      className="bg-surface border-white/10 flex flex-col"
+      className="dashboard-chart bg-surface border-white/10 flex flex-col"
     >
-      <CardHeader className="relative flex flex-col items-stretch p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-36">
+      <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
+        <div className="chart-heading min-w-0 px-4 py-5 sm:px-6">
           <div>
             <CardTitle className="text-white font-[Poppins]">
               {t("dashboard.tempoDeUsoDiario", {}, locale)}</CardTitle>
@@ -108,14 +108,14 @@ export function UsageChart({ filter }: UsageChartProps) {
               {t("dashboard.minutosDeUtilizacaoNosUltimosDias", {}, locale)}</CardDescription>
           </div>
         </div>
-        <div className="border-t border-white/10 px-6 py-4">
+        <div className="col-span-full border-t border-white/10 px-4 py-4 sm:px-6">
           <p className="font-[Poppins] text-xs font-semibold uppercase tracking-widest text-zinc-600">
             {t("dashboard.tempoTotal", {}, locale)}</p>
           <p className="mt-1 font-[Poppins] text-2xl font-bold text-white sm:text-3xl">
             {hasData ? formattedTime : "—"}
           </p>
         </div>
-        <div className="absolute top-5 right-4 z-40">
+        <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
             containerId="usage-chart"
             fileName={t("dashboard.export.tempo_de_uso")}
@@ -173,7 +173,7 @@ export function UsageChart({ filter }: UsageChartProps) {
                   tick={{ fontSize: font(12) }}
                   tickFormatter={(v: string) => formatDay(v, { day: "2-digit", month: "2-digit" })}
                 />
-                <ChartTooltip
+                <ChartTooltip trigger={tooltipTrigger}
                   cursor={false}
                   content={(props) => {
                     if (!props.active || !props.payload?.[0]) return null;

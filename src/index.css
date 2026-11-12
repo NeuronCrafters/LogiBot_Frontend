@@ -232,6 +232,45 @@ textarea::-webkit-scrollbar-thumb {
     background-color: Highlight;
   }
   .recharts-surface {
-    forced-color-adjust: none;
+    forced-color-adjust: auto;
   }
+  .recharts-surface text {
+    fill: CanvasText !important;
+  }
+  .recharts-cartesian-grid line,
+  .recharts-polar-grid path,
+  .recharts-polar-grid line,
+  .recharts-cartesian-axis-line,
+  .recharts-cartesian-axis-tick-line {
+    stroke: CanvasText !important;
+  }
+  .chart-hatch-background { forced-color-adjust: none; fill: Canvas; }
+  .chart-hatch-line { forced-color-adjust: none; fill: CanvasText; }
+  .recharts-surface [fill^="url("], .chart-fill-swatch [fill^="url("] {
+    forced-color-adjust: none;
+    stroke: CanvasText;
+  }
+  .recharts-radial-bar-background-sector { fill: Canvas !important; }
+}
+
+.dashboard-chart { min-width: 0; container-type: inline-size; overflow-wrap: anywhere; }
+.dashboard-chart-header { grid-template-columns: minmax(0, 1fr); }
+.dashboard-chart-header .chart-actions { grid-row: 2; }
+.dashboard-chart h3, .chart-metrics { overflow-wrap: anywhere; }
+.chart-metrics { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.radar-axis-index, .radar-labels { display: none; }
+[data-indexed-radar="true"] .radar-axis-name { display: none; }
+[data-indexed-radar="true"] .radar-axis-index { display: inline; }
+[data-indexed-radar="true"] .radar-labels { display: block; }
+.viewport-chart-tooltip .recharts-default-tooltip { white-space: normal !important; }
+
+@container (min-width: 30rem) {
+  .dashboard-chart-header { grid-template-columns: minmax(0, 1fr) auto; }
+  .dashboard-chart-header .chart-actions { grid-column: 2; grid-row: 1; padding-top: 1.25rem; padding-left: 0; }
+  .chart-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container (max-width: 30rem) {
+  .radar-axis-name { display: none; }
+  .radar-axis-index { display: inline; }
+  .radar-labels { display: block; }
 }

@@ -12,5 +12,7 @@ export default defineConfig({
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], locale: "pt-BR" } },
     { name: "mobile", use: { ...devices["Pixel 7"], locale: "es-ES" } },
+    { name: "firefox-accessibility", testMatch: /accessibility-overlays\.spec\.ts/, use: { ...devices["Desktop Firefox"], locale: "pt-BR" } },
+    { name: "webkit-accessibility", testMatch: /accessibility-overlays\.spec\.ts/, use: { ...devices["Desktop Safari"], locale: "pt-BR" } },
   ],
 });

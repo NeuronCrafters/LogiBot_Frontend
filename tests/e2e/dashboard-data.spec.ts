@@ -38,7 +38,7 @@ test("zero is an assessed score, while students without answers have no performa
   await expect(page.locator("#general-score-card")).toContainText("0,00");
   await expect(page.locator("#general-score-card")).not.toContainText("Cada assunto tem o mesmo peso");
   await page.locator("#general-score-card").getByRole("button", { name: "Informações sobre o gráfico", exact: true }).click();
-  await expect(page.locator("#general-score-card")).toContainText("Cada assunto tem o mesmo peso");
+  await expect(page.getByRole('dialog', { name: 'Sobre este gráfico' })).toContainText("Cada assunto tem o mesmo peso");
   await expect(page.locator("#proficiency-radar-chart")).toContainText("linguagem Python");
   await expect(page.locator("#proficiency-radar-chart")).not.toContainText("Nenhum dado de proficiência");
   await expect(page.locator("#effort-matrix-chart")).toContainText("1 aluno(s) sem respostas de quiz");

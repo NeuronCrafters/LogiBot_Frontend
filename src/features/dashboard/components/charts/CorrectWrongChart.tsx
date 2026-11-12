@@ -1,9 +1,10 @@
+import { ChartTooltip as Tooltip } from "@/components/ui/chart";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
 import { number, percent, t, useLocale } from "@/i18n";
 ﻿import { useQuery } from "@tanstack/react-query";
-import { Pie, PieChart, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Pie, PieChart, Cell, Legend, ResponsiveContainer } from "recharts";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { logApi } from "@/services/apiClient";
@@ -55,21 +56,21 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
   const hasData = !!accuracyData && (accuracyData.totalCorrect > 0 || accuracyData.totalWrong > 0);
   const refetchTyped = refetch as () => void;
   const errorMessage = apiError(error, "common.erroAoCarregarDados");
-  const { animate, font, space } = useChartPreferences();
+  const { animate, font, space, tooltipTrigger } = useChartPreferences();
   const hatchId = useSvgId("wrong-hatch");
   const fills = [COLORS[0], `url(#${hatchId})`];
   const icons = [CheckCircle2, XCircle];
 
   return (
-    <Card id="correct-wrong-chart" className="bg-surface border-white/10 flex flex-col h-full">
-      <CardHeader className="relative flex flex-col p-0 space-y-0 border-b border-white/10">
-        <div className="flex items-start justify-between px-6 py-5 pr-36">
+    <Card id="correct-wrong-chart" className="dashboard-chart bg-surface border-white/10 flex flex-col h-full">
+      <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
+        <div className="chart-heading min-w-0 px-4 py-5 sm:px-6">
           <div>
             <CardTitle className="text-white font-[Poppins]">{t("dashboard.desempenhoPorTopicoGeral")}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">{t("dashboard.acertosEErrosComBaseNaInteracao")}</CardDescription>
           </div>
         </div>
-        <div className="absolute top-5 right-4 z-40">
+        <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
             containerId="correct-wrong-chart"
             fileName={t("dashboard.export.acertos_erros")}
@@ -121,7 +122,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
                   <Cell key={`cell-${index}`} fill={fills[index]} stroke={COLORS[index]} strokeWidth={1} aria-label={`${entry.name}: ${number(entry.value)}`} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ backgroundColor: "rgb(var(--c-surface-sunken))", borderColor: chartLine(0.1), borderRadius: 12 }} labelStyle={{ color: "rgb(var(--c-white))" }} itemStyle={{ color: "rgb(var(--c-white))" }} />
+              <Tooltip trigger={tooltipTrigger} contentStyle={{ backgroundColor: "rgb(var(--c-surface-sunken))", borderColor: chartLine(0.1), borderRadius: 12 }} labelStyle={{ color: "rgb(var(--c-white))" }} itemStyle={{ color: "rgb(var(--c-white))" }} />
               <Legend
                 verticalAlign="bottom"
                 height={space(36)}
