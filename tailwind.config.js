@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 const defaults = require("tailwindcss/colors");
 const plugin = require("tailwindcss/plugin");
+const CHART_PALETTES = require("./src/shared/preferences/chartPalettes.json");
 
 const NEUTRAL_FAMILIES = ["neutral", "zinc", "gray", "slate", "stone"];
 const HUE_FAMILIES = [
@@ -31,11 +32,52 @@ const boostedColor = (name) => `rgb(var(--c-${name}) / calc(<alpha-value> * var(
 const borderColorValue = () =>
   `rgb(var(--c-border-ink) / calc(<alpha-value> * var(--border-boost, 1) * var(--alpha-boost, 1)))`;
 
+const CHART_TOKENS = ["positive", "negative", "warning", "info", "primary", "accent"];
+const DEFAULT_CHART_TOKENS = {
+  positive: ["emerald-500", "emerald-400"],
+  negative: ["red-500", "red-400"],
+  warning: ["amber-500", "amber-400"],
+  info: ["blue-500", "blue-400"],
+  primary: ["blue-500", "blue-400"],
+  accent: ["violet-500", "violet-400"],
+};
+const CONTROL_BORDER = {
+  dark: { default: "#767676", more: "#a3a3a3" },
+  light: { default: "#6b7789", more: "#334155" },
+};
+
+function defaultChartVariables() {
+  const vars = {};
+  for (const [token, [fill, ink]] of Object.entries(DEFAULT_CHART_TOKENS)) {
+    vars[`--chart-${token}`] = `var(--c-${fill})`;
+    vars[`--chart-${token}-ink`] = `var(--c-${ink})`;
+  }
+  return vars;
+}
+
+function paletteVariables(name, mode) {
+  const vars = {};
+  for (const token of CHART_TOKENS) {
+    vars[`--chart-${token}`] = rgb(CHART_PALETTES[name][mode][token]);
+    vars[`--chart-${token}-ink`] = rgb(CHART_PALETTES[name][mode][token]);
+  }
+  return vars;
+}
+
+function paletteRules() {
+  const rules = {};
+  for (const name of Object.keys(CHART_PALETTES)) {
+    rules[`:root[data-palette="${name}"]`] = paletteVariables(name, "dark");
+    rules[`:root.light[data-palette="${name}"]`] = paletteVariables(name, "light");
+  }
+  return rules;
+}
+
 function contrastVariables(mode) {
   const strong = mode === "dark"
     ? { muted: "#d4d4d8", 400: "#d4d4d8", 500: "#a1a1aa" }
     : { muted: "#1e293b", 400: "#1e293b", 500: "#334155", 600: "#475569", 700: "#64748b" };
-  const vars = { "--alpha-boost": "2.5", "--c-text-muted": rgb(strong.muted), "--c-placeholder": rgb(strong[500]) };
+  const vars = { "--alpha-boost": "2.5", "--c-text-muted": rgb(strong.muted), "--c-placeholder": rgb(strong[500]), "--c-control-border": rgb(CONTROL_BORDER[mode].more) };
   if (mode === "light") vars["--c-border-ink"] = rgb("#334155");
   for (const family of NEUTRAL_FAMILIES)
     for (const shade of ["400", "500", "600", "700"])
@@ -60,6 +102,7 @@ function themeVariables(mode) {
   vars["--c-text-muted"] = rgb(mode === "dark" ? "#a1a1aa" : "#475569");
   vars["--c-placeholder"] = rgb(mode === "dark" ? "#a1a1aa" : "#56657a");
   vars["--c-border-ink"] = mode === "dark" ? "255 255 255" : rgb("#64748b");
+  vars["--c-control-border"] = rgb(CONTROL_BORDER[mode].default);
   vars["--border-boost"] = mode === "dark" ? "1" : "2";
   vars["--text-alpha-boost"] = mode === "dark" ? "1" : "1.3";
   vars["--chart-ink"] = mode === "dark" ? "255 255 255" : rgb("#172033");
@@ -76,6 +119,7 @@ const palette = {
   black: defaults.black,
   white: boostedColor("white"),
   "on-accent": color("on-accent"),
+  control: color("control-border"),
   surface: { DEFAULT: color("surface"), sunken: color("surface-sunken"), raised: color("surface-raised") },
 };
 for (const family of [...NEUTRAL_FAMILIES, ...HUE_FAMILIES])
@@ -119,6 +163,10 @@ module.exports = {
           3: "hsl(var(--chart-3))",
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
+          ...Object.fromEntries(CHART_TOKENS.flatMap((token) => [
+            [token, `rgb(var(--chart-${token}) / <alpha-value>)`],
+            [`${token}-ink`, `rgb(var(--chart-${token}-ink) / <alpha-value>)`],
+          ])),
         },
       },
       keyframes: {
@@ -135,10 +183,11 @@ module.exports = {
     require("tailwindcss-animate"),
     plugin(({ addBase }) => {
       addBase({
-        ":root": { ...themeVariables("dark"), "color-scheme": "dark" },
+        ":root": { ...themeVariables("dark"), ...defaultChartVariables(), "color-scheme": "dark" },
         ":root.light": { ...themeVariables("light"), "color-scheme": "light" },
         ':root[data-contrast="more"]': contrastVariables("dark"),
         ':root.light[data-contrast="more"]': contrastVariables("light"),
+        ...paletteRules(),
       });
     }),
   ],

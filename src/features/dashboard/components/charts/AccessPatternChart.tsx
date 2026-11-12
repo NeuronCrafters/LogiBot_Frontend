@@ -1,7 +1,7 @@
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
-import { getResolvedPreferences } from "@/shared/preferences";
-import { t, useLocale } from "@/i18n";
+import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
+import { getLanguage, t, useLocale } from "@/i18n";
 ﻿import { useQuery } from "@tanstack/react-query";
 import {
   Scatter,
@@ -27,6 +27,7 @@ import {
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { formatDateTime, formatDuration } from "@/shared/lib/formatDate";
 import { ChartDownloadButton } from "../ChartDownloadButton";
+import { ChartDataTable } from "../ChartDataTable";
 
 const CHART_INFO =
   () => (t("dashboard.cadaPontoRepresentaUmaSessaoDeUso"));
@@ -105,6 +106,7 @@ function useSessionData(filters: ChartProps["filters"]) {
 
 export function AccessPatternChart({ filters }: ChartProps) {
   useLocale();
+  const { animate, font, space } = useChartPreferences();
 
   const {
     data: sessions,
@@ -162,10 +164,10 @@ export function AccessPatternChart({ filters }: ChartProps) {
           <ChartError message={apiError(error, "common.erroAoCarregarDados")} onRetry={refetch} />
         )}
         {hasRequiredIds && !isLoading && !isError && hasData && (
-          <div className="h-[300px]">
+          <div style={{ height: space(300) }}>
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart
-                margin={{ top: 10, right: 20, bottom: 10, left: 0 }}
+                margin={{ top: 10, right: space(20), bottom: 10, left: 0 }}
               >
                 <CartesianGrid stroke={chartLine(0.08)} />
                 <XAxis
@@ -176,7 +178,8 @@ export function AccessPatternChart({ filters }: ChartProps) {
                   ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
                   tickFormatter={(h) => `${Math.floor(h)}h`}
                   stroke={chartLine(0.3)}
-                  tick={{ fill: chartText(0.5), fontSize: 12 }}
+                  height={Math.ceil(font(12) * 1.5) + 12}
+                  tick={{ fill: chartText(0.5), fontSize: font(12) }}
                 />
                 <YAxis
                   type="number"
@@ -186,15 +189,16 @@ export function AccessPatternChart({ filters }: ChartProps) {
                   ticks={[0, 1, 2, 3, 4, 5, 6]}
                   tickFormatter={(d) => DAYS()[d]}
                   stroke={chartLine(0.3)}
-                  tick={{ fill: chartText(0.5), fontSize: 12 }}
+                  width={space(60)}
+                  tick={{ fill: chartText(0.5), fontSize: font(12) }}
                 />
                 <Tooltip
                   cursor={{ strokeDasharray: "3 3" }}
                   content={<CustomTooltip />}
                 />
-                <Scatter isAnimationActive={!getResolvedPreferences().reduceMotion}
+                <Scatter isAnimationActive={animate}
                   data={sessions}
-                  fill="rgb(var(--c-violet-500))"
+                  fill={CHART_COLORS.accent}
                   fillOpacity={0.75}
                   shape={(point: any) => (
                     <>
@@ -206,6 +210,20 @@ export function AccessPatternChart({ filters }: ChartProps) {
               </ScatterChart>
             </ResponsiveContainer>
           </div>
+        )}
+        {hasRequiredIds && !isLoading && !isError && hasData && (
+          <ChartDataTable
+            title={t("dashboard.padraoDeAcesso")}
+            rows={sessions}
+            rowKey={(row, index) => `${row.startTime.getTime()}-${index}`}
+            columns={[
+              { header: t("dashboard.table.entrada"), cell: (row) => formatDateTime(row.startTime) },
+              { header: t("dashboard.table.saida"), cell: (row) => formatDateTime(row.endTime) },
+              { header: t("dashboard.table.duracao"), numeric: true, cell: (row) => row.duration },
+              { header: t("dashboard.table.diaDaSemana"), cell: (row) => row.startTime.toLocaleDateString(getLanguage(), { weekday: "long" }) },
+            ]}
+            footer={`${t("dashboard.table.total")}: ${sessions.length}`}
+          />
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>

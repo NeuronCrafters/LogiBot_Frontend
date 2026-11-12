@@ -16,4 +16,5 @@
   root.dataset.text = stored.textSize === "large" || stored.textSize === "larger" ? stored.textSize : "default";
   root.dataset.contrast = contrast;
   root.dataset.motion = reduce ? "reduce" : "full";
+  root.dataset.palette = ["redGreen", "blueYellow", "monochrome"].indexOf(stored.palette) >= 0 ? stored.palette : "default";
 })();

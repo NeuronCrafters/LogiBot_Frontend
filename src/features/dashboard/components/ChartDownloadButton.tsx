@@ -31,6 +31,7 @@ async function downloadChartAsPng(
     backgroundColor: `rgb(${getComputedStyle(document.documentElement).getPropertyValue("--c-surface").trim() || "31 31 31"})`,
     pixelRatio: 2,
     cacheBust: true,
+    filter: (node) => !(node instanceof HTMLElement && node.dataset.exportIgnore === "true"),
   });
 
   const link = document.createElement("a");

@@ -5,7 +5,8 @@ import { Copy, Check, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import { Children, isValidElement, memo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useResolvedPreferences } from "@/shared/preferences";
+import { codeTheme } from "@/features/chat/codeTheme";
 import type { RetrievedChunk } from "@/features/chat/api/chatApi";
 
 const remarkPlugins = [remarkGfm];
@@ -20,6 +21,9 @@ const CodeBlock = memo(function CodeBlock({
   useLocale();
 
   const [copied, setCopied] = useState(false);
+  const { theme, contrast } = useResolvedPreferences();
+  const { style, background } = codeTheme(theme, contrast);
+  const languageName = language.toUpperCase();
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(children);
@@ -31,10 +35,12 @@ const CodeBlock = memo(function CodeBlock({
     <div className="relative my-4 border border-neutral-700 rounded-xl overflow-hidden shadow-lg group">
       <div className="flex justify-between items-center px-4 py-2 bg-neutral-800 border-b border-neutral-700 text-xs text-white font-mono">
         <span className="text-neutral-400 font-bold">
-          {language.toUpperCase()}
+          {languageName}
         </span>
+        <span className="sr-only" aria-live="polite">{copied ? t("common.copiado") : ""}</span>
         <button
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors bg-neutral-700 hover:bg-neutral-600 px-2 py-1 rounded"
+          type="button"
+          className="flex items-center gap-1.5 text-xs text-zinc-200 hover:text-white transition-colors bg-neutral-700 hover:bg-neutral-600 px-2 py-1 rounded"
           onClick={handleCopy}
         >
           {copied ? (
@@ -50,13 +56,16 @@ const CodeBlock = memo(function CodeBlock({
       </div>
       <SyntaxHighlighter
         language={language}
-        style={oneDark}
+        style={style}
+        role="region"
+        tabIndex={0}
+        aria-label={t("chat.codigoEmLinguagem", { language: languageName })}
         customStyle={{
           margin: 0,
           borderRadius: 0,
           fontSize: "0.875rem",
           lineHeight: "1.625",
-          background: "#1e1e1e",
+          background,
         }}
         codeTagProps={{ style: { fontFamily: "ui-monospace, monospace" } }}
         wrapLongLines={false}

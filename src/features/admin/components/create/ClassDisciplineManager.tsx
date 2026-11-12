@@ -18,7 +18,7 @@ import { toast } from "@/shared/lib/toast";
 import { Select } from "@/components/ui/select";
 
 const inputCls =
-  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 pl-10 pr-3 font-[Poppins] text-sm text-white outline-none transition-colors placeholder:text-zinc-600 focus:border-blue-500/60";
+  "h-11 w-full rounded-xl border border-control bg-neutral-950/60 pl-10 pr-3 font-[Poppins] text-sm text-white outline-none transition-colors placeholder:text-zinc-600 focus:border-blue-500/60";
 
 type RegistrationCodeResponse = {
   registrationCode?: string;

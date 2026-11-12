@@ -173,7 +173,7 @@ function PasswordInput({
       onChange={(e) => onChange(e.target.value)}
       aria-label={placeholder}
       placeholder={placeholder}
-      className="w-full bg-surface-sunken border border-zinc-700 rounded-lg p-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-orange-500 transition-colors text-sm"
+      className="w-full bg-surface-sunken border border-control rounded-lg p-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-orange-500 transition-colors text-sm"
     />
   );
 }

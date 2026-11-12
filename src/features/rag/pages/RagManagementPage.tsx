@@ -1,9 +1,10 @@
 import { apiError } from "@/shared/lib/apiError";
-import { getResolvedPreferences } from "@/shared/preferences";
+import { useReducedMotion } from "@/shared/preferences";
 import { t, useLocale, getLanguage } from "@/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ArrowDown,
   Database,
   FileText,
   Loader2,
@@ -34,7 +35,7 @@ import type { RetrievedChunk } from "@/features/chat/api/chatApi";
 const labelCls =
   "mb-1.5 block font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
 const inputCls =
-  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
+  "h-11 w-full rounded-xl border border-control bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600";
 
 /* ── Status badge ── */
 const STATUS_META: Record<string, { label: string; className: string }> = {
@@ -453,7 +454,7 @@ function DocumentsTab({
               value={uploadTitle}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder={t("rag.tituloOpcional")}
-              className="h-10 rounded-xl border border-white/10 bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 sm:w-48"
+              className="h-10 rounded-xl border border-control bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 sm:w-48"
             />
             <button
               type="submit"
@@ -522,14 +523,41 @@ function ChatTab({
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const reduceMotion = useReducedMotion();
+  const followBottomRef = useRef(true);
+  const wasTestingRef = useRef(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
+
+  const scrollToBottom = (smooth = true) => {
+    followBottomRef.current = true;
+    setShowScrollButton(false);
+    bottomRef.current?.scrollIntoView({ behavior: smooth && !reduceMotion ? "smooth" : "auto", block: "end" });
+  };
+
+  const checkScrollPosition = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    followBottomRef.current = nearBottom;
+    setShowScrollButton(!nearBottom);
+  };
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: getResolvedPreferences().reduceMotion ? "auto" : "smooth" });
-  }, [messages, isTesting]);
+    if (followBottomRef.current) scrollToBottom();
+    else setShowScrollButton(true);
+  }, [messages, isTesting]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (wasTestingRef.current && !isTesting) setAnnouncement(t("chat.respostaRecebida"));
+    if (isTesting) setAnnouncement("");
+    wasTestingRef.current = isTesting;
+  }, [isTesting]);
 
   const handleSubmit = () => {
     const trimmed = input.trim();
     if (!trimmed || isTesting) return;
+    scrollToBottom();
     onTest(trimmed);
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "44px";
@@ -586,9 +614,13 @@ function ChatTab({
       </div>
 
       {/* Messages */}
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </div>
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto scroll-smooth px-4 py-4"
+        onScroll={checkScrollPosition}
+        className="relative flex-1 overflow-y-auto scroll-smooth px-4 py-4"
       >
         {messages.length === 0 && !isTesting && (
           <div className="flex h-full items-center justify-center">
@@ -633,6 +665,18 @@ function ChatTab({
         </div>
       </div>
 
+      {showScrollButton && (
+        <button
+          type="button"
+          aria-label={t("chat.irParaUltimaMensagem")}
+          title={t("chat.irParaUltimaMensagem")}
+          onClick={() => scrollToBottom()}
+          className="absolute bottom-20 left-0 right-0 z-20 mx-auto w-fit rounded-full border border-neutral-600 bg-neutral-700 p-2 text-white shadow-lg transition-colors hover:bg-neutral-600"
+        >
+          <ArrowDown size={16} aria-hidden="true" />
+        </button>
+      )}
+
       {/* Input */}
       <div className="shrink-0 border-t border-white/10 p-3">
         <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
@@ -644,7 +688,7 @@ function ChatTab({
             placeholder={t("rag.digiteSuaPerguntaEnterParaEnviar")}
             rows={1}
             disabled={isTesting || locked}
-            className="flex-1 resize-none overflow-hidden rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 disabled:opacity-50"
+            className="flex-1 resize-none overflow-hidden rounded-xl border border-control bg-neutral-950/60 px-3 py-2.5 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 disabled:opacity-50"
             style={{ height: "44px" }}
           />
           <button

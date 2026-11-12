@@ -1,6 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
-import { getResolvedPreferences } from "@/shared/preferences";
+import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
 import { percent, t, useLocale, number } from "@/i18n";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -29,17 +29,27 @@ import {
 import { dashboardApi } from "@/features/dashboard/api/dashboardApi";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
+import { ChartDataTable, MissingValue } from "../ChartDataTable";
+import { ShapeSwatch, type MarkerShape } from "../ChartMarks";
 
 const CHART_INFO =
   () => (t("dashboard.relacionaOEsforcoTempoDeUsoEm"));
 
 const MATRIX_COLORS = {
-  highHigh: "rgb(var(--c-emerald-500))",
-  highLow: "rgb(var(--c-blue-500))",
-  lowHigh: "rgb(var(--c-amber-500))",
-  lowLow: "rgb(var(--c-red-500))",
+  highHigh: CHART_COLORS.positive,
+  highLow: CHART_COLORS.info,
+  lowHigh: CHART_COLORS.warning,
+  lowLow: CHART_COLORS.negative,
   average: "rgb(var(--c-white))",
 };
+const MATRIX_SHAPES: Record<keyof typeof MATRIX_COLORS, MarkerShape> = {
+  highHigh: "circle",
+  highLow: "diamond",
+  lowHigh: "triangle",
+  lowLow: "square",
+  average: "star",
+};
+const decimal = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 const QUADRANT_LABELS = {
   get highHigh() { return t("dashboard.acimaDaMediaEmDesempenhoEEsforco"); },
   get highLow() { return t("dashboard.bomDesempenhoComMenorEsforco"); },
@@ -74,6 +84,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
   const locale = useLocale();
 
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
+  const { animate, font, space } = useChartPreferences();
   const hasData = data && data.points.some((point) => point.performance !== null);
   const showReferenceLines = data && data.points.filter((point) => point.performance !== null).length > 1;
 
@@ -122,7 +133,21 @@ export function EffortMatrixChart({ filters }: ChartProps) {
       },
       { highHigh: 0, highLow: 0, lowHigh: 0, lowLow: 0 },
     );
-    return { points, counts, avgPerformance, avgEffort, effortDomainMax };
+    let assessedIndex = 0;
+    const tableRows = data.points.map((point) =>
+      point.performance === null
+        ? { name: point.name, performance: null, effort: point.originalEffort ?? point.effort, quadrant: null }
+        : (() => {
+            const assessedPoint = points[assessedIndex++];
+            return {
+              name: assessedPoint.name,
+              performance: assessedPoint.originalPerformance,
+              effort: assessedPoint.originalEffort,
+              quadrant: assessedPoint.quadrant as keyof typeof QUADRANT_LABELS,
+            };
+          })(),
+    );
+    return { points, counts, avgPerformance, avgEffort, effortDomainMax, tableRows };
   }, [data]);
 
   return (
@@ -166,10 +191,10 @@ export function EffortMatrixChart({ filters }: ChartProps) {
           </NoData>
         )}
         {!isLoading && !isError && matrix && (
-          <div className="h-[300px]">
+          <div style={{ height: space(300) }}>
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart
-                margin={{ top: 20, right: 30, bottom: 20, left: 10 }}
+                margin={{ top: space(20), right: space(30), bottom: space(20), left: 10 }}
               >
                 {showReferenceLines && (
                   <>
@@ -218,7 +243,8 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                   unit=" min"
                   domain={[0, matrix.effortDomainMax]}
                   stroke={chartLine(0.3)}
-                  tick={{ fontSize: 12, fill: chartText(0.5) }}
+                  height={Math.ceil(font(12) * 1.5) + 12}
+                  tick={{ fontSize: font(12), fill: chartText(0.5) }}
                 />
                 <YAxis
                   type="number"
@@ -227,7 +253,8 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                   unit="%"
                   domain={[0, 100]}
                   stroke={chartLine(0.3)}
-                  tick={{ fontSize: 12, fill: chartText(0.5) }}
+                  width={space(60)}
+                  tick={{ fontSize: font(12), fill: chartText(0.5) }}
                 />
                 <ZAxis dataKey="size" range={[42, 70]} />
                 <Tooltip
@@ -275,7 +302,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                       label={{
                         value: t("common.mediaValue0", { value0: number(matrix.avgPerformance, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
                         fill: chartText(0.55),
-                        fontSize: 11,
+                        fontSize: font(11),
                         position: "insideTopLeft",
                       }}
                     />
@@ -286,20 +313,20 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                       label={{
                         value: t("dashboard.value0Min", { value0: number(matrix.avgEffort, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
                         fill: chartText(0.55),
-                        fontSize: 11,
+                        fontSize: font(11),
                         position: "insideTopRight",
                       }}
                     />
                   </>
                 )}
-                <Scatter isAnimationActive={!getResolvedPreferences().reduceMotion} name={t("dashboard.entities")} data={matrix.points} shape={(point: any) => (
+                <Scatter isAnimationActive={animate} name={t("dashboard.entities")} data={matrix.points} shape={(point: any) => (
                   <>
                     <title>{t("dashboard.pointDescription", {
                       name: point.payload.name,
                       performance: percent(point.payload.originalPerformance / 100),
                       effort: number(point.payload.originalEffort),
                     })}</title>
-                    <Symbols {...point} type="circle" />
+                    <Symbols {...point} type={MATRIX_SHAPES[point.payload.quadrant as keyof typeof MATRIX_SHAPES] ?? "circle"} />
                   </>
                 )}>
                   {matrix.points.map((point, i) => (
@@ -317,6 +344,33 @@ export function EffortMatrixChart({ filters }: ChartProps) {
           </div>
         )}
       </CardContent>
+
+      {!isLoading && !isError && matrix && (
+        <div className="px-6 pb-2">
+          <ChartDataTable
+            title={t("dashboard.matrizDesempenhoVersusEsforco", {}, locale)}
+            rows={matrix.tableRows}
+            rowKey={(row, index) => `${row.name}-${index}`}
+            columns={[
+              { header: t("dashboard.table.nome", {}, locale), cell: (row) => row.name },
+              {
+                header: t("dashboard.table.desempenho", {}, locale),
+                numeric: true,
+                cell: (row) => row.performance === null
+                  ? <MissingValue label={t("dashboard.table.semRespostas", {}, locale)} />
+                  : percent(row.performance / 100, decimal),
+              },
+              { header: t("dashboard.table.esforco", {}, locale), numeric: true, cell: (row) => number(row.effort, decimal) },
+              {
+                header: t("dashboard.table.situacao", {}, locale),
+                cell: (row) => row.quadrant
+                  ? <span className="inline-flex items-center gap-2"><ShapeSwatch shape={MATRIX_SHAPES[row.quadrant]} color={MATRIX_COLORS[row.quadrant]} outlined={row.quadrant === "average"} />{QUADRANT_LABELS[row.quadrant]}</span>
+                  : <MissingValue label={t("dashboard.table.semAvaliacao", {}, locale)} />,
+              },
+            ]}
+          />
+        </div>
+      )}
 
       {matrix && (
         <CardFooter className="grid grid-cols-1 gap-2 border-t border-white/10 px-6 py-4 sm:grid-cols-2">
@@ -349,15 +403,18 @@ export function EffortMatrixChart({ filters }: ChartProps) {
               className="flex items-center justify-between gap-3 font-[Poppins] text-xs text-zinc-400"
             >
               <span className="flex items-center gap-2">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: MATRIX_COLORS[key] }}
-                />
+                <ShapeSwatch shape={MATRIX_SHAPES[key]} color={MATRIX_COLORS[key]} />
                 {label}
               </span>
               <span className="font-semibold text-white">{count}</span>
             </div>
           ))}
+          {matrix.points.some((point) => point.isAverage) && (
+            <div className="flex items-center gap-2 font-[Poppins] text-xs text-zinc-400">
+              <ShapeSwatch shape={MATRIX_SHAPES.average} color={MATRIX_COLORS.average} outlined />
+              {QUADRANT_LABELS.average}
+            </div>
+          )}
         </CardFooter>
       )}
     </Card>

@@ -232,8 +232,8 @@ export function Select({
         }}
         onClick={handleOpen}
         className={cn(
-          "flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm outline-none transition-colors",
-          open ? "border-blue-500/60" : "hover:border-white/20",
+          "flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-control bg-neutral-950/60 px-3 font-[Poppins] text-sm outline-none transition-colors",
+          open ? "border-blue-500/60" : "hover:border-white/50",
           selected ? "text-white" : "text-zinc-600",
           disabled && "cursor-not-allowed opacity-50",
         )}

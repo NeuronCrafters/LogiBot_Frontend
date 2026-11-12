@@ -1,6 +1,7 @@
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
-import { getResolvedPreferences } from "@/shared/preferences";
+import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
+import { subjectLabel } from "../../subjectLabels";
 import { percent, t, useLocale } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -26,12 +27,13 @@ import {
 import { dashboardApi } from "@/features/dashboard/api/dashboardApi";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
+import { ChartDataTable, MissingValue } from "../ChartDataTable";
 
 const CHART_INFO =
   () => `${t("dashboard.nivelDeAcertoMedioPorAssuntoNo")} ${t("dashboard.proficiencyCoverage")}`;
 
 const chartConfig = {
-  score: { get label() { return t("dashboard.acerto"); }, color: "rgb(var(--c-blue-500))" },
+  score: { get label() { return t("dashboard.acerto"); }, color: CHART_COLORS.primary },
 } satisfies ChartConfig;
 
 interface ChartProps {
@@ -54,18 +56,12 @@ function useProficiencyData(filters: ChartProps["filters"]) {
     staleTime: 1000 * 60 * 5,
     select: (response) => {
       const apiData = response.data;
-      const subjectNames: Record<string, string> = {
-        variaveis: t("common.variaveis"), listas: t("common.listas"),
-        verificacoes: t("common.condicionais"), condicionais: t("common.condicionais"),
-        funcoes: t("common.funcoes"), operadores_logicos: t("dashboard.opLogicos"),
-        loops: t("dashboard.repeticao"), repeticao: t("dashboard.repeticao"),
-      };
       const labels = apiData.labels;
       const chartData = labels.map((label) => {
         const index = apiData.labels.indexOf(label);
         const hasResponses = index >= 0 && Number.isFinite(apiData.data[index]);
         return {
-          subject: subjectNames[label] || label,
+          subject: subjectLabel(label),
           score: hasResponses ? apiData.data[index] : 0,
           hasResponses,
         };
@@ -110,6 +106,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
   const refetchTyped = refetch as () => void;
   const errorMessage =
     apiError(error, "common.erroAoCarregarDados");
+  const { animate, font, space } = useChartPreferences();
 
   return (
     <Card
@@ -159,7 +156,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
             >
               <RadarChart
                 data={data!.chartData}
-                margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
+                margin={{ top: space(20), right: space(36), bottom: space(20), left: space(36) }}
               >
                 <ChartTooltip
                   cursor={false}
@@ -188,7 +185,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                 />
                 <PolarAngleAxis
                   dataKey="subject"
-                  tick={{ fill: chartText(0.6), fontSize: 11 }}
+                  tick={{ fill: chartText(0.6), fontSize: font(11) }}
                 />
                 <PolarRadiusAxis
                   angle={90}
@@ -196,19 +193,36 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
                   tick={false}
                   axisLine={false}
                 />
-                <Radar isAnimationActive={!getResolvedPreferences().reduceMotion}
+                <Radar isAnimationActive={animate}
                   dataKey="score"
-                  fill="rgb(var(--c-blue-500))"
+                  fill={CHART_COLORS.primary}
                   fillOpacity={0.25}
-                  stroke="rgb(var(--c-blue-500))"
+                  stroke={CHART_COLORS.primary}
                   strokeWidth={2}
                   dot={(props: any) => props.payload?.payload?.hasResponses
-                    ? <circle key={props.index} cx={props.cx} cy={props.cy} r={4} fill="rgb(var(--c-blue-500))" />
+                    ? <circle key={props.index} cx={props.cx} cy={props.cy} r={4} fill={CHART_COLORS.primary} />
                     : <g key={props.index} />}
                 />
               </RadarChart>
             </ChartContainer>
           </div>
+        )}
+        {hasRequired && !isLoading && !isError && hasData && (
+          <ChartDataTable
+            title={t("dashboard.proficienciaPorAssunto")}
+            rows={data!.chartData}
+            rowKey={(row, index) => `${row.subject}-${index}`}
+            columns={[
+              { header: t("dashboard.table.assunto"), cell: (row) => row.subject },
+              {
+                header: t("dashboard.table.acertoMedio"),
+                numeric: true,
+                cell: (row) => row.hasResponses
+                  ? percent(row.score / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+                  : <MissingValue label={t("dashboard.table.semRespostas")} />,
+              },
+            ]}
+          />
         )}
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>

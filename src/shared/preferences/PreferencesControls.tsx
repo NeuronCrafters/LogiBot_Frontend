@@ -7,7 +7,7 @@ import { resetPreferences, setPreference, usePreferences, type Preferences } fro
 
 type Option<K extends keyof Preferences> = { value: Preferences[K]; label: MessageKey };
 
-const GROUPS: { [K in keyof Preferences]: { legend: MessageKey; options: Option<K>[] } } = {
+const GROUPS: { [K in keyof Preferences]: { legend: MessageKey; hint?: MessageKey; options: Option<K>[] } } = {
   theme: {
     legend: "preferences.tema",
     options: [
@@ -47,14 +47,25 @@ const GROUPS: { [K in keyof Preferences]: { legend: MessageKey; options: Option<
       { value: "complete", label: "preferences.respostaCompleta" },
     ],
   },
+  palette: {
+    legend: "preferences.paleta",
+    hint: "preferences.paletaDescricao",
+    options: [
+      { value: "default", label: "preferences.paletaPadrao" },
+      { value: "redGreen", label: "preferences.paletaVermelhoVerde" },
+      { value: "blueYellow", label: "preferences.paletaAzulAmarelo" },
+      { value: "monochrome", label: "preferences.paletaMonocromatica" },
+    ],
+  },
 };
 
 function RadioGroup<K extends keyof Preferences>({ name, value }: { name: K; value: Preferences[K] }) {
   const id = useId();
   const group = GROUPS[name];
   return (
-    <fieldset className="min-w-0">
+    <fieldset className="min-w-0" aria-describedby={group.hint ? `${id}-hint` : undefined}>
       <legend className="mb-2 text-sm font-medium text-zinc-300">{t(group.legend)}</legend>
+      {group.hint && <p id={`${id}-hint`} className="-mt-1 mb-2 text-xs text-zinc-400">{t(group.hint)}</p>}
       <div className="flex flex-wrap gap-2">
         {group.options.map((option) => {
           const optionId = `${id}-${String(option.value)}`;
@@ -63,10 +74,11 @@ function RadioGroup<K extends keyof Preferences>({ name, value }: { name: K; val
             <label
               key={String(option.value)}
               htmlFor={optionId}
-              className={`relative flex min-h-[44px] cursor-pointer items-center rounded-lg border px-3 text-sm transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-400 ${
+              data-checked={checked || undefined}
+              className={`preference-option relative flex min-h-[44px] cursor-pointer items-center rounded-lg border px-3 text-sm transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-400 ${
                 checked
                   ? "border-blue-400 bg-blue-500/15 font-semibold text-white"
-                  : "border-white/20 bg-neutral-950/60 text-zinc-300 hover:border-white/40 hover:text-white"
+                  : "border-control bg-neutral-950/60 text-zinc-300 hover:border-white/40 hover:text-white"
               }`}
             >
               <input
@@ -77,7 +89,7 @@ function RadioGroup<K extends keyof Preferences>({ name, value }: { name: K; val
                 checked={checked}
                 onChange={() => setPreference(name, option.value)}
               />
-              {checked && <span aria-hidden="true" className="mr-1.5 h-2 w-2 rounded-full bg-blue-400" />}
+              {checked && <span aria-hidden="true" className="preference-option-dot mr-1.5 h-2 w-2 rounded-full bg-blue-400" />}
               {t(option.label)}
             </label>
           );
@@ -96,6 +108,7 @@ export function PreferencesControls({ chat = true }: { chat?: boolean }) {
       <RadioGroup name="textSize" value={preferences.textSize} />
       <RadioGroup name="contrast" value={preferences.contrast} />
       <RadioGroup name="motion" value={preferences.motion} />
+      <RadioGroup name="palette" value={preferences.palette} />
       {chat && <RadioGroup name="chatDisplay" value={preferences.chatDisplay} />}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
         <p className="text-xs text-zinc-400">{t("preferences.descricao")}</p>

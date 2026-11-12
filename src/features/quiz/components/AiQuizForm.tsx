@@ -17,7 +17,7 @@ import { toast } from "@/shared/lib/toast";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const inputCls =
-  "h-11 w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-indigo-500/60 placeholder:text-zinc-600 disabled:opacity-40";
+  "h-11 w-full rounded-xl border border-control bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-indigo-500/60 placeholder:text-zinc-600 disabled:opacity-40";
 const labelCls =
   "block mb-1.5 font-[Poppins] text-xs font-semibold uppercase tracking-wider text-zinc-500";
 const selectCls = inputCls + " cursor-pointer";

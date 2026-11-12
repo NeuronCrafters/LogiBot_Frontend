@@ -1,7 +1,7 @@
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine } from "../../chartColors";
-import { getResolvedPreferences } from "@/shared/preferences";
-import { t, useLocale, getLanguage } from "@/i18n";
+import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
+import { number, t, useLocale, getLanguage } from "@/i18n";
 ﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,6 +18,10 @@ import type { DashboardFilterState } from "@/features/dashboard/filterTypes";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { dashboardFiltersFromLegacy } from "../../insightFilters";
+import { ChartDataTable, MissingValue } from "../ChartDataTable";
+
+const formatDay = (value: string, options: Intl.DateTimeFormatOptions = { day: "2-digit", month: "2-digit", year: "numeric" }) =>
+  new Date(value).toLocaleDateString(getLanguage(), { ...options, timeZone: "UTC" });
 
 export function formatTimeWithDays(seconds: number): string {
   const totalSeconds = Math.floor(seconds);
@@ -68,8 +72,9 @@ export function UsageChart({ filter }: UsageChartProps) {
     refetch,
   } = useUsageData(filter);
   const hasRequiredIds = !!dashboardFiltersFromLegacy(filter).universityId;
+  const { animate, font, space } = useChartPreferences();
   const chartConfig = useMemo(
-    () => ({ usage: { label: t("dashboard.minutos", {}, locale), color: "rgb(var(--c-blue-500))" } }),
+    () => ({ usage: { label: t("dashboard.minutos", {}, locale), color: CHART_COLORS.primary } }),
     [locale],
   );
   const chartData = useMemo(() => {
@@ -141,7 +146,7 @@ export function UsageChart({ filter }: UsageChartProps) {
           />
         )}
         {hasRequiredIds && !isLoading && !isError && hasData && (
-          <div className="h-[300px]">
+          <div style={{ height: space(300) }}>
             <ChartContainer
               config={chartConfig}
               className="h-full w-full text-white"
@@ -162,27 +167,18 @@ export function UsageChart({ filter }: UsageChartProps) {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  minTickGap={32}
+                  minTickGap={space(32)}
+                  height={Math.ceil(font(12) * 1.5) + 8}
                   stroke="rgb(var(--c-neutral-500))"
-                  tickFormatter={(v: string) =>
-                    new Date(v).toLocaleDateString(getLanguage(), {
-                      day: "2-digit",
-                      month: "2-digit",
-                      timeZone: "UTC",
-                    })
-                  }
+                  tick={{ fontSize: font(12) }}
+                  tickFormatter={(v: string) => formatDay(v, { day: "2-digit", month: "2-digit" })}
                 />
                 <ChartTooltip
                   cursor={false}
                   content={(props) => {
                     if (!props.active || !props.payload?.[0]) return null;
                     const d = props.payload[0].payload as any;
-                    const date = new Date(d.date).toLocaleDateString(getLanguage(), {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      timeZone: "UTC",
-                    });
+                    const date = formatDay(d.date);
                     const secs = Math.round((d.usage ?? 0) * 60);
                     return (
                       <div className="rounded-xl border border-white/10 bg-surface-sunken px-3 py-2.5 text-sm shadow-xl">
@@ -207,15 +203,41 @@ export function UsageChart({ filter }: UsageChartProps) {
                     );
                   }}
                 />
-                <Bar isAnimationActive={!getResolvedPreferences().reduceMotion}
+                <Bar isAnimationActive={animate}
                   dataKey="usage"
-                  fill="rgb(var(--c-blue-500))"
+                  fill={CHART_COLORS.primary}
                   radius={[4, 4, 0, 0]}
                   fillOpacity={0.85}
                 />
               </BarChart>
             </ChartContainer>
           </div>
+        )}
+        {hasRequiredIds && !isLoading && !isError && hasData && (
+          <ChartDataTable
+            title={t("dashboard.tempoDeUsoDiario_490", {}, locale)}
+            rows={chartData as { date: string; usage?: number; sessions?: unknown[] }[]}
+            rowKey={(row) => row.date}
+            columns={[
+              { header: t("dashboard.table.data", {}, locale), cell: (row) => formatDay(row.date) },
+              {
+                header: t("dashboard.table.minutosDeUso", {}, locale),
+                numeric: true,
+                cell: (row) => typeof row.usage === "number" ? number(row.usage, { maximumFractionDigits: 1 }) : <MissingValue />,
+              },
+              {
+                header: t("dashboard.table.tempoFormatado", {}, locale),
+                numeric: true,
+                cell: (row) => typeof row.usage === "number" ? formatTimeWithDays(Math.round(row.usage * 60)) : <MissingValue />,
+              },
+              {
+                header: t("dashboard.table.sessoes", {}, locale),
+                numeric: true,
+                cell: (row) => Array.isArray(row.sessions) ? number(row.sessions.length) : <MissingValue />,
+              },
+            ]}
+            footer={`${t("dashboard.table.total", {}, locale)}: ${formattedTime}`}
+          />
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>

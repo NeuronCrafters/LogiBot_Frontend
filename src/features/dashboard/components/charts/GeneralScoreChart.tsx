@@ -1,6 +1,7 @@
 import { apiError } from "@/shared/lib/apiError";
-import { getResolvedPreferences } from "@/shared/preferences";
-import { t, useLocale, number } from "@/i18n";
+import { useChartPreferences } from "../../chartPreferences";
+import { subjectLabel } from "../../subjectLabels";
+import { t, useLocale, number, percent } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import {
   BarChart,
@@ -22,16 +23,18 @@ import {
 import { dashboardApi } from "@/features/dashboard/api/dashboardApi";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
+import { ChartDataTable, MissingValue } from "../ChartDataTable";
 
 const CHART_INFO =
   () => (t("dashboard.notaGeralDe0A10Calculada"));
 
 const SCORE_COLORS = {
-  ruim: "rgb(var(--c-red-500))",
-  regular: "rgb(var(--c-amber-500))",
-  bom: "rgb(var(--c-blue-500))",
-  excelente: "rgb(var(--c-emerald-500))",
+  ruim: "rgb(var(--chart-negative-ink))",
+  regular: "rgb(var(--chart-warning-ink))",
+  bom: "rgb(var(--chart-info-ink))",
+  excelente: "rgb(var(--chart-positive-ink))",
 };
+const decimal = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 
 interface ChartProps {
   filters: {
@@ -55,23 +58,27 @@ function useScoreData(filters: ChartProps["filters"]) {
     enabled: !!filters.universityId,
     staleTime: 1000 * 60 * 5,
     select: (data) => {
-      const active = data.filter(
-        (t: any) => t.successPercentage > 0 || t.errorPercentage > 0,
-      );
+      const isActive = (topic: any) => topic.successPercentage > 0 || topic.errorPercentage > 0;
+      const topics = data.map((topic: any) => ({
+        name: subjectLabel(String(topic.topic ?? topic.name ?? "")),
+        success: Number(topic.successPercentage ?? 0),
+        error: Number(topic.errorPercentage ?? 0),
+        counted: isActive(topic),
+      }));
+      const active = data.filter(isActive);
+      const result = (score: number, status: string, color: string) => ({ score, topicCount: active.length, status, color, topics });
       if (active.length === 0)
-        return { score: 0, topicCount: 0, status: t("dashboard.semDados"), color: "rgb(var(--c-neutral-600))" };
+        return { ...result(0, t("dashboard.semDados"), "rgb(var(--c-neutral-600))"), topicCount: 0 };
       const avg =
         active.reduce(
           (acc: number, curr: any) => acc + curr.successPercentage,
           0,
         ) / active.length;
       const score = avg / 10;
-      if (score >= 9)
-        return { score, topicCount: active.length, status: t("common.excelente"), color: SCORE_COLORS.excelente };
-      if (score >= 7) return { score, topicCount: active.length, status: t("common.bom"), color: SCORE_COLORS.bom };
-      if (score >= 5)
-        return { score, topicCount: active.length, status: t("common.regular"), color: SCORE_COLORS.regular };
-      return { score, topicCount: active.length, status: t("common.insuficiente"), color: SCORE_COLORS.ruim };
+      if (score >= 9) return result(score, t("common.excelente"), SCORE_COLORS.excelente);
+      if (score >= 7) return result(score, t("common.bom"), SCORE_COLORS.bom);
+      if (score >= 5) return result(score, t("common.regular"), SCORE_COLORS.regular);
+      return result(score, t("common.insuficiente"), SCORE_COLORS.ruim);
     },
   });
 }
@@ -86,12 +93,13 @@ export function GeneralScoreChart({ filters }: ChartProps) {
   const errorMessage =
     apiError(error, "common.erroAoCarregarDados");
   const chartData = [{ category: t("dashboard.nota"), score: data?.score ?? 0 }];
+  const { animate } = useChartPreferences();
 
   const bands = [
-    { label: number(0) + "–" + number(4.99), desc: t("common.insuficiente"), color: "text-red-400" },
-    { label: number(5) + "–" + number(6.99), desc: t("common.regular"), color: "text-amber-400" },
-    { label: number(7) + "–" + number(8.99), desc: t("common.bom"), color: "text-blue-400" },
-    { label: number(9) + "–" + number(10), desc: t("common.excelente"), color: "text-emerald-400" },
+    { label: number(0) + "–" + number(4.99), desc: t("common.insuficiente"), color: "text-chart-negative-ink" },
+    { label: number(5) + "–" + number(6.99), desc: t("common.regular"), color: "text-chart-warning-ink" },
+    { label: number(7) + "–" + number(8.99), desc: t("common.bom"), color: "text-chart-info-ink" },
+    { label: number(9) + "–" + number(10), desc: t("common.excelente"), color: "text-chart-positive-ink" },
   ];
 
   return (
@@ -194,7 +202,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
                   <XAxis type="number" domain={[0, 10]} hide />
                   <YAxis type="category" dataKey="category" hide />
                   <Tooltip cursor={false} content={() => null} />
-                  <Bar isAnimationActive={!getResolvedPreferences().reduceMotion} dataKey="score" radius={[4, 4, 4, 4]}>
+                  <Bar isAnimationActive={animate} dataKey="score" radius={[4, 4, 4, 4]}>
                     <Cell fill={data.color} />
                   </Bar>
                 </BarChart>
@@ -209,6 +217,34 @@ export function GeneralScoreChart({ filters }: ChartProps) {
           </NoData>
         )}
       </CardContent>
+
+      {hasRequired && !isLoading && !isError && hasData && (
+        <div className="px-6 pb-2">
+          <ChartDataTable
+            title={t("dashboard.avaliacaoGeralDeDesempenho_443")}
+            rows={data.topics}
+            rowKey={(row, index) => `${row.name}-${index}`}
+            columns={[
+              { header: t("dashboard.table.assunto"), cell: (row) => row.name },
+              {
+                header: t("dashboard.table.taxaDeAcerto"),
+                numeric: true,
+                cell: (row) => row.counted ? percent(row.success / 100, decimal) : <MissingValue label={t("dashboard.table.semRespostas")} />,
+              },
+              {
+                header: t("dashboard.table.taxaDeErro"),
+                numeric: true,
+                cell: (row) => row.counted ? percent(row.error / 100, decimal) : <MissingValue label={t("dashboard.table.semRespostas")} />,
+              },
+              { header: t("dashboard.table.consideradoNaNota"), cell: (row) => (row.counted ? t("common.sim") : t("common.nao")) },
+            ]}
+            footer={t("dashboard.table.notaGeral", {
+              score: number(data.score, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+              status: data.status,
+            })}
+          />
+        </div>
+      )}
 
       {hasData && (
         <CardFooter className="flex justify-between border-t border-white/10 px-6 py-4">

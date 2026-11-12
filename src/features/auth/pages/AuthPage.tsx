@@ -308,7 +308,7 @@ function AuthInput({
       <label htmlFor={id} className="block pl-1 text-sm font-medium text-zinc-300">
         {label}
       </label>
-      <div className="flex h-14 w-full min-w-0 items-center gap-3 rounded-xl border border-white/20 bg-neutral-950/60 px-3 text-zinc-400 transition-colors focus-within:border-blue-400 focus-within:text-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
+      <div className="flex h-14 w-full min-w-0 items-center gap-3 rounded-xl border border-control bg-neutral-950/60 px-3 text-zinc-400 transition-colors focus-within:border-blue-400 focus-within:text-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
         <span className="shrink-0" aria-hidden="true">{icon}</span>
         <input
           id={id}

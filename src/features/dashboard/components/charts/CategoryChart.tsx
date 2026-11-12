@@ -1,7 +1,7 @@
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
-import { getResolvedPreferences } from "@/shared/preferences";
-import { percent, t, useLocale } from "@/i18n";
+import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
+import { number, percent, t, useLocale } from "@/i18n";
 ﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -29,12 +29,13 @@ import type { DashboardFilterState } from "@/features/dashboard/filterTypes";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
 import { dashboardFiltersFromLegacy } from "../../insightFilters";
+import { ChartDataTable } from "../ChartDataTable";
 
 const CHART_INFO =
   () => (t("dashboard.frequenciaDeAcessoPorCategoriaDeConteudo"));
 
 const chartConfig = {
-  acessos: { get label() { return t("dashboard.acessos"); }, color: "rgb(var(--c-blue-500))" },
+  acessos: { get label() { return t("dashboard.acessos"); }, color: CHART_COLORS.primary },
 } satisfies ChartConfig;
 
 interface CategoryChartProps {
@@ -101,6 +102,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
   const refetchTyped = refetch as () => void;
   const errorMessage =
     apiError(error, "common.erroAoCarregarDados");
+  const { animate, font, space } = useChartPreferences();
 
   return (
     <Card
@@ -149,7 +151,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
             >
               <RadarChart
                 data={data!.chartData}
-                margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
+                margin={{ top: space(20), right: space(36), bottom: space(20), left: space(36) }}
               >
                 <ChartTooltip
                   cursor={false}
@@ -178,7 +180,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                 />
                 <PolarAngleAxis
                   dataKey="category"
-                  tick={{ fill: chartText(0.6), fontSize: 11 }}
+                  tick={{ fill: chartText(0.6), fontSize: font(11) }}
                 />
                 <PolarRadiusAxis
                   angle={90}
@@ -186,17 +188,34 @@ export function CategoryChart({ filter }: CategoryChartProps) {
                   tick={false}
                   axisLine={false}
                 />
-                <Radar isAnimationActive={!getResolvedPreferences().reduceMotion}
+                <Radar isAnimationActive={animate}
                   dataKey="acessos"
-                  fill="rgb(var(--c-blue-500))"
+                  fill={CHART_COLORS.primary}
                   fillOpacity={0.25}
-                  stroke="rgb(var(--c-blue-500))"
+                  stroke={CHART_COLORS.primary}
                   strokeWidth={2}
-                  dot={{ fill: "rgb(var(--c-blue-500))", strokeWidth: 0, r: 4 }}
+                  dot={{ fill: CHART_COLORS.primary, strokeWidth: 0, r: 4 }}
                 />
               </RadarChart>
             </ChartContainer>
           </div>
+        )}
+        {hasRequired && !isLoading && !isError && hasData && (
+          <ChartDataTable
+            title={t("dashboard.assuntosMaisAcessadosNoChat", {}, locale)}
+            rows={data!.chartData}
+            rowKey={(row) => row.category}
+            columns={[
+              { header: t("dashboard.table.categoria", {}, locale), cell: (row) => row.category },
+              { header: t("dashboard.table.acessos", {}, locale), numeric: true, cell: (row) => number(row.acessos) },
+              {
+                header: t("dashboard.table.percentualDoTotal", {}, locale),
+                numeric: true,
+                cell: (row) => percent(row.acessos / data!.totalAccesses, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+              },
+            ]}
+            footer={`${t("dashboard.table.total", {}, locale)}: ${number(data!.totalAccesses)}`}
+          />
         )}
         {hasRequired && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetchTyped}>

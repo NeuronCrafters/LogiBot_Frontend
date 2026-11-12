@@ -81,7 +81,7 @@ export function EditNameModal({
                   onChange={(e) => setName(e.target.value)}
                   aria-label={t("account.novoNome")}
                   placeholder={t("account.digiteONovoNome")}
-                  className="w-full bg-surface-sunken border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-colors placeholder:text-zinc-600"
+                  className="w-full bg-surface-sunken border border-control rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-colors placeholder:text-zinc-600"
                 />
               </div>
             </div>

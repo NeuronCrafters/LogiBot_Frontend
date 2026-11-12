@@ -1,11 +1,12 @@
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
-import { getResolvedPreferences } from "@/shared/preferences";
+import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
 import { percent, t, useLocale, number } from "@/i18n";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   CartesianGrid,
+  LabelList,
   Line,
   LineChart,
   ReferenceLine,
@@ -25,6 +26,10 @@ import {
 import { dashboardApi } from "@/features/dashboard/api/dashboardApi";
 import { ChartLoader, ChartError, NoData } from "../ChartStates";
 import { ChartDownloadButton } from "../ChartDownloadButton";
+import { ChartDataTable } from "../ChartDataTable";
+
+const MAX_DIRECT_LABELS = 12;
+const decimal = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 
 const CHART_INFO =
   () => (t("dashboard.mostraAEvolucaoDaTaxaDeAcerto"));
@@ -82,6 +87,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
   const hasRequiredIds = !!filters.universityId;
+  const { animate, font, space, scale } = useChartPreferences();
   const scopeLabel = filters.studentId ? t("dashboard.doEstudante", {}, locale) : t("dashboard.mediaDoGrupo_453", {}, locale);
 
   const summary = useMemo(() => {
@@ -148,11 +154,11 @@ export function LearningJourneyChart({ filters }: ChartProps) {
           <ChartError message={apiError(error, "common.erroAoCarregarDados")} onRetry={refetch} />
         )}
         {hasRequiredIds && !isLoading && !isError && hasData && summary && (
-          <div className="h-[300px]">
+          <div style={{ height: space(300) }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={data}
-                margin={{ left: 4, right: 18, top: 16, bottom: 6 }}
+                margin={{ left: 4, right: space(18), top: space(24), bottom: 6 }}
               >
                 <CartesianGrid
                   vertical={false}
@@ -163,13 +169,15 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={12}
-                  tick={{ fill: chartText(0.55), fontSize: 11 }}
+                  height={Math.ceil(font(11) * 1.5) + 16}
+                  tick={{ fill: chartText(0.55), fontSize: font(11) }}
                 />
                 <YAxis
                   domain={[0, 100]}
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fill: chartText(0.5), fontSize: 11 }}
+                  width={space(48)}
+                  tick={{ fill: chartText(0.5), fontSize: font(11) }}
                   tickFormatter={(v) => percent(v / 100)}
                 />
                 <Tooltip
@@ -212,26 +220,57 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                   label={{
                     value: t("common.mediaValue0", { value0: number(summary.average, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }, locale),
                     fill: chartText(0.55),
-                    fontSize: 11,
+                    fontSize: font(11),
                     position: "insideTopLeft",
                   }}
                 />
-                <Line isAnimationActive={!getResolvedPreferences().reduceMotion}
+                {/* Recharts keeps the props of a series with children (LabelList) until it remounts. */}
+                <Line key={`journey-${animate}-${scale}`} isAnimationActive={animate}
                   type="monotone"
                   dataKey="performance"
-                  stroke="rgb(var(--c-emerald-500))"
+                  stroke={CHART_COLORS.positive}
                   strokeWidth={2.75}
                   dot={{
                     r: 4,
                     strokeWidth: 2,
                     stroke: "rgb(var(--c-surface))",
-                    fill: "rgb(var(--c-emerald-500))",
+                    fill: CHART_COLORS.positive,
                   }}
                   activeDot={{ r: 6, strokeWidth: 2, stroke: "rgb(var(--c-surface))" }}
-                />
+                >
+                  {data.length <= MAX_DIRECT_LABELS && (
+                    <LabelList
+                      dataKey="performance"
+                      position="top"
+                      offset={10}
+                      fill={chartText(0.8)}
+                      fontSize={font(11)}
+                      formatter={(value: number) => percent(value / 100, decimal)}
+                    />
+                  )}
+                </Line>
               </LineChart>
             </ResponsiveContainer>
           </div>
+        )}
+        {hasRequiredIds && !isLoading && !isError && hasData && summary && (
+          <ChartDataTable
+            title={t("dashboard.jornadaDeAprendizagem_458", {}, locale)}
+            rows={data}
+            rowKey={(row, index) => `${row.name}-${index}`}
+            columns={[
+              { header: t("dashboard.table.quiz", {}, locale), cell: (row) => row.name },
+              { header: t("dashboard.table.taxaDeAcerto", {}, locale), numeric: true, cell: (row) => percent(row.performance / 100, decimal) },
+              {
+                header: t("dashboard.table.variacao", {}, locale),
+                numeric: true,
+                cell: (row) => row.deltaFromPrevious === null
+                  ? t("dashboard.table.primeiroQuiz", {}, locale)
+                  : `${row.deltaFromPrevious > 0 ? "+" : ""}${number(row.deltaFromPrevious, decimal)}`,
+              },
+            ]}
+            footer={t("common.mediaValue0", { value0: number(summary.average, decimal) }, locale)}
+          />
         )}
         {hasRequiredIds && !isLoading && !isError && !hasData && (
           <NoData onRetry={refetch}>
@@ -252,7 +291,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
             <p className="font-[Poppins] text-xs text-zinc-500">{t("dashboard.evolucao", {}, locale)}</p>
             <p
               className="mt-0.5 font-[Poppins] font-bold"
-              style={{ color: summary.evolution >= 0 ? "rgb(var(--c-emerald-500))" : "rgb(var(--c-red-500))" }}
+              style={{ color: summary.evolution >= 0 ? "rgb(var(--chart-positive-ink))" : "rgb(var(--chart-negative-ink))" }}
             >
               {summary.evolution > 0 ? "+" : ""}
               {number(summary.evolution, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}{t("common.percentagePoints")}

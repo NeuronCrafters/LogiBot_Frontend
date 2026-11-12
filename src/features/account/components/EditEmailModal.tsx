@@ -81,7 +81,7 @@ export function EditEmailModal({
                   onChange={(e) => setEmail(e.target.value)}
                   aria-label={t("account.novoEMail")}
                   placeholder={t("account.digiteONovoEMail")}
-                  className="w-full bg-surface-sunken border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500 transition-colors placeholder:text-zinc-600"
+                  className="w-full bg-surface-sunken border border-control rounded-lg p-3 text-white focus:outline-none focus:border-purple-500 transition-colors placeholder:text-zinc-600"
                 />
               </div>
             </div>

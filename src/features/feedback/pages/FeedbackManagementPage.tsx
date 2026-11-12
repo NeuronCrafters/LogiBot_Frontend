@@ -216,7 +216,7 @@ export function FeedbackManagementPage() {
             placeholder={t("feedback.buscarPorMensagemOuAluno", {}, locale)}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 w-full rounded-xl border border-white/10 bg-neutral-950/60 pl-9 pr-3 text-sm text-white placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 sm:w-72"
+            className="h-9 w-full rounded-xl border border-control bg-neutral-950/60 pl-9 pr-3 text-sm text-white placeholder-zinc-500 outline-none transition-colors focus:border-blue-500/50 sm:w-72"
           />
         </div>
       </div>

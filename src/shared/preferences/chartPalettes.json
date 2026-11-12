@@ -1,0 +1,14 @@
+{
+  "redGreen": {
+    "dark": { "positive": "#56b4e9", "negative": "#e69f00", "warning": "#f0e442", "info": "#e8e8e8", "primary": "#56b4e9", "accent": "#f0e442" },
+    "light": { "positive": "#005a9c", "negative": "#a04a00", "warning": "#706850", "info": "#2a2a2a", "primary": "#005a9c", "accent": "#706850" }
+  },
+  "blueYellow": {
+    "dark": { "positive": "#2ec4b6", "negative": "#ff6b81", "warning": "#f0a6ff", "info": "#e8e8e8", "primary": "#2ec4b6", "accent": "#f0a6ff" },
+    "light": { "positive": "#00756c", "negative": "#c0162f", "warning": "#9b2aa8", "info": "#2a2a2a", "primary": "#00756c", "accent": "#9b2aa8" }
+  },
+  "monochrome": {
+    "dark": { "positive": "#f2f2f2", "negative": "#8c8c8c", "warning": "#ababab", "info": "#d0d0d0", "primary": "#d0d0d0", "accent": "#ababab" },
+    "light": { "positive": "#1a1a1a", "negative": "#6b6b6b", "warning": "#555555", "info": "#383838", "primary": "#383838", "accent": "#555555" }
+  }
+}

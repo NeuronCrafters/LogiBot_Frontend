@@ -27,7 +27,7 @@ interface StudentChatContentProps {
   user: User;
 }
 
-const ChatMessageList = memo(function ChatMessageList({
+export const ChatMessageList = memo(function ChatMessageList({
   messages,
 }: {
   messages: ChatMessage[];

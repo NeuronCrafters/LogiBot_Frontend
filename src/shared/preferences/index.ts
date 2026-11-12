@@ -7,6 +7,7 @@ export type TextSizePreference = "default" | "large" | "larger";
 export type ContrastPreference = "system" | "default" | "more";
 export type MotionPreference = "system" | "reduce" | "full";
 export type ChatDisplayPreference = "progressive" | "complete";
+export type PalettePreference = "default" | "redGreen" | "blueYellow" | "monochrome";
 
 export interface Preferences {
   theme: ThemePreference;
@@ -14,6 +15,7 @@ export interface Preferences {
   contrast: ContrastPreference;
   motion: MotionPreference;
   chatDisplay: ChatDisplayPreference;
+  palette: PalettePreference;
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -22,6 +24,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   contrast: "system",
   motion: "system",
   chatDisplay: "progressive",
+  palette: "default",
 };
 
 const OPTIONS: { [K in keyof Preferences]: readonly Preferences[K][] } = {
@@ -30,6 +33,7 @@ const OPTIONS: { [K in keyof Preferences]: readonly Preferences[K][] } = {
   contrast: ["system", "default", "more"],
   motion: ["system", "reduce", "full"],
   chatDisplay: ["progressive", "complete"],
+  palette: ["default", "redGreen", "blueYellow", "monochrome"],
 };
 
 export function sanitizePreferences(value: unknown): Preferences {
@@ -67,6 +71,7 @@ export interface ResolvedPreferences {
   contrast: "default" | "more";
   reduceMotion: boolean;
   chatDisplay: ChatDisplayPreference;
+  palette: PalettePreference;
 }
 
 export function resolvePreferences(preferences: Preferences): ResolvedPreferences {
@@ -76,6 +81,7 @@ export function resolvePreferences(preferences: Preferences): ResolvedPreference
     contrast: preferences.contrast === "system" ? (systemQueries.moreContrast?.matches ? "more" : "default") : preferences.contrast,
     reduceMotion: preferences.motion === "system" ? Boolean(systemQueries.reduceMotion?.matches) : preferences.motion === "reduce",
     chatDisplay: preferences.chatDisplay,
+    palette: preferences.palette,
   };
 }
 
@@ -86,6 +92,7 @@ export function applyPreferences(resolved: ResolvedPreferences, root: HTMLElemen
   root.dataset.text = resolved.textSize;
   root.dataset.contrast = resolved.contrast;
   root.dataset.motion = resolved.reduceMotion ? "reduce" : "full";
+  root.dataset.palette = resolved.palette;
 }
 
 let preferences = readStored();

@@ -64,7 +64,7 @@ export const ChatInput = memo(function ChatInput({
   return (
     <div className="w-full px-4 pb-4 pt-2 flex justify-center">
       <div
-        className={`flex items-end gap-2 w-full max-w-3xl bg-neutral-800 border border-neutral-700 ${isMultiline ? "rounded-3xl" : "rounded-full"} pl-5 pr-2 py-2 shadow-lg transition-opacity ${isLocked ? "bg-neutral-700 border-neutral-600" : ""}`}
+        className={`flex items-end gap-2 w-full max-w-3xl bg-neutral-800 border border-control ${isMultiline ? "rounded-3xl" : "rounded-full"} pl-5 pr-2 py-2 shadow-lg transition-opacity ${isLocked ? "bg-neutral-700 border-neutral-600" : ""}`}
       >
         <textarea
           ref={textareaRef}
