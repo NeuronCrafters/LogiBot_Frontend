@@ -1,9 +1,9 @@
 import { useId } from "react";
 import { SUPPORTED_LANGUAGES, languageName, t, useLocale, type Language } from ".";
 
-export function ContentLanguageLabel({ language }: { language?: Language | null }) {
+export function ContentLanguageLabel({ language, className = "text-xs" }: { language?: Language | null; className?: string }) {
   useLocale();
-  return <span className="text-xs text-zinc-400">{t("language.content")}: {languageName(language)}</span>;
+  return <span className={`${className} text-zinc-400`}>{t("language.content")}: {languageName(language)}</span>;
 }
 
 export function ContentLanguageSelect({ value, onChange }: { value: Language; onChange: (value: Language) => void }) {

@@ -136,13 +136,14 @@ export function EffortMatrixChart({ filters }: ChartProps) {
     let assessedIndex = 0;
     const tableRows = data.points.map((point) =>
       point.performance === null
-        ? { name: point.name, performance: null, effort: point.originalEffort ?? point.effort, quadrant: null }
+        ? { name: point.name, performance: null, effort: point.originalEffort ?? point.effort, effortEstimated: point.effortEstimated, quadrant: null }
         : (() => {
             const assessedPoint = points[assessedIndex++];
             return {
               name: assessedPoint.name,
               performance: assessedPoint.originalPerformance,
               effort: assessedPoint.originalEffort,
+              effortEstimated: assessedPoint.effortEstimated,
               quadrant: assessedPoint.quadrant as keyof typeof QUADRANT_LABELS,
             };
           })(),
@@ -289,6 +290,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                             {number(d.originalEffort, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} min
                           </span>
                         </p>
+                        {d.effortEstimated && <p className="mt-1 text-xs text-zinc-400">{t("dashboard.time.estimatedNote", {}, locale)}</p>}
                       </div>
                     );
                   }}
@@ -360,7 +362,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
                   ? <MissingValue label={t("dashboard.table.semRespostas", {}, locale)} />
                   : percent(row.performance / 100, decimal),
               },
-              { header: t("dashboard.table.esforco", {}, locale), numeric: true, cell: (row) => number(row.effort, decimal) },
+              { header: t("dashboard.table.esforco", {}, locale), numeric: true, cell: (row) => <>{number(row.effort, decimal)}{row.effortEstimated && <span className="block text-xs text-zinc-400">{t("dashboard.time.estimated", {}, locale)}</span>}</> },
               {
                 header: t("dashboard.table.situacao", {}, locale),
                 cell: (row) => row.quadrant

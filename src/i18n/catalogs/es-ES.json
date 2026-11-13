@@ -943,5 +943,11 @@
   "dashboard.table.variacao": "Variación respecto al anterior (p.p.)",
   "dashboard.table.primeiroQuiz": "Primer cuestionario",
   "dashboard.table.total": "Total",
-  "chat.codigoEmLinguagem": "Código en {{language}}"
+  "chat.codigoEmLinguagem": "Código en {{language}}",
+  "dashboard.time.estimated": "Tiempo estimado",
+  "dashboard.time.estimatedNote": "Incluye duraciones estimadas entre el inicio de la sesión y la última actividad registrada. Esto no mide el tiempo activo.",
+  "dashboard.time.unavailableNote": "Hay sesiones sin duración recuperable.",
+  "dashboard.time.unavailable": "Sin duración recuperable",
+  "dashboard.time.recorded": "Registrado",
+  "dashboard.time.source": "Origen del tiempo"
 }

@@ -51,7 +51,7 @@ function useUsageData(filter: UsageChartProps["filter"]) {
     queryKey: ["useUsageData", filters],
     queryFn: async () => {
       const { data } = await api.post("/logs/students/summary", filters);
-      return { totalUsageTime: data.usageTimeInSeconds, dailyUsage: data.dailyUsage || [], sessions: data.sessions || [] };
+      return { totalUsageTime: data.usageTimeInSeconds, dailyUsage: data.dailyUsage || [], sessions: data.sessions || [], estimatedUsageTime: data.estimatedUsageTimeInSeconds ?? 0, undeterminedSessionCount: data.undeterminedSessionCount ?? 0 };
     },
     enabled: !!filters.universityId,
     staleTime: 15 * 60 * 1_000,
@@ -114,6 +114,8 @@ export function UsageChart({ filter }: UsageChartProps) {
           <p className="mt-1 font-[Poppins] text-2xl font-bold text-white sm:text-3xl">
             {hasData ? formattedTime : "—"}
           </p>
+          {usageData?.estimatedUsageTime > 0 && <p className="mt-2 text-sm text-zinc-400" data-usage-estimate>{t("dashboard.time.estimatedNote", {}, locale)}</p>}
+          {usageData?.undeterminedSessionCount > 0 && <p className="mt-2 text-sm text-zinc-400">{t("dashboard.time.unavailableNote", {}, locale)}</p>}
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton

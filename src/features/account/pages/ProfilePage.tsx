@@ -1,6 +1,5 @@
 import { apiError } from "@/shared/lib/apiError";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
-import { PreferencesControls } from "@/shared/preferences/PreferencesControls";
 import { t, useLocale } from "@/i18n";
 ﻿import { useState, type ReactNode } from "react";
 import { logger } from "@/shared/lib/logger";
@@ -8,6 +7,7 @@ import {
   BookOpen,
   GraduationCap,
   KeyRound,
+  Languages,
   Loader2,
   Mail,
   Pencil,
@@ -196,22 +196,14 @@ export function Profile() {
             </div>
           </section>
 
-          <section className="rounded-xl border border-white/10 bg-neutral-950/60 p-5">
-            <h2 className="mb-3 font-semibold text-white">{t("language.label")}</h2>
-            <LanguageSwitcher details />
-          </section>
-          <section className="rounded-xl border border-white/10 bg-neutral-950/60 p-5">
-            <h2 className="mb-4 font-semibold text-white">{t("preferences.titulo")}</h2>
-            <PreferencesControls />
-          </section>
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
-            <div className="space-y-5">
+          <div className="grid gap-5 lg:grid-cols-2">
               <Panel
+                className="lg:col-span-2"
                 icon={<UserIcon className="h-5 w-5 text-blue-400" />}
                 title={t("account.informacoesPessoais")}
                 subtitle={t("account.dadosPrincipaisUsadosNaSuaConta")}
               >
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <InfoTile
                     label={t("common.nomeCompleto")}
                     value={user.name}
@@ -230,6 +222,7 @@ export function Profile() {
 
               {!isAdmin && (
                 <Panel
+                  className="lg:col-span-2"
                   icon={<GraduationCap className="h-5 w-5 text-emerald-400" />}
                   title={t("account.dadosAcademicos")}
                   subtitle={t("account.vinculosCarregadosAPartirDaSuaInstituicao")}
@@ -287,10 +280,9 @@ export function Profile() {
                   </div>
                 </Panel>
               )}
-            </div>
-
-            <aside className="space-y-5">
+            <aside>
               <Panel
+                className="h-full"
                 icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
                 title={t("account.seguranca")}
                 subtitle={t("account.mantenhaOAcessoDaContaProtegido")}
@@ -317,6 +309,15 @@ export function Profile() {
                 </div>
               </Panel>
             </aside>
+            <Panel
+              className="h-full"
+              icon={<Languages className="h-5 w-5 text-indigo-400" />}
+              title={t("language.label")}
+            >
+              <div className="rounded-xl border border-white/10 bg-neutral-950/60 p-4 [&_select]:max-w-none">
+                <LanguageSwitcher details />
+              </div>
+            </Panel>
           </div>
         </div>
       </main>
@@ -347,16 +348,18 @@ function Panel({
   title,
   subtitle,
   children,
+  className = "",
 }: {
   icon: ReactNode;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   children: ReactNode;
+  className?: string;
 }) {
   useLocale();
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10">
+    <section className={`rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 ${className}`}>
       <div className="mb-5 flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
           {icon}
@@ -365,9 +368,9 @@ function Panel({
           <h2 className="font-[Poppins] text-base font-semibold text-white">
             {title}
           </h2>
-          <p className="mt-1 font-[Poppins] text-xs leading-relaxed text-zinc-500">
+          {subtitle && <p className="mt-1 font-[Poppins] text-xs leading-relaxed text-zinc-500">
             {subtitle}
-          </p>
+          </p>}
         </div>
       </div>
       {children}

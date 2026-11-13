@@ -2,7 +2,7 @@ import { useDialogFocus } from "@/shared/hooks/useDialogFocus";
 import { apiError } from "@/shared/lib/apiError";
 import { ContentLanguageSelect, ContentLanguageLabel } from "@/i18n/ContentLanguage";
 import { percent, t, useLocale, getLanguage, type Language } from "@/i18n";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useId } from "react";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -400,18 +400,18 @@ function QuestionsPanel({ quizId, language }: { quizId: string; language?: Langu
         ) : (
           <div
             key={q.id}
-            className="flex items-start gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-4"
+            className="flex flex-col items-start gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-3 sm:flex-row sm:p-4"
           >
             <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 font-[Poppins] text-xs font-bold text-indigo-400">
               {i + 1}
             </span>
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
               <p lang={language || undefined} className="font-[Poppins] text-sm text-white">{q.question}</p>
               <div className="mt-1.5 flex flex-wrap gap-1">
                 {q.options.map((opt, oi) => (
                   <span
                     key={oi}
-                    className={`rounded-md px-2 py-0.5 font-[Poppins] text-xs ${
+                    className={`rounded-md px-2 py-0.5 font-[Poppins] text-sm ${
                       LETTERS[oi] === q.correctOption
                         ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                         : "border border-white/10 bg-white/5 text-zinc-600"
@@ -422,24 +422,24 @@ function QuestionsPanel({ quizId, language }: { quizId: string; language?: Langu
                 ))}
               </div>
               {q.explanation && (
-                <p className="mt-2 font-[Poppins] text-xs leading-relaxed text-zinc-500">
+                <p className="mt-2 font-[Poppins] text-sm leading-relaxed text-zinc-500">
                   <span className="font-semibold text-zinc-400">{t("quiz.explicacao")}{" "}</span>
                   <span lang={language || undefined}>{q.explanation}</span>
                 </p>
               )}
             </div>
-            <div className="flex gap-1 shrink-0">
+            <div className="flex max-w-full shrink-0 flex-wrap gap-2">
               <button
                 aria-label={t("common.editar")}
                 onClick={() => setEditingId(q.id)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 hover:text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 hover:text-white"
               >
                 <Pencil className="h-3 w-3" />
               </button>
               <button
                 aria-label={t("common.excluir")}
                 onClick={() => setDeleteId(q.id)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 hover:border-red-500/30 hover:text-red-400"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 hover:border-red-500/30 hover:text-red-400"
               >
                 <Trash2 className="h-3 w-3" />
               </button>
@@ -457,7 +457,7 @@ function QuestionsPanel({ quizId, language }: { quizId: string; language?: Langu
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 font-[Poppins] text-sm text-zinc-500 transition-colors hover:border-indigo-500/30 hover:text-indigo-400"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 px-3 py-2 font-[Poppins] text-sm text-zinc-500 [overflow-wrap:anywhere] transition-colors hover:border-indigo-500/30 hover:text-indigo-400"
         >
           <Plus className="h-4 w-4" />
           {t("quiz.adicionarPergunta")}</button>
@@ -623,75 +623,78 @@ function QuizCard({
   useLocale();
 
   const isDraft = quiz.status === "draft";
+  const titleId = useId();
 
   return (
-    <div
+    <article aria-labelledby={titleId}
       className={`overflow-hidden rounded-2xl border bg-surface shadow-md shadow-black/10 transition-colors hover:border-white/20 ${
         isDraft ? "border-white/10" : "border-emerald-500/20"
       }`}
     >
-      <div className="flex items-start gap-3 p-5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+      <div className="flex items-start gap-3 p-4 sm:p-5">
+        <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 sm:flex">
           <Brain className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p lang={quiz.language || undefined} className="font-[Poppins] text-sm font-semibold leading-snug text-white">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h2 id={titleId} lang={quiz.language || undefined} className="min-w-0 flex-[1_1_9rem] break-words font-[Poppins] text-base font-semibold leading-snug text-white sm:text-lg">
               {quiz.title}
-            </p>
-            <ContentLanguageLabel language={quiz.language} />
+            </h2>
             {isDraft ? (
-              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-amber-400">
+              <span className="shrink-0 whitespace-nowrap rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-[Poppins] text-sm font-medium text-amber-400">
                 {t("quiz.rascunho")}</span>
             ) : (
-              <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-emerald-400">
-                <CheckCircle2 className="h-3 w-3" />
+              <span className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-[Poppins] text-sm font-medium text-emerald-400">
+                <CheckCircle2 className="hidden h-3 w-3 sm:block" />
                 {t("quiz.publicado")}</span>
             )}
           </div>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-indigo-400">
-              <BookOpen className="h-3 w-3" />
-              {quiz.disciplineName}
+          <div className="mt-2">
+            <ContentLanguageLabel language={quiz.language} className="text-sm leading-relaxed" />
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-[Poppins] text-sm font-medium text-indigo-400">
+              <BookOpen className="h-3 w-3 shrink-0" />
+              <span className="min-w-0 [overflow-wrap:anywhere]">{quiz.disciplineName}</span>
             </span>
-            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-xs text-zinc-500">
+            <span className="max-w-full rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-[Poppins] text-sm text-zinc-500 [overflow-wrap:anywhere]">
               {TOPIC_LABEL()[quiz.topic] ?? quiz.topic}
             </span>
             {quiz.generationSource === "ai" && (
-              <span className="flex items-center gap-1 rounded-md border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 font-[Poppins] text-xs font-medium text-purple-400">
+              <span className="flex items-center gap-1 rounded-md border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 font-[Poppins] text-sm font-medium text-purple-400">
                 <Sparkles className="h-2.5 w-2.5" />
                 {t("common.ai")}
               </span>
             )}
-            <span className="font-[Poppins] text-xs text-zinc-600">
-              {t("common.questions", { count: quiz.questionCount })}
-            </span>
           </div>
+          <p className="mt-2 font-[Poppins] text-sm text-zinc-600">
+            {t("common.questions", { count: quiz.questionCount })}
+          </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5 border-t border-white/5 px-5 py-3">
+      <div className="flex flex-wrap items-center gap-2 border-t border-white/5 px-4 py-3 sm:px-5">
         <button
           onClick={onToggleExpand}
-          className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex min-h-11 min-w-0 max-w-full items-center gap-1.5 rounded-lg [overflow-wrap:anywhere] border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
           {isExpanded ? (
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-4 w-4 shrink-0" />
           ) : (
-            <ChevronRight className="h-3 w-3" />
+            <ChevronRight className="h-4 w-4 shrink-0" />
           )}
           {t("quiz.perguntas")}</button>
         <button
           onClick={onViewResults}
-          className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex min-h-11 min-w-0 max-w-full items-center gap-1.5 rounded-lg [overflow-wrap:anywhere] border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
-          <Users className="h-3 w-3" />
+          <Users className="h-4 w-4 shrink-0" />
           {t("quiz.resultados")}</button>
         <button
           onClick={onEdit}
-          className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex min-h-11 min-w-0 max-w-full items-center gap-1.5 rounded-lg [overflow-wrap:anywhere] border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
         >
-          <Pencil className="h-3 w-3" />
+          <Pencil className="h-4 w-4 shrink-0" />
           {t("common.editar")}</button>
 
         {/* Publish / unpublish */}
@@ -700,24 +703,24 @@ function QuizCard({
             onClick={onPublish}
             disabled={isPublishing || quiz.questionCount === 0}
             title={quiz.questionCount === 0 ? t("quiz.adicioneAoMenosUmaPergunta") : undefined}
-            className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 font-[Poppins] text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex min-h-11 min-w-0 max-w-full items-center gap-1.5 rounded-lg [overflow-wrap:anywhere] border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 font-[Poppins] text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isPublishing ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
             ) : (
-              <Send className="h-3 w-3" />
+              <Send className="h-4 w-4 shrink-0" />
             )}
             {t("quiz.publicar")}</button>
         ) : (
           <button
             onClick={onUnpublish}
             disabled={isPublishing}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-xs text-zinc-400 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40"
+            className="flex min-h-11 min-w-0 max-w-full items-center gap-1.5 rounded-lg [overflow-wrap:anywhere] border border-white/10 bg-white/5 px-2.5 py-1.5 font-[Poppins] text-sm text-zinc-400 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40"
           >
             {isPublishing ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
             ) : (
-              <EyeOff className="h-3 w-3" />
+              <EyeOff className="h-4 w-4 shrink-0" />
             )}
             {t("quiz.despublicar")}</button>
         )}
@@ -725,18 +728,18 @@ function QuizCard({
         <button
           aria-label={t("common.excluirValue0", { value0: quiz.title })}
           onClick={onDelete}
-          className="ml-auto flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-1.5 text-zinc-600 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+          className="ml-auto flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 p-1.5 text-zinc-600 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
 
       {isExpanded && (
-        <div className="border-t border-white/5 p-5">
+        <div className="border-t border-white/5 p-3 sm:p-5">
           <QuestionsPanel quizId={quiz.id} language={quiz.language} />
         </div>
       )}
-    </div>
+    </article>
   );
 }
 
@@ -849,29 +852,29 @@ export function ProfessorQuizPage() {
     <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
         {/* Header */}
-        <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-surface p-4 shadow-lg shadow-black/10 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 sm:flex">
                 <Brain className="h-5 w-5" />
               </div>
-              <div>
+              <div className="min-w-0 [overflow-wrap:anywhere]">
                 <h1 className="font-[Poppins] text-2xl font-semibold text-white">
                   {t("common.meusQuizzes", {}, locale)}</h1>
                 <p className="mt-1 font-[Poppins] text-sm leading-relaxed text-zinc-400">
                   {t("quiz.crieEGerencieQuizzesParaSuasDisciplinas", {}, locale)}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 self-start sm:self-auto">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 self-start sm:self-auto">
               <button
                 onClick={() => setAiModal(true)}
-                className="flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 font-[Poppins] text-sm font-semibold text-indigo-300 transition-colors hover:border-indigo-500/60 hover:bg-indigo-500/20"
+                className="flex min-h-11 min-w-0 max-w-full items-center gap-1.5 [overflow-wrap:anywhere] rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 font-[Poppins] text-sm font-semibold text-indigo-300 transition-colors hover:border-indigo-500/60 hover:bg-indigo-500/20"
               >
                 <Sparkles className="h-4 w-4" />
                 {t("common.criarComIa", {}, locale)}</button>
               <button
                 onClick={() => setCreateModal(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-indigo-700"
+                className="flex min-h-11 min-w-0 max-w-full items-center gap-1.5 [overflow-wrap:anywhere] rounded-lg bg-indigo-600 px-4 py-2 font-[Poppins] text-sm font-semibold text-on-accent transition-colors hover:bg-indigo-700"
               >
                 <Plus className="h-4 w-4" />
                 {t("common.criarQuiz", {}, locale)}</button>

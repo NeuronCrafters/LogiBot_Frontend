@@ -35,6 +35,7 @@ const CHART_INFO =
 interface SessionData {
   startTime: string;
   endTime: string;
+  durationSource?: "recorded" | "estimated" | "unavailable";
 }
 interface ProcessedSession {
   day: number;
@@ -42,6 +43,7 @@ interface ProcessedSession {
   startTime: Date;
   endTime: Date;
   duration: string;
+  durationSource: "recorded" | "estimated" | "unavailable";
 }
 interface ChartProps {
   filters: DashboardFilterParams;
@@ -69,8 +71,9 @@ const CustomTooltip = ({ active, payload }: any) => {
         </span>
       </p>
       <p className="border-t border-white/10 pt-1 font-[Poppins] text-zinc-400">
-        {t("dashboard.duracao")}{" "}<span className="font-medium text-white">{d.duration}</span>
+        {t("dashboard.duracao")}{" "}<span className="font-medium text-white">{d.durationSource === "unavailable" ? t("dashboard.time.unavailable") : d.duration}</span>
       </p>
+      {d.durationSource === "estimated" && <p className="text-xs text-zinc-400">{t("dashboard.time.estimatedNote")}</p>}
     </div>
   );
 };
@@ -98,6 +101,7 @@ function useSessionData(filters: ChartProps["filters"]) {
           startTime: start,
           endTime: end,
           duration: formatDuration(end, start),
+          durationSource: s.durationSource ?? "recorded",
         };
       });
     },
@@ -219,7 +223,8 @@ export function AccessPatternChart({ filters }: ChartProps) {
             columns={[
               { header: t("dashboard.table.entrada"), cell: (row) => formatDateTime(row.startTime) },
               { header: t("dashboard.table.saida"), cell: (row) => formatDateTime(row.endTime) },
-              { header: t("dashboard.table.duracao"), numeric: true, cell: (row) => row.duration },
+              { header: t("dashboard.table.duracao"), numeric: true, cell: (row) => row.durationSource === "unavailable" ? t("dashboard.time.unavailable") : row.duration },
+              { header: t("dashboard.time.source"), cell: (row) => t(row.durationSource === "estimated" ? "dashboard.time.estimated" : row.durationSource === "unavailable" ? "dashboard.time.unavailable" : "dashboard.time.recorded") },
               { header: t("dashboard.table.diaDaSemana"), cell: (row) => row.startTime.toLocaleDateString(getLanguage(), { weekday: "long" }) },
             ]}
             footer={`${t("dashboard.table.total")}: ${sessions.length}`}

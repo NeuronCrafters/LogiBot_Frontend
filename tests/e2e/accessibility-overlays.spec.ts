@@ -179,7 +179,7 @@ test('the eighth chart offers its data table by keyboard', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   await expect(card.getByRole('table')).toContainText('28/10/2026');
-  await expect(card.getByRole('columnheader')).toHaveCount(4);
+  await expect(card.getByRole('columnheader')).toHaveCount(5);
   const audit = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(audit.violations.map(item => item.id)).toEqual([]);
 });

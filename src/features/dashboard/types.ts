@@ -10,6 +10,7 @@ export interface EffortMatrixData {
     name: string;
     performance: number | null;
     effort: number;
+    effortEstimated?: boolean;
     originalPerformance?: number;
     originalEffort?: number;
     isAverage?: boolean;
@@ -36,6 +37,7 @@ export type AccessPatternData = [number, number, number][];
 export interface SessionDetailsData {
   startTime: string;
   endTime: string;
+  durationSource?: "recorded" | "estimated" | "unavailable";
 }
 
 export type DashboardInsightChart =
