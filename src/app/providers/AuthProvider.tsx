@@ -1,3 +1,4 @@
+import { useServerSession, SessionWarning, type ServerSession } from "./useServerSession";
 import { apiError } from "@/shared/lib/apiError";
 import { useLocale, applyAccountLanguage, clearAccountLanguage } from "@/i18n";
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,11 +10,12 @@ import { useCategoryClickTracker } from "@/features/chat/hooks/useCategoryClickT
 import { useQueryClient } from "@tanstack/react-query";
 import { usePrefetchChatHistory } from "@/features/chat/hooks/useChatHistory";
 
-const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   useLocale();
 
+  const generation = useRef(0);
+  const [session, setSession] = useState<ServerSession | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!user;
 
   async function login(email: string, password: string) {
+    generation.current++;
     try {
       const response = await api.post(
         "/auth/session",
@@ -47,8 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const getUser = useCallback(async () => {
+    const requestGeneration = generation.current;
     try {
       const response = await api.get("/auth/me", { withCredentials: true });
+      if (requestGeneration !== generation.current) return;
       const data = response.data;
 
       const safeUser: User = {
@@ -65,67 +70,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       localStorage.setItem("has_session", "1");
       applyAccountLanguage(data.preferredLanguage ?? null);
+      setSession(data.session?.id ? data.session : null);
+      if (data.session?.id && localStorage.getItem("logibot.session.started") !== data.session.id)
+        localStorage.setItem("logibot.session.started", data.session.id);
+      sessionStorage.removeItem("logibot.session.expired");
       setUser(safeUser);
 
       if (safeUser._id) {
         prefetchChatHistory(safeUser._id);
       }
     } catch (error: any) {
+      if (requestGeneration !== generation.current) return;
       if (error?.response?.status !== 401) {
         logger.error("Auth", "Erro ao obter usuário.", error);
       }
       localStorage.removeItem("has_session");
       clearAccountLanguage();
+      setSession(null);
       setUser(null);
     }
   }, [prefetchChatHistory]);
 
+  const finishSession = useCallback((expired = false, broadcast = true) => {
+    generation.current++;
+    localStorage.removeItem("has_session");
+    if (expired) sessionStorage.setItem("logibot.session.expired", "1");
+    else sessionStorage.removeItem("logibot.session.expired");
+    if (broadcast) localStorage.setItem("logibot.session.ended", String(Date.now()));
+    void queryClient.cancelQueries();
+    queryClient.clear();
+    clearAccountLanguage(true);
+    setSession(null);
+    setUser(null);
+    navigate(expired ? "/signin?expired=1" : "/signin", { replace: true });
+  }, [queryClient, navigate]);
+
+  const expireSession = useCallback(() => finishSession(true), [finishSession]);
   const logout = useCallback(async () => {
     try {
       await flushClicks();
       await api.post("/auth/logout", {}, { withCredentials: true });
-    } catch (error) {
-      logger.error("Auth", "Erro ao fazer logout.", error);
-    } finally {
-      localStorage.removeItem("has_session");
-      queryClient.clear();
-      clearAccountLanguage(true);
-      setUser(null);
-      navigate("/signin");
-    }
-  }, [flushClicks, queryClient, navigate]);
+    } catch (error) { logger.error("Auth", "Erro ao fazer logout.", error); }
+    finally { finishSession(); }
+  }, [flushClicks, finishSession]);
 
-  const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
-
-  const resetInactivityTimer = useCallback(() => {
-    if (inactivityTimer.current) {
-      clearTimeout(inactivityTimer.current);
-    }
-    inactivityTimer.current = setTimeout(() => {
-      if (isAuthenticated) {
-        logger.info("Auth", "Usuário inativo por 2 horas. Desconectando.");
-        logout();
-      }
-    }, INACTIVITY_TIMEOUT);
-  }, [isAuthenticated, logout]);
-
+  const lifecycle = useServerSession(session, setSession, expireSession);
   useEffect(() => {
-    if (isAuthenticated) {
-      const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
-      const reset = () => resetInactivityTimer();
-
-      resetInactivityTimer();
-
-      events.forEach(event => window.addEventListener(event, reset));
-
-      return () => {
-        if (inactivityTimer.current) {
-          clearTimeout(inactivityTimer.current);
-        }
-        events.forEach(event => window.removeEventListener(event, reset));
-      };
-    }
-  }, [isAuthenticated, resetInactivityTimer]);
+    const unauthorized = () => { if (localStorage.getItem("has_session")) expireSession(); };
+    const endedElsewhere = (event: StorageEvent) => {
+      if (event.key === "logibot.session.ended" && user) finishSession(true, false);
+      if (event.key === "logibot.session.started" && user) window.location.reload();
+    };
+    window.addEventListener("logibot:unauthorized", unauthorized);
+    window.addEventListener("storage", endedElsewhere);
+    return () => {
+      window.removeEventListener("logibot:unauthorized", unauthorized);
+      window.removeEventListener("storage", endedElsewhere);
+    };
+  }, [expireSession, finishSession, user]);
 
   useEffect(() => {
     if (localStorage.getItem("has_session")) {
@@ -148,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={contextValue}>
       {children}
+      <SessionWarning kind={lifecycle.warning} pending={lifecycle.pending} error={lifecycle.connectionError} onContinue={lifecycle.continueSession} onSignOut={logout} />
     </AuthContext.Provider>
   );
 }

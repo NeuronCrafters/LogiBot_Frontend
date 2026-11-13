@@ -35,6 +35,10 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       logger.warn("API", "Usuário não autenticado.");
+      const path = String(error.config?.url || "");
+      if (error.response?.data?.code !== "auth.apiKeyInvalid" && !/^\/auth\/(session|register|password-reset|password-reset-requests)$/.test(path)) {
+        window.dispatchEvent(new Event("logibot:unauthorized"));
+      }
     } else if (error.response?.status >= 500) {
       logger.error("API", "Erro interno do servidor.", error.response.data);
     }

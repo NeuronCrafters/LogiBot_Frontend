@@ -76,6 +76,7 @@ function useChartData(filters: ChartProps["filters"]) {
     queryFn: () =>
       dashboardApi.getEffortMatrix(filters).then((res) => res.data),
     enabled: !!filters.universityId,
+    refetchInterval: 30_000,
     staleTime: 1000 * 60 * 5,
   });
 }

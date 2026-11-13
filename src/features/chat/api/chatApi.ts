@@ -164,6 +164,7 @@ export const chatApi = {
     });
 
     if (!response.ok) {
+      if (response.status === 401) window.dispatchEvent(new Event("logibot:unauthorized"));
       throw new Error(t("chat.streamFalhouComStatusValue0", { value0: response.status }));
     }
 

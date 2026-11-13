@@ -1,3 +1,4 @@
+import { useAccountDraft } from "@/shared/hooks/useAccountDraft";
 import { ContentLanguageLabel } from "@/i18n/ContentLanguage";
 import { percent, t, useLocale, type Language } from "@/i18n";
 import { useState, useEffect } from "react";
@@ -162,7 +163,7 @@ export function QuizAttempt() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers, clearDraft] = useAccountDraft<Record<string, string>>(`quiz.${id}`, {});
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -180,6 +181,7 @@ export function QuizAttempt() {
   const submitMutation = useMutation({
     mutationFn: () => studentQuizApi.submitAttempt(id!, answers),
     onSuccess: (data) => {
+      clearDraft();
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ["studentQuizHub"] });
     },
@@ -191,7 +193,7 @@ export function QuizAttempt() {
   };
 
   const handleRetry = () => {
-    setAnswers({});
+    clearDraft();
     setResult(null);
     setCurrentIndex(0);
   };

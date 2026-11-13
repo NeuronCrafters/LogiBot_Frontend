@@ -945,9 +945,20 @@
   "dashboard.table.total": "Total",
   "chat.codigoEmLinguagem": "Código en {{language}}",
   "dashboard.time.estimated": "Tiempo estimado",
-  "dashboard.time.estimatedNote": "Incluye duraciones estimadas entre el inicio de la sesión y la última actividad registrada. Esto no mide el tiempo activo.",
+  "dashboard.time.estimatedNote": "Incluye duraciones estimadas entre el inicio de la sesión y la última actividad registrada.",
   "dashboard.time.unavailableNote": "Hay sesiones sin duración recuperable.",
   "dashboard.time.unavailable": "Sin duración recuperable",
   "dashboard.time.recorded": "Registrado",
-  "dashboard.time.source": "Origen del tiempo"
+  "dashboard.time.source": "Origen del tiempo",
+  "auth.sessionExpired": "Tu sesión ha caducado. Inicia sesión de nuevo para continuar.",
+  "auth.sessionWarningTitle": "Tu sesión está a punto de caducar",
+  "auth.sessionIdleWarning": "Llevas un tiempo sin interactuar. Confirma para continuar conectado.",
+  "auth.sessionAbsoluteWarning": "Esta sesión se acerca a su límite de seguridad. Guarda tu trabajo e inicia sesión de nuevo.",
+  "auth.sessionContinue": "Continuar conectado",
+  "auth.sessionSignIn": "Iniciar sesión de nuevo",
+  "auth.sessionConnectionError": "No se pudo confirmar tu sesión. Comprueba la conexión e inténtalo de nuevo.",
+  "dashboard.time.observed": "Actividad observada",
+  "dashboard.time.liveNote": "Incluye actividad observada en sesiones en curso. Se actualiza cada 30 segundos.",
+  "dashboard.time.observedNote": "El tiempo observado usa registros de interacción; los períodos sin interacción no se suman.",
+  "dashboard.time.ongoing": "En curso"
 }

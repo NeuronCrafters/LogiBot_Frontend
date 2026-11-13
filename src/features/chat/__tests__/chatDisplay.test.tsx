@@ -65,7 +65,7 @@ describe("exibição das respostas do chat", () => {
     act(() => { sending = flow.result.current.sendMessage("Pergunta"); });
     await waitFor(() => expect(chatApi.streamTutor).toHaveBeenCalled());
     act(() => { stream.callbacks.onToken?.("Trecho parcial"); });
-    await act(async () => { stream.fail(new Error("rede")); await sending; });
+    await act(async () => { stream.fail(new Error("rede")); await expect(sending).rejects.toThrow("rede"); });
     sync();
     expect(screen.queryByText(/Trecho parcial/)).toBeNull();
     expect(screen.getByText(/Erro ao processar/i)).toBeInTheDocument();

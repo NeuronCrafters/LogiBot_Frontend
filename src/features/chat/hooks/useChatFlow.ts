@@ -164,6 +164,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
               type: "text",
             }),
         );
+        throw error;
       }
     },
     [sessionId, locale],

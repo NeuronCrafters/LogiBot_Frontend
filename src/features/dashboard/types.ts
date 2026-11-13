@@ -37,7 +37,9 @@ export type AccessPatternData = [number, number, number][];
 export interface SessionDetailsData {
   startTime: string;
   endTime: string;
-  durationSource?: "recorded" | "estimated" | "unavailable";
+  durationSource?: "recorded" | "estimated" | "unavailable" | "observed";
+  sessionDuration?: number;
+  ongoing?: boolean;
 }
 
 export type DashboardInsightChart =

@@ -31,6 +31,7 @@ export function AuthPage({ mode }: AuthPageProps) {
   useLocale();
 
   const isSignup = mode === "signup";
+  const expired = new URLSearchParams(window.location.search).get("expired") === "1";
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -171,6 +172,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               </div>
 
               <form onSubmit={handleSubmit} className="min-w-0 space-y-3">
+            {!isSignup && expired && <p role="status" className="mb-4 text-base leading-relaxed text-zinc-400">{t("auth.sessionExpired")}</p>}
                 {isSignup && (
                   <AuthInput
                     id="signup-name-input"

@@ -1,3 +1,4 @@
+import { useAccountDraft } from "@/shared/hooks/useAccountDraft";
 import { t, useLocale } from "@/i18n";
 ﻿import { ArrowUp, Loader2 } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
@@ -15,7 +16,7 @@ export const ChatInput = memo(function ChatInput({
 }: ChatInputProps) {
   const locale = useLocale();
 
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText, clearDraft] = useAccountDraft("chat.input", "");
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -44,9 +45,9 @@ export const ChatInput = memo(function ChatInput({
     setIsSending(true);
     try {
       userAnalysisApi.addInteraction(text).catch(() => {});
-      setInputText("");
       if (textareaRef.current) textareaRef.current.style.height = "auto";
       await Promise.resolve(sendMessage(text));
+      clearDraft();
     } catch (err) {
       logger.error("Chat", "Erro ao enviar mensagem.", err);
     } finally {

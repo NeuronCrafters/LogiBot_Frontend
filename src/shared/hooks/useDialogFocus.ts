@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useModalScrollLock } from "./useModalScrollLock";
 
-export function useDialogFocus<T extends HTMLElement>(open: boolean, onClose?: () => void) {
+export function useDialogFocus<T extends HTMLElement>(open: boolean, onClose?: () => void, focusDialog = false) {
   const ref = useRef<T>(null);
   useModalScrollLock(open, ref);
   const close = useRef(onClose);
@@ -11,7 +11,8 @@ export function useDialogFocus<T extends HTMLElement>(open: boolean, onClose?: (
     if (!open || !root) return;
     const previous = document.activeElement as HTMLElement | null;
     const focusable = () => Array.from(root.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]')).filter(element => !element.closest('[aria-hidden="true"]'));
-    focusable()[0]?.focus();
+    if (focusDialog) root.focus({ preventScroll: true });
+    else focusable()[0]?.focus();
     const keydown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !root.querySelector('[aria-expanded="true"][aria-haspopup="listbox"]')) { event.stopPropagation(); close.current?.(); }
       if (event.key !== "Tab") return;

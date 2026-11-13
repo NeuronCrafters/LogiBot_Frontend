@@ -224,6 +224,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         await sendMessage(text);
       } catch (error) {
         logger.error("Chat", "Erro ao enviar mensagem.", error);
+        throw error;
       } finally {
         setIsWaitingResponse(false);
       }

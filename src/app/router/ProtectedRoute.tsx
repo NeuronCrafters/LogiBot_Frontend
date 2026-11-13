@@ -8,7 +8,7 @@ const ProtectedRoute = () => {
     return null;
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/signin" />;
+  return isAuthenticated ? <Outlet /> : <Navigate to={sessionStorage.getItem("logibot.session.expired") ? "/signin?expired=1" : "/signin"} replace />;
 };
 
 export default ProtectedRoute;

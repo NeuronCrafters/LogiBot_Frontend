@@ -34,8 +34,10 @@ const CHART_INFO =
 
 interface SessionData {
   startTime: string;
-  endTime: string;
-  durationSource?: "recorded" | "estimated" | "unavailable";
+  endTime: string | null;
+  sessionDuration?: number;
+  ongoing?: boolean;
+  durationSource?: "recorded" | "estimated" | "unavailable" | "observed";
 }
 interface ProcessedSession {
   day: number;
@@ -43,7 +45,8 @@ interface ProcessedSession {
   startTime: Date;
   endTime: Date;
   duration: string;
-  durationSource: "recorded" | "estimated" | "unavailable";
+  ongoing?: boolean;
+  durationSource: "recorded" | "estimated" | "unavailable" | "observed";
 }
 interface ChartProps {
   filters: DashboardFilterParams;
@@ -67,7 +70,7 @@ const CustomTooltip = ({ active, payload }: any) => {
       <p className="font-[Poppins] text-zinc-400">
         {t("dashboard.saida")}{" "}
         <span className="font-medium text-white">
-          {formatDateTime(d.endTime)}
+          {d.ongoing ? t("dashboard.time.ongoing") : formatDateTime(d.endTime)}
         </span>
       </p>
       <p className="border-t border-white/10 pt-1 font-[Poppins] text-zinc-400">
@@ -89,18 +92,20 @@ function useSessionData(filters: ChartProps["filters"]) {
       filters.universityId &&
       (filters.studentId || filters.classId || filters.courseId)
     ),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 30_000,
+    refetchInterval: 30_000,
     select: (apiData: SessionData[] | undefined) => {
       if (!apiData) return [];
       return apiData.map((s) => {
         const start = new Date(s.startTime);
-        const end = new Date(s.endTime);
+        const end = new Date(s.endTime || s.startTime);
         return {
           day: start.getDay(),
           hour: start.getHours() + start.getMinutes() / 60,
           startTime: start,
           endTime: end,
-          duration: formatDuration(end, start),
+          duration: typeof s.sessionDuration === "number" ? formatDuration(new Date(s.sessionDuration * 1000), new Date(0)) : formatDuration(end, start),
+          ongoing: s.ongoing,
           durationSource: s.durationSource ?? "recorded",
         };
       });
@@ -222,9 +227,9 @@ export function AccessPatternChart({ filters }: ChartProps) {
             rowKey={(row, index) => `${row.startTime.getTime()}-${index}`}
             columns={[
               { header: t("dashboard.table.entrada"), cell: (row) => formatDateTime(row.startTime) },
-              { header: t("dashboard.table.saida"), cell: (row) => formatDateTime(row.endTime) },
+              { header: t("dashboard.table.saida"), cell: (row) => row.ongoing ? t("dashboard.time.ongoing") : formatDateTime(row.endTime) },
               { header: t("dashboard.table.duracao"), numeric: true, cell: (row) => row.durationSource === "unavailable" ? t("dashboard.time.unavailable") : row.duration },
-              { header: t("dashboard.time.source"), cell: (row) => t(row.durationSource === "estimated" ? "dashboard.time.estimated" : row.durationSource === "unavailable" ? "dashboard.time.unavailable" : "dashboard.time.recorded") },
+              { header: t("dashboard.time.source"), cell: (row) => t(row.durationSource === "observed" ? "dashboard.time.observed" : row.durationSource === "estimated" ? "dashboard.time.estimated" : row.durationSource === "unavailable" ? "dashboard.time.unavailable" : "dashboard.time.recorded") },
               { header: t("dashboard.table.diaDaSemana"), cell: (row) => row.startTime.toLocaleDateString(getLanguage(), { weekday: "long" }) },
             ]}
             footer={`${t("dashboard.table.total")}: ${sessions.length}`}
