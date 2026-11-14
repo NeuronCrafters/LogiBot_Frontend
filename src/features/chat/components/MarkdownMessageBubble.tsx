@@ -1,9 +1,9 @@
 import { t, useLocale, type Language } from "@/i18n";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Copy, Check, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { Copy, Check, BookOpen, ChevronDown, ChevronUp, Pencil, Loader2 } from "lucide-react";
 import logo from "@/assets/logo.svg";
-import { Children, isValidElement, memo, useState } from "react";
+import { Children, isValidElement, memo, useRef, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { useResolvedPreferences } from "@/shared/preferences";
 import { codeTheme } from "@/features/chat/codeTheme";
@@ -188,6 +188,8 @@ const markdownComponents = {
 };
 
 interface MarkdownMessageBubbleProps {
+  onEdit?: (text: string) => Promise<void>;
+  busy?: boolean;
   outputLanguage?: Language;
   text: string;
   sender: "user" | "bot";
@@ -259,19 +261,59 @@ export const MarkdownMessageBubble = memo(function MarkdownMessageBubble({
   text,
   sender,
   retrievedChunks,
+  onEdit,
+  busy = false,
 }: MarkdownMessageBubbleProps) {
   useLocale();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [editError, setEditError] = useState(false);
+  const editButton = useRef<HTMLButtonElement>(null);
+  const closeEditor = () => { setEditing(false); setEditError(false); requestAnimationFrame(() => editButton.current?.focus()); };
+  const confirmEdit = async () => {
+    if (!draft.trim() || submitting || busy || !onEdit) return;
+    setSubmitting(true); setEditError(false);
+    setEditing(false);
+    try { await onEdit(draft.trim()); }
+    catch { setEditing(true); setEditError(true); }
+    finally { setSubmitting(false); }
+  };
 
   const isUser = sender === "user";
 
   if (isUser) {
+    if (editing) return <form onSubmit={event => { event.preventDefault(); void confirmEdit(); }}
+      className="mb-6 ml-auto mr-2 w-[calc(100%-1rem)] max-w-2xl rounded-2xl border border-control bg-neutral-800 p-3 font-[Poppins] sm:p-4">
+      <textarea autoFocus aria-label={t("chat.editMessage")} value={draft} disabled={submitting || busy}
+        onChange={event => setDraft(event.target.value)}
+        onKeyDown={event => {
+          if (event.key === "Escape" && !submitting && !busy) { event.preventDefault(); closeEditor(); }
+          if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); void confirmEdit(); }
+        }}
+        rows={Math.min(10, Math.max(3, draft.split("\n").length))}
+        className="w-full resize-y rounded-lg border border-control bg-neutral-900 p-3 text-sm leading-relaxed text-gray-100 focus:outline focus:outline-2 focus:outline-blue-400" />
+      <p className="mt-2 text-xs text-zinc-400">{t("chat.editHint")}</p>
+      {editError && <p role="alert" className="mt-2 text-sm text-red-400">{t("chat.editFailed")}</p>}
+      <div className="mt-3 flex justify-end gap-2">
+        <button type="button" disabled={submitting || busy} onClick={closeEditor} className="min-h-11 rounded-lg border border-control px-3 py-2 text-sm text-zinc-300 disabled:opacity-50">{t("chat.cancelEdit")}</button>
+        <button type="submit" disabled={!draft.trim() || submitting || busy} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm text-on-accent disabled:opacity-50">
+          {submitting && <Loader2 aria-hidden="true" size={16} className="animate-spin" />}{t("chat.resendEdit")}
+        </button>
+      </div>
+    </form>;
     return (
-      <div className="flex justify-end mb-6 px-2">
-        <div className="max-w-[75%] bg-neutral-800 border border-neutral-700 rounded-2xl rounded-br-sm px-4 py-3">
+      <div className="group mb-6 flex flex-col items-end px-2">
+        <div className="max-w-[90%] bg-neutral-800 border border-neutral-700 rounded-2xl rounded-br-sm px-4 py-3 sm:max-w-[75%]">
           <p className="text-gray-100 text-sm leading-relaxed font-[Poppins] whitespace-pre-wrap">
             {text}
           </p>
         </div>
+        {onEdit && <button ref={editButton} type="button" disabled={busy || submitting} aria-label={t("chat.editMessage")} title={t("chat.editMessage")}
+          onClick={() => { setDraft(text); setEditError(false); setEditing(true); }}
+          className="mt-1 inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-neutral-800 hover:text-white disabled:opacity-40">
+          <Pencil aria-hidden="true" size={15} />
+        </button>}
       </div>
     );
   }

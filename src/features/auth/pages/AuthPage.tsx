@@ -15,8 +15,7 @@ import {
   Mail,
   User,
 } from "lucide-react";
-import { AnimatedLogo } from "@/shared/components/AnimatedLogo";
-import logoMascote from "@/assets/logo.svg";
+import { RobotAvatar } from "@/shared/mascot/RobotAvatar";
 import { AppModal } from "@/shared/components/feedback/AppModal";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { api } from "@/shared/api/httpClient";
@@ -133,7 +132,7 @@ export function AuthPage({ mode }: AuthPageProps) {
             </Link>
             <div className="relative flex flex-col items-center text-center">
               <div className="flex h-52 w-52 items-center justify-center rounded-[2rem] border border-white/10 bg-surface shadow-xl shadow-black/20">
-                <AnimatedLogo className="scale-[0.78]" />
+                <RobotAvatar className="h-52 w-52" />
               </div>
               <h1 className="mt-8 max-w-xs text-2xl font-semibold leading-tight text-white">
                 {t("auth.aprendaLogicaComApoioInteligente")}</h1>
@@ -149,13 +148,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                   to="/"
                   className="mx-auto flex w-fit flex-col items-center gap-2 text-lg font-bold text-white"
                 >
-                  <img
-                    src={logoMascote}
-                    alt={t("common.logoMascoteDoLogibot")}
-                    width={121}
-                    height={123}
-                    className="brand-mark h-auto w-24 max-w-full shrink-0 object-contain"
-                  />
+                  <RobotAvatar variant="head" className="h-24 w-24" />
                   <span>LogiBot.AI</span>
                 </Link>
               </div>

@@ -57,6 +57,15 @@ const GROUPS: { [K in keyof Preferences]: { legend: MessageKey; hint?: MessageKe
       { value: "monochrome", label: "preferences.paletaMonocromatica" },
     ],
   },
+  mascot: {
+    legend: "mascot.preferenceTitle",
+    hint: "mascot.preferenceHint",
+    options: [
+      { value: "animated", label: "mascot.animated" },
+      { value: "static", label: "mascot.static" },
+      { value: "legacy", label: "mascot.legacy" },
+    ],
+  },
 };
 
 function RadioGroup<K extends keyof Preferences>({ name, value }: { name: K; value: Preferences[K] }) {
@@ -108,6 +117,7 @@ export function PreferencesControls({ chat = true }: { chat?: boolean }) {
       <RadioGroup name="textSize" value={preferences.textSize} />
       <RadioGroup name="contrast" value={preferences.contrast} />
       <RadioGroup name="motion" value={preferences.motion} />
+      <RadioGroup name="mascot" value={preferences.mascot} />
       <RadioGroup name="palette" value={preferences.palette} />
       {chat && <RadioGroup name="chatDisplay" value={preferences.chatDisplay} />}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">

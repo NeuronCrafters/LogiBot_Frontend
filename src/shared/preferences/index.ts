@@ -8,6 +8,7 @@ export type ContrastPreference = "system" | "default" | "more";
 export type MotionPreference = "system" | "reduce" | "full";
 export type ChatDisplayPreference = "progressive" | "complete";
 export type PalettePreference = "default" | "redGreen" | "blueYellow" | "monochrome";
+export type MascotPreference = "animated" | "static" | "legacy";
 
 export interface Preferences {
   theme: ThemePreference;
@@ -16,6 +17,7 @@ export interface Preferences {
   motion: MotionPreference;
   chatDisplay: ChatDisplayPreference;
   palette: PalettePreference;
+  mascot: MascotPreference;
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -25,6 +27,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   motion: "system",
   chatDisplay: "progressive",
   palette: "default",
+  mascot: "animated",
 };
 
 const OPTIONS: { [K in keyof Preferences]: readonly Preferences[K][] } = {
@@ -34,13 +37,14 @@ const OPTIONS: { [K in keyof Preferences]: readonly Preferences[K][] } = {
   motion: ["system", "reduce", "full"],
   chatDisplay: ["progressive", "complete"],
   palette: ["default", "redGreen", "blueYellow", "monochrome"],
+  mascot: ["animated", "static", "legacy"],
 };
 
 export function sanitizePreferences(value: unknown): Preferences {
   const source = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
   const result = { ...DEFAULT_PREFERENCES };
   for (const key of Object.keys(OPTIONS) as (keyof Preferences)[]) {
-    const candidate = source[key];
+    const candidate = key === "mascot" && source[key] === "hidden" ? "legacy" : source[key];
     if ((OPTIONS[key] as readonly unknown[]).includes(candidate)) (result as Record<string, unknown>)[key] = candidate;
   }
   return result;
@@ -74,7 +78,7 @@ export interface ResolvedPreferences {
   palette: PalettePreference;
 }
 
-export function resolvePreferences(preferences: Preferences): ResolvedPreferences {
+export function resolvePreferences(preferences: Omit<Preferences, "mascot"> & { mascot?: MascotPreference }): ResolvedPreferences {
   return {
     theme: preferences.theme === "system" ? (systemQueries.light?.matches ? "light" : "dark") : preferences.theme,
     textSize: preferences.textSize,

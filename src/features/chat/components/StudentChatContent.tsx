@@ -1,3 +1,7 @@
+import { RobotAvatar } from "@/shared/mascot/RobotAvatar";
+import { useQueryClient } from "@tanstack/react-query";
+import { ChatFollowUpSuggestions } from "./ChatFollowUpSuggestions";
+import { ChatQuizPracticeInvitation } from "./ChatQuizPracticeInvitation";
 import { t, useLocale, normalizeLanguage } from "@/i18n";
 ﻿import { ArrowDown } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
@@ -10,6 +14,7 @@ import {
 import { useChatHistory } from "@/features/chat/hooks/useChatHistory";
 import {
   memo,
+  Fragment,
   useState,
   useRef,
   useEffect,
@@ -18,7 +23,6 @@ import {
 } from "react";
 import { useSearchParams } from "react-router-dom";
 import { usePreferences, useReducedMotion } from "@/shared/preferences";
-import logo from "@/assets/logo.svg";
 import { MarkdownMessageBubble } from "./MarkdownMessageBubble";
 import { ChatTypingDots } from "./ChatTypingDots";
 import { historyService } from "@/features/chat/api/chatHistoryApi";
@@ -29,11 +33,22 @@ interface StudentChatContentProps {
 
 export const ChatMessageList = memo(function ChatMessageList({
   messages,
+  sessionId,
+  userId,
+  busy = false,
+  onSend,
+  onSuggestionsReady,
 }: {
   messages: ChatMessage[];
+  sessionId?: string;
+  userId?: string;
+  busy?: boolean;
+  onSend?: (text: string, editMessageId?: string) => Promise<void>;
+  onSuggestionsReady?: () => void;
 }) {
   useLocale();
   const { chatDisplay } = usePreferences();
+  const questions = messages.filter(message => message.sender === "user").map(message => message.text);
 
   return (
     <>
@@ -41,13 +56,21 @@ export const ChatMessageList = memo(function ChatMessageList({
         msg.type === "typing" || (chatDisplay === "complete" && msg.streaming) ? (
           <ChatTypingDots key={msg.id || index} streamStage={msg.streaming ? "agent" : msg.streamStage} />
         ) : (
+          <Fragment key={msg.id || index}>
           <MarkdownMessageBubble
-            key={msg.id || index}
             text={msg.text}
             outputLanguage={msg.outputLanguage}
             sender={msg.sender}
             retrievedChunks={msg.retrievedChunks}
+            busy={busy}
+            onEdit={onSend && sessionId && msg.sender === "user" && /^[0-9a-f-]{36}$/i.test(msg.id) ? text => onSend(text, msg.id) : undefined}
           />
+          {onSend && sessionId && !busy && index === messages.length - 1 && msg.sender === "bot" && !msg.streaming && !msg.failed && msg.text.trim() && /^[0-9a-f-]{36}$/i.test(msg.serverId || msg.id) &&
+            <>
+            <ChatFollowUpSuggestions sessionId={sessionId} messageId={msg.serverId || msg.id} questions={questions} onSelect={question => { void onSend(question).catch(() => {}); }} onReady={onSuggestionsReady} />
+            {userId && <ChatQuizPracticeInvitation userId={userId} sessionId={sessionId} questions={questions} onReady={onSuggestionsReady} />}
+            </>}
+          </Fragment>
         ),
       )}
     </>
@@ -56,6 +79,8 @@ export const ChatMessageList = memo(function ChatMessageList({
 
 const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   const locale = useLocale();
+  const queryClient = useQueryClient();
+  const sending = useRef(false);
 
   const userId = user?._id || "user";
   const [searchParams, setSearchParams] = useSearchParams();
@@ -155,6 +180,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
             text: m.content || "",
             outputLanguage: normalizeLanguage(m.metadata?.outputLanguage),
             sender: (m.role === "assistant" ? "bot" : "user") as "user" | "bot",
+              serverId: m.id || m._id,
             type: "text" as const,
             retrievedChunks: m.metadata?.retrievedChunks?.length
               ? m.metadata.retrievedChunks
@@ -217,20 +243,28 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
   }, [messages, mode, sessionIdFromUrl, scrollToBottom]);
 
   const handleSendWrapper = useCallback(
-    async (text: string) => {
+    async (text: string, editMessageId?: string) => {
+      if (sending.current) return;
+      sending.current = true;
       scrollToBottom();
       setIsWaitingResponse(true);
       try {
-        await sendMessage(text);
+        await sendMessage(text, editMessageId);
+        if (editMessageId) void queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
       } catch (error) {
         logger.error("Chat", "Erro ao enviar mensagem.", error);
         throw error;
       } finally {
+        sending.current = false;
         setIsWaitingResponse(false);
       }
     },
-    [scrollToBottom, sendMessage],
+    [scrollToBottom, sendMessage, queryClient, userId],
   );
+
+  const handleSuggestionsReady = useCallback(() => {
+    if (followBottomRef.current) scrollToBottom();
+  }, [scrollToBottom]);
 
   useEffect(() => {
     if (wasWaitingRef.current && !isWaitingResponse) setAnnouncement(t("chat.respostaRecebida", {}, locale));
@@ -262,13 +296,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
         <div className="absolute inset-0 flex items-center justify-center px-4 pb-16">
           <div className="w-full max-w-3xl">
             <div className="mb-7 flex flex-col items-center text-center">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center bg-neutral-900 shadow-lg">
-                <img
-                  src={logo}
-                  alt={t("common.logibot", {}, locale)}
-                  className="brand-mark h-full w-full object-contain"
-                />
-              </div>
+              <RobotAvatar className="mb-4 h-32 w-32 sm:h-40 sm:w-40" />
               <h1 className="font-[Poppins] text-2xl sm:text-3xl font-semibold text-white">
                 {t("chat.oQueVamosProgramarHoje", {}, locale)}</h1>
               <p className="mt-3 font-[Poppins] text-sm sm:text-base text-neutral-400">
@@ -290,7 +318,7 @@ const StudentChatContent: React.FC<StudentChatContentProps> = ({ user }) => {
           >
             {(mode === "chat" || sessionIdFromUrl) && (
               <div className="w-full max-w-6xl mx-auto pt-6 pb-40 flex flex-col">
-                <ChatMessageList messages={messages} />
+                <ChatMessageList messages={messages} sessionId={sessionId} userId={userId} busy={isWaitingResponse} onSend={handleSendWrapper} onSuggestionsReady={handleSuggestionsReady} />
                 <div ref={messagesEndRef} />
               </div>
             )}

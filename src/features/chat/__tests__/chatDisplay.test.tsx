@@ -31,6 +31,41 @@ beforeEach(() => {
 });
 
 describe("exibição das respostas do chat", () => {
+  it("edits a persisted question and resends only the branch up to that question", async () => {
+    const { stream, flow } = setup();
+    const id = "00000000-0000-4000-8000-000000000001";
+    act(() => {
+      flow.result.current.setSessionId("session");
+      flow.result.current.setMessages([
+        { id, text: "Original", sender: "user", type: "text" },
+        { id: "answer", text: "Resposta antiga", sender: "bot", type: "text" },
+        { id: "later", text: "Pergunta posterior", sender: "user", type: "text" },
+      ]);
+    });
+    let sending!: Promise<void>;
+    act(() => { sending = flow.result.current.sendMessage("Corrigida", id); });
+    expect(flow.result.current.messages.map(message => message.text)).toEqual(["Corrigida", ""]);
+    expect(chatApi.streamTutor).toHaveBeenLastCalledWith("Corrigida", "session", expect.any(Object), id);
+    await act(async () => {
+      stream.callbacks.onSession?.({ sessionId: "session", userMessageId: id });
+      stream.callbacks.onToken?.("Resposta nova");
+      stream.callbacks.onDone?.({ assistantMessageId: "saved-answer" });
+      stream.finish(); await sending;
+    });
+    expect(flow.result.current.messages.map(message => message.text)).toEqual(["Corrigida", "Resposta nova"]);
+    expect(flow.result.current.messages[1].serverId).toBe("saved-answer");
+  });
+
+  it("restores the existing conversation if the server rejects an edit before accepting it", async () => {
+    const { stream, flow } = setup();
+    const messages: ChatMessage[] = [{ id: "question", text: "Original", sender: "user", type: "text" }, { id: "answer", text: "Resposta", sender: "bot", type: "text" }];
+    act(() => flow.result.current.setMessages(messages));
+    let sending!: Promise<void>;
+    act(() => { sending = flow.result.current.sendMessage("Corrigida", "question"); });
+    await act(async () => { stream.fail(new Error("rejected")); await expect(sending).rejects.toThrow("rejected"); });
+    expect(flow.result.current.messages).toEqual(messages);
+  });
+
   it("modo completo esconde os trechos parciais e mostra a resposta ao terminar", async () => {
     act(() => setPreference("chatDisplay", "complete"));
     const { stream, flow, sync } = setup();

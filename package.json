@@ -15,6 +15,7 @@
     "test:e2e:real": "playwright test --config playwright.real.config.ts"
   },
   "dependencies": {
+    "@react-three/fiber": "^8.18.0",
     "@tanstack/react-query": "^5.76.1",
     "@types/react-syntax-highlighter": "^15.5.13",
     "axios": "^1.6.2",
@@ -30,7 +31,8 @@
     "recharts": "^2.15.3",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
@@ -41,6 +43,7 @@
     "@types/node": "^22.20.5",
     "@types/react": "^18.3.21",
     "@types/react-dom": "^18.2.17",
+    "@types/three": "^0.170.0",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",

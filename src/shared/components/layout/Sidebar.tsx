@@ -1,7 +1,7 @@
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 import { PreferencesMenu } from "@/shared/preferences/PreferencesControls";
 import { t, useLocale } from "@/i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ChatHistory } from "@/features/chat/components/ChatHistory";
@@ -135,6 +135,7 @@ function NavLink({
     <Link
       id={`menu-option-${item.path.replace(/^\//, "").replace(/\//g, "-")}`}
       to={item.path}
+      aria-current={active ? "page" : undefined}
       onClick={onClick}
       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-[Poppins] transition-colors ${active ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"}`}
     >
@@ -161,7 +162,13 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
 
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [historyFilter, setHistoryFilter] = useState<"chat" | "quiz">("chat");
+  const [historyFilter, setHistoryFilter] = useState<"chat" | "quiz">(() =>
+    location.pathname === "/quiz" || location.pathname.startsWith("/quiz/") ? "quiz" : "chat",
+  );
+  useEffect(() => {
+    if (location.pathname === "/quiz" || location.pathname.startsWith("/quiz/")) setHistoryFilter("quiz");
+    else if (location.pathname === "/chat" || location.pathname.startsWith("/chat/")) setHistoryFilter("chat");
+  }, [location.pathname]);
 
   if (!user) return null;
 
@@ -215,7 +222,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
                 <NavLink
                   key={item.path}
                   item={item}
-                  active={location.pathname === item.path}
+                  active={location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)}
                   aria-label={t("navigation.close")}
             onClick={onMobileClose}
                 />
@@ -232,12 +239,14 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
             <div className="flex bg-white/5 rounded-lg p-1 gap-1">
               <button
                 onClick={() => setHistoryFilter("chat")}
+                aria-pressed={historyFilter === "chat"}
                 className={`flex items-center justify-center gap-1.5 flex-1 h-7 text-xs rounded-md transition-colors font-[Poppins] ${historyFilter === "chat" ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300"}`}
               >
                 <MessageCircle size={11} />
                 {t("common.chat")}</button>
               <button
                 onClick={() => setHistoryFilter("quiz")}
+                aria-pressed={historyFilter === "quiz"}
                 className={`flex items-center justify-center gap-1.5 flex-1 h-7 text-xs rounded-md transition-colors font-[Poppins] ${historyFilter === "quiz" ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300"}`}
               >
                 <Brain size={11} />

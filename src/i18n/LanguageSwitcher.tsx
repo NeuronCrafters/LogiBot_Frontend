@@ -4,16 +4,16 @@ import { chooseLanguage, normalizeLanguage, retryLanguageSave, t, useLanguagePre
 
 
 
-export function LanguageSwitcher({ details = false }: { details?: boolean }) {
+export function LanguageSwitcher({ details = false, compact = false }: { details?: boolean; compact?: boolean }) {
   const id = useId();
   const { user } = useAuth();
   const { selection, saveState, explicitVersion } = useLanguagePreference();
   return (
-    <div className="flex min-w-0 flex-col gap-1 text-sm text-zinc-300">
+    <div className={`flex min-w-0 max-w-full shrink-0 flex-col gap-1 text-sm text-zinc-300 ${compact ? "w-24 min-[360px]:w-32 sm:w-44 lg:w-36 xl:w-44" : "w-44"}`}>
       <label htmlFor={id} className="sr-only">{t("language.label")}</label>
       <select id={id} aria-label={t("language.label")} value={selection || "system"}
         onChange={event => chooseLanguage(event.target.value === "system" ? null : normalizeLanguage(event.target.value)!)}
-        className="h-10 w-full min-w-0 max-w-[15rem] rounded-lg border border-control bg-neutral-900 px-2 py-0 text-xs text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400">
+        className="h-10 w-full min-w-0 rounded-lg border border-control bg-neutral-900 px-2 py-0 text-xs text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400">
         <option value="system">{t("language.system")}</option>
         <option value="pt-BR">{t("language.ptBR")}</option>
         <option value="en-US">{t("language.enUS")}</option>

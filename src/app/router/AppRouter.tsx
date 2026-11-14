@@ -7,6 +7,8 @@ import { AuthPage } from "@/features/auth/pages/AuthPage";
 import ProtectedRoute from "@/app/router/ProtectedRoute";
 import { AppLayout } from "@/shared/components/layout/AppLayout";
 import { Start } from "@/features/home/pages/StartPage";
+import { NavigationTransition } from "@/shared/navigation/NavigationTransition";
+import { preloadQuizAttemptPage } from "@/shared/navigation/preloadQuiz";
 
 const Chat = React.lazy(() =>
   import("@/features/chat/pages/ChatPage").then((m) => ({ default: m.Chat })),
@@ -39,7 +41,7 @@ const Quiz = React.lazy(() =>
   import("@/features/quiz/pages/QuizPage").then((m) => ({ default: m.Quiz })),
 );
 const QuizAttempt = React.lazy(() =>
-  import("@/features/quiz/pages/QuizAttemptPage").then((m) => ({ default: m.QuizAttempt })),
+  preloadQuizAttemptPage().then((m) => ({ default: m.QuizAttempt })),
 );
 const ProfessorQuizPage = React.lazy(() =>
   import("@/features/quiz/pages/ProfessorQuizPage").then((m) => ({ default: m.ProfessorQuizPage })),
@@ -61,7 +63,7 @@ function PageLoader() {
 
 export default function AppRouter() {
   return (
-    <Routes>
+    <NavigationTransition>{location => <Routes location={location}>
       <Route path="/" element={<Home />} />
       <Route path="/signin" element={<AuthPage mode="signin" />} />
       <Route path="/signup" element={<AuthPage mode="signup" />} />
@@ -186,6 +188,6 @@ export default function AppRouter() {
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    </Routes>}</NavigationTransition>
   );
 }

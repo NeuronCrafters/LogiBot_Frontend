@@ -16,6 +16,8 @@ export type ChatMessage = {
   streamStage?: ChatStreamStage;
   streaming?: boolean;
   outputLanguage?: Language;
+  serverId?: string;
+  failed?: boolean;
 };
 
 type Mode = "none" | "chat";
@@ -36,12 +38,16 @@ export function useChatFlow(_options: UseChatFlowOptions) {
   }, []);
 
   const sendMessage = useCallback(
-    async (text: string) => {
+    async (text: string, editMessageId?: string) => {
       if (!text.trim()) return;
+      const editIndex = editMessageId ? messages.findIndex(message => message.id === editMessageId && message.sender === "user") : -1;
+      if (editMessageId && editIndex < 0) throw new Error(t("chat.editFailed", {}, locale));
+      const previousMessages = messages;
+      let accepted = false;
 
       const now = Date.now();
       const userMsg: ChatMessage = {
-        id: `user-${now}`,
+        id: editMessageId || `user-${now}`,
         text: text.trim(),
         sender: "user",
         type: "text",
@@ -55,7 +61,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
         streamStage: "queued",
       };
 
-      setMessages((prev) => [...prev, userMsg, typingMsg]);
+      setMessages((prev) => [...(editMessageId ? prev.slice(0, editIndex) : prev), userMsg, typingMsg]);
 
       try {
         let streamedText = "";
@@ -63,7 +69,9 @@ export function useChatFlow(_options: UseChatFlowOptions) {
 
         const result = await chatApi.streamTutor(text.trim(), sessionId, {
           onSession: (event) => {
+            accepted = true;
             if (event.sessionId) setSessionId(event.sessionId);
+            if (event.userMessageId) setMessages(prev => prev.map(message => message.id === userMsg.id ? { ...message, id: event.userMessageId } : message));
           },
           onStatus: (event) => {
             setMessages((prev) =>
@@ -116,6 +124,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
                       text: streamedText || message.text,
                       streamStage: undefined,
                       streaming: false,
+                      serverId: event.assistantMessageId,
                       retrievedChunks: event.retrievedChunks?.length
                         ? event.retrievedChunks
                         : message.retrievedChunks,
@@ -124,7 +133,7 @@ export function useChatFlow(_options: UseChatFlowOptions) {
               ),
             );
           },
-        });
+        }, editMessageId);
 
         if (result.sessionId) setSessionId(result.sessionId);
         setMessages((prev) =>
@@ -154,7 +163,8 @@ export function useChatFlow(_options: UseChatFlowOptions) {
         }
       } catch (error) {
         logger.error("Chat", "Erro ao enviar mensagem.", error);
-        setMessages((prev) =>
+        if (editMessageId && !accepted) setMessages(previousMessages);
+        else setMessages((prev) =>
           prev
             .filter((m) => m.id !== typingMsg.id)
             .concat({
@@ -162,12 +172,13 @@ export function useChatFlow(_options: UseChatFlowOptions) {
               text: t("chat.erroAoProcessarMensagemTenteNovamente", {}, locale),
               sender: "bot",
               type: "text",
+              failed: true,
             }),
         );
         throw error;
       }
     },
-    [sessionId, locale],
+    [sessionId, locale, messages],
   );
 
   return {

@@ -2,6 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --motion-exit: 160ms;
+  --motion-enter: 300ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  scroll-behavior: smooth;
+}
+
+.navigation-transition { min-height: 100dvh; }
+
+.navigation-transition[data-route-scope="content"] main,
+.navigation-transition[data-route-scope="page"] > .navigation-view {
+  transition: opacity var(--motion-exit) ease, transform var(--motion-exit) var(--motion-ease);
+  animation: route-page-enter var(--motion-enter) var(--motion-ease);
+}
+
+.navigation-transition[data-route-phase="exit"][data-route-scope="content"] main,
+.navigation-transition[data-route-phase="exit"][data-route-scope="page"] > .navigation-view {
+  animation: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+}
+
+.navigation-transition[data-route-scope="page"] > .navigation-view {
+  animation-name: route-page-fade;
+}
+.navigation-transition[data-route-phase="exit"][data-route-scope="page"] > .navigation-view {
+  animation: none;
+  transform: none;
+}
+
+@keyframes route-page-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+:root[data-motion="reduce"] .navigation-view,
+:root[data-motion="reduce"] .navigation-transition main,
+:root[data-motion="reduce"] .page-reveal {
+  animation: none;
+  transition: none;
+}
+
+.home-page { --home-header-height: 7rem; }
+.home-hero { min-height: calc(100svh - var(--home-header-height)); }
+.home-section { scroll-margin-top: var(--home-header-height); }
+:root[data-motion="reduce"] { scroll-behavior: auto; }
+:root[data-motion="reduce"] .home-page article { transform: none; }
+
+@media (min-width: 1024px) {
+  .home-page { --home-header-height: 4rem; }
+}
+
+.page-reveal { animation: route-page-enter var(--motion-enter) var(--motion-ease); }
+
+@keyframes route-page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {

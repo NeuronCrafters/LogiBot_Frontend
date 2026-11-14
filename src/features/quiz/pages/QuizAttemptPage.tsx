@@ -1,3 +1,4 @@
+import { LearningCompanion } from "@/shared/mascot/LearningCompanion";
 import { useAccountDraft } from "@/shared/hooks/useAccountDraft";
 import { ContentLanguageLabel } from "@/i18n/ContentLanguage";
 import { percent, t, useLocale, type Language } from "@/i18n";
@@ -203,7 +204,7 @@ export function QuizAttempt() {
 
   if (isLoading) {
     return (
-      <main className="flex flex-1 items-center justify-center">
+      <main key="loading" className="flex flex-1 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
       </main>
     );
@@ -211,7 +212,7 @@ export function QuizAttempt() {
 
   if (error || !quiz) {
     return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
+      <main key="error" className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
         <AlertCircle className="h-10 w-10 text-red-400" />
         <p className="font-[Poppins] text-sm text-zinc-400">
           {t("quiz.quizNaoEncontrado")}</p>
@@ -225,7 +226,7 @@ export function QuizAttempt() {
   }
 
   return (
-    <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+    <main key={id} className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         {/* Header */}
         <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
@@ -266,6 +267,9 @@ export function QuizAttempt() {
           </div>
         </section>
 
+        <LearningCompanion context="quiz" reaction={Object.keys(answers).length + currentIndex}
+          mood={submitMutation.isPending ? "thinking" : result ? (result.score === result.totalQuestions ? "celebrate" : "encourage") : "welcome"} />
+
         {/* Content */}
         <section className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
           {result ? (
@@ -303,7 +307,7 @@ export function QuizAttempt() {
                 </div>
 
                 {/* Question */}
-                <div className="space-y-3">
+                <div key={q.id} className="page-reveal space-y-3">
                   <p className="font-[Poppins] text-base font-medium leading-relaxed text-white">
                     <span lang={quiz.language || undefined}>{q.question}</span>
                   </p>

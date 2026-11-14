@@ -17,7 +17,7 @@ export interface ProfessorQuiz {
   language?: Language | null;
   id: string;
   title: string;
-  topic: QuizTopic;
+  topic: string;
   description: string | null;
   disciplineId: string;
   disciplineName: string;

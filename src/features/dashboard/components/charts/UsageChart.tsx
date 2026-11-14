@@ -2,7 +2,7 @@ import { apiError } from "@/shared/lib/apiError";
 import { chartLine } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
 import { number, t, useLocale, getLanguage } from "@/i18n";
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -118,7 +118,7 @@ export function UsageChart({ filter }: UsageChartProps) {
           {usageData?.observedUsageTime > 0 && <p className="mt-2 text-sm text-zinc-400">{t("dashboard.time.observedNote", {}, locale)}</p>}
           {usageData?.ongoingSessionCount > 0 && <p className="mt-2 text-sm text-zinc-400">{t("dashboard.time.liveNote", {}, locale)}</p>}
           {usageData?.estimatedUsageTime > 0 && <p className="mt-2 text-sm text-zinc-400" data-usage-estimate>{t("dashboard.time.estimatedNote", {}, locale)}</p>}
-          {usageData?.undeterminedSessionCount > 0 && <p className="mt-2 text-sm text-zinc-400">{t("dashboard.time.unavailableNote", {}, locale)}</p>}
+          {/* {usageData?.undeterminedSessionCount > 0 && <p className="mt-2 text-sm text-zinc-400">{t("dashboard.time.unavailableNote", {}, locale)}</p>} */}
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton

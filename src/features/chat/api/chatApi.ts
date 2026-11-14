@@ -41,6 +41,7 @@ export interface ChatStreamSessionEvent {
 }
 
 export interface ChatStreamDoneEvent {
+  assistantMessageId?: string;
   provider?: string;
   retrievedChunks?: RetrievedChunk[];
   timingsMs?: Record<string, number>;
@@ -151,6 +152,7 @@ export const chatApi = {
     message: string,
     sessionId: string | undefined,
     callbacks: ChatStreamCallbacks = {},
+    editMessageId?: string,
   ): Promise<ChatStreamResult> {
     const response = await fetch(`${baseURL}/chat/messages/stream`, {
       method: "POST",
@@ -160,7 +162,7 @@ export const chatApi = {
         ...requestLanguageHeaders(),
         "x-api-key": apiKey,
       },
-      body: JSON.stringify({ message, sessionId }),
+      body: JSON.stringify({ message, sessionId, editMessageId }),
     });
 
     if (!response.ok) {
@@ -210,6 +212,7 @@ export const chatApi = {
       if (event === "done") {
         const payload = parseSseJson<ChatStreamDoneEvent>(data) ?? {};
         result.provider = payload.provider;
+        result.assistantMessageId = payload.assistantMessageId;
         result.retrievedChunks =
           payload.retrievedChunks ?? result.retrievedChunks;
         result.timingsMs = payload.timingsMs;
@@ -248,6 +251,11 @@ export const chatApi = {
       withCredentials: true,
     });
     return response.data;
+  },
+
+  async getFollowUps(sessionId: string, messageId: string, signal?: AbortSignal): Promise<string[]> {
+    const response = await api.post(`/chat/sessions/${encodeURIComponent(sessionId)}/follow-ups`, { messageId }, { signal });
+    return Array.isArray(response.data?.suggestions) ? response.data.suggestions.filter((value: unknown) => typeof value === "string").slice(0, 3) : [];
   },
 
   async getOpenJobs(

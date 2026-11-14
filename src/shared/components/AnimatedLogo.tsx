@@ -2,23 +2,9 @@ import boneco from "@/assets/boneco.svg";
 import parte from "@/assets/parte.svg";
 
 export const AnimatedLogo = ({ className = "" }: { className?: string }) => (
-  <div className={`relative ${className}`} aria-hidden="true">
-    <img src={boneco} alt="" className="brand-mark w-48 h-48 mt-14" />
-    <img
-      src={parte}
-      alt=""
-      className="brand-mark absolute w-20 h-16 top-4 left-6 animate-ear-left"
-      style={{ transformOrigin: "bottom" }}
-    />
-    <img src={parte} alt="" className="brand-mark absolute top-4 right-6 w-20 h-16 scale-x-[-1]" />
-    <style>{`
-      @keyframes moveEarLeft {
-        0% { transform: rotate(0deg); }
-        25% { transform: rotate(-15deg); }
-        75% { transform: rotate(0deg); }
-        100% { transform: rotate(0deg); }
-      }
-      .animate-ear-left { animation: moveEarLeft 1.5s 30; }
-    `}</style>
-  </div>
+  <svg viewBox="0 0 270 280" className={`brand-mark h-full w-full ${className}`} aria-hidden="true">
+    <image href={boneco} x="0" y="95" width="270" height="176" />
+    <image href={parte} x="60" y="10" width="56" height="80" className="legacy-robot-ear" />
+    <image href={parte} x="60" y="10" width="56" height="80" transform="translate(270 0) scale(-1 1)" />
+  </svg>
 );

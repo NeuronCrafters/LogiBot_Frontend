@@ -74,7 +74,7 @@ export const ChatInput = memo(function ChatInput({
               ? t("chat.logibotEstaDigitando", {}, locale)
               : t("chat.mensagemParaOLogibot", {}, locale)
           }
-          className="flex-1 bg-transparent text-gray-200 text-sm outline-none resize-none overflow-y-auto max-h-[200px] min-h-[24px] py-1 leading-normal placeholder-neutral-500 font-[Poppins] disabled:cursor-not-allowed"
+          className="flex-1 bg-transparent text-gray-200 text-sm outline-none focus:outline-0 resize-none overflow-y-auto max-h-[200px] min-h-[24px] py-1 leading-normal placeholder-neutral-500 font-[Poppins] disabled:cursor-not-allowed"
           rows={1}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}

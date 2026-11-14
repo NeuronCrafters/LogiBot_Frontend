@@ -1,0 +1,74 @@
+.learning-companion {
+  container-type: inline-size;
+}
+
+.learning-companion-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.learning-companion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.learning-companion-hint {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition: grid-template-rows 360ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 240ms ease, visibility 0s linear 360ms;
+}
+
+.learning-companion-hint[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.learning-companion-chevron {
+  transition: transform 360ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[aria-expanded="true"] > .learning-companion-chevron {
+  transform: rotate(180deg);
+}
+
+:root[data-motion="reduce"] .learning-companion-hint {
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) .learning-companion-hint {
+    transition-delay: 0s;
+  }
+}
+
+.legacy-robot-ear {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: legacy-robot-ear-wave 1.5s ease-in-out 1;
+}
+
+@keyframes legacy-robot-ear-wave {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-15deg); }
+  70% { transform: rotate(5deg); }
+}
+
+@container (max-width: 24rem) {
+  .learning-companion-header {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.25rem 0.5rem;
+  }
+
+  .learning-companion-actions {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+}
