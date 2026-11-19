@@ -15,9 +15,13 @@ interface DashboardFilterProps {
     mode: LogModeType,
     allParams?: DashboardFilterParams,
   ) => void;
+  /** Heading shown above the fields (defaults to "Filters"). */
+  title?: string;
+  /** Inside the side panel: no card around it and one field per row. */
+  compact?: boolean;
 }
 
-function DashboardFilterContent({ onChange }: DashboardFilterProps) {
+function DashboardFilterContent({ onChange, title, compact = false }: DashboardFilterProps) {
   const locale = useLocale();
 
   const { user } = useAuth();
@@ -89,12 +93,12 @@ function DashboardFilterContent({ onChange }: DashboardFilterProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6">
+    <div className={compact ? "" : "rounded-2xl border border-white/10 bg-surface p-5 shadow-lg shadow-black/10 sm:p-6"}>
       <h3 className="font-[Poppins] text-base font-semibold text-white">
-        {t("dashboard.filtros", {}, locale)}</h3>
+        {title ?? t("dashboard.filtros", {}, locale)}</h3>
 
-      <div className="mt-5 w-full space-y-5">
-        <div className="flex flex-col md:flex-row gap-6 w-full">
+      <div className={compact ? "mt-3 w-full space-y-3" : "mt-5 w-full space-y-5"}>
+        <div className={compact ? "flex w-full flex-col gap-3" : "flex flex-col md:flex-row gap-6 w-full"}>
           <div className="space-y-3 flex-1 w-full">
             <Label
               htmlFor="entity-type"
@@ -118,6 +122,7 @@ function DashboardFilterContent({ onChange }: DashboardFilterProps) {
             key={entityType}
             entityType={entityType as LogEntityType}
             multiple={mode === "comparison"}
+            stacked={compact}
             onSelect={handleEntitySelection}
           />
         )}

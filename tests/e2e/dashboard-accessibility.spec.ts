@@ -1,11 +1,12 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {readFileSync} from 'node:fs';
-import {mockApi,selectLanguage} from './fixtures';
+import { mockApi, selectLanguage, openDashboardFilters, closeDashboardFilters } from './fixtures';
 for(const locale of ['pt-BR','en-US','es-ES']) {
  const dictionary=JSON.parse(readFileSync(new URL(`../../src/i18n/catalogs/${locale}.json`,import.meta.url),'utf8'));
  test(`gráficos preenchidos e insight acessíveis ${locale}`,async({page},testInfo)=>{
   await mockApi(page,'admin');await page.goto('/dashboard');await selectLanguage(page,locale);
+  await openDashboardFilters(page);
   await page.getByRole('combobox',{name:dictionary['dashboard.selecioneUmaEntidade'],exact:true}).click();
   await page.getByRole('option',{name:dictionary['common.aluno'],exact:true}).click();
   await expect(page.getByRole('combobox',{name:'Universidade original',exact:true})).toBeVisible();
@@ -14,7 +15,7 @@ for(const locale of ['pt-BR','en-US','es-ES']) {
   await page.getByRole('combobox',{name:dictionary['academic.selecioneATurma'],exact:true}).click();
   await page.getByRole('option',{name:'Turma original',exact:true}).click();
   await page.getByRole('combobox',{name:dictionary['academic.selectStudent'],exact:true}).click();
-  await page.getByRole('option',{name:'João da Silva',exact:true}).click();
+  await page.getByRole('option',{name:'João da Silva',exact:true}).click(); await closeDashboardFilters(page);
   await expect(page.locator('.recharts-scatter-symbol')).toHaveCount(2);
   const audit=async()=>{
    const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();

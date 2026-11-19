@@ -37,7 +37,7 @@ export function PasswordRecoveryPage({ reset = false }: { reset?: boolean }) {
   return <div className="min-h-screen bg-neutral-950 px-4 py-4 text-white">
     <div className="flex items-start justify-end gap-2"><PreferencesMenu /><LanguageSwitcher /></div>
     <main className="mx-auto flex min-h-[80vh] max-w-md flex-col justify-center">
-      <Link to="/" className="mb-6 text-xl font-bold">LogiBot.AI</Link>
+      <Link to="/" className="mb-6 text-xl font-bold">LogiBots.AI</Link>
       <section className="rounded-2xl border border-white/10 bg-surface p-6">
         <h1 className="text-xl font-semibold">{t(reset ? "auth.recoveryNewPassword" : "auth.recoveryTitle")}</h1>
         <p className="mt-3 text-sm text-zinc-400">{t(reset ? "auth.recoveryResetDescription" : "auth.recoveryDescription")}</p>

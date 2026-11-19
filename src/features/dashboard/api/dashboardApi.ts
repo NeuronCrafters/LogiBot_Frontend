@@ -9,6 +9,10 @@ import type {
   SessionDetailsData,
   DashboardInsightChart,
   DashboardInsightResponse,
+  ComparisonInsightChart,
+  ExamComparisonData,
+  EngagementData,
+  ChatSatisfactionData,
 } from "@/features/dashboard/types";
 
 export interface DashboardFilterParams {
@@ -51,6 +55,25 @@ export const dashboardApi = {
       filters,
       force,
     }, language ? { headers: { "Accept-Language": language, "X-Language": language } } : undefined),
+
+  /** Analysis of both selections together (A × B). */
+  getComparisonInsight: (a: DashboardFilterParams, b: DashboardFilterParams, force = false, language?: Language) =>
+    api.post<DashboardInsightResponse>("/dashboard/insights/comparison", { a, b, force },
+      language ? { headers: { "Accept-Language": language, "X-Language": language } } : undefined),
+
+  /** Analysis of one direct comparison chart (A × B). */
+  getComparisonChartInsight: (chart: ComparisonInsightChart, a: DashboardFilterParams, b: DashboardFilterParams, force = false, language?: Language) =>
+    api.post<DashboardInsightResponse>("/dashboard/insights/comparison-chart", { chart, a, b, force },
+      language ? { headers: { "Accept-Language": language, "X-Language": language } } : undefined),
+
+  getExamComparison: (filters: DashboardFilterParams) =>
+    api.post<ExamComparisonData>("/dashboard/compare/exams", filters),
+
+  getEngagement: (filters: DashboardFilterParams) =>
+    api.post<EngagementData>("/dashboard/compare/engagement", filters),
+
+  getChatSatisfaction: (filters: DashboardFilterParams) =>
+    api.post<ChatSatisfactionData>("/dashboard/compare/chat-satisfaction", filters),
 
   getOverviewInsight: (filters: DashboardFilterParams, force = false, language?: Language) =>
     api.post<DashboardInsightResponse>("/dashboard/insights/overview", {

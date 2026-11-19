@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type SetStateAction } from "react";
+import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 // Tab-scoped, account-scoped drafts survive reauthentication, expire after a day,
@@ -6,15 +6,18 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 export function useAccountDraft<T>(name: string, initial: T) {
   const { user } = useAuth();
   const key = user?._id ? `logibot.draft.${user._id}.${name}` : null;
+  // The empty fallback is usually a new literal on every render: kept in a ref so it never resets the draft.
+  const empty = useRef(initial);
+  empty.current = initial;
   const read = useCallback((): T => {
-    if (!key) return initial;
+    if (!key) return empty.current;
     try {
       const raw = JSON.parse(sessionStorage.getItem(key) || "null");
       if (raw && Date.now() - raw.at < 86400000) return raw.value;
       sessionStorage.removeItem(key);
     } catch { /* unavailable or invalid storage */ }
-    return initial;
-  }, [key]); // initial is the empty fallback, not a dependency
+    return empty.current;
+  }, [key]);
   const [state, setState] = useState(() => ({ key, value: read() }));
   useEffect(() => { setState({ key, value: read() }); }, [key, read]);
   const value = state.key === key ? state.value : initial;
@@ -28,7 +31,7 @@ export function useAccountDraft<T>(name: string, initial: T) {
   }, [key, read]);
   const clear = useCallback(() => {
     if (key) try { sessionStorage.removeItem(key); } catch { /* restricted storage */ }
-    setState({ key, value: initial });
+    setState({ key, value: empty.current });
   }, [key]);
   return [value, setValue, clear] as const;
 }

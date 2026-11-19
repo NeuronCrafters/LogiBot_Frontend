@@ -1,4 +1,6 @@
 import { apiError } from "@/shared/lib/apiError";
+import { granularityFor, groupUsage, spanInDays } from "@/features/dashboard/timeBuckets";
+import { useChartId } from "@/features/dashboard/chartIdContext";
 import { chartLine } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
 import { number, t, useLocale, getLanguage } from "@/i18n";
@@ -34,6 +36,8 @@ export function formatTimeWithDays(seconds: number): string {
 
 interface UsageChartProps {
   filter: DashboardFilterState & {
+    /** Dashboard period (yyyy-mm-dd). */
+    period?: { startDate?: string; endDate?: string };
     hierarchyParams: {
       universityId?: string;
       courseId?: string;
@@ -63,6 +67,7 @@ function useUsageData(filter: UsageChartProps["filter"]) {
 }
 
 export function UsageChart({ filter }: UsageChartProps) {
+  const chartId = useChartId("usage-chart");
   const locale = useLocale();
 
   const {
@@ -78,7 +83,7 @@ export function UsageChart({ filter }: UsageChartProps) {
     () => ({ usage: { label: t("dashboard.minutos", {}, locale), color: CHART_COLORS.primary } }),
     [locale],
   );
-  const chartData = useMemo(() => {
+  const dailyRows = useMemo(() => {
     if (
       !usageData ||
       !Array.isArray(usageData.dailyUsage) ||
@@ -89,6 +94,14 @@ export function UsageChart({ filter }: UsageChartProps) {
       a.date.localeCompare(b.date),
     );
   }, [usageData]);
+  // Long periods are grouped by week or month so the bars stay readable at any width (no sideways scroll).
+  const period = filter.period;
+  const granularity = granularityFor(spanInDays(dailyRows.map((row: { date: string }) => row.date), period));
+  const chartData = useMemo(() => (granularity === "day" ? dailyRows : groupUsage(dailyRows, granularity)), [dailyRows, granularity]);
+  const bucketLabel = (value: string, long = false) =>
+    granularity === "week" ? t("dashboard.period.weekOf", { date: formatDay(value, { day: "2-digit", month: "2-digit" }) })
+      : granularity === "month" ? formatDay(value, long ? { month: "long", year: "numeric" } : { month: "short", year: "2-digit" })
+        : long ? formatDay(value) : formatDay(value, { day: "2-digit", month: "2-digit" });
   const hasData = chartData.length > 0;
   const formattedTime = useMemo(
     () => formatTimeWithDays(usageData?.totalUsageTime ?? 0),
@@ -97,7 +110,7 @@ export function UsageChart({ filter }: UsageChartProps) {
 
   return (
     <Card
-      id="usage-chart"
+      id={chartId}
       className="dashboard-chart bg-surface border-white/10 flex flex-col"
     >
       <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
@@ -107,6 +120,9 @@ export function UsageChart({ filter }: UsageChartProps) {
               {t("dashboard.tempoDeUsoDiario", {}, locale)}</CardTitle>
             <CardDescription className="text-white/50 font-[Poppins] mt-1">
               {t("dashboard.minutosDeUtilizacaoNosUltimosDias", {}, locale)}</CardDescription>
+            {granularity !== "day" && (
+              <p className="mt-1 font-[Poppins] text-xs text-zinc-400">{t(granularity === "week" ? "dashboard.period.groupedByWeek" : "dashboard.period.groupedByMonth", {}, locale)}</p>
+            )}
           </div>
         </div>
         <div className="col-span-full border-t border-white/10 px-4 py-4 sm:px-6">
@@ -122,7 +138,7 @@ export function UsageChart({ filter }: UsageChartProps) {
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
-            containerId="usage-chart"
+            containerId={chartId}
             fileName={t("dashboard.export.tempo_de_uso")}
             info={t("dashboard.dailyUsageInfo")}
             insight={{
@@ -159,7 +175,7 @@ export function UsageChart({ filter }: UsageChartProps) {
               <BarChart
                 data={chartData}
                 margin={{ left: 12, right: 12, top: 20, bottom: 5 }}
-                barSize={36}
+                maxBarSize={36}
                 barGap={2}
               >
                 <CartesianGrid
@@ -176,14 +192,14 @@ export function UsageChart({ filter }: UsageChartProps) {
                   height={Math.ceil(font(12) * 1.5) + 8}
                   stroke="rgb(var(--c-neutral-500))"
                   tick={{ fontSize: font(12) }}
-                  tickFormatter={(v: string) => formatDay(v, { day: "2-digit", month: "2-digit" })}
+                  tickFormatter={(v: string) => bucketLabel(v)}
                 />
                 <ChartTooltip trigger={tooltipTrigger}
                   cursor={false}
                   content={(props) => {
                     if (!props.active || !props.payload?.[0]) return null;
                     const d = props.payload[0].payload as any;
-                    const date = formatDay(d.date);
+                    const date = bucketLabel(d.date, true);
                     const secs = Math.round((d.usage ?? 0) * 60);
                     return (
                       <div className="rounded-xl border border-white/10 bg-surface-sunken px-3 py-2.5 text-sm shadow-xl">
@@ -221,7 +237,7 @@ export function UsageChart({ filter }: UsageChartProps) {
         {hasRequiredIds && !isLoading && !isError && hasData && (
           <ChartDataTable
             title={t("dashboard.tempoDeUsoDiario_490", {}, locale)}
-            rows={chartData as { date: string; usage?: number; sessions?: unknown[] }[]}
+            rows={dailyRows as { date: string; usage?: number; sessions?: unknown[] }[]}
             rowKey={(row) => row.date}
             columns={[
               { header: t("dashboard.table.data", {}, locale), cell: (row) => formatDay(row.date) },

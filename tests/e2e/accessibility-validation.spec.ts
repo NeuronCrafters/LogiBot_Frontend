@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { mockApi } from './fixtures';
+import { mockApi, openDashboardFilters, closeDashboardFilters } from './fixtures';
 
 const KEY = 'logibot.preferences';
 const CHARTS = ['usage-chart', 'correct-wrong-chart', 'general-score-card', 'category-chart', 'proficiency-radar-chart', 'effort-matrix-chart', 'learning-journey-chart'];
@@ -20,10 +20,11 @@ const noHorizontalScroll = (page: Page) => page.evaluate(() => document.document
 
 async function openUniversityDashboard(page: Page) {
   await page.goto('/dashboard');
+  await openDashboardFilters(page);
   await page.getByRole('combobox', { name: 'Selecione uma Entidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Selecione a universidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade original', exact: true }).click();
+  await page.getByRole('option', { name: 'Instituição', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Selecione a instituição', exact: true }).click();
+  await page.getByRole('option', { name: 'Universidade original', exact: true }).click(); await closeDashboardFilters(page);
   await expect(page.locator('#proficiency-radar-chart .recharts-polar-angle-axis-tick text').first()).toBeVisible();
 }
 
@@ -61,8 +62,9 @@ test.describe('preferências nos gráficos já abertos', () => {
     expect(before.slice(0, 5)).toEqual([11, 11, 11, 11, 11]);
     await choosePreference(page, 'Tamanho do texto', 'Muito maior');
     await expect(page.locator('html')).toHaveAttribute('data-text', 'larger');
-    const after = await Promise.all(selectors.map(selector => fontSize(page, selector)));
-    selectors.forEach((selector, index) => expect(after[index], selector).toBeCloseTo(before[index] * 1.25, 1));
+    // Charts redraw after the preference changes: wait for each label to settle instead of reading once.
+    for (const [index, selector] of selectors.entries())
+      await expect.poll(() => fontSize(page, selector), { message: selector }).toBeCloseTo(before[index] * 1.25, 1);
     expect(await noHorizontalScroll(page)).toBeTruthy();
     for (const id of CHARTS) {
       const box = await page.locator(`#${id}`).boundingBox();

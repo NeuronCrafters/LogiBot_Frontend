@@ -9,12 +9,16 @@ import { AppLayout } from "@/shared/components/layout/AppLayout";
 import { Start } from "@/features/home/pages/StartPage";
 import { NavigationTransition } from "@/shared/navigation/NavigationTransition";
 import { preloadQuizAttemptPage } from "@/shared/navigation/preloadQuiz";
+import { preloadPracticePage } from "@/shared/navigation/preloadPractice";
 
 const Chat = React.lazy(() =>
   import("@/features/chat/pages/ChatPage").then((m) => ({ default: m.Chat })),
 );
 const Dashboard = React.lazy(() =>
   import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.Dashboard })),
+);
+const ConceptPanel = React.lazy(() =>
+  import("@/features/concepts/pages/ConceptPanelPage").then((m) => ({ default: m.ConceptPanelPage })),
 );
 const CreateEntities = React.lazy(() =>
   import("@/features/admin/pages/CreateEntitiesPage").then((m) => ({
@@ -48,6 +52,45 @@ const ProfessorQuizPage = React.lazy(() =>
 );
 const RagManagementPage = React.lazy(() =>
   import("@/features/rag/pages/RagManagementPage").then((m) => ({ default: m.RagManagementPage })),
+);
+const PracticePage = React.lazy(() =>
+  preloadPracticePage().then((m) => ({ default: m.PracticePage })),
+);
+const QuestionBankPage = React.lazy(() =>
+  import("@/features/questions/pages/QuestionBankPage").then((m) => ({ default: m.QuestionBankPage })),
+);
+const QuestionEditorPage = React.lazy(() =>
+  import("@/features/questions/pages/QuestionEditorPage").then((m) => ({ default: m.QuestionEditorPage })),
+);
+const StudentExamsPage = React.lazy(() =>
+  import("@/features/exams/pages/StudentExamsPage").then((m) => ({ default: m.StudentExamsPage })),
+);
+const ExamTakePage = React.lazy(() =>
+  import("@/features/exams/pages/ExamTakePage").then((m) => ({ default: m.ExamTakePage })),
+);
+const ExamManageListPage = React.lazy(() =>
+  import("@/features/exams/pages/ExamManageListPage").then((m) => ({ default: m.ExamManageListPage })),
+);
+const ExamEditorPage = React.lazy(() =>
+  import("@/features/exams/pages/ExamEditorPage").then((m) => ({ default: m.ExamEditorPage })),
+);
+const ExamManageDetailPage = React.lazy(() =>
+  import("@/features/exams/pages/ExamManageDetailPage").then((m) => ({ default: m.ExamManageDetailPage })),
+);
+const BlindReviewPage = React.lazy(() =>
+  import("@/features/exams/pages/BlindReviewPage").then((m) => ({ default: m.BlindReviewPage })),
+);
+const ExamResultsPage = React.lazy(() =>
+  import("@/features/exams/pages/ExamResultsPage").then((m) => ({ default: m.ExamResultsPage })),
+);
+const DevPage = React.lazy(() =>
+  import("@/features/dev/pages/DevPage").then((m) => ({ default: m.DevPage })),
+);
+const FeatureReleasePage = React.lazy(() =>
+  import("@/features/release/pages/FeatureReleasePage").then((m) => ({ default: m.FeatureReleasePage })),
+);
+const ChatFeedbackAdminPage = React.lazy(() =>
+  import("@/features/chat/pages/ChatFeedbackAdminPage").then((m) => ({ default: m.ChatFeedbackAdminPage })),
 );
 const FeedbackManagement = React.lazy(() =>
   import("@/features/feedback/pages/FeedbackManagementPage").then((m) => ({ default: m.FeedbackManagementPage })),
@@ -114,10 +157,122 @@ export default function AppRouter() {
             }
           />
           <Route
+            path="/practice"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <PracticePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/practice/:exercise"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <PracticePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/questions"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <QuestionBankPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/questions/new"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <QuestionEditorPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/questions/:id/edit"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <QuestionEditorPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exams"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <StudentExamsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exams/:id"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ExamTakePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exams/manage"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ExamManageListPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exams/manage/new"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ExamEditorPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exams/manage/:id"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ExamManageDetailPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exams/manage/:id/edit"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ExamEditorPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exams/manage/:id/review"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <BlindReviewPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exams/manage/:id/results"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ExamResultsPage />
+              </Suspense>
+            }
+          />
+          <Route
             path="/dashboard"
             element={
               <Suspense fallback={<PageLoader />}>
                 <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/concepts"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ConceptPanel />
               </Suspense>
             }
           />
@@ -174,6 +329,30 @@ export default function AppRouter() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <Feedback />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dev"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <DevPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/features"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <FeatureReleasePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/chat-feedback"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ChatFeedbackAdminPage />
               </Suspense>
             }
           />

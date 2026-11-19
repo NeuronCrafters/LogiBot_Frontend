@@ -1,4 +1,5 @@
 import { ChartTooltip as Tooltip } from "@/components/ui/chart";
+import { useChartId } from "@/features/dashboard/chartIdContext";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
@@ -22,6 +23,8 @@ const CHART_INFO = () => (t("dashboard.proporcaoDeAcertosEErrosNosQuizzes"));
 
 interface CorrectWrongChartProps {
   filter: DashboardFilterState & {
+    /** Dashboard period (yyyy-mm-dd). */
+    period?: { startDate?: string; endDate?: string };
     hierarchyParams: { universityId?: string; courseId?: string; classId?: string; disciplineId?: string };
   };
 }
@@ -49,6 +52,7 @@ function useAccuracyData(filter: CorrectWrongChartProps["filter"]) {
 }
 
 export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
+  const chartId = useChartId("correct-wrong-chart");
   useLocale();
 
   const { data: accuracyData, isLoading, isError, error, refetch } = useAccuracyData(filter);
@@ -62,7 +66,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
   const icons = [CheckCircle2, XCircle];
 
   return (
-    <Card id="correct-wrong-chart" className="dashboard-chart bg-surface border-white/10 flex flex-col h-full">
+    <Card id={chartId} className="dashboard-chart bg-surface border-white/10 flex flex-col h-full">
       <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
         <div className="chart-heading min-w-0 px-4 py-5 sm:px-6">
           <div>
@@ -72,7 +76,7 @@ export function CorrectWrongChart({ filter }: CorrectWrongChartProps) {
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
-            containerId="correct-wrong-chart"
+            containerId={chartId}
             fileName={t("dashboard.export.acertos_erros")}
             info={CHART_INFO()}
             insight={{

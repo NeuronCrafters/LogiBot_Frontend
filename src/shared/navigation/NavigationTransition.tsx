@@ -1,9 +1,11 @@
 import { useLayoutEffect, useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation, type Location } from "react-router-dom";
 import { useReducedMotion } from "@/shared/preferences";
+import { isAppLayoutPath } from "@/shared/navigation/appLayoutSections";
 
 type Phase = "idle" | "exit" | "enter";
 const EXIT_MS = 160;
+
 
 /** Retain the outgoing route during its fade; query/hash changes keep their live state. */
 export function NavigationTransition({ children }: { children: (location: Location) => ReactNode }) {
@@ -37,7 +39,7 @@ export function NavigationTransition({ children }: { children: (location: Locati
     return () => window.clearTimeout(timer);
   }, [displayed.phase]);
 
-  const contentOnly = /^\/(?:home|chat|quiz|dashboard|entities|profile|feedback|admin|rag)(?:\/|$)/.test(displayed.location.pathname);
+  const contentOnly = isAppLayoutPath(displayed.location.pathname);
   return <div ref={root} className="navigation-transition" data-route-phase={displayed.phase}
     data-route-scope={contentOnly ? "content" : "page"} aria-busy={displayed.phase === "exit" || undefined}>
     <div className="navigation-view">{children(displayed.location)}</div>

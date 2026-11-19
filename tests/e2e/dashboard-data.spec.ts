@@ -1,15 +1,16 @@
 import { test, expect } from "@playwright/test";
-import { mockApi, ids, selectLanguage } from "./fixtures";
+import { mockApi, ids, selectLanguage, openDashboardFilters, closeDashboardFilters } from "./fixtures";
 
 test("university scope loads summaries without an administrator school and preserves real topics", async ({ page }) => {
   const requests = await mockApi(page, "admin", { school: "", schoolId: [] });
   await page.route("**/api/dashboard/proficiency-radar", (route) => route.fulfill({ json: { labels: ["Estruturas de Repetição", "Vetores, Matrizes e Arrays", "linguagem Python", "Assunto cadastrado sem respostas"], data: [72, 60, 60, null] } }));
   await page.goto("/dashboard");
   await selectLanguage(page, "pt-BR");
+  await openDashboardFilters(page);
   await page.getByRole("combobox", { name: "Selecione uma Entidade", exact: true }).click();
-  await page.getByRole("option", { name: "Universidade", exact: true }).click();
-  await page.getByRole("combobox", { name: "Selecione a universidade", exact: true }).click();
-  await page.getByRole("option", { name: "Universidade original", exact: true }).click();
+  await page.getByRole("option", { name: "Instituição", exact: true }).click();
+  await page.getByRole("combobox", { name: "Selecione a instituição", exact: true }).click();
+  await page.getByRole("option", { name: "Universidade original", exact: true }).click(); await closeDashboardFilters(page);
   await expect(page.locator("#usage-chart")).toContainText("0:01:00:00");
   await expect(page.locator("#correct-wrong-chart")).toContainText("8");
   await expect(page.locator("#category-chart")).toContainText("4");
@@ -31,10 +32,11 @@ test("zero is an assessed score, while students without answers have no performa
   await page.route("**/api/dashboard/effort-matrix", (route) => route.fulfill({ json: { points: [{ name: "Sem quiz", performance: null, effort: 0.3 }], unassessedCount: 1, averages: { avgPerformance: 0, avgEffort: 0 } } }));
   await page.goto("/dashboard");
   await selectLanguage(page, "pt-BR");
+  await openDashboardFilters(page);
   await page.getByRole("combobox", { name: "Selecione uma Entidade", exact: true }).click();
-  await page.getByRole("option", { name: "Universidade", exact: true }).click();
-  await page.getByRole("combobox", { name: "Selecione a universidade", exact: true }).click();
-  await page.getByRole("option", { name: "Universidade original", exact: true }).click();
+  await page.getByRole("option", { name: "Instituição", exact: true }).click();
+  await page.getByRole("combobox", { name: "Selecione a instituição", exact: true }).click();
+  await page.getByRole("option", { name: "Universidade original", exact: true }).click(); await closeDashboardFilters(page);
   await expect(page.locator("#general-score-card")).toContainText("0,00");
   await expect(page.locator("#general-score-card")).not.toContainText("Cada assunto tem o mesmo peso");
   await page.locator("#general-score-card").getByRole("button", { name: "Informações sobre o gráfico", exact: true }).click();

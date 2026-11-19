@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { mockApi } from './fixtures';
+import { mockApi, openDashboardFilters, closeDashboardFilters } from './fixtures';
 
 const KEY = 'logibot.preferences';
 
@@ -126,10 +126,11 @@ test('grade dos gráficos permanece visível no tema claro', async ({ page }) =>
   await withPreferences(page, { theme: 'light' });
   await mockApi(page, 'admin');
   await page.goto('/dashboard');
+  await openDashboardFilters(page);
   await page.getByRole('combobox', { name: 'Selecione uma Entidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Selecione a universidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade original', exact: true }).click();
+  await page.getByRole('option', { name: 'Instituição', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Selecione a instituição', exact: true }).click();
+  await page.getByRole('option', { name: 'Universidade original', exact: true }).click(); await closeDashboardFilters(page);
   for (const selector of ['#usage-chart .recharts-cartesian-grid line', '#proficiency-radar-chart .recharts-polar-grid-concentric-polygon']) {
   const grid = page.locator(selector).first();
   await expect(grid, selector).toBeAttached();

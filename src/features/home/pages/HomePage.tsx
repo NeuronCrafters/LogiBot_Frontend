@@ -9,19 +9,28 @@ import { Footer } from "@/features/home/components/Footer";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import logoMascote from "@/assets/logo.svg";
 import {
+  Accessibility,
   ArrowRight,
   BarChart2,
   BookOpen,
   Building2,
   CheckCircle,
+  ClipboardCheck,
   GraduationCap,
   MessageCircle,
   Play,
   Sparkles,
+  Table2,
   Users,
 } from "lucide-react";
 
 const features = [
+  {
+    icon: <BookOpen className="h-5 w-5" />,
+    get title() { return t("home.quizAdaptativo"); },
+    get description() { return t("home.pratiquePorNivelTemaESubtopicoCom"); },
+    tone: "text-indigo-400 bg-indigo-500/10",
+  },
   {
     icon: <MessageCircle className="h-5 w-5" />,
     get title() { return t("home.chatEspecializado"); },
@@ -29,10 +38,22 @@ const features = [
     tone: "text-blue-400 bg-blue-500/10",
   },
   {
-    icon: <BookOpen className="h-5 w-5" />,
-    get title() { return t("home.quizAdaptativo"); },
-    get description() { return t("home.pratiquePorNivelTemaESubtopicoCom"); },
-    tone: "text-indigo-400 bg-indigo-500/10",
+    icon: <Table2 className="h-5 w-5" />,
+    get title() { return t("home.feature.logicTitle"); },
+    get description() { return t("home.feature.logicDescription"); },
+    tone: "text-amber-300 bg-amber-500/10",
+  },
+  {
+    icon: <Accessibility className="h-5 w-5" />,
+    get title() { return t("home.feature.accessibleTitle"); },
+    get description() { return t("home.feature.accessibleDescription"); },
+    tone: "text-cyan-300 bg-cyan-500/10",
+  },
+  {
+    icon: <ClipboardCheck className="h-5 w-5" />,
+    get title() { return t("home.feature.examsTitle"); },
+    get description() { return t("home.feature.examsDescription"); },
+    tone: "text-rose-300 bg-rose-500/10",
   },
   {
     icon: <BarChart2 className="h-5 w-5" />,
@@ -47,13 +68,13 @@ const profiles = [
     icon: <GraduationCap className="h-5 w-5" />,
     get role() { return t("common.aluno"); },
     get description() { return t("home.aprendePraticaERevisaConteudosComApoio"); },
-    get benefits() { return [t("home.chatSobreLogica"), t("home.quizzesGuiados"), t("home.feedbackImediato")]; },
+    get benefits() { return [t("home.chatSobreLogica"), t("home.quizzesGuiados"), t("home.benefit.workbench"), t("home.benefit.exams"), t("home.feedbackImediato")]; },
   },
   {
     icon: <Users className="h-5 w-5" />,
     get role() { return t("common.professor"); },
     get description() { return t("home.acompanhaTurmasEIdentificaDificuldadesComMais"); },
-    get benefits() { return [t("home.relatoriosPorTurma"), t("home.matrizDeEsforco"), t("home.dadosPorAluno")]; },
+    get benefits() { return [t("home.benefit.questionBank"), t("home.benefit.blindReview"), t("home.relatoriosPorTurma"), t("home.matrizDeEsforco"), t("home.dadosPorAluno")]; },
   },
   {
     icon: <Building2 className="h-5 w-5" />,
@@ -100,7 +121,7 @@ export function Home() {
               />
             </span>
             <span className="hidden sm:inline font-[Poppins] text-base font-bold text-white">
-              LogiBot.AI
+              LogiBots.AI
             </span>
           </a>
           <nav aria-label={t("home.sectionNavigation")} className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 font-[Poppins] text-sm font-medium text-zinc-200 lg:flex">
@@ -149,7 +170,7 @@ export function Home() {
               >
                 {t("home.aprendaPratiqueEAcompanheEvolucaoComO")}</h1>
               <p className="mt-5 max-w-2xl font-[Poppins] text-base leading-relaxed text-zinc-400 sm:text-lg">
-                {t("home.umAmbienteEducacionalComChatInteligenteQuizzes")}</p>
+                {t("home.heroDescription")}</p>
               <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                 <button
                   onClick={handleStart}
@@ -174,7 +195,7 @@ export function Home() {
           title={t("home.umFluxoCompletoParaEstudarEAcompanhar")}
           description={t("home.asPrincipaisExperienciasDoProdutoSeguemA")}
         >
-          <div className="grid gap-5 md:grid-cols-3 lg:gap-6">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             {features.map((feature) => (
               <InfoCard key={feature.title}>
                 <div
@@ -236,7 +257,7 @@ export function Home() {
                 <h2 id="start-title" className="font-[Poppins] text-3xl font-semibold leading-tight text-white sm:text-4xl">
                   {t("home.comeceAUsarOLogibotAiHoje")}</h2>
                 <p className="mt-4 font-[Poppins] text-base leading-relaxed text-zinc-400">
-                  {t("home.crieSuaContaParaAcessarOChat")}</p>
+                  {t("home.ctaDescription")}</p>
               </div>
               <button
                 onClick={handleStart}

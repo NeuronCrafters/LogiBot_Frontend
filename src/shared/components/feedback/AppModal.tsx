@@ -23,6 +23,10 @@ interface AppModalProps {
   onClose?: () => void;
   children?: ReactNode;
   disabled?: boolean;
+  /** Disables only the confirm button (e.g. nothing selected yet); closing stays available. */
+  confirmDisabled?: boolean;
+  /** Width of the dialog; long content (e.g. a full chat answer) uses "lg". */
+  size?: "md" | "lg";
 }
 
 const defaultConfig = {
@@ -87,6 +91,8 @@ export function AppModal({
   onClose,
   children,
   disabled = false,
+  confirmDisabled = false,
+  size = "md",
 }: AppModalProps) {
   useLocale();
 
@@ -96,7 +102,7 @@ export function AppModal({
   const config = defaultConfig[type];
 
   const handleConfirm = () => {
-    if (disabled) return;
+    if (disabled || confirmDisabled) return;
     if (onConfirm) onConfirm();
     else if (onClose) onClose();
   };
@@ -108,7 +114,7 @@ export function AppModal({
 
   return (
     <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title || t("common.details")} tabIndex={-1} className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
-      <div className="my-auto w-full max-w-md shrink-0">
+      <div className={`my-auto w-full shrink-0 ${size === "lg" ? "max-w-3xl" : "max-w-md"}`}>
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-surface text-white shadow-2xl shadow-black/30">
           <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
             <div className="flex items-start gap-3">
@@ -157,7 +163,7 @@ export function AppModal({
             <button
               type="button"
               onClick={handleConfirm}
-              disabled={disabled}
+              disabled={disabled || confirmDisabled}
               className={`inline-flex h-10 items-center justify-center rounded-lg border px-4 font-[Poppins] text-sm font-semibold text-white shadow-md transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${config.confirm}`}
             >
               {acceptLabel ?? config.acceptLabel}

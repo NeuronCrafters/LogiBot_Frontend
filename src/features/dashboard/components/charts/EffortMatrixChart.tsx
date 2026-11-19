@@ -1,4 +1,5 @@
 import { ChartTooltip as Tooltip } from "@/components/ui/chart";
+import { useChartId } from "@/features/dashboard/chartIdContext";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
@@ -82,6 +83,7 @@ function useChartData(filters: ChartProps["filters"]) {
 }
 
 export function EffortMatrixChart({ filters }: ChartProps) {
+  const chartId = useChartId("effort-matrix-chart");
   const locale = useLocale();
 
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
@@ -154,7 +156,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
 
   return (
     <Card
-      id="effort-matrix-chart"
+      id={chartId}
       className="dashboard-chart bg-surface border-white/10 flex flex-col"
     >
       <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
@@ -168,7 +170,7 @@ export function EffortMatrixChart({ filters }: ChartProps) {
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
-            containerId="effort-matrix-chart"
+            containerId={chartId}
             fileName={t("dashboard.export.matriz_esforco")}
             info={CHART_INFO()}
             insight={{

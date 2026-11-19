@@ -1,4 +1,5 @@
 import { apiError } from "@/shared/lib/apiError";
+import { OptionalMark } from "@/shared/components/forms/OptionalMark";
 import { ContentLanguageSelect } from "@/i18n/ContentLanguage";
 import { t, useLocale, getLanguage } from "@/i18n";
 import { useState, useMemo } from "react";
@@ -311,7 +312,7 @@ export function AiQuizForm({ onClose }: Props) {
 
       {/* Título e descrição (opcionais) */}
       <div>
-        <label className={labelCls}>{t("quiz.tituloDoQuizOpcional", {}, locale)}</label>
+        <label className={labelCls}>{t("quiz.tituloDoQuizOpcional", {}, locale)}<OptionalMark /></label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -323,7 +324,7 @@ export function AiQuizForm({ onClose }: Props) {
       </div>
 
       <div>
-        <label className={labelCls}>{t("common.descricaoOpcional", {}, locale)}</label>
+        <label className={labelCls}>{t("common.descricaoOpcional", {}, locale)}<OptionalMark /></label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}

@@ -1,4 +1,5 @@
 import { RadarAxisTick, RadarLabels } from "../RadarLabels";
+import { useChartId } from "@/features/dashboard/chartIdContext";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
@@ -41,6 +42,8 @@ const chartConfig = {
 
 interface CategoryChartProps {
   filter: DashboardFilterState & {
+    /** Dashboard period (yyyy-mm-dd). */
+    period?: { startDate?: string; endDate?: string };
     hierarchyParams: {
       universityId?: string;
       courseId?: string;
@@ -82,6 +85,7 @@ function useSubjectsData(filter: CategoryChartProps["filter"]) {
 }
 
 export function CategoryChart({ filter }: CategoryChartProps) {
+  const chartId = useChartId("category-chart");
   const locale = useLocale();
 
   const { data, isLoading, isError, refetch, error } = useSubjectsData(filter);
@@ -107,7 +111,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
 
   return (
     <Card
-      id="category-chart"
+      id={chartId}
       data-indexed-radar={data?.chartData.some(row => row.category.length > 22) || undefined}
       className="dashboard-chart bg-surface border-white/10 flex flex-col h-full"
     >
@@ -122,7 +126,7 @@ export function CategoryChart({ filter }: CategoryChartProps) {
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
-            containerId="category-chart"
+            containerId={chartId}
             fileName={t("dashboard.export.assuntos_acessados")}
             info={CHART_INFO()}
             insight={{

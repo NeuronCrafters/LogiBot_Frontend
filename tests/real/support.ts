@@ -60,7 +60,7 @@ export const test=base.extend<{}, {lab:Lab}>({
     lab.accounts.add(account.id);lab[role]=account;
     if(role==='coordinator')await call(admin,'PATCH',`/admin/professors/${account.id}/role`,{action:'add'});
    }
-   lab.student=(await call(admin,'POST','/auth/register',{name:`${prefix} Aluno`,email:`${prefix.toLowerCase()}-student@example.invalid`,password:lab.password,code:lab.group.registrationCode})).user.user;
+   lab.student=(await call(admin,'POST','/auth/register',{name:`${prefix} Aluno`,email:`${prefix.toLowerCase()}-student@example.invalid`,password:lab.password,confirmPassword:lab.password,code:lab.group.registrationCode})).user.user;
    lab.accounts.add(lab.student.id);
    await use(lab);
   }finally{

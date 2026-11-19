@@ -24,6 +24,13 @@ interface AcademicFilterProps {
     courseId?: string;
     classId?: string;
   };
+  /** One field per row (narrow side panel). */
+  stacked?: boolean;
+  /**
+   * Entities that cannot be chosen again (e.g. selection A when choosing B). Only the level being
+   * chosen is filtered: parents stay available, so two classes of the same course can be compared.
+   */
+  excludeIds?: string[];
 }
 
 const normalizeToId = (v: unknown): string => {
@@ -50,6 +57,8 @@ function AcademicFilterContent({
   multiple = false,
   onSelect,
   additionalParams,
+  stacked = false,
+  excludeIds = [],
 }: AcademicFilterProps) {
   const locale = useLocale();
 
@@ -298,10 +307,11 @@ function AcademicFilterContent({
   };
 
   if (error) return <div className="text-red-500">{t("academic.erroAoCarregarDados", {}, locale)}</div>;
+  const available = (level: LogEntityType, id: string) => level !== entityType || excludeIds.indexOf(id) === -1;
 
   return (
     <div className="w-full">
-      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-4">
+      <div className={stacked ? "grid w-full grid-cols-1 gap-3" : "grid w-full grid-cols-1 gap-4 md:grid-cols-4"}>
         {showUniversitySelect && (
           <Select
             disabled={!isUniversityEnabled || isLoading}
@@ -315,7 +325,7 @@ function AcademicFilterContent({
               onSelect([], { universityId: v });
             }}
             placeholder={isAdmin ? t("academic.selecioneAUniversidade", {}, locale) : universities[0]?.name || t("common.universidade", {}, locale)}
-            options={universities.map((u) => ({ value: u._id, label: u.name }))}
+            options={universities.filter((u) => available("university", u._id)).map((u) => ({ value: u._id, label: u.name }))}
           />
         )}
 
@@ -331,7 +341,7 @@ function AcademicFilterContent({
               onSelect([], { universityId: selectedUniversity, courseId: v });
             }}
             placeholder={!selectedUniversity ? t("academic.selecioneAUniversidade_10", {}, locale) : courses.length === 0 ? t("academic.nenhumCursoDisponivel", {}, locale) : t("academic.selecioneOCurso", {}, locale)}
-            options={courses.map((c) => ({ value: c._id, label: c.name }))}
+            options={courses.filter((c) => available("course", c._id)).map((c) => ({ value: c._id, label: c.name }))}
           />
         )}
 
@@ -355,7 +365,7 @@ function AcademicFilterContent({
               onSelect([], { universityId: selectedUniversity, courseId: selectedCourse, classId: v });
             }}
             placeholder={!selectedCourse ? t("academic.selecioneOCurso_14", {}, locale) : classes.length === 0 ? t("academic.nenhumaTurmaDisponivel", {}, locale) : t("academic.selecioneATurma", {}, locale)}
-            options={classes.map((c) => ({ value: c._id, label: c.name }))}
+            options={classes.filter((c) => available("class", c._id)).map((c) => ({ value: c._id, label: c.name }))}
           />
         )}
 
@@ -365,7 +375,7 @@ function AcademicFilterContent({
             value={selectedIds[0] ?? ""}
             onChange={(v) => { if (v) toggleItem(v); }}
             placeholder={isLoading ? t("common.carregando", {}, locale) : t(({ student: "academic.selectStudent", discipline: "academic.selectSubject", class: "academic.selectClass", course: "academic.selectProgram", university: "academic.selectUniversity" } as const)[entityType], {}, locale)}
-            options={filteredEntities.map((item) => ({ value: item._id, label: item.name }))}
+            options={filteredEntities.filter((item) => excludeIds.indexOf(item._id) === -1).map((item) => ({ value: item._id, label: item.name }))}
           />
         )}
       </div>

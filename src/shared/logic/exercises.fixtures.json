@@ -1,0 +1,1229 @@
+{
+  "description": "Golden cases for parsonsCore.ts and integrity hashes of the shared exercise files. Keep identical in LogiBot_Backend and LogiBot_Frontend. Expected marks were derived by hand from the LCS rule (on ties the earlier line of the answer is skipped).",
+  "parsonsEngineVersion": "1.0.0",
+  "parsonsCoreSha256": "03c48c9a9a884e6c9818b7d03f956a639081de7ed775d4c536d4d4bfdcf9c630",
+  "catalogSha256": "a6ef28c280231950df36822953b2adfd38e82eebf15c74c4950bfd1be2b29e29",
+  "definitions": {
+    "single": {
+      "lines": [
+        {
+          "id": "a"
+        },
+        {
+          "id": "b"
+        },
+        {
+          "id": "c"
+        },
+        {
+          "id": "d"
+        },
+        {
+          "id": "x",
+          "distractor": true
+        }
+      ],
+      "solutions": [
+        [
+          [
+            "a",
+            0
+          ],
+          [
+            "b",
+            0
+          ],
+          [
+            "c",
+            1
+          ],
+          [
+            "d",
+            0
+          ]
+        ]
+      ]
+    },
+    "twoOrders": {
+      "lines": [
+        {
+          "id": "r1"
+        },
+        {
+          "id": "r2"
+        },
+        {
+          "id": "s"
+        }
+      ],
+      "solutions": [
+        [
+          [
+            "r1",
+            0
+          ],
+          [
+            "r2",
+            0
+          ],
+          [
+            "s",
+            0
+          ]
+        ],
+        [
+          [
+            "r2",
+            0
+          ],
+          [
+            "r1",
+            0
+          ],
+          [
+            "s",
+            0
+          ]
+        ]
+      ]
+    }
+  },
+  "grading": [
+    {
+      "name": "exact answer",
+      "definition": "single",
+      "answer": [
+        [
+          "a",
+          0
+        ],
+        [
+          "b",
+          0
+        ],
+        [
+          "c",
+          1
+        ],
+        [
+          "d",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": true,
+        "marks": {
+          "a": "correct",
+          "b": "correct",
+          "c": "correct",
+          "d": "correct"
+        },
+        "misplaced": 0,
+        "wrongIndent": 0,
+        "distractors": 0,
+        "missing": 0,
+        "solutionIndex": 0
+      }
+    },
+    {
+      "name": "distractor on top does not cascade",
+      "definition": "single",
+      "answer": [
+        [
+          "x",
+          0
+        ],
+        [
+          "a",
+          0
+        ],
+        [
+          "b",
+          0
+        ],
+        [
+          "c",
+          1
+        ],
+        [
+          "d",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": false,
+        "marks": {
+          "x": "distractor",
+          "a": "correct",
+          "b": "correct",
+          "c": "correct",
+          "d": "correct"
+        },
+        "misplaced": 0,
+        "wrongIndent": 0,
+        "distractors": 1,
+        "missing": 0,
+        "solutionIndex": 0
+      }
+    },
+    {
+      "name": "two swapped lines mark only one",
+      "definition": "single",
+      "answer": [
+        [
+          "a",
+          0
+        ],
+        [
+          "c",
+          1
+        ],
+        [
+          "b",
+          0
+        ],
+        [
+          "d",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": false,
+        "marks": {
+          "a": "correct",
+          "c": "misplaced",
+          "b": "correct",
+          "d": "correct"
+        },
+        "misplaced": 1,
+        "wrongIndent": 0,
+        "distractors": 0,
+        "missing": 0,
+        "solutionIndex": 0
+      }
+    },
+    {
+      "name": "wrong indentation",
+      "definition": "single",
+      "answer": [
+        [
+          "a",
+          0
+        ],
+        [
+          "b",
+          1
+        ],
+        [
+          "c",
+          1
+        ],
+        [
+          "d",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": false,
+        "marks": {
+          "a": "correct",
+          "b": "wrong_indent",
+          "c": "correct",
+          "d": "correct"
+        },
+        "misplaced": 0,
+        "wrongIndent": 1,
+        "distractors": 0,
+        "missing": 0,
+        "solutionIndex": 0
+      }
+    },
+    {
+      "name": "missing line is counted, not named",
+      "definition": "single",
+      "answer": [
+        [
+          "a",
+          0
+        ],
+        [
+          "b",
+          0
+        ],
+        [
+          "d",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": false,
+        "marks": {
+          "a": "correct",
+          "b": "correct",
+          "d": "correct"
+        },
+        "misplaced": 0,
+        "wrongIndent": 0,
+        "distractors": 0,
+        "missing": 1,
+        "solutionIndex": 0
+      }
+    },
+    {
+      "name": "empty answer",
+      "definition": "single",
+      "answer": [],
+      "expected": {
+        "correct": false,
+        "marks": {},
+        "misplaced": 0,
+        "wrongIndent": 0,
+        "distractors": 0,
+        "missing": 4,
+        "solutionIndex": 0
+      }
+    },
+    {
+      "name": "reversed order keeps one line",
+      "definition": "single",
+      "answer": [
+        [
+          "d",
+          0
+        ],
+        [
+          "c",
+          1
+        ],
+        [
+          "b",
+          0
+        ],
+        [
+          "a",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": false,
+        "marks": {
+          "d": "misplaced",
+          "c": "misplaced",
+          "b": "misplaced",
+          "a": "correct"
+        },
+        "misplaced": 3,
+        "wrongIndent": 0,
+        "distractors": 0,
+        "missing": 0,
+        "solutionIndex": 0
+      }
+    },
+    {
+      "name": "first valid order",
+      "definition": "twoOrders",
+      "answer": [
+        [
+          "r1",
+          0
+        ],
+        [
+          "r2",
+          0
+        ],
+        [
+          "s",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": true,
+        "marks": {
+          "r1": "correct",
+          "r2": "correct",
+          "s": "correct"
+        },
+        "misplaced": 0,
+        "wrongIndent": 0,
+        "distractors": 0,
+        "missing": 0,
+        "solutionIndex": 0
+      }
+    },
+    {
+      "name": "second valid order",
+      "definition": "twoOrders",
+      "answer": [
+        [
+          "r2",
+          0
+        ],
+        [
+          "r1",
+          0
+        ],
+        [
+          "s",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": true,
+        "marks": {
+          "r2": "correct",
+          "r1": "correct",
+          "s": "correct"
+        },
+        "misplaced": 0,
+        "wrongIndent": 0,
+        "distractors": 0,
+        "missing": 0,
+        "solutionIndex": 1
+      }
+    },
+    {
+      "name": "closest order wins even with an indentation error",
+      "definition": "twoOrders",
+      "answer": [
+        [
+          "r2",
+          0
+        ],
+        [
+          "r1",
+          1
+        ],
+        [
+          "s",
+          0
+        ]
+      ],
+      "expected": {
+        "correct": false,
+        "marks": {
+          "r2": "correct",
+          "r1": "wrong_indent",
+          "s": "correct"
+        },
+        "misplaced": 0,
+        "wrongIndent": 1,
+        "distractors": 0,
+        "missing": 0,
+        "solutionIndex": 1
+      }
+    }
+  ],
+  "validation": [
+    {
+      "definition": "single",
+      "input": {},
+      "code": "NOT_A_LIST",
+      "params": {}
+    },
+    {
+      "definition": "single",
+      "input": [
+        {
+          "id": "z",
+          "indent": 0
+        }
+      ],
+      "code": "UNKNOWN_LINE",
+      "params": {
+        "position": 0
+      }
+    },
+    {
+      "definition": "single",
+      "input": [
+        {
+          "id": "a",
+          "indent": 0
+        },
+        {
+          "indent": 0
+        }
+      ],
+      "code": "UNKNOWN_LINE",
+      "params": {
+        "position": 1
+      }
+    },
+    {
+      "definition": "single",
+      "input": [
+        {
+          "id": "a",
+          "indent": 0
+        },
+        {
+          "id": "a",
+          "indent": 1
+        }
+      ],
+      "code": "DUPLICATE_LINE",
+      "params": {
+        "line": "a"
+      }
+    },
+    {
+      "definition": "single",
+      "input": [
+        {
+          "id": "a",
+          "indent": 5
+        }
+      ],
+      "code": "INVALID_INDENT",
+      "params": {
+        "line": "a",
+        "max": 4
+      }
+    },
+    {
+      "definition": "single",
+      "input": [
+        {
+          "id": "a",
+          "indent": 1.5
+        }
+      ],
+      "code": "INVALID_INDENT",
+      "params": {
+        "line": "a",
+        "max": 4
+      }
+    },
+    {
+      "definition": "single",
+      "input": [
+        {
+          "id": "a",
+          "indent": "1"
+        }
+      ],
+      "code": "INVALID_INDENT",
+      "params": {
+        "line": "a",
+        "max": 4
+      }
+    },
+    {
+      "definition": "single",
+      "input": [
+        null
+      ],
+      "code": "UNKNOWN_LINE",
+      "params": {
+        "position": 0
+      }
+    }
+  ],
+  "questionCoreSha256": "97143987888eeacdcd15c82b588232eaf656b9caade942a2b62b20bcf2309bd8",
+  "questions": [
+    {
+      "name": "quiz válido normaliza textos e conceitos",
+      "input": {
+        "type": "quiz",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [
+          "  Laço  de Repetição "
+        ],
+        "language": "pt-BR",
+        "content": {
+          "options": [
+            " V ",
+            "F"
+          ],
+          "correct": 1
+        }
+      },
+      "question": {
+        "type": "quiz",
+        "statement": "Qual é o valor de p → q com p = V e q = F?",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [
+          "laço de repetição"
+        ],
+        "language": "pt-BR",
+        "content": {
+          "type": "quiz",
+          "options": [
+            "V",
+            "F"
+          ],
+          "correct": 1
+        }
+      }
+    },
+    {
+      "name": "quiz com alternativa repetida, vazia e resposta inválida",
+      "input": {
+        "type": "quiz",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "options": [
+            "A",
+            "a",
+            ""
+          ],
+          "correct": 5
+        }
+      },
+      "issues": [
+        {
+          "field": "content.options.1",
+          "code": "OPTION_DUPLICATE",
+          "params": {
+            "index": 2
+          }
+        },
+        {
+          "field": "content.options.2",
+          "code": "REQUIRED",
+          "params": {
+            "index": 3
+          }
+        },
+        {
+          "field": "content.correct",
+          "code": "CORRECT_REQUIRED",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "name": "quiz com alternativas demais",
+      "input": {
+        "type": "quiz",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e"
+          ],
+          "correct": 0
+        }
+      },
+      "issues": [
+        {
+          "field": "content.options",
+          "code": "OPTIONS_COUNT",
+          "params": {
+            "min": 2,
+            "max": 4
+          }
+        }
+      ]
+    },
+    {
+      "name": "tabela-verdade detecta conceitos e mantém os do professor",
+      "input": {
+        "type": "truth_table",
+        "statement": "Monte a tabela.",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [
+          "Condicional",
+          "negation"
+        ],
+        "language": "pt-BR",
+        "content": {
+          "formula": "(p -> q) & ~q"
+        }
+      },
+      "question": {
+        "type": "truth_table",
+        "statement": "Monte a tabela.",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [
+          "negation",
+          "conjunction",
+          "conditional",
+          "condicional"
+        ],
+        "language": "pt-BR",
+        "content": {
+          "type": "truth_table",
+          "formula": "(p → q) ∧ ¬q",
+          "columns": "all"
+        }
+      }
+    },
+    {
+      "name": "tabela-verdade sem operador",
+      "input": {
+        "type": "truth_table",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "formula": "p"
+        }
+      },
+      "issues": [
+        {
+          "field": "content.formula",
+          "code": "FORMULA_INVALID",
+          "params": {
+            "logicCode": "NO_OPERATOR"
+          }
+        }
+      ]
+    },
+    {
+      "name": "tradução válida",
+      "input": {
+        "type": "translation",
+        "statement": "Se chove, a rua fica molhada.",
+        "weight": 1,
+        "subject": "",
+        "concepts": [],
+        "language": "en-US",
+        "content": {
+          "legend": [
+            {
+              "letter": "p",
+              "text": " chove "
+            },
+            {
+              "letter": "q",
+              "text": "a rua fica molhada"
+            }
+          ],
+          "target": "p -> q"
+        }
+      },
+      "question": {
+        "type": "translation",
+        "statement": "Se chove, a rua fica molhada.",
+        "weight": 1,
+        "subject": null,
+        "concepts": [
+          "conditional"
+        ],
+        "language": "en-US",
+        "content": {
+          "type": "translation",
+          "legend": [
+            {
+              "letter": "p",
+              "text": "chove"
+            },
+            {
+              "letter": "q",
+              "text": "a rua fica molhada"
+            }
+          ],
+          "target": "p → q"
+        }
+      }
+    },
+    {
+      "name": "tradução com legenda e alvo inválidos",
+      "input": {
+        "type": "translation",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "legend": [
+            {
+              "letter": "P",
+              "text": "x"
+            },
+            {
+              "letter": "q",
+              "text": ""
+            },
+            {
+              "letter": "q",
+              "text": "y"
+            }
+          ],
+          "target": "p -> r"
+        }
+      },
+      "issues": [
+        {
+          "field": "content.legend.0.letter",
+          "code": "LEGEND_LETTER_INVALID",
+          "params": {
+            "index": 1
+          }
+        },
+        {
+          "field": "content.legend.1.text",
+          "code": "REQUIRED",
+          "params": {
+            "index": 2
+          }
+        },
+        {
+          "field": "content.legend.2.letter",
+          "code": "LEGEND_LETTER_DUPLICATE",
+          "params": {
+            "letter": "q"
+          }
+        },
+        {
+          "field": "content.target",
+          "code": "FORMULA_INVALID",
+          "params": {
+            "logicCode": "PROPOSITION_NOT_IN_LEGEND",
+            "found": "p, r",
+            "allowed": "q"
+          }
+        }
+      ]
+    },
+    {
+      "name": "parsons válido com recuo e distratora",
+      "input": {
+        "type": "parsons",
+        "statement": "Escreva n se for positivo.",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "solution": "leia(n)\nse n > 0 então\n  escreva(n)\n\nfimse\n",
+          "distractors": "escreva(0)\n",
+          "alternatives": ""
+        }
+      },
+      "question": {
+        "type": "parsons",
+        "statement": "Escreva n se for positivo.",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "type": "parsons",
+          "lines": [
+            {
+              "id": "line-0",
+              "text": "leia(n)"
+            },
+            {
+              "id": "line-1",
+              "text": "se n > 0 então"
+            },
+            {
+              "id": "line-2",
+              "text": "escreva(n)"
+            },
+            {
+              "id": "line-3",
+              "text": "fimse"
+            },
+            {
+              "id": "distractor-0",
+              "text": "escreva(0)",
+              "distractor": true
+            }
+          ],
+          "solutions": [
+            [
+              [
+                "line-0",
+                0
+              ],
+              [
+                "line-1",
+                0
+              ],
+              [
+                "line-2",
+                1
+              ],
+              [
+                "line-3",
+                0
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "parsons com ordem alternativa e repetida ignorada",
+      "input": {
+        "type": "parsons",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "solution": "leia(a)\nleia(b)\nescreva(a+b)",
+          "distractors": "",
+          "alternatives": "leia(b)\nleia(a)\nescreva(a+b)\n---\nleia(a)\nleia(b)\nescreva(a+b)"
+        }
+      },
+      "question": {
+        "type": "parsons",
+        "statement": "Qual é o valor de p → q com p = V e q = F?",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "type": "parsons",
+          "lines": [
+            {
+              "id": "line-0",
+              "text": "leia(a)"
+            },
+            {
+              "id": "line-1",
+              "text": "leia(b)"
+            },
+            {
+              "id": "line-2",
+              "text": "escreva(a+b)"
+            }
+          ],
+          "solutions": [
+            [
+              [
+                "line-0",
+                0
+              ],
+              [
+                "line-1",
+                0
+              ],
+              [
+                "line-2",
+                0
+              ]
+            ],
+            [
+              [
+                "line-1",
+                0
+              ],
+              [
+                "line-0",
+                0
+              ],
+              [
+                "line-2",
+                0
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "parsons com recuo ímpar, linha repetida, distratora na solução e alternativa diferente",
+      "input": {
+        "type": "parsons",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "solution": "a\n   b\na",
+          "distractors": "b",
+          "alternatives": "a\nb"
+        }
+      },
+      "issues": [
+        {
+          "field": "content.solution",
+          "code": "PARSONS_INDENT_SPACES",
+          "params": {
+            "line": 2
+          }
+        },
+        {
+          "field": "content.solution",
+          "code": "PARSONS_DUPLICATE_LINE",
+          "params": {
+            "line": 3,
+            "text": "a"
+          }
+        },
+        {
+          "field": "content.distractors",
+          "code": "PARSONS_DISTRACTOR_IN_SOLUTION",
+          "params": {
+            "line": 1,
+            "text": "b"
+          }
+        },
+        {
+          "field": "content.alternatives",
+          "code": "PARSONS_ALTERNATIVE_MISMATCH",
+          "params": {
+            "index": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "parsons com uma linha só",
+      "input": {
+        "type": "parsons",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "solution": "a",
+          "distractors": "",
+          "alternatives": ""
+        }
+      },
+      "issues": [
+        {
+          "field": "content.solution",
+          "code": "PARSONS_TOO_FEW_LINES",
+          "params": {
+            "min": 2
+          }
+        }
+      ]
+    },
+    {
+      "name": "dissertativa com critério",
+      "input": {
+        "type": "essay",
+        "statement": "Explique a diferença entre ∧ e ∨.",
+        "weight": 2.5,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "criteria": " Citar a tabela-verdade de cada um. "
+        }
+      },
+      "question": {
+        "type": "essay",
+        "statement": "Explique a diferença entre ∧ e ∨.",
+        "weight": 2.5,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "type": "essay",
+          "criteria": "Citar a tabela-verdade de cada um."
+        }
+      }
+    },
+    {
+      "name": "campos comuns inválidos",
+      "input": {
+        "type": "essay",
+        "statement": " ",
+        "weight": 1.25,
+        "subject": "operadores_logicos",
+        "concepts": "laço",
+        "language": "fr",
+        "content": {}
+      },
+      "issues": [
+        {
+          "field": "statement",
+          "code": "REQUIRED",
+          "params": {}
+        },
+        {
+          "field": "weight",
+          "code": "WEIGHT_RANGE",
+          "params": {
+            "min": 0.5,
+            "max": 10
+          }
+        },
+        {
+          "field": "language",
+          "code": "LANGUAGE_INVALID",
+          "params": {}
+        },
+        {
+          "field": "concepts",
+          "code": "CONCEPTS_INVALID",
+          "params": {
+            "max": 10,
+            "length": 40
+          }
+        }
+      ]
+    },
+    {
+      "name": "tipo desconhecido",
+      "input": {
+        "type": "ensaio",
+        "statement": "  Qual é o valor de p → q com p = V e q = F?  ",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR"
+      },
+      "issues": [
+        {
+          "field": "type",
+          "code": "TYPE_INVALID",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "name": "tabela-verdade grande só com a coluna final",
+      "input": {
+        "type": "truth_table",
+        "statement": "Monte a tabela.",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "formula": "p & q & r & s & t & u & v & w & x & y",
+          "columns": "final"
+        }
+      },
+      "question": {
+        "type": "truth_table",
+        "statement": "Monte a tabela.",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [
+          "conjunction"
+        ],
+        "language": "pt-BR",
+        "content": {
+          "type": "truth_table",
+          "formula": "((((((((p ∧ q) ∧ r) ∧ s) ∧ t) ∧ u) ∧ v) ∧ w) ∧ x) ∧ y",
+          "columns": "final"
+        }
+      }
+    },
+    {
+      "name": "tabela-verdade grande demais com todas as colunas",
+      "input": {
+        "type": "truth_table",
+        "statement": "Monte a tabela.",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "formula": "p & q & r & s & t & u & v & w & x & y",
+          "columns": "all"
+        }
+      },
+      "issues": [
+        {
+          "field": "content.formula",
+          "code": "FORMULA_INVALID",
+          "params": {
+            "logicCode": "TABLE_TOO_LARGE",
+            "max": 2048,
+            "cells": 9216
+          }
+        }
+      ]
+    },
+    {
+      "name": "tabela-verdade com modo de colunas inválido",
+      "input": {
+        "type": "truth_table",
+        "statement": "Monte a tabela.",
+        "weight": 1,
+        "subject": "operadores_logicos",
+        "concepts": [],
+        "language": "pt-BR",
+        "content": {
+          "formula": "p -> q",
+          "columns": "some"
+        }
+      },
+      "issues": [
+        {
+          "field": "content.columns",
+          "code": "COLUMNS_INVALID",
+          "params": {}
+        }
+      ]
+    }
+  ],
+  "parsonsEditorRoundTrip": {
+    "content": {
+      "type": "parsons",
+      "lines": [
+        {
+          "id": "line-0",
+          "text": "leia(n)"
+        },
+        {
+          "id": "line-1",
+          "text": "se n > 0 então"
+        },
+        {
+          "id": "line-2",
+          "text": "escreva(n)"
+        },
+        {
+          "id": "line-3",
+          "text": "fimse"
+        },
+        {
+          "id": "distractor-0",
+          "text": "escreva(0)",
+          "distractor": true
+        }
+      ],
+      "solutions": [
+        [
+          [
+            "line-0",
+            0
+          ],
+          [
+            "line-1",
+            0
+          ],
+          [
+            "line-2",
+            1
+          ],
+          [
+            "line-3",
+            0
+          ]
+        ]
+      ]
+    },
+    "expected": {
+      "solution": "leia(n)\nse n > 0 então\n  escreva(n)\nfimse",
+      "distractors": "escreva(0)",
+      "alternatives": ""
+    }
+  }
+}

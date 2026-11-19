@@ -58,3 +58,13 @@ export async function selectLanguage(page:Page,language:string){
  const close=page.getByRole('button',{name:/Fechar menu|Close menu|Cerrar menú/});
  if(await close.count())await close.first().click();
 }
+
+/** The main dashboard filters are on the page; this waits until the page is ready. */
+export async function openDashboardFilters(page:Page){
+  await page.locator('[data-dashboard-panel-toggle]').first().waitFor();
+}
+/** Closes the narrow-screen drawer after choosing, so the charts are reachable. */
+export async function closeDashboardFilters(page:Page){
+  const drawer=page.locator('[data-dashboard-drawer]');
+  if(await drawer.count()){await page.keyboard.press('Escape');await drawer.waitFor({state:'detached'});}
+}

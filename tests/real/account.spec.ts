@@ -9,7 +9,7 @@ for(const locale of languages){
   await page.getByRole('button',{name:text('pt-BR','auth.facaSeuCadastro'),exact:true}).click();
   if(await page.getByRole('dialog').count())await page.getByRole('button',{name:text('pt-BR','common.aceitoOsTermos'),exact:true}).click();
   await page.locator('#signup-name-input').fill(`${lab.prefix.replaceAll("-"," ")} ${locale.replace("-"," ")}`);
-  await page.locator('#signup-email-input').fill(email);await page.locator('#signup-password-input').fill(lab.password);await page.locator('#signup-code-input').fill(lab.group.registrationCode);
+  await page.locator('#signup-email-input').fill(email);await page.locator('#signup-password-input').fill(lab.password);await page.locator('#signup-confirm-password-input').fill(lab.password);await page.locator('#signup-code-input').fill(lab.group.registrationCode);
   const registered=page.waitForResponse(r=>r.url().endsWith('/auth/register')&&r.request().method()==='POST');
   await page.locator('#signup-submit-button').click();const response=await registered;expect(response.status()).toBe(201);
   const account=(await response.json()).user.user;lab.accounts.add(account.id);

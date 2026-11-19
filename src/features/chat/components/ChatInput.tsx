@@ -46,9 +46,11 @@ export const ChatInput = memo(function ChatInput({
     try {
       userAnalysisApi.addInteraction(text).catch(() => {});
       if (textareaRef.current) textareaRef.current.style.height = "auto";
-      await Promise.resolve(sendMessage(text));
+      // The message moves to the conversation at once; it only comes back if sending fails.
       clearDraft();
+      await Promise.resolve(sendMessage(text));
     } catch (err) {
+      setInputText((current) => current || text);
       logger.error("Chat", "Erro ao enviar mensagem.", err);
     } finally {
       setIsSending(false);

@@ -5,6 +5,8 @@ test.use({ locale: "pt-BR" });
 
 async function sidebar(page: Page) {
   const opener = page.getByRole("button", { name: "Abrir menu" });
+  // Wait until either the phone menu button or the desktop sidebar is on screen before deciding.
+  await opener.or(page.locator("aside:visible")).first().waitFor();
   if (await opener.isVisible()) await opener.click();
   return page.locator("aside:visible").last();
 }

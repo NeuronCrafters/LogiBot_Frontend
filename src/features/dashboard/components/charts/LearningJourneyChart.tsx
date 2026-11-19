@@ -1,9 +1,11 @@
 import { ChartTooltip as Tooltip } from "@/components/ui/chart";
+import { useChartId } from "@/features/dashboard/chartIdContext";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
 import { percent, t, useLocale, number } from "@/i18n";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { JOURNEY_RECENT, journeyWindow } from "@/features/dashboard/timeBuckets";
 import { useQuery } from "@tanstack/react-query";
 import {
   CartesianGrid,
@@ -82,11 +84,16 @@ function useChartData(filters: ChartProps["filters"]) {
 }
 
 export function LearningJourneyChart({ filters }: ChartProps) {
+  const chartId = useChartId("learning-journey-chart");
   const locale = useLocale();
 
   const { data, isLoading, isError, error, refetch } = useChartData(filters);
   const hasData = data && data.length > 0;
   const hasRequiredIds = !!filters.universityId;
+  // The last quizzes by default; all of them on request (grouped when there are too many to read).
+  const [showAll, setShowAll] = useState(false);
+  const windowed = useMemo(() => journeyWindow(data ?? [], showAll), [data, showAll]);
+  const total = data?.length ?? 0;
   const { animate, font, space, scale, tooltipTrigger } = useChartPreferences();
   const scopeLabel = filters.studentId ? t("dashboard.doEstudante", {}, locale) : t("dashboard.mediaDoGrupo_453", {}, locale);
 
@@ -112,7 +119,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
 
   return (
     <Card
-      id="learning-journey-chart"
+      id={chartId}
       className="dashboard-chart bg-surface border-white/10 flex flex-col"
     >
       <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
@@ -127,7 +134,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
-            containerId="learning-journey-chart"
+            containerId={chartId}
             fileName={t("dashboard.export.jornada_aprendizagem")}
             info={CHART_INFO()}
             insight={{
@@ -157,7 +164,7 @@ export function LearningJourneyChart({ filters }: ChartProps) {
           <div style={{ height: space(300) }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={data}
+                data={windowed.points}
                 margin={{ left: 4, right: space(18), top: space(24), bottom: 6 }}
               >
                 <CartesianGrid
@@ -251,6 +258,19 @@ export function LearningJourneyChart({ filters }: ChartProps) {
                 </Line>
               </LineChart>
             </ResponsiveContainer>
+          </div>
+        )}
+        {hasRequiredIds && !isLoading && !isError && hasData && summary && total > JOURNEY_RECENT && (
+          <div data-export-ignore="true" className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 px-2 font-[Poppins] text-xs text-zinc-400 sm:px-0">
+            <span aria-live="polite">
+              {showAll
+                ? windowed.grouped ? t("dashboard.period.journeyGrouped", { total }) : t("dashboard.period.journeyAll", { total })
+                : t("dashboard.period.journeyRecent", { shown: JOURNEY_RECENT, total })}
+            </span>
+            <button type="button" onClick={() => setShowAll((current) => !current)}
+              className="inline-flex min-h-11 items-center rounded-lg px-2 font-semibold text-blue-300 underline-offset-2 hover:underline sm:min-h-8">
+              {showAll ? t("dashboard.period.journeyShowRecent", { shown: JOURNEY_RECENT }) : t("dashboard.period.journeyShowAll", { total })}
+            </button>
           </div>
         )}
         {hasRequiredIds && !isLoading && !isError && hasData && summary && (

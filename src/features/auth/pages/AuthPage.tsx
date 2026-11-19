@@ -2,7 +2,8 @@ import { apiError } from "@/shared/lib/apiError";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 import { PreferencesMenu } from "@/shared/preferences/PreferencesControls";
 import { t, useLocale } from "@/i18n";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { FieldHintPopover } from "@/shared/components/forms/FieldHintPopover";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/shared/lib/toast";
 import {
@@ -37,9 +38,13 @@ export function AuthPage({ mode }: AuthPageProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
+
+  // Only flag a mismatch once the second password is at least as long as the first.
+  const mismatch = isSignup && confirmPassword.length >= password.length && confirmPassword.length > 0 && confirmPassword !== password;
 
   const handleLogin = async () => {
     const finalEmail = email.replace(/\s/g, "");
@@ -75,6 +80,11 @@ export function AuthPage({ mode }: AuthPageProps) {
     if (!finalPassword) return toast.error({ key: "auth.senhaEObrigatoria", params: {} });
     if (finalPassword.length < 12)
       return toast.error({ key: "auth.aSenhaDeveTerPeloMenos12", params: {} });
+    if (!confirmPassword) return toast.error({ key: "auth.confirmeASenha", params: {} });
+    if (confirmPassword !== finalPassword) {
+      document.getElementById("signup-confirm-password-input")?.focus();
+      return toast.error({ key: "auth.asSenhasNaoCoincidem", params: {} });
+    }
     if (!finalCode) return toast.error({ key: "auth.codigoDeAcessoEObrigatorio", params: {} });
 
     setLoading(true);
@@ -83,6 +93,7 @@ export function AuthPage({ mode }: AuthPageProps) {
         name: finalName,
         email: finalEmail,
         password: finalPassword,
+        confirmPassword,
         code: finalCode,
       });
       await login(finalEmail, finalPassword);
@@ -127,7 +138,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               className="absolute left-8 top-8 flex items-center gap-2"
             >
               <span className="font-[Poppins] text-lg font-bold text-white">
-                LogiBot.AI
+                LogiBots.AI
               </span>
             </Link>
             <div className="relative flex flex-col items-center text-center">
@@ -149,7 +160,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                   className="mx-auto flex w-fit flex-col items-center gap-2 text-lg font-bold text-white"
                 >
                   <RobotAvatar variant="head" className="h-24 w-24" />
-                  <span>LogiBot.AI</span>
+                  <span>LogiBots.AI</span>
                 </Link>
               </div>
 
@@ -172,6 +183,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                     icon={<User className="h-4 w-4" />}
                     type="text"
                     label={t("common.nomeCompleto")}
+                    placeholder={t("auth.placeholderName")}
                     autoComplete="name"
                     value={name}
                     onChange={setName}
@@ -196,21 +208,39 @@ export function AuthPage({ mode }: AuthPageProps) {
                   icon={<Lock className="h-4 w-4" />}
                   type="password"
                   label={t("common.senha")}
+                  placeholder={isSignup ? t("auth.placeholderNewPassword") : t("auth.placeholderPassword")}
                   autoComplete={isSignup ? "new-password" : "current-password"}
-                  describedBy={isSignup ? "signup-password-hint" : undefined}
+                  hint={isSignup ? { title: t("auth.passwordHintTitle"), text: t("auth.aSenhaDeveTerNoMinimo12") } : undefined}
                   value={password}
                   onChange={(value) => setPassword(value.replace(/\s/g, ""))}
                   required
                 />
                 {isSignup && (
                   <>
-                    <p id="signup-password-hint" className="pl-1 text-xs text-zinc-500">
-                      {t("auth.aSenhaDeveTerNoMinimo12")}</p>
+                    <AuthInput
+                      id="signup-confirm-password-input"
+                      icon={<Lock className="h-4 w-4" />}
+                      type="password"
+                      label={t("auth.repetirSenha")}
+                      placeholder={t("auth.placeholderRepeatPassword")}
+                      autoComplete="new-password"
+                      hint={{ title: t("auth.repetirSenha"), text: t("auth.repitaASenhaHint") }}
+                      describedBy={mismatch ? "signup-confirm-password-error" : undefined}
+                      invalid={mismatch}
+                      value={confirmPassword}
+                      onChange={(value) => setConfirmPassword(value.replace(/\s/g, ""))}
+                      required
+                    />
+                    {mismatch && (
+                      <p id="signup-confirm-password-error" className="pl-1 text-xs text-red-300">
+                        {t("auth.asSenhasNaoCoincidem")}</p>
+                    )}
                     <AuthInput
                       id="signup-code-input"
                       icon={<FileText className="h-4 w-4" />}
                       type="text"
                       label={t("auth.codigoDeAcesso")}
+                      placeholder={t("auth.placeholderCode")}
                       autoComplete="off"
                       value={code}
                       onChange={(value) => setCode(value.replace(/\s/g, ""))}
@@ -281,6 +311,8 @@ function AuthInput({
   onChange,
   required,
   describedBy,
+  invalid,
+  hint,
 }: {
   id: string;
   icon: ReactNode;
@@ -292,8 +324,15 @@ function AuthInput({
   onChange: (value: string) => void;
   required?: boolean;
   describedBy?: string;
+  invalid?: boolean;
+  /** Shown in a floating panel while the field has focus; always available to screen readers. */
+  hint?: { title: string; text: string };
 }) {
   useLocale();
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [hintOpen, setHintOpen] = useState(false);
+  const hintId = hint ? `${id}-hint` : undefined;
+  const describedByIds = [hintId, describedBy].filter(Boolean).join(" ") || undefined;
 
   const [showPassword, setShowPassword] = useState(false);
   const inputType = type === "password" && showPassword ? "text" : type;
@@ -303,14 +342,20 @@ function AuthInput({
       <label htmlFor={id} className="block pl-1 text-sm font-medium text-zinc-300">
         {label}
       </label>
-      <div className="flex h-14 w-full min-w-0 items-center gap-3 rounded-xl border border-control bg-neutral-950/60 px-3 text-zinc-400 transition-colors focus-within:border-blue-400 focus-within:text-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
+      {hint && <span id={hintId} className="sr-only">{hint.text}</span>}
+      {hint && <FieldHintPopover anchor={boxRef} open={hintOpen} title={hint.title} text={hint.text} />}
+      <div ref={boxRef} className={`flex h-14 w-full min-w-0 items-center gap-3 rounded-xl border ${invalid ? "border-red-400" : "border-control"} bg-neutral-950/60 px-3 text-zinc-400 transition-colors focus-within:border-blue-400 focus-within:text-blue-400 focus-within:ring-1 focus-within:ring-blue-400`}>
         <span className="shrink-0" aria-hidden="true">{icon}</span>
         <input
           id={id}
           type={inputType}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          aria-describedby={describedBy}
+          aria-describedby={describedByIds}
+          onFocus={() => setHintOpen(true)}
+          onBlur={() => setHintOpen(false)}
+          onKeyDown={(event) => { if (event.key === "Escape" && hintOpen) { event.preventDefault(); setHintOpen(false); } }}
+          aria-invalid={invalid || undefined}
           spellCheck={type === "text" ? undefined : false}
           autoCapitalize={type === "text" ? undefined : "none"}
           value={value}

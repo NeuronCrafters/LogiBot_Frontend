@@ -20,6 +20,7 @@ import {
   type DashboardFilterParams,
 } from "@/features/dashboard/api/dashboardApi";
 import type {
+  ComparisonInsightChart,
   DashboardInsightChart,
   DashboardInsightResponse,
 } from "@/features/dashboard/types";
@@ -35,6 +36,19 @@ type InsightRequest = { language: Language } & (
       kind: "overview";
       title: string;
       filters: DashboardFilterParams;
+    }
+  | {
+      kind: "comparison";
+      title: string;
+      filters: DashboardFilterParams;
+      other: DashboardFilterParams;
+    }
+  | {
+      kind: "comparison-chart";
+      chart: ComparisonInsightChart;
+      title: string;
+      filters: DashboardFilterParams;
+      other: DashboardFilterParams;
     });
 
 type DashboardInsightContextValue = {
@@ -44,6 +58,10 @@ type DashboardInsightContextValue = {
     filters: DashboardFilterParams,
   ) => void;
   openOverview: (filters: DashboardFilterParams) => void;
+  /** Both selections analysed together. */
+  openComparison: (a: DashboardFilterParams, b: DashboardFilterParams) => void;
+  /** One direct comparison chart, with both selections. */
+  openComparisonChart: (chart: ComparisonInsightChart, title: string, a: DashboardFilterParams, b: DashboardFilterParams) => void;
 };
 
 const DashboardInsightContext =
@@ -67,8 +85,9 @@ function queryKey(request: InsightRequest) {
     "dashboard-insight",
     request.language,
     request.kind,
-    request.kind === "chart" ? request.chart : "overview",
+    request.kind === "chart" || request.kind === "comparison-chart" ? request.chart : request.kind,
     request.filters,
+    request.kind === "comparison" || request.kind === "comparison-chart" ? request.other : null,
   ] as const;
 }
 
@@ -162,6 +181,16 @@ const insightMarkdownComponents = {
   ),
 };
 
+/** Titles follow the current language (the request may be redone after a language change). */
+const COMPARISON_TITLES = {
+  "topic-difference": "dashboard.compare.topicTitle",
+  "radar-overlay": "dashboard.compare.radarTitle",
+  "performance-distribution": "dashboard.compare.distributionTitle",
+  "exam-results": "dashboard.compare.examsTitle",
+  "weekly-engagement": "dashboard.compare.engagementTitle",
+  "chat-satisfaction": "dashboard.compare.chatTitle",
+} as const;
+
 export function DashboardInsightProvider({
   children,
 }: {
@@ -193,7 +222,11 @@ export function DashboardInsightProvider({
                   force,
                   next.language,
                 )
-              : await dashboardApi.getOverviewInsight(next.filters, force, next.language);
+              : next.kind === "comparison"
+                ? await dashboardApi.getComparisonInsight(next.filters, next.other, force, next.language)
+                : next.kind === "comparison-chart"
+                ? await dashboardApi.getComparisonChartInsight(next.chart, next.filters, next.other, force, next.language)
+                : await dashboardApi.getOverviewInsight(next.filters, force, next.language);
           return response.data;
         };
 
@@ -244,6 +277,24 @@ export function DashboardInsightProvider({
     [load, locale],
   );
 
+  const openComparison = useCallback(
+    (a: DashboardFilterParams, b: DashboardFilterParams) => {
+      const next: InsightRequest = { kind: "comparison", language: getLanguage(), title: t("dashboard.panel.overviewBoth", {}, locale), filters: a, other: b };
+      setRequest(next);
+      void load(next, false);
+    },
+    [load, locale],
+  );
+
+  const openComparisonChart = useCallback(
+    (chart: ComparisonInsightChart, title: string, a: DashboardFilterParams, b: DashboardFilterParams) => {
+      const next: InsightRequest = { kind: "comparison-chart", chart, language: getLanguage(), title, filters: a, other: b };
+      setRequest(next);
+      void load(next, false);
+    },
+    [load],
+  );
+
   useEffect(() => {
     if (!request || request.language === locale) return;
     const next = { ...request, language: locale };
@@ -262,7 +313,7 @@ export function DashboardInsightProvider({
   const dialogRef = useDialogFocus<HTMLDivElement>(Boolean(request), close);
 
   return (
-    <DashboardInsightContext.Provider value={{ openChart, openOverview }}>
+    <DashboardInsightContext.Provider value={{ openChart, openOverview, openComparison, openComparisonChart }}>
       {children}
       {request && (
         <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("dashboard.insightPedagogicoGeradoAPartirDosDados", {}, locale)} tabIndex={-1} className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-6">
@@ -274,7 +325,7 @@ export function DashboardInsightProvider({
                 </div>
                 <div>
                   <h2 className="font-[Poppins] text-lg font-semibold">
-                    {request.kind === "overview" ? t("dashboard.analiseGeralDoDashboard", {}, locale) : t(INSIGHT_TITLES[request.chart], {}, locale)}
+                    {request.kind === "overview" ? t("dashboard.analiseGeralDoDashboard", {}, locale) : request.kind === "comparison" ? t("dashboard.panel.overviewBoth", {}, locale) : request.kind === "comparison-chart" ? t(COMPARISON_TITLES[request.chart], {}, locale) : t(INSIGHT_TITLES[request.chart], {}, locale)}
                   </h2>
                   <p className="mt-1 font-[Poppins] text-sm text-zinc-500">
                     {t("dashboard.insightPedagogicoGeradoAPartirDosDados", {}, locale)}</p>

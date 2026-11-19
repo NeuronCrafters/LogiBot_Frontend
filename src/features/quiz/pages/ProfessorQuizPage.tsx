@@ -1,4 +1,5 @@
 import { useDialogFocus } from "@/shared/hooks/useDialogFocus";
+import { OptionalMark } from "@/shared/components/forms/OptionalMark";
 import { apiError } from "@/shared/lib/apiError";
 import { ContentLanguageSelect, ContentLanguageLabel } from "@/i18n/ContentLanguage";
 import { percent, t, useLocale, getLanguage, type Language } from "@/i18n";
@@ -169,7 +170,7 @@ function QuizForm({
         />
       </div>
       <div>
-        <label className={labelCls}>{t("common.descricaoOpcional")}</label>
+        <label className={labelCls}>{t("common.descricaoOpcional")}<OptionalMark /></label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -287,7 +288,7 @@ function QuestionForm({
         />
       </div>
       <div>
-        <label className={labelCls}>{t("quiz.explicacaoOpcional")}</label>
+        <label className={labelCls}>{t("quiz.explicacaoOpcional")}<OptionalMark /></label>
         <textarea
           value={explanation}
           onChange={(e) => setExplanation(e.target.value)}

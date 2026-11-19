@@ -2,6 +2,7 @@ import { RobotAvatar } from "@/shared/mascot/RobotAvatar";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChatFollowUpSuggestions } from "./ChatFollowUpSuggestions";
 import { ChatQuizPracticeInvitation } from "./ChatQuizPracticeInvitation";
+import { AnswerFeedback } from "./AnswerFeedback";
 import { t, useLocale, normalizeLanguage } from "@/i18n";
 ﻿import { ArrowDown } from "lucide-react";
 import { logger } from "@/shared/lib/logger";
@@ -65,6 +66,8 @@ export const ChatMessageList = memo(function ChatMessageList({
             busy={busy}
             onEdit={onSend && sessionId && msg.sender === "user" && /^[0-9a-f-]{36}$/i.test(msg.id) ? text => onSend(text, msg.id) : undefined}
           />
+          {onSend && sessionId && msg.sender === "bot" && !msg.streaming && !msg.failed && msg.text.trim() && /^[0-9a-f-]{36}$/i.test(msg.serverId || "") &&
+            <AnswerFeedback sessionId={sessionId} messageId={msg.serverId!} />}
           {onSend && sessionId && !busy && index === messages.length - 1 && msg.sender === "bot" && !msg.streaming && !msg.failed && msg.text.trim() && /^[0-9a-f-]{36}$/i.test(msg.serverId || msg.id) &&
             <>
             <ChatFollowUpSuggestions sessionId={sessionId} messageId={msg.serverId || msg.id} questions={questions} onSelect={question => { void onSend(question).catch(() => {}); }} onReady={onSuggestionsReady} />

@@ -8,6 +8,7 @@ import { ChatHistory } from "@/features/chat/components/ChatHistory";
 import { QuizHistory } from "@/features/quiz/components/QuizHistory";
 import {
   PieChart,
+  Target,
   Settings,
   TableProperties,
   User,
@@ -18,8 +19,28 @@ import {
   Database,
   MessageCircle,
   Inbox,
+  ToggleRight,
+  FlaskConical,
+  ThumbsUp,
+  Table2,
+  Languages,
+  ListOrdered,
+  Library,
+  ClipboardCheck,
+  ClipboardList,
+  PanelLeftClose,
 } from "lucide-react";
+import { cn } from "@/shared/lib/cn";
+
+const COLLAPSED_KEY = "logibot.sidebar.collapsed";
+const readCollapsed = () => {
+  try { return localStorage.getItem(COLLAPSED_KEY) === "1"; } catch { return false; }
+};
 import logoMascote from "@/assets/logo.svg";
+import { preloadPracticePage } from "@/shared/navigation/preloadPractice";
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
+import { useFeatures } from "@/features/release/hooks/useFeatures";
+import { featureForPath } from "@/features/release/featureCatalog";
 
 interface SidebarProps {
   onMobileClose?: () => void;
@@ -31,6 +52,8 @@ interface NavItem {
   path: string;
   icon: React.ReactNode;
   label: string;
+  /** Loads the page code ahead, so the route fade does not fall back to the full-screen loader. */
+  preload?: () => Promise<unknown>;
 }
 interface NavSection {
   label: string;
@@ -47,6 +70,11 @@ const STUDENT_SECTIONS: NavSection[] = [
         get label() { return t("common.chat"); },
       },
       { path: "/quiz", icon: <Brain className="w-4 h-4" />, get label() { return t("common.quiz"); } },
+      { path: "/practice/truth-table", icon: <Table2 className="w-4 h-4" />, get label() { return t("exercises.type.truthTable"); }, preload: preloadPracticePage },
+      { path: "/practice/translation", icon: <Languages className="w-4 h-4" />, get label() { return t("exercises.type.translation"); }, preload: preloadPracticePage },
+      { path: "/practice/parsons", icon: <ListOrdered className="w-4 h-4" />, get label() { return t("exercises.type.parsons"); }, preload: preloadPracticePage },
+      { path: "/exams", icon: <ClipboardCheck className="w-4 h-4" />, get label() { return t("exams.navLabel"); } },
+      { path: "/concepts", icon: <Target className="w-4 h-4" />, get label() { return t("concepts.navLabel"); } },
     ],
   },
   {
@@ -72,9 +100,27 @@ function buildStaffSections(role: Role): NavSection[] {
     });
   if (["teacher", "course-coordinator", "admin"].includes(role))
     gestao.push({
+      path: "/concepts",
+      icon: <Target className="w-4 h-4" />,
+      label: t("concepts.navLabel"),
+    });
+  if (["teacher", "course-coordinator", "admin"].includes(role))
+    gestao.push({
       path: "/quiz/manage",
       icon: <Brain className="w-4 h-4" />,
       label: t("common.quizzes"),
+    });
+  if (["teacher", "course-coordinator", "admin"].includes(role))
+    gestao.push({
+      path: "/questions",
+      icon: <Library className="w-4 h-4" />,
+      label: t("questions.navLabel"),
+    });
+  if (["teacher", "course-coordinator", "admin"].includes(role))
+    gestao.push({
+      path: "/exams/manage",
+      icon: <ClipboardList className="w-4 h-4" />,
+      label: t("exams.navLabel"),
     });
   if (["teacher", "course-coordinator", "admin"].includes(role))
     gestao.push({
@@ -93,6 +139,18 @@ function buildStaffSections(role: Role): NavSection[] {
       path: "/admin/feedbacks",
       icon: <Inbox className="w-4 h-4" />,
       label: t("common.feedbacks"),
+    });
+  if (role === "admin")
+    gestao.push({
+      path: "/admin/chat-feedback",
+      icon: <ThumbsUp className="w-4 h-4" />,
+      label: t("chatFeedback.admin.navLabel"),
+    });
+  if (role === "admin")
+    gestao.push({
+      path: "/admin/features",
+      icon: <ToggleRight className="w-4 h-4" />,
+      label: t("features.admin.navLabel"),
     });
   if (["admin", "teacher", "course-coordinator"].includes(role))
     gestao.push({
@@ -124,12 +182,17 @@ function NavLink({
   item,
   active,
   onClick,
+  compact = false,
 }: {
   item: NavItem;
   active: boolean;
   onClick?: () => void;
+  /** Icon rail: the name fades out but stays the link's accessible name, and shows as a tooltip. */
+  compact?: boolean;
 }) {
   useLocale();
+  const preload = item.preload;
+  const warmUp = preload ? () => { void preload().catch(() => {}); } : undefined;
 
   return (
     <Link
@@ -137,21 +200,24 @@ function NavLink({
       to={item.path}
       aria-current={active ? "page" : undefined}
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-[Poppins] transition-colors ${active ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"}`}
+      onPointerEnter={warmUp}
+      onFocus={warmUp}
+      title={compact ? item.label : undefined}
+      className={`relative flex min-h-9 items-center rounded-lg text-sm font-[Poppins] transition-colors ${compact ? "mx-auto h-10 w-10 justify-center" : "gap-3 px-3 py-2"} ${active ? "bg-blue-500/15 font-medium text-white ring-1 ring-inset ring-blue-400/30" : "text-zinc-400 hover:text-white hover:bg-white/5"}`}
     >
-      <span className={active ? "text-white" : "text-zinc-500"}>
+      <span className={cn("shrink-0", active ? "text-blue-300" : "text-zinc-500")}>
         {item.icon}
       </span>
-      {item.label}
+      <span className={cn("side-rail-fade whitespace-nowrap", compact && "pointer-events-none absolute left-full opacity-0")}>{item.label}</span>
     </Link>
   );
 }
 
-function SectionLabel({ label }: { label: string }) {
+function SectionLabel({ label, compact = false }: { label: string; compact?: boolean }) {
   useLocale();
 
   return (
-    <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-600 font-[Poppins]">
+    <p aria-hidden={compact || undefined} className={cn("side-rail-fade px-3 mb-1 whitespace-nowrap text-xs font-semibold uppercase tracking-widest text-zinc-600 font-[Poppins]", compact && "opacity-0")}>
       {label}
     </p>
   );
@@ -161,7 +227,16 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
   useLocale();
 
   const { user, logout } = useAuth();
+  const { isEnabled } = useFeatures();
   const location = useLocation();
+  // Desktop only: the menu collapses to an icon rail (the phone keeps its drawer).
+  const collapsible = !onMobileClose;
+  const [collapsedState, setCollapsedState] = useState(readCollapsed);
+  const collapsed = collapsible && collapsedState;
+  const toggleCollapsed = () => setCollapsedState((current) => {
+    try { localStorage.setItem(COLLAPSED_KEY, current ? "0" : "1"); } catch { /* storage unavailable */ }
+    return !current;
+  });
   const [historyFilter, setHistoryFilter] = useState<"chat" | "quiz">(() =>
     location.pathname === "/quiz" || location.pathname.startsWith("/quiz/") ? "quiz" : "chat",
   );
@@ -181,7 +256,29 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         ? "teacher"
         : "student";
   const isStudent = role === "student";
-  const allSections = isStudent ? STUDENT_SECTIONS : buildStaffSections(role);
+  // Features not released for the person disappear from the menu (and their pages are blocked).
+  const released = (item: NavItem) => {
+    const feature = featureForPath(item.path);
+    return !feature || isEnabled(feature);
+  };
+  const ownerItem: NavItem = { path: "/dev", icon: <FlaskConical className="w-4 h-4" />, label: t("dev.navLabel") };
+  const allSections = (isStudent ? STUDENT_SECTIONS : buildStaffSections(role))
+    // Releasing features and the test environment belong to the platform owner only.
+    .map((section) => {
+      const items = section.items.filter((item) => item.path !== "/admin/features" || user.isOwner);
+      return user.isOwner && section.items.some((item) => item.path === "/admin/chat-feedback") ? { label: section.label, items: [...items, ownerItem] } : { label: section.label, items };
+    })
+    .map((section) => ({ label: section.label, items: section.items.filter(released) }))
+    .filter((section) => section.items.length > 0);
+  const chatHistory = isEnabled("chat");
+  const quizHistory = isEnabled("quiz");
+  const historyShown = !chatHistory ? "quiz" : !quizHistory ? "chat" : historyFilter;
+  // Only the most specific item is current (/entities/manage must not also light up /entities).
+  const matches = (path: string) => location.pathname === path || location.pathname.startsWith(`${path}/`);
+  const activePath = allSections
+    .reduce((all, section) => all.concat(section.items.map((item) => item.path)), [] as string[])
+    .filter(matches)
+    .sort((a, b) => b.length - a.length)[0];
   const contaSection = allSections.find((s) => s.items.some(item => item.path === "/profile"));
   const sections = allSections.filter((s) => !s.items.some(item => item.path === "/profile"));
 
@@ -191,16 +288,26 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
   };
 
   return (
-    <div className="flex flex-col h-full w-60">
-      <div className="flex items-center gap-2.5 px-4 py-4 shrink-0">
+    <div data-collapsed={collapsed || undefined} className={cn("side-rail flex h-full flex-col overflow-hidden", collapsed ? "w-16" : "w-60")}>
+      <div className={cn("flex shrink-0 gap-2.5 py-4", collapsed ? "flex-col items-center px-2" : "items-center px-4")}>
         <img
           src={logoMascote}
           alt={t("common.logibot")}
           className="brand-mark h-7 w-7 object-contain"
         />
-        <span className="font-[Poppins] font-bold text-base text-white leading-none">
-          LogiBot.AI
-        </span>
+        {!collapsed && (
+          <span className="font-[Poppins] font-bold text-base text-white leading-none whitespace-nowrap">
+            LogiBots.AI
+          </span>
+        )}
+        {!onMobileClose && isEnabled("notifications") && <NotificationBell className={collapsed ? "" : "ml-auto"} />}
+        {collapsible && (
+          <button type="button" onClick={toggleCollapsed} aria-expanded={!collapsed} data-sidebar-toggle
+            aria-label={collapsed ? t("navigation.expandMenu") : t("navigation.collapseMenu")} title={collapsed ? t("navigation.expandMenu") : t("navigation.collapseMenu")}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/5 hover:text-white">
+            <PanelLeftClose aria-hidden="true" className={cn("side-rail-icon h-4 w-4", collapsed && "rotate-180")} />
+          </button>
+        )}
         {onMobileClose && (
           <button
             aria-label={t("navigation.close")}
@@ -212,17 +319,21 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         )}
       </div>
 
-      <div className="flex items-start gap-2 px-4 pb-3"><PreferencesMenu className="shrink-0" /><div className="min-w-0 flex-1"><LanguageSwitcher /></div></div>
+      <div className={cn("flex items-start gap-2 pb-3", collapsed ? "justify-center px-2" : "px-4")}>
+        <PreferencesMenu className="shrink-0" />
+        {!collapsed && <div className="min-w-0 flex-1"><LanguageSwitcher /></div>}
+      </div>
       <nav id="header-menu-options" className="px-2 shrink-0 space-y-4">
         {sections.map((section, si) => (
           <div key={si}>
-            <SectionLabel label={section.label} />
+            <SectionLabel label={section.label} compact={collapsed} />
             <div className="space-y-0.5">
               {section.items.map((item) => (
                 <NavLink
                   key={item.path}
                   item={item}
-                  active={location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)}
+                  compact={collapsed}
+                  active={item.path === activePath}
                   aria-label={t("navigation.close")}
             onClick={onMobileClose}
                 />
@@ -232,11 +343,11 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         ))}
       </nav>
 
-      {isStudent && (
+      {isStudent && !collapsed && (chatHistory || quizHistory) && (
         <div className="flex-1 flex flex-col min-h-0 mt-4 border-t border-white/5">
           <div className="px-2 pt-3 pb-2 shrink-0 space-y-2">
             <SectionLabel label={t("common.historico")} />
-            <div className="flex bg-white/5 rounded-lg p-1 gap-1">
+            {chatHistory && quizHistory && <div className="flex bg-white/5 rounded-lg p-1 gap-1">
               <button
                 onClick={() => setHistoryFilter("chat")}
                 aria-pressed={historyFilter === "chat"}
@@ -251,10 +362,10 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
               >
                 <Brain size={11} />
                 {t("common.quiz")}</button>
-            </div>
+            </div>}
           </div>
           <div className="flex-1 overflow-y-auto px-2 pb-2 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-            {historyFilter === "chat" ? (
+            {historyShown === "chat" ? (
               <ChatHistory userId={user._id} closeMenu={onMobileClose} />
             ) : (
               <QuizHistory userId={user._id} closeMenu={onMobileClose} />
@@ -263,18 +374,19 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         </div>
       )}
 
-      {!isStudent && <div className="flex-1" />}
+      {(!isStudent || collapsed || !(chatHistory || quizHistory)) && <div className="flex-1" />}
 
       <div className="px-2 pb-3 pt-3 border-t border-white/5 shrink-0">
         {contaSection && (
           <div className="mb-2">
-            <SectionLabel label={contaSection.label} />
+            <SectionLabel label={contaSection.label} compact={collapsed} />
             <div className="space-y-0.5">
               {contaSection.items.map((item) => (
                 <NavLink
                   key={item.path}
                   item={item}
-                  active={location.pathname === item.path}
+                  compact={collapsed}
+                  active={item.path === activePath}
                   aria-label={t("navigation.close")}
             onClick={onMobileClose}
                 />
@@ -285,10 +397,11 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         <button
           id="header-logout-button"
           onClick={handleLogout}
-          className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-zinc-500 hover:text-red-400 hover:bg-red-950/20 rounded-lg transition-colors font-[Poppins]"
+          title={collapsed ? t("common.sairDaConta") : undefined}
+          className={cn("relative flex items-center text-sm text-zinc-500 hover:text-red-400 hover:bg-red-950/20 rounded-lg transition-colors font-[Poppins]", collapsed ? "mx-auto h-10 w-10 justify-center" : "w-full gap-2.5 px-3 py-2")}
         >
-          <LogOut size={15} />
-          {t("common.sairDaConta")}</button>
+          <LogOut size={15} className="shrink-0" />
+          <span className={cn("side-rail-fade whitespace-nowrap", collapsed && "pointer-events-none absolute left-full opacity-0")}>{t("common.sairDaConta")}</span></button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
-import { useServerSession, SessionWarning, type ServerSession } from "./useServerSession";
+import { useServerSession, type ServerSession } from "./useServerSession";
+import { SessionWarning } from "./SessionWarning";
 import { apiError } from "@/shared/lib/apiError";
 import { useLocale, applyAccountLanguage, clearAccountLanguage } from "@/i18n";
 ﻿import { useCallback, useEffect, useRef, useState } from "react";

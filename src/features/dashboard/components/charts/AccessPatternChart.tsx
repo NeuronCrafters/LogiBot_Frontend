@@ -1,4 +1,5 @@
 import { ChartTooltip as Tooltip } from "@/components/ui/chart";
+import { useChartId } from "@/features/dashboard/chartIdContext";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine, chartText } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
@@ -114,6 +115,7 @@ function useSessionData(filters: ChartProps["filters"]) {
 }
 
 export function AccessPatternChart({ filters }: ChartProps) {
+  const chartId = useChartId("access-pattern-chart");
   useLocale();
   const { animate, font, space, tooltipTrigger } = useChartPreferences();
 
@@ -132,7 +134,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
 
   return (
     <Card
-      id="access-pattern-chart"
+      id={chartId}
       className="dashboard-chart bg-surface border-white/10 flex flex-col"
     >
       <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
@@ -146,7 +148,7 @@ export function AccessPatternChart({ filters }: ChartProps) {
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
-            containerId="access-pattern-chart"
+            containerId={chartId}
             fileName={t("dashboard.export.padrao_acesso")}
             info={CHART_INFO()}
             insight={{

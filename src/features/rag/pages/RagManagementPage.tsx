@@ -1,4 +1,5 @@
 import { apiError } from "@/shared/lib/apiError";
+import { OptionalMark } from "@/shared/components/forms/OptionalMark";
 import { useReducedMotion } from "@/shared/preferences";
 import { t, useLocale, getLanguage } from "@/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -450,12 +451,16 @@ function DocumentsTab({
                 className="sr-only"
               />
             </label>
-            <input
-              value={uploadTitle}
-              onChange={(e) => onTitleChange(e.target.value)}
-              placeholder={t("rag.tituloOpcional")}
-              className="h-10 rounded-xl border border-control bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 sm:w-48"
-            />
+            <span className="flex min-w-0 items-center gap-1">
+              <input
+                value={uploadTitle}
+                onChange={(e) => onTitleChange(e.target.value)}
+                placeholder={t("rag.tituloOpcional")}
+                aria-label={`${t("rag.tituloOpcional")} ${t("common.optionalMark")}`}
+                className="h-10 min-w-0 flex-1 rounded-xl border border-control bg-neutral-800/50 px-3 font-[Poppins] text-sm text-white outline-none transition-colors focus:border-blue-500/60 placeholder:text-zinc-600 sm:w-48 sm:flex-none"
+              />
+              <OptionalMark />
+            </span>
             <button
               type="submit"
               disabled={!uploadFile || isUploading}

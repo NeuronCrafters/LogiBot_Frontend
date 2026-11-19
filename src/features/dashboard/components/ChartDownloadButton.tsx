@@ -6,7 +6,7 @@ import { useState, useRef, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { useFloatingPosition } from "@/shared/hooks/useFloatingPosition";
 import type { DashboardFilterParams } from "../api/dashboardApi";
-import type { DashboardInsightChart } from "../types";
+import type { ComparisonInsightChart, DashboardInsightChart } from "../types";
 import { useDashboardInsights } from "./DashboardInsightProvider";
 
 interface ChartDownloadButtonProps {
@@ -18,6 +18,14 @@ interface ChartDownloadButtonProps {
     chart: DashboardInsightChart;
     title: string;
     filters: DashboardFilterParams;
+    disabled?: boolean;
+  };
+  /** Direct comparison charts: the analysis receives both selections. */
+  comparisonInsight?: {
+    chart: ComparisonInsightChart;
+    title: string;
+    a: DashboardFilterParams;
+    b: DashboardFilterParams;
     disabled?: boolean;
   };
 }
@@ -50,6 +58,7 @@ export function ChartDownloadButton({
   info,
   className,
   insight,
+  comparisonInsight,
 }: ChartDownloadButtonProps) {
   useLocale();
 
@@ -164,6 +173,19 @@ export function ChartDownloadButton({
               insight.filters,
             )
           }
+          className="rounded-lg border border-violet-500/20 bg-violet-500/10 p-2 text-violet-400 transition-colors hover:border-violet-500/40 hover:bg-violet-500/15 hover:text-violet-300 disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <Sparkles className="h-4 w-4" />
+        </button>
+      )}
+
+      {comparisonInsight && (
+        <button
+          type="button"
+          aria-label={t("dashboard.gerarInsightDeIaParaValue0", { value0: comparisonInsight.title })}
+          title={t("dashboard.analisarComIa")}
+          disabled={comparisonInsight.disabled}
+          onClick={() => dashboardInsights.openComparisonChart(comparisonInsight.chart, comparisonInsight.title, comparisonInsight.a, comparisonInsight.b)}
           className="rounded-lg border border-violet-500/20 bg-violet-500/10 p-2 text-violet-400 transition-colors hover:border-violet-500/40 hover:bg-violet-500/15 hover:text-violet-300 disabled:cursor-not-allowed disabled:opacity-30"
         >
           <Sparkles className="h-4 w-4" />

@@ -24,6 +24,6 @@ export function useDialogFocus<T extends HTMLElement>(open: boolean, onClose?: (
     };
     root.addEventListener("keydown", keydown);
     return () => { root.removeEventListener("keydown", keydown); if (previous?.isConnected) previous.focus(); };
-  }, [open]);
+  }, [open, focusDialog]);
   return ref;
 }

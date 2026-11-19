@@ -38,6 +38,22 @@
   to { opacity: 1; }
 }
 
+/* Mobile navigation drawer: slides in and out in step with the route fade. */
+.mobile-drawer[data-state="open"] { animation: drawer-in var(--motion-enter) var(--motion-ease); }
+.mobile-drawer[data-state="closing"] { animation: drawer-out var(--motion-exit) ease forwards; pointer-events: none; }
+.mobile-drawer-backdrop[data-state="open"] { animation: drawer-backdrop-in var(--motion-enter) ease; }
+.mobile-drawer-backdrop[data-state="closing"] { animation: drawer-backdrop-out var(--motion-exit) ease forwards; pointer-events: none; }
+@keyframes drawer-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes drawer-out { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@keyframes drawer-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes drawer-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+/* Truth-table V/F picker: floats over the table without changing its layout. */
+.truth-picker { animation: truth-picker-in 120ms var(--motion-ease); transform-origin: top left; }
+@keyframes truth-picker-in { from { opacity: 0; transform: translateY(-4px) scale(0.97); } to { opacity: 1; transform: none; } }
+:root[data-motion="reduce"] .truth-picker,
+:root[data-motion="reduce"] .mobile-drawer,
+:root[data-motion="reduce"] .mobile-drawer-backdrop { animation: none; }
+
 :root[data-motion="reduce"] .navigation-view,
 :root[data-motion="reduce"] .navigation-transition main,
 :root[data-motion="reduce"] .page-reveal {
@@ -281,6 +297,28 @@ textarea::-webkit-scrollbar-thumb {
   outline-color: rgb(var(--c-blue-400));
 }
 
+/* Text fields marked `outline-none` draw their own focus (their border or the box around them).
+   Tailwind's outline-none only makes the outline transparent, so the colour above would bring
+   back a second rectangle inside the box. */
+:where(input, textarea, select).outline-none:focus-visible {
+  outline-color: transparent;
+}
+
+/* Details that open after a choice (chat answer rating). */
+@keyframes reveal-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal-down {
+  animation: reveal-down 180ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-down { animation: none; }
+}
+:root[data-motion="reduce"] .reveal-down {
+  animation: none;
+}
+
 /* Windows High Contrast / forced colors: keep states that the app draws with backgrounds. */
 @media (forced-colors: active) {
   .preference-option[data-checked] {
@@ -334,3 +372,23 @@ textarea::-webkit-scrollbar-thumb {
   .radar-axis-index { display: inline; }
   .radar-labels { display: block; }
 }
+
+/* Dashboard side panel: width, contents and toggle icon move together (WCAG: no motion when reduced). */
+.dashboard-panel, .side-rail { transition: width 240ms cubic-bezier(0.2, 0, 0, 1); }
+.dashboard-panel-fade, .side-rail-fade { transition: opacity 180ms ease-out; }
+.dashboard-panel-icon, .side-rail-icon { transition: transform 240ms cubic-bezier(0.2, 0, 0, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-panel, .dashboard-panel-fade, .dashboard-panel-icon,
+  .side-rail, .side-rail-fade, .side-rail-icon { transition: none; }
+}
+:root[data-motion="reduce"] .dashboard-panel,
+:root[data-motion="reduce"] .dashboard-panel-fade,
+:root[data-motion="reduce"] .dashboard-panel-icon,
+:root[data-motion="reduce"] .side-rail,
+:root[data-motion="reduce"] .side-rail-fade,
+:root[data-motion="reduce"] .side-rail-icon { transition: none; }
+
+/* Account switch veil (Dev area): fades instead of a blank page reload. */
+.account-switch { transition: opacity 200ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .account-switch { transition: none; } }
+:root[data-motion="reduce"] .account-switch { transition: none; }

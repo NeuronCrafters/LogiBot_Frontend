@@ -1,4 +1,5 @@
 import { ChartTooltip as Tooltip } from "@/components/ui/chart";
+import { useChartId } from "@/features/dashboard/chartIdContext";
 import { apiError } from "@/shared/lib/apiError";
 import { useChartPreferences } from "../../chartPreferences";
 import { subjectLabel } from "../../subjectLabels";
@@ -84,6 +85,7 @@ function useScoreData(filters: ChartProps["filters"]) {
 }
 
 export function GeneralScoreChart({ filters }: ChartProps) {
+  const chartId = useChartId("general-score-card");
   useLocale();
 
   const { data, isLoading, isError, error, refetch } = useScoreData(filters);
@@ -104,7 +106,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
 
   return (
     <Card
-      id="general-score-card"
+      id={chartId}
       className="dashboard-chart bg-surface border-white/10 flex flex-col h-full"
     >
       <CardHeader className="dashboard-chart-header grid gap-0 p-0 space-y-0 border-b border-white/10">
@@ -118,7 +120,7 @@ export function GeneralScoreChart({ filters }: ChartProps) {
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
-            containerId="general-score-card"
+            containerId={chartId}
             fileName={t("dashboard.export.nota_geral")}
             info={hasData ? t("dashboard.scoreFormula", { count: data.topicCount }) : CHART_INFO()}
             insight={{

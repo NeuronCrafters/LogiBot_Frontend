@@ -187,7 +187,7 @@ export function RecentEntityList({
                   <button
                     onClick={() => handleEditClick(item)}
                     title={t("common.editar")}
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-500 opacity-0 transition-all hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400 group-hover:opacity-100"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 transition-all hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400 focus-visible:border-blue-500/40 focus-visible:text-blue-400"
                   >
                     <Pencil className="h-3 w-3" />
                   </button>

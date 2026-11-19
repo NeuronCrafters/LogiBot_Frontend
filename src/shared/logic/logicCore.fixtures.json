@@ -1,0 +1,1000 @@
+{
+  "description": "Golden cases for logicCore.ts. Keep identical in LogiBot_Backend and LogiBot_Frontend. Expected values were derived by hand from the operator definitions, not from the implementation. Truth columns are bit strings in textbook row order (first row all true): 1 = true, 0 = false.",
+  "engineVersion": "1.1.0",
+  "coreSha256": "b31776ab3e665ec7b79c9f58b2872b60c27bf13ddd29616486ac102ceb1abf58",
+  "parse": [
+    {
+      "input": "p",
+      "normalized": "p",
+      "variables": [
+        "p"
+      ],
+      "concepts": []
+    },
+    {
+      "input": "~p",
+      "normalized": "¬p",
+      "variables": [
+        "p"
+      ],
+      "concepts": [
+        "negation"
+      ]
+    },
+    {
+      "input": "!p",
+      "normalized": "¬p",
+      "variables": [
+        "p"
+      ],
+      "concepts": [
+        "negation"
+      ]
+    },
+    {
+      "input": "¬¬p",
+      "normalized": "¬¬p",
+      "variables": [
+        "p"
+      ],
+      "concepts": [
+        "negation"
+      ]
+    },
+    {
+      "input": "p & q",
+      "normalized": "p ∧ q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "conjunction"
+      ]
+    },
+    {
+      "input": "p ^ q",
+      "normalized": "p ∧ q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "conjunction"
+      ]
+    },
+    {
+      "input": "p∧q",
+      "normalized": "p ∧ q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "conjunction"
+      ]
+    },
+    {
+      "input": "p | q",
+      "normalized": "p ∨ q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "disjunction"
+      ]
+    },
+    {
+      "input": "p -> q",
+      "normalized": "p → q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "conditional"
+      ]
+    },
+    {
+      "input": "p <-> q",
+      "normalized": "p ↔ q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "biconditional"
+      ]
+    },
+    {
+      "input": "p -> q -> r",
+      "normalized": "p → (q → r)",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "concepts": [
+        "conditional"
+      ]
+    },
+    {
+      "input": "(p -> q) -> r",
+      "normalized": "(p → q) → r",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "concepts": [
+        "conditional"
+      ]
+    },
+    {
+      "input": "p & q & r",
+      "normalized": "(p ∧ q) ∧ r",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "concepts": [
+        "conjunction"
+      ]
+    },
+    {
+      "input": "p <-> q <-> r",
+      "normalized": "(p ↔ q) ↔ r",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "concepts": [
+        "biconditional"
+      ]
+    },
+    {
+      "input": "p | q & r",
+      "normalized": "p ∨ (q ∧ r)",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "concepts": [
+        "conjunction",
+        "disjunction"
+      ]
+    },
+    {
+      "input": "~p & q",
+      "normalized": "¬p ∧ q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "negation",
+        "conjunction"
+      ]
+    },
+    {
+      "input": "~(p & q)",
+      "normalized": "¬(p ∧ q)",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "negation",
+        "conjunction"
+      ]
+    },
+    {
+      "input": "p & q -> r",
+      "normalized": "(p ∧ q) → r",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "concepts": [
+        "conjunction",
+        "conditional"
+      ]
+    },
+    {
+      "input": "p -> q <-> ~q -> ~p",
+      "normalized": "(p → q) ↔ (¬q → ¬p)",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "negation",
+        "conditional",
+        "biconditional"
+      ]
+    },
+    {
+      "input": "p | q -> r & s",
+      "normalized": "(p ∨ q) → (r ∧ s)",
+      "variables": [
+        "p",
+        "q",
+        "r",
+        "s"
+      ],
+      "concepts": [
+        "conjunction",
+        "disjunction",
+        "conditional"
+      ]
+    },
+    {
+      "input": "  ( ( p ) )  ",
+      "normalized": "p",
+      "variables": [
+        "p"
+      ],
+      "concepts": []
+    },
+    {
+      "input": "(p -> q) & ~q",
+      "normalized": "(p → q) ∧ ¬q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "negation",
+        "conjunction",
+        "conditional"
+      ]
+    },
+    {
+      "input": "q & p",
+      "normalized": "q ∧ p",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "conjunction"
+      ]
+    },
+    {
+      "input": "(p → q) ∧ ¬q",
+      "normalized": "(p → q) ∧ ¬q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "concepts": [
+        "negation",
+        "conjunction",
+        "conditional"
+      ]
+    }
+  ],
+  "subformulas": [
+    {
+      "input": "p",
+      "expected": []
+    },
+    {
+      "input": "(p -> q) & ~q",
+      "expected": [
+        "p → q",
+        "¬q",
+        "(p → q) ∧ ¬q"
+      ]
+    },
+    {
+      "input": "~(p & q) <-> ~p | ~q",
+      "expected": [
+        "p ∧ q",
+        "¬(p ∧ q)",
+        "¬p",
+        "¬q",
+        "¬p ∨ ¬q",
+        "¬(p ∧ q) ↔ (¬p ∨ ¬q)"
+      ]
+    },
+    {
+      "input": "(p & q) | (p & q)",
+      "expected": [
+        "p ∧ q",
+        "(p ∧ q) ∨ (p ∧ q)"
+      ]
+    }
+  ],
+  "truthTables": [
+    {
+      "input": "~p",
+      "variables": [
+        "p"
+      ],
+      "columns": {
+        "¬p": "01"
+      }
+    },
+    {
+      "input": "p & q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "columns": {
+        "p ∧ q": "1000"
+      }
+    },
+    {
+      "input": "p | q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "columns": {
+        "p ∨ q": "1110"
+      }
+    },
+    {
+      "input": "p -> q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "columns": {
+        "p → q": "1011"
+      }
+    },
+    {
+      "input": "p <-> q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "columns": {
+        "p ↔ q": "1001"
+      }
+    },
+    {
+      "input": "p | ~p",
+      "variables": [
+        "p"
+      ],
+      "columns": {
+        "¬p": "01",
+        "p ∨ ¬p": "11"
+      }
+    },
+    {
+      "input": "(p -> q) & ~q",
+      "variables": [
+        "p",
+        "q"
+      ],
+      "columns": {
+        "p → q": "1011",
+        "¬q": "0101",
+        "(p → q) ∧ ¬q": "0001"
+      }
+    },
+    {
+      "input": "p -> q -> r",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "columns": {
+        "q → r": "10111011",
+        "p → (q → r)": "10111111"
+      }
+    },
+    {
+      "input": "(p & q) | r",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "columns": {
+        "p ∧ q": "11000000",
+        "(p ∧ q) ∨ r": "11101010"
+      }
+    },
+    {
+      "input": "p <-> q <-> r",
+      "variables": [
+        "p",
+        "q",
+        "r"
+      ],
+      "columns": {
+        "p ↔ q": "11000011",
+        "(p ↔ q) ↔ r": "10010110"
+      }
+    },
+    {
+      "input": "(p | q) -> (r & s)",
+      "variables": [
+        "p",
+        "q",
+        "r",
+        "s"
+      ],
+      "columns": {
+        "p ∨ q": "1111111111110000",
+        "r ∧ s": "1000100010001000",
+        "(p ∨ q) → (r ∧ s)": "1000100010001111"
+      }
+    }
+  ],
+  "parseErrors": [
+    {
+      "input": "",
+      "code": "EMPTY_FORMULA",
+      "params": {}
+    },
+    {
+      "input": "   ",
+      "code": "EMPTY_FORMULA",
+      "params": {}
+    },
+    {
+      "input": "p &",
+      "code": "UNEXPECTED_END",
+      "params": {}
+    },
+    {
+      "input": "(p & q",
+      "code": "MISSING_CLOSING_PAREN",
+      "params": {
+        "position": 0
+      }
+    },
+    {
+      "input": "~(p & q r",
+      "code": "MISSING_CLOSING_PAREN",
+      "params": {
+        "position": 1
+      }
+    },
+    {
+      "input": "p q",
+      "code": "TRAILING_TOKEN",
+      "params": {
+        "token": "q",
+        "position": 2
+      }
+    },
+    {
+      "input": "p )",
+      "code": "TRAILING_TOKEN",
+      "params": {
+        "token": ")",
+        "position": 2
+      }
+    },
+    {
+      "input": "p & & q",
+      "code": "UNEXPECTED_TOKEN",
+      "params": {
+        "token": "&",
+        "position": 4
+      }
+    },
+    {
+      "input": ")",
+      "code": "UNEXPECTED_TOKEN",
+      "params": {
+        "token": ")",
+        "position": 0
+      }
+    },
+    {
+      "input": "()",
+      "code": "UNEXPECTED_TOKEN",
+      "params": {
+        "token": ")",
+        "position": 1
+      }
+    },
+    {
+      "input": "-> p",
+      "code": "UNEXPECTED_TOKEN",
+      "params": {
+        "token": "->",
+        "position": 0
+      }
+    },
+    {
+      "input": "pq",
+      "code": "MULTI_LETTER_PROPOSITION",
+      "params": {
+        "word": "pq",
+        "position": 0
+      }
+    },
+    {
+      "input": "chove -> molha",
+      "code": "MULTI_LETTER_PROPOSITION",
+      "params": {
+        "word": "chove",
+        "position": 0
+      }
+    },
+    {
+      "input": "p & p1",
+      "code": "MULTI_LETTER_PROPOSITION",
+      "params": {
+        "word": "p1",
+        "position": 4
+      }
+    },
+    {
+      "input": "P & q",
+      "code": "UPPERCASE_PROPOSITION",
+      "params": {
+        "letter": "P",
+        "suggestion": "p",
+        "position": 0
+      }
+    },
+    {
+      "input": "p # q",
+      "code": "UNKNOWN_SYMBOL",
+      "params": {
+        "symbol": "#",
+        "position": 2
+      }
+    },
+    {
+      "input": "p - q",
+      "code": "UNKNOWN_SYMBOL",
+      "params": {
+        "symbol": "-",
+        "position": 2
+      }
+    },
+    {
+      "input": "p <- q",
+      "code": "UNKNOWN_SYMBOL",
+      "params": {
+        "symbol": "<",
+        "position": 2
+      }
+    },
+    {
+      "input": "p ∧ é",
+      "code": "UNKNOWN_SYMBOL",
+      "params": {
+        "symbol": "é",
+        "position": 4
+      }
+    },
+    {
+      "input": "p ∧ 😀",
+      "code": "UNKNOWN_SYMBOL",
+      "params": {
+        "symbol": "😀",
+        "position": 4
+      }
+    }
+  ],
+  "checkFormula": [
+    {
+      "input": "p & q & r & s & t",
+      "options": {
+        "maxPropositions": 4
+      },
+      "code": "TOO_MANY_PROPOSITIONS",
+      "params": {
+        "max": 4,
+        "found": 5
+      }
+    },
+    {
+      "input": "p & q & r & s",
+      "options": {
+        "maxPropositions": 4
+      },
+      "code": null,
+      "params": null
+    },
+    {
+      "input": "p",
+      "options": {
+        "requireOperator": true
+      },
+      "code": "NO_OPERATOR",
+      "params": {}
+    },
+    {
+      "input": "~p",
+      "options": {
+        "requireOperator": true
+      },
+      "code": null,
+      "params": null
+    },
+    {
+      "input": "p & x",
+      "options": {
+        "allowedPropositions": [
+          "q",
+          "p"
+        ]
+      },
+      "code": "PROPOSITION_NOT_IN_LEGEND",
+      "params": {
+        "found": "x",
+        "allowed": "p, q"
+      }
+    },
+    {
+      "input": "z | x",
+      "options": {
+        "allowedPropositions": [
+          "p"
+        ]
+      },
+      "code": "PROPOSITION_NOT_IN_LEGEND",
+      "params": {
+        "found": "x, z",
+        "allowed": "p"
+      }
+    },
+    {
+      "input": "p &",
+      "options": {
+        "allowedPropositions": [
+          "p"
+        ]
+      },
+      "code": "UNEXPECTED_END",
+      "params": {}
+    }
+  ],
+  "equivalence": [
+    {
+      "left": "~(p & q)",
+      "right": "~p | ~q",
+      "equivalent": true
+    },
+    {
+      "left": "~(p | q)",
+      "right": "~p & ~q",
+      "equivalent": true
+    },
+    {
+      "left": "p -> q",
+      "right": "~q -> ~p",
+      "equivalent": true
+    },
+    {
+      "left": "p -> q",
+      "right": "~p | q",
+      "equivalent": true
+    },
+    {
+      "left": "p <-> q",
+      "right": "(p -> q) & (q -> p)",
+      "equivalent": true
+    },
+    {
+      "left": "p | ~p",
+      "right": "q | ~q",
+      "equivalent": true
+    },
+    {
+      "left": "p -> q",
+      "right": "q -> p",
+      "equivalent": false,
+      "counterexample": {
+        "p": true,
+        "q": false
+      },
+      "leftValue": false,
+      "rightValue": true
+    },
+    {
+      "left": "p & q",
+      "right": "p",
+      "equivalent": false,
+      "counterexample": {
+        "p": true,
+        "q": false
+      },
+      "leftValue": false,
+      "rightValue": true
+    },
+    {
+      "left": "~(p & q)",
+      "right": "~p & ~q",
+      "equivalent": false,
+      "counterexample": {
+        "p": true,
+        "q": false
+      },
+      "leftValue": true,
+      "rightValue": false
+    }
+  ],
+  "translation": [
+    {
+      "target": "p -> q",
+      "legend": [
+        "p",
+        "q"
+      ],
+      "answer": "p -> q",
+      "status": "correct",
+      "normalizedAnswer": "p → q",
+      "identicalToTarget": true
+    },
+    {
+      "target": "p -> q",
+      "legend": [
+        "q",
+        "p"
+      ],
+      "answer": "~p | q",
+      "status": "correct",
+      "normalizedAnswer": "¬p ∨ q",
+      "identicalToTarget": false
+    },
+    {
+      "target": "~(p & q)",
+      "legend": [
+        "p",
+        "q"
+      ],
+      "answer": "~p | ~q",
+      "status": "correct",
+      "normalizedAnswer": "¬p ∨ ¬q",
+      "identicalToTarget": false
+    },
+    {
+      "target": "p",
+      "legend": [
+        "p",
+        "q"
+      ],
+      "answer": "p & (q | ~q)",
+      "status": "correct",
+      "normalizedAnswer": "p ∧ (q ∨ ¬q)",
+      "identicalToTarget": false
+    },
+    {
+      "target": "p -> q",
+      "legend": [
+        "p",
+        "q"
+      ],
+      "answer": "q -> p",
+      "status": "incorrect",
+      "normalizedAnswer": "q → p",
+      "counterexample": {
+        "p": true,
+        "q": false
+      },
+      "answerValue": true,
+      "expectedValue": false
+    },
+    {
+      "target": "p -> q",
+      "legend": [
+        "p",
+        "q"
+      ],
+      "answer": "p",
+      "status": "incorrect",
+      "normalizedAnswer": "p",
+      "counterexample": {
+        "p": true,
+        "q": false
+      },
+      "answerValue": true,
+      "expectedValue": false
+    },
+    {
+      "target": "p -> q",
+      "legend": [
+        "p",
+        "q"
+      ],
+      "answer": "p -> r",
+      "status": "invalid",
+      "code": "PROPOSITION_NOT_IN_LEGEND",
+      "params": {
+        "found": "r",
+        "allowed": "p, q"
+      }
+    },
+    {
+      "target": "p -> q",
+      "legend": [
+        "p",
+        "q"
+      ],
+      "answer": "p ->",
+      "status": "invalid",
+      "code": "UNEXPECTED_END",
+      "params": {}
+    },
+    {
+      "target": "p -> q",
+      "legend": [
+        "p",
+        "q"
+      ],
+      "answer": "",
+      "status": "invalid",
+      "code": "EMPTY_FORMULA",
+      "params": {}
+    }
+  ],
+  "truthTableGrading": [
+    {
+      "formula": "p -> q",
+      "cells": {
+        "0|p → q": true,
+        "1|p → q": false,
+        "2|p → q": true,
+        "3|p → q": true
+      },
+      "expected": {
+        "correct": true,
+        "total": 4,
+        "right": 4,
+        "empty": 0,
+        "wrong": [],
+        "errorsByConcept": {}
+      }
+    },
+    {
+      "formula": "p -> q",
+      "cells": {
+        "0|p → q": true,
+        "1|p → q": true,
+        "2|p → q": true,
+        "3|p → q": "V",
+        "9|p → q": false,
+        "0|q → p": true
+      },
+      "expected": {
+        "correct": false,
+        "total": 4,
+        "right": 2,
+        "empty": 1,
+        "wrong": [
+          {
+            "row": 1,
+            "column": "p → q",
+            "concept": "conditional"
+          }
+        ],
+        "errorsByConcept": {
+          "conditional": 1
+        }
+      }
+    },
+    {
+      "formula": "(p -> q) & ~q",
+      "cells": {
+        "0|p → q": true,
+        "1|p → q": false,
+        "2|p → q": true,
+        "3|p → q": true,
+        "0|¬q": false,
+        "1|¬q": true,
+        "2|¬q": false,
+        "3|¬q": true,
+        "0|(p → q) ∧ ¬q": false,
+        "1|(p → q) ∧ ¬q": false,
+        "2|(p → q) ∧ ¬q": false,
+        "3|(p → q) ∧ ¬q": false
+      },
+      "expected": {
+        "correct": false,
+        "total": 12,
+        "right": 11,
+        "empty": 0,
+        "wrong": [
+          {
+            "row": 3,
+            "column": "(p → q) ∧ ¬q",
+            "concept": "conjunction"
+          }
+        ],
+        "errorsByConcept": {
+          "conjunction": 1
+        }
+      }
+    },
+    {
+      "formula": "~p",
+      "cells": {},
+      "expected": {
+        "correct": false,
+        "total": 2,
+        "right": 0,
+        "empty": 2,
+        "wrong": [],
+        "errorsByConcept": {}
+      }
+    },
+    {
+      "formula": "p -> q",
+      "columns": "final",
+      "cells": {
+        "0|p → q": true,
+        "1|p → q": false,
+        "2|p → q": true,
+        "3|p → q": false
+      },
+      "expected": {
+        "correct": false,
+        "total": 4,
+        "right": 3,
+        "empty": 0,
+        "wrong": [
+          {
+            "row": 3,
+            "column": "p → q",
+            "concept": "conditional"
+          }
+        ],
+        "errorsByConcept": {
+          "conditional": 1
+        }
+      }
+    }
+  ],
+  "truthTableLimits": [
+    {
+      "input": "p & q & r & s & t & u & v & w & x & y",
+      "columns": "final",
+      "code": null,
+      "rows": 1024,
+      "columns_count": 1
+    },
+    {
+      "input": "p & q & r & s & t & u & v & w & x & y",
+      "columns": "all",
+      "code": "TABLE_TOO_LARGE",
+      "params": {
+        "max": 2048,
+        "cells": 9216
+      }
+    },
+    {
+      "input": "p & q & r & s & t & u & v & w & x & y & z",
+      "columns": "final",
+      "code": "TOO_MANY_PROPOSITIONS",
+      "params": {
+        "max": 10,
+        "found": 11
+      }
+    },
+    {
+      "input": "(p -> q) & (r | s) & ~t",
+      "columns": "all",
+      "code": null,
+      "rows": 32,
+      "columns_count": 5
+    },
+    {
+      "input": "(p -> q) & (r | s) & ~t",
+      "columns": "final",
+      "code": null,
+      "rows": 32,
+      "columns_count": 1
+    }
+  ]
+}

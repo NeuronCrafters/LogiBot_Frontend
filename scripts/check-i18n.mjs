@@ -25,11 +25,11 @@ function inspect(directory) {
     function visit(node) {
       if (ts.isJsxText(node) && /\p{L}/u.test(node.text)) {
         const text = node.text.trim().replace(/\s+/g, ' ');
-        assert.ok(['LogiBot.AI', 'min'].includes(text), `Texto fora do catálogo em ${path}: ${text}`);
+        assert.ok(['LogiBot.AI', 'LogiBots.AI', 'min'].includes(text), `Texto fora do catálogo em ${path}: ${text}`);
       }
       if (ts.isJsxAttribute(node) && ['aria-label', 'placeholder', 'title', 'alt', 'emptyText', 'createLabel', 'info', 'eyebrow'].includes(node.name.getText(source)) && node.initializer && ts.isStringLiteral(node.initializer)) {
         const text = node.initializer.text;
-        assert.ok(!/\p{L}/u.test(text) || /^(?:LogiBot(?:\.AI)?|SAEL|logo|Avatar|avatar|image|user|PNG)$/i.test(text), `Atributo fora do catálogo em ${path}: ${text}`);
+        assert.ok(!/\p{L}/u.test(text) || /^(?:LogiBots?(?:\.AI)?|SAEL|logo|Avatar|avatar|image|user|PNG)$/i.test(text), `Atributo fora do catálogo em ${path}: ${text}`);
       }
       ts.forEachChild(node, visit);
     }

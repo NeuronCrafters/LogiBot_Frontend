@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { mockApi, selectLanguage, ids } from "./fixtures";
+import { mockApi, selectLanguage, ids, openDashboardFilters, closeDashboardFilters } from "./fixtures";
 
 for(const language of ['pt-BR','en-US','es-ES']){
  test(`página pública, HTML e navegação em ${language}`,async({page})=>{
@@ -149,8 +149,9 @@ test('geração de quiz envia idioma escolhido e conserva materiais',async({page
 
 test('exportação PNG usa gráfico atual e registra tela responsiva',async({page},testInfo)=>{
  await mockApi(page,'admin');await page.goto('/dashboard');await selectLanguage(page,'en-US');
- await page.getByRole('combobox',{name:'Select an Entity'}).click();await page.getByRole('option',{name:'University',exact:true}).click();
- await page.getByRole('combobox',{name:'Select the university'}).click();await page.getByRole('option',{name:'Universidade original',exact:true}).click();
+ await openDashboardFilters(page);
+ await page.getByRole('combobox',{name:'Select an Entity'}).click();await page.getByRole('option',{name:'Institution',exact:true}).click();
+ await page.getByRole('combobox',{name:'Select the institution'}).click();await page.getByRole('option',{name:'Universidade original',exact:true}).click(); await closeDashboardFilters(page);
  const button=page.getByRole('button',{name:'Download chart as PNG'}).first();await expect(button).toBeVisible();
  const downloadPromise=page.waitForEvent('download');await button.click();const download=await downloadPromise;
  expect(download.suggestedFilename()).toBe('usage_time.png');await download.saveAs(testInfo.outputPath('usage-time-en.png'));

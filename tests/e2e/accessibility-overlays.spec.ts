@@ -1,6 +1,6 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { mockApi } from './fixtures';
+import { mockApi, openDashboardFilters, closeDashboardFilters } from './fixtures';
 
 test.use({ locale: 'pt-BR' });
 
@@ -11,10 +11,11 @@ async function preferences(page: Page, values: Record<string, string>) {
 async function universityDashboard(page: Page) {
   await mockApi(page, 'admin');
   await page.goto('/dashboard');
+  await openDashboardFilters(page);
   await page.getByRole('combobox', { name: 'Selecione uma Entidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Selecione a universidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade original', exact: true }).click();
+  await page.getByRole('option', { name: 'Instituição', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Selecione a instituição', exact: true }).click();
+  await page.getByRole('option', { name: 'Universidade original', exact: true }).click(); await closeDashboardFilters(page);
   await expect(page.locator('#proficiency-radar-chart .recharts-polar-angle-axis-tick text').first()).toBeVisible();
 }
 
@@ -100,10 +101,11 @@ test('long chart tooltips fit the viewport on touch and mouse input', async ({ p
   const name = 'Participante IFPA 02 — Nome completo bastante longo para consultar os resultados';
   await page.route('**/api/dashboard/effort-matrix', route => route.fulfill({ json: { points: [{ name, effort: 130.3, performance: 66.7 }], averages: { avgPerformance: 70, avgEffort: 29.2 } } }));
   await page.goto('/dashboard');
+  await openDashboardFilters(page);
   await page.getByRole('combobox', { name: 'Selecione uma Entidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Selecione a universidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade original', exact: true }).click();
+  await page.getByRole('option', { name: 'Instituição', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Selecione a instituição', exact: true }).click();
+  await page.getByRole('option', { name: 'Universidade original', exact: true }).click(); await closeDashboardFilters(page);
   const point = page.locator('#effort-matrix-chart .recharts-scatter-symbol').first();
   if (isMobile) await point.tap(); else await point.hover();
   const tooltip = page.locator('[data-chart-tooltip]').filter({ hasText: name });
@@ -119,10 +121,11 @@ test('long radar names, headings and metrics remain readable at 125% and 200%', 
   const labels = ['Estruturas de Repetição', 'Vetores, Matrizes e Arrays', 'linguagem Python', 'Assunto cadastrado sem respostas'];
   await page.route('**/api/dashboard/proficiency-radar', route => route.fulfill({ json: { labels, data: [72, 60, 60, null] } }));
   await page.goto('/dashboard');
+  await openDashboardFilters(page);
   await page.getByRole('combobox', { name: 'Selecione uma Entidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Selecione a universidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade original', exact: true }).click();
+  await page.getByRole('option', { name: 'Instituição', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Selecione a instituição', exact: true }).click();
+  await page.getByRole('option', { name: 'Universidade original', exact: true }).click(); await closeDashboardFilters(page);
   for (const font of [20, 32]) {
     await page.evaluate(size => { document.documentElement.style.fontSize = `${size}px`; }, font);
     const card = page.locator('#proficiency-radar-chart');

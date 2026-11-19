@@ -1,4 +1,5 @@
 import { RadarAxisTick, RadarLabels } from "../RadarLabels";
+import { useChartId } from "@/features/dashboard/chartIdContext";
 import { apiError } from "@/shared/lib/apiError";
 import { chartLine } from "../../chartColors";
 import { CHART_COLORS, useChartPreferences } from "../../chartPreferences";
@@ -97,6 +98,7 @@ function useProficiencyData(filters: ChartProps["filters"]) {
 }
 
 export function ProficiencyRadarChart({ filters }: ChartProps) {
+  const chartId = useChartId("proficiency-radar-chart");
   useLocale();
 
   const { data, isLoading, isError, refetch, error } =
@@ -111,7 +113,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
 
   return (
     <Card
-      id="proficiency-radar-chart"
+      id={chartId}
       data-indexed-radar={data?.chartData.some(row => row.subject.length > 22) || undefined}
       className="dashboard-chart bg-surface border-white/10 flex flex-col h-full"
     >
@@ -126,7 +128,7 @@ export function ProficiencyRadarChart({ filters }: ChartProps) {
         </div>
         <div className="chart-actions flex items-start justify-end px-4 pb-4 sm:px-6">
           <ChartDownloadButton
-            containerId="proficiency-radar-chart"
+            containerId={chartId}
             fileName={t("dashboard.export.proficiencia_radar")}
             info={CHART_INFO()}
             insight={{

@@ -16,13 +16,12 @@ test('recovered totals remain explicitly estimated in the usage chart and effort
   } }));
   await page.goto('/dashboard');
   await page.getByRole('combobox', { name: 'Selecione uma Entidade', exact: true }).click();
-  await page.getByRole('option', { name: 'Universidade', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Selecione a universidade', exact: true }).click();
+  await page.getByRole('option', { name: 'Instituição', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Selecione a instituição', exact: true }).click();
   await page.getByRole('option', { name: 'Universidade original', exact: true }).click();
   const usage = page.locator('#usage-chart');
   await expect(usage).toContainText('1:00:16:25');
-  await expect(usage).toContainText('Isso não mede o tempo ativo.');
-  await expect(usage).toContainText('Há sessões sem duração recuperável.');
+  await expect(usage).toContainText('Inclui durações estimadas entre o início da sessão e a última atividade registrada.');
   await page.locator('#effort-matrix-chart').getByRole('button', { name: 'Ver dados em tabela' }).click();
   await expect(page.locator('#effort-matrix-chart').getByRole('table')).toContainText('Tempo estimado');
   const audit = await new AxeBuilder({ page }).include('#usage-chart').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();

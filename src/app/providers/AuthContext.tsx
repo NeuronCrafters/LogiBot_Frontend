@@ -21,6 +21,12 @@ export interface User {
     disciplineId?: string | string[];
     discipline?: string | string[];
     classId?: string[] | string;
+    /** "sandbox" when signed in to a test account (separate test database). */
+    environment?: "production" | "sandbox";
+    /** Owner using a test account who can go back to their own account. */
+    canReturnToOwner?: boolean;
+    /** Platform owner (support): sees the Dev area. */
+    isOwner?: boolean;
 }
 
 export interface AuthContextData {
