@@ -20,6 +20,21 @@ const Dashboard = React.lazy(() =>
 const InstitutionPage = React.lazy(() =>
   import("@/features/institutions/pages/InstitutionPage").then((m) => ({ default: m.InstitutionPage })),
 );
+const RankingPage = React.lazy(() =>
+  import("@/features/ranking/pages/RankingPage").then((m) => ({ default: m.RankingPage })),
+);
+const FlashcardsPage = React.lazy(() =>
+  import("@/features/flashcards/pages/FlashcardsPage").then((m) => ({ default: m.FlashcardsPage })),
+);
+const FlashcardStudyPage = React.lazy(() =>
+  import("@/features/flashcards/pages/FlashcardStudyPage").then((m) => ({ default: m.FlashcardStudyPage })),
+);
+const FlashcardManagePage = React.lazy(() =>
+  import("@/features/flashcards/pages/FlashcardManagePage").then((m) => ({ default: m.FlashcardManagePage })),
+);
+const FlashcardEditorPage = React.lazy(() =>
+  import("@/features/flashcards/pages/FlashcardEditorPage").then((m) => ({ default: m.FlashcardEditorPage })),
+);
 const ConceptPanel = React.lazy(() =>
   import("@/features/concepts/pages/ConceptPanelPage").then((m) => ({ default: m.ConceptPanelPage })),
 );
@@ -284,6 +299,54 @@ export default function AppRouter() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <InstitutionPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/ranking"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <RankingPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/flashcards"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <FlashcardsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/flashcards/manage"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <FlashcardManagePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/flashcards/manage/new"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <FlashcardEditorPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/flashcards/manage/:deckId/edit"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <FlashcardEditorPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/flashcards/:deckId"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <FlashcardStudyPage />
               </Suspense>
             }
           />

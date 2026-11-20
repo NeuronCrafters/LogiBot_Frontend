@@ -24,6 +24,8 @@ import {
   Database,
   Inbox,
   FlaskConical,
+  Layers,
+  Trophy,
 } from "lucide-react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
@@ -89,6 +91,14 @@ const PAGE_META: Record<string, { title: string; icon: ReactNode }> = {
   "/institution": {
     get title() { return t("institutions.navLabel"); },
     icon: <Building2 className="w-4 h-4 text-blue-400" />,
+  },
+  "/ranking": {
+    get title() { return t("ranking.navLabel"); },
+    icon: <Trophy className="w-4 h-4 text-amber-300" />,
+  },
+  "/flashcards": {
+    get title() { return t("flashcards.navLabel"); },
+    icon: <Layers className="w-4 h-4 text-blue-400" />,
   },
   "/concepts": {
     get title() { return t("concepts.navLabel"); },

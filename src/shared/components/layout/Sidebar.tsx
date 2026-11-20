@@ -6,7 +6,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ChatHistory } from "@/features/chat/components/ChatHistory";
 import { QuizHistory } from "@/features/quiz/components/QuizHistory";
+import { useQuery } from "@tanstack/react-query";
+import { rankingApi } from "@/features/ranking/api/rankingApi";
 import {
+  Trophy,
+  Layers,
   PieChart,
   Target,
   Building2,
@@ -76,6 +80,8 @@ const STUDENT_SECTIONS: NavSection[] = [
       { path: "/practice/translation", icon: <Languages className="w-4 h-4" />, get label() { return t("exercises.type.translation"); }, preload: preloadPracticePage },
       { path: "/practice/parsons", icon: <ListOrdered className="w-4 h-4" />, get label() { return t("exercises.type.parsons"); }, preload: preloadPracticePage },
       { path: "/exams", icon: <ClipboardCheck className="w-4 h-4" />, get label() { return t("exams.navLabel"); } },
+      { path: "/flashcards", icon: <Layers className="w-4 h-4" />, get label() { return t("flashcards.navLabel"); } },
+      { path: "/ranking", icon: <Trophy className="w-4 h-4" />, get label() { return t("ranking.navLabel"); } },
     ],
   },
   {
@@ -123,6 +129,17 @@ function buildStaffSections(role: Role): NavSection[] {
       icon: <Library className="w-4 h-4" />,
       label: t("questions.navLabel"),
     });
+  if (["teacher", "course-coordinator", "admin"].includes(role))
+    gestao.push({
+      path: "/flashcards/manage",
+      icon: <Layers className="w-4 h-4" />,
+      label: t("flashcards.navLabel"),
+    });
+  gestao.push({
+    path: "/ranking",
+    icon: <Trophy className="w-4 h-4" />,
+    label: t("ranking.navLabel"),
+  });
   if (["teacher", "course-coordinator", "admin"].includes(role))
     gestao.push({
       path: "/exams/manage",
@@ -236,6 +253,8 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
   const { user, logout } = useAuth();
   const { isEnabled } = useFeatures();
   const location = useLocation();
+  // The ranking also depends on the owner's rules for each profile (students are off by default).
+  const rankingAccess = useQuery({ queryKey: ["rankingScopes"], queryFn: rankingApi.scopes, enabled: !!user && isEnabled("ranking"), staleTime: 5 * 60 * 1000 });
   // Desktop only: the menu collapses to an icon rail (the phone keeps its drawer).
   const collapsible = !onMobileClose;
   const [collapsedState, setCollapsedState] = useState(readCollapsed);
@@ -266,6 +285,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
   // Features not released for the person disappear from the menu (and their pages are blocked).
   const released = (item: NavItem) => {
     const feature = featureForPath(item.path);
+    if (item.path === "/ranking" && !rankingAccess.data?.allowed) return false;
     return !feature || isEnabled(feature);
   };
   const ownerItem: NavItem = { path: "/dev", icon: <FlaskConical className="w-4 h-4" />, label: t("dev.navLabel") };

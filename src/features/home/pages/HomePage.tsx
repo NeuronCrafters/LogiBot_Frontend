@@ -1,7 +1,9 @@
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 import { getResolvedPreferences } from "@/shared/preferences";
 import { PreferencesMenu } from "@/shared/preferences/PreferencesControls";
-import { t, useLocale } from "@/i18n";
+import { t, useLocale, type MessageKey } from "@/i18n";
+import { useQuery } from "@tanstack/react-query";
+import { publicApi } from "@/shared/api/httpClient";
 ﻿import { type MouseEvent, type ReactNode } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { RobotAvatar } from "@/shared/mascot/RobotAvatar";
@@ -17,6 +19,7 @@ import {
   CheckCircle,
   ClipboardCheck,
   GraduationCap,
+  Layers,
   MessageCircle,
   Play,
   Sparkles,
@@ -24,68 +27,71 @@ import {
   Users,
 } from "lucide-react";
 
-const features = [
-  {
-    icon: <BookOpen className="h-5 w-5" />,
-    get title() { return t("home.quizAdaptativo"); },
-    get description() { return t("home.pratiquePorNivelTemaESubtopicoCom"); },
-    tone: "text-indigo-400 bg-indigo-500/10",
-  },
-  {
-    icon: <MessageCircle className="h-5 w-5" />,
-    get title() { return t("home.chatEspecializado"); },
-    get description() { return t("home.tireDuvidasSobreLogicaDeProgramacaoCom"); },
-    tone: "text-blue-400 bg-blue-500/10",
-  },
-  {
-    icon: <Table2 className="h-5 w-5" />,
-    get title() { return t("home.feature.logicTitle"); },
-    get description() { return t("home.feature.logicDescription"); },
-    tone: "text-amber-300 bg-amber-500/10",
-  },
-  {
-    icon: <Accessibility className="h-5 w-5" />,
-    get title() { return t("home.feature.accessibleTitle"); },
-    get description() { return t("home.feature.accessibleDescription"); },
-    tone: "text-cyan-300 bg-cyan-500/10",
-  },
-  {
-    icon: <ClipboardCheck className="h-5 w-5" />,
-    get title() { return t("home.feature.examsTitle"); },
-    get description() { return t("home.feature.examsDescription"); },
-    tone: "text-rose-300 bg-rose-500/10",
-  },
-  {
-    icon: <BarChart2 className="h-5 w-5" />,
-    get title() { return t("home.analyticsEducacional"); },
-    get description() { return t("home.acompanheDesempenhoEsforcoEEvolucaoParaApoiar"); },
-    tone: "text-emerald-400 bg-emerald-500/10",
-  },
-];
+/** Turned on for the whole platform; unknown (loading, offline) counts as on. */
+type Flags = Partial<Record<string, boolean>>;
+const on = (flags: Flags, feature: string) => flags[feature] !== false;
+const PRACTICE: Array<[string, string]> = [["practice_truth_table", "home.logic.truthTable"], ["practice_translation", "home.logic.translation"], ["practice_parsons", "home.logic.parsons"]];
+
+/** Practice types turned on, in words ("tabelas-verdade e tradução…"). */
+function logicDescription(flags: Flags, known: boolean) {
+  if (!known) return t("home.feature.logicGeneric");
+  const names = PRACTICE.filter(([feature]) => on(flags, feature)).map(([, key]) => t(key as MessageKey));
+  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} ${t("home.logic.and")} ${names[names.length - 1]}` : names[0];
+  return t("home.feature.logicList", { list });
+}
+
+/** Cards of the home page: only what is turned on for the platform shows up. */
+function buildFeatures(flags: Flags, known: boolean) {
+  const practice = PRACTICE.some(([feature]) => on(flags, feature));
+  return [
+    on(flags, "quiz") && { icon: <BookOpen className="h-5 w-5" />, title: t("home.quizAdaptativo"), description: t("home.pratiquePorNivelTemaESubtopicoCom"), tone: "text-indigo-400 bg-indigo-500/10" },
+    on(flags, "chat") && { icon: <MessageCircle className="h-5 w-5" />, title: t("home.chatEspecializado"), description: t("home.tireDuvidasSobreLogicaDeProgramacaoCom"), tone: "text-blue-400 bg-blue-500/10" },
+    practice && { icon: <Table2 className="h-5 w-5" />, title: t("home.feature.logicTitle"), description: logicDescription(flags, known), tone: "text-amber-300 bg-amber-500/10" },
+    on(flags, "flashcards") && { icon: <Layers className="h-5 w-5" />, title: t("home.feature.flashcardsTitle"), description: t("home.feature.flashcardsDescription"), tone: "text-violet-300 bg-violet-500/10" },
+    { icon: <Accessibility className="h-5 w-5" />, title: t("home.feature.accessibleTitle"), description: t("home.feature.accessibleDescription"), tone: "text-cyan-300 bg-cyan-500/10" },
+    on(flags, "exams") && { icon: <ClipboardCheck className="h-5 w-5" />, title: t("home.feature.examsTitle"), description: t("home.feature.examsDescription"), tone: "text-rose-300 bg-rose-500/10" },
+    on(flags, "dashboard") && { icon: <BarChart2 className="h-5 w-5" />, title: t("home.analyticsEducacional"), description: t("home.acompanheDesempenhoEsforcoEEvolucaoParaApoiar"), tone: "text-emerald-400 bg-emerald-500/10" },
+  ].filter((item): item is { icon: JSX.Element; title: string; description: string; tone: string } => !!item);
+}
 
 const profiles = [
   {
     icon: <GraduationCap className="h-5 w-5" />,
     get role() { return t("common.aluno"); },
     get description() { return t("home.aprendePraticaERevisaConteudosComApoio"); },
-    get benefits() { return [t("home.chatSobreLogica"), t("home.quizzesGuiados"), t("home.benefit.workbench"), t("home.benefit.exams"), t("home.feedbackImediato")]; },
+    benefits: (flags: Flags) => [
+      on(flags, "chat") && t("home.chatSobreLogica"), on(flags, "quiz") && t("home.quizzesGuiados"),
+      PRACTICE.some(([feature]) => on(flags, feature)) && t("home.benefit.workbench"), on(flags, "flashcards") && t("home.benefit.flashcards"),
+      on(flags, "exams") && t("home.benefit.exams"), t("home.feedbackImediato"),
+    ],
   },
   {
     icon: <Users className="h-5 w-5" />,
     get role() { return t("common.professor"); },
     get description() { return t("home.acompanhaTurmasEIdentificaDificuldadesComMais"); },
-    get benefits() { return [t("home.benefit.questionBank"), t("home.benefit.blindReview"), t("home.relatoriosPorTurma"), t("home.matrizDeEsforco"), t("home.dadosPorAluno")]; },
+    benefits: (flags: Flags) => [
+      on(flags, "question_bank") && t("home.benefit.questionBank"), on(flags, "exams") && t("home.benefit.blindReview"),
+      on(flags, "dashboard") && t("home.relatoriosPorTurma"), on(flags, "dashboard") && t("home.matrizDeEsforco"), t("home.dadosPorAluno"),
+    ],
   },
   {
     icon: <Building2 className="h-5 w-5" />,
     get role() { return t("common.coordenador"); },
     get description() { return t("home.observaIndicadoresAmplosParaOrientarAcoesAcademicas"); },
-    get benefits() { return [t("home.visaoPorCurso"), t("home.filtrosInstitucionais"), t("home.gestaoPorDados")]; },
+    benefits: (_flags: Flags) => [t("home.visaoPorCurso"), t("home.filtrosInstitucionais"), t("home.gestaoPorDados")],
   },
 ];
 
 export function Home() {
   useLocale();
+  // What the platform offers right now: cards and benefits of features turned off do not show.
+  const platform = useQuery({
+    queryKey: ["platformFeatures"],
+    queryFn: async () => (await publicApi.get("/features/public")).data?.features as Record<string, boolean>,
+    staleTime: 60 * 1000,
+    retry: false,
+  });
+  const flags: Flags = platform.data ?? {};
 
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
@@ -196,7 +202,7 @@ export function Home() {
           description={t("home.asPrincipaisExperienciasDoProdutoSeguemA")}
         >
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-            {features.map((feature) => (
+            {buildFeatures(flags, platform.isSuccess).map((feature) => (
               <InfoCard key={feature.title}>
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl ${feature.tone}`}
@@ -235,7 +241,7 @@ export function Home() {
                   </p>
                 </div>
                 <ul className="space-y-2">
-                  {profile.benefits.map((benefit) => (
+                  {profile.benefits(flags).filter((benefit): benefit is string => !!benefit).map((benefit) => (
                     <li
                       key={benefit}
                       className="flex items-start gap-2 font-[Poppins] text-sm text-zinc-400"

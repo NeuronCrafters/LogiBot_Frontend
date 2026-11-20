@@ -18,6 +18,8 @@ export const FEATURES = [
   "institution_page",
   "institution_location",
   "institution_photo",
+  "flashcards",
+  "ranking",
 ] as const;
 export type Feature = (typeof FEATURES)[number];
 export type Scope = "global" | "institution" | "course" | "class";
@@ -31,6 +33,8 @@ const PATHS: Array<[RegExp, Feature]> = [
   [/^\/exams(\/|$)/, "exams"],
   [/^\/concepts(\/|$)/, "concept_panel"],
   [/^\/institution(\/|$)/, "institution_page"],
+  [/^\/flashcards(\/|$)/, "flashcards"],
+  [/^\/ranking(\/|$)/, "ranking"],
   [/^\/questions(\/|$)/, "question_bank"],
   [/^\/feedback(\/|$)/, "feedback"],
   [/^\/rag(\/|$)/, "rag"],
