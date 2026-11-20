@@ -14,7 +14,8 @@ export interface RankingScopes {
 }
 export interface RankingData {
   scope: Scope; id: string; name: string;
-  rules: { periodDays: number; weights: Record<Source, number>; studentNames: boolean };
+  /** `sources`: activities that count here (those of features turned off are left out). */
+  rules: { periodDays: number; weights: Record<Source, number>; studentNames: boolean; sources?: Source[] };
   since: string;
   viewer: { level: Level; canConfigure: boolean };
   minGroupSize: number;

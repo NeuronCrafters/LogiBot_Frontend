@@ -15,6 +15,8 @@ import { subjectLabel } from "@/features/dashboard/subjectLabels";
 import { asChat, asEngagement, asExams, biggestDifferences, performanceDistribution, radarOverlay, topicDifferences, weeklyOverlay, type Difference } from "@/features/dashboard/comparisonData";
 import type { ChatSatisfactionData, ComparisonInsightChart } from "@/features/dashboard/types";
 import { cn } from "@/shared/lib/cn";
+import { useFeatures } from "@/features/release/hooks/useFeatures";
+import type { Feature } from "@/features/release/featureCatalog";
 import { apiError } from "@/shared/lib/apiError";
 
 /** Same colours as the A/B labels of the page: blue for A, amber for B. B also uses a dashed stroke. */
@@ -31,8 +33,13 @@ interface ComparisonProps {
 const pct = (value: number | null, digits = 1) => (value === null ? null : percent(value / 100, { minimumFractionDigits: digits, maximumFractionDigits: digits }));
 const signed = (value: number) => `${value > 0 ? "+" : value < 0 ? "−" : ""}${number(Math.abs(value), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} p.p.`;
 
+/** Data of a turned-off feature is never asked for (the server refuses it as well). */
+const PAIR_FEATURE: Record<string, Feature> = { topicPerformance: "quiz", proficiencyRadar: "quiz", effortMatrix: "quiz", exams: "exams", chatSatisfaction: "chat" };
+
 function usePair<T>(name: string, filters: ComparisonProps, load: (filters: DashboardFilterParams) => Promise<{ data: T }>) {
-  const enabled = !!filters.a.universityId && !!filters.b.universityId;
+  const { isEnabled } = useFeatures();
+  const feature = PAIR_FEATURE[name];
+  const enabled = !!filters.a.universityId && !!filters.b.universityId && (!feature || isEnabled(feature));
   const left = useQuery({ queryKey: ["comparison", name, filters.a], queryFn: async () => (await load(filters.a)).data, enabled, staleTime: 5 * 60 * 1000 });
   const right = useQuery({ queryKey: ["comparison", name, filters.b], queryFn: async () => (await load(filters.b)).data, enabled, staleTime: 5 * 60 * 1000 });
   return {

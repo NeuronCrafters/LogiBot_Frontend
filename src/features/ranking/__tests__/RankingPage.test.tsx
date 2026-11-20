@@ -85,3 +85,12 @@ it("lets the owner change the rules for the platform", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
   await waitFor(() => expect(api.saveSettings).toHaveBeenCalledWith("global", "", expect.objectContaining({ periodDays: 7, weights: expect.objectContaining({ quiz: 8 }), visibleTo: expect.objectContaining({ student: true }) })));
 });
+
+it("leaves out of the rules and columns the activities of features turned off", async () => {
+  api.scopes.mockResolvedValue(scopes);
+  api.ranking.mockResolvedValue({ ...board, rules: { ...board.rules, weights: { practice: 10, quiz: 5, exam: 0, flashcards: 2 }, sources: ["practice", "quiz", "flashcards"] } });
+  renderPage();
+  expect(await screen.findByText("Cada flash card dominado: 2 pontos")).toBeInTheDocument();
+  expect(screen.queryByText(/Nota de cada prova/)).not.toBeInTheDocument();
+  expect(within(screen.getByRole("table", { name: "Alunos · Informática" })).queryByRole("columnheader", { name: "Provas" })).not.toBeInTheDocument();
+});

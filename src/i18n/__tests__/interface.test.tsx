@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BrowserRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthContext } from "@/app/providers/AuthContext";
 import { Home } from "@/features/home/pages/HomePage";
@@ -10,7 +11,9 @@ import { QUIZ_TOPICS } from "@/features/quiz/types";
 import { AppModal } from "@/shared/components/feedback/AppModal";
 
 const auth = {user:null,setUser:vi.fn(),isAuthenticated:false,loading:false,login:vi.fn(),logout:vi.fn(),getUser:vi.fn()};
-const wrapper=({children}:{children:React.ReactNode})=><BrowserRouter><AuthContext.Provider value={auth}>{children}</AuthContext.Provider></BrowserRouter>;
+// The home page asks which features are on; offline here, so it shows them all (no network in tests).
+vi.mock("@/shared/api/httpClient", async (original) => ({ ...(await original<typeof import("@/shared/api/httpClient")>()), publicApi: { get: vi.fn().mockRejectedValue(new Error("offline")) } }));
+const wrapper=({children}:{children:React.ReactNode})=><QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><BrowserRouter><AuthContext.Provider value={auth}>{children}</AuthContext.Provider></BrowserRouter></QueryClientProvider>;
 beforeEach(()=>{act(()=>chooseLanguage("pt-BR"));});
 
 describe("interface reativa e preservação",()=>{

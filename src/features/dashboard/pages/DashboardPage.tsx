@@ -24,6 +24,7 @@ import type { University } from "@/features/academic/types";
 import { useFeatures } from "@/features/release/hooks/useFeatures";
 import { useDialogFocus } from "@/shared/hooks/useDialogFocus";
 import { cn } from "@/shared/lib/cn";
+import type { Feature } from "@/features/release/featureCatalog";
 import { RAIL_TOGGLE_CLASS, RAIL_TOGGLE_ICON_CLASS } from "@/shared/components/layout/railToggle";
 import { periodRange, type PeriodPreset } from "@/features/dashboard/timeBuckets";
 
@@ -34,22 +35,23 @@ type Side = "a" | "b";
 
 const EMPTY: Selection = { legacy: { type: "student", ids: [], mode: "individual", hierarchyParams: {} }, filters: {}, selected: false };
 /** `comparisonOnly`: one chart with both selections, shown first while comparing. */
-const CHARTS: Array<{ key: ChartKey; title: MessageKey; wide: boolean; comparisonOnly?: boolean }> = [
+/** `feature`: the chart only exists while that feature is turned on (its data is never shown otherwise). */
+const CHARTS: Array<{ key: ChartKey; title: MessageKey; wide: boolean; comparisonOnly?: boolean; feature?: Feature }> = [
   { key: "compareHighlights", title: "dashboard.compare.highlightsTitle", wide: true, comparisonOnly: true },
-  { key: "compareTopics", title: "dashboard.compare.topicTitle", wide: true, comparisonOnly: true },
-  { key: "compareRadar", title: "dashboard.compare.radarTitle", wide: false, comparisonOnly: true },
-  { key: "compareDistribution", title: "dashboard.compare.distributionTitle", wide: false, comparisonOnly: true },
-  { key: "compareExams", title: "dashboard.compare.examsTitle", wide: false, comparisonOnly: true },
-  { key: "compareChat", title: "dashboard.compare.chatTitle", wide: false, comparisonOnly: true },
+  { key: "compareTopics", title: "dashboard.compare.topicTitle", wide: true, comparisonOnly: true, feature: "quiz" },
+  { key: "compareRadar", title: "dashboard.compare.radarTitle", wide: false, comparisonOnly: true, feature: "quiz" },
+  { key: "compareDistribution", title: "dashboard.compare.distributionTitle", wide: false, comparisonOnly: true, feature: "quiz" },
+  { key: "compareExams", title: "dashboard.compare.examsTitle", wide: false, comparisonOnly: true, feature: "exams" },
+  { key: "compareChat", title: "dashboard.compare.chatTitle", wide: false, comparisonOnly: true, feature: "chat" },
   { key: "compareEngagement", title: "dashboard.compare.engagementTitle", wide: true, comparisonOnly: true },
   { key: "usage", title: "dashboard.tempoDeUsoDiario", wide: true },
   { key: "access", title: "dashboard.detalhesDeAcessoPorSessao", wide: true },
-  { key: "correctWrong", title: "dashboard.desempenhoPorTopicoGeral", wide: false },
-  { key: "generalScore", title: "dashboard.avaliacaoGeralDeDesempenho", wide: false },
-  { key: "category", title: "dashboard.assuntosMaisAcessadosChat", wide: false },
-  { key: "proficiency", title: "dashboard.proficienciaPorAssuntoQuiz", wide: false },
-  { key: "effort", title: "dashboard.matrizDesempenhoVsEsforco", wide: true },
-  { key: "journey", title: "dashboard.jornadaDeAprendizagem", wide: true },
+  { key: "correctWrong", title: "dashboard.desempenhoPorTopicoGeral", wide: false, feature: "quiz" },
+  { key: "generalScore", title: "dashboard.avaliacaoGeralDeDesempenho", wide: false, feature: "quiz" },
+  { key: "category", title: "dashboard.assuntosMaisAcessadosChat", wide: false, feature: "chat" },
+  { key: "proficiency", title: "dashboard.proficienciaPorAssuntoQuiz", wide: false, feature: "quiz" },
+  { key: "effort", title: "dashboard.matrizDesempenhoVsEsforco", wide: true, feature: "quiz" },
+  { key: "journey", title: "dashboard.jornadaDeAprendizagem", wide: true, feature: "quiz" },
 ];
 const RAIL_KEY = "logibot.dashboard.panelCollapsed";
 const HIDDEN_KEY = "logibot.dashboard.hiddenCharts";
@@ -253,7 +255,7 @@ function DashboardContent() {
   }, [pendingJump, desktop, drawerOpen, baseId]);
 
   // The access pattern chart only applies to students; direct comparison charts only while comparing.
-  const available = CHARTS.filter((chart) => (chart.key !== "access" || typeA === "student") && (!chart.comparisonOnly || showB));
+  const available = CHARTS.filter((chart) => (chart.key !== "access" || typeA === "student") && (!chart.comparisonOnly || showB) && (!chart.feature || isEnabled(chart.feature)));
   const sideName = (selection: Selection, side: Side) => `${side.toUpperCase()} · ${entityName(universities, typeA, selection.legacy.ids[0]) ?? "—"}`;
   const visible = available.filter((chart) => hidden.indexOf(chart.key) === -1);
 

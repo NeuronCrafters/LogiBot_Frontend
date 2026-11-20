@@ -71,14 +71,15 @@ function Board({ data }: { data: RankingData }) {
   const id = useId();
   const student = data.viewer.level === "student";
   const showClass = data.scope !== "class";
-  const sources = SOURCES.filter((source) => data.rules.weights[source] > 0);
+  const active = data.rules.sources ?? SOURCES;
+  const sources = SOURCES.filter((source) => active.indexOf(source) !== -1 && data.rules.weights[source] > 0);
   return (
     <div className="space-y-5">
       <section aria-labelledby={`${id}-rules`} className="rounded-2xl border border-blue-400/20 bg-blue-500/5 p-4">
         <h2 id={`${id}-rules`} className="flex items-center gap-2 text-sm font-semibold text-white"><Info aria-hidden="true" className="h-4 w-4 text-blue-300" />{t("ranking.rulesTitle")}</h2>
         <p className="mt-1 text-sm text-zinc-300">{t("ranking.rulesPeriod", { count: data.rules.periodDays, date: formatDate(data.since) })}</p>
         <ul className="mt-2 grid gap-1 text-sm text-zinc-300 sm:grid-cols-2">
-          {SOURCES.map((source) => <li key={source}>{t(`ranking.rule.${source}`, { points: data.rules.weights[source] })}</li>)}
+          {SOURCES.filter((source) => active.indexOf(source) !== -1).map((source) => <li key={source}>{t(`ranking.rule.${source}`, { points: data.rules.weights[source] })}</li>)}
         </ul>
         <p className="mt-2 text-xs text-zinc-400">{t("ranking.rulesTies")} {data.groupLevel ? t("ranking.rulesGroups", { min: data.minGroupSize }) : ""}</p>
       </section>
