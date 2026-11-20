@@ -17,6 +17,9 @@ const Chat = React.lazy(() =>
 const Dashboard = React.lazy(() =>
   import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.Dashboard })),
 );
+const InstitutionPage = React.lazy(() =>
+  import("@/features/institutions/pages/InstitutionPage").then((m) => ({ default: m.InstitutionPage })),
+);
 const ConceptPanel = React.lazy(() =>
   import("@/features/concepts/pages/ConceptPanelPage").then((m) => ({ default: m.ConceptPanelPage })),
 );
@@ -265,6 +268,22 @@ export default function AppRouter() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/institution"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <InstitutionPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/institution/:institutionId"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <InstitutionPage />
               </Suspense>
             }
           />

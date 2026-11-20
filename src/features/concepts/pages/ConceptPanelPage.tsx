@@ -8,6 +8,8 @@ import { cn } from "@/shared/lib/cn";
 import { conceptLabel } from "@/features/exercises/lib/logicLabels";
 import { conceptsApi, type ConceptProficiency, type ProficiencyData, type ProficiencyScope, type Rate, type ScopeOptions } from "@/features/concepts/api/conceptsApi";
 import { download, proficiencyCsv } from "@/features/concepts/lib/proficiencyExport";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const PERIODS = [30, 90, 365, 0];
 const selectClass = "h-11 w-full rounded-xl border border-control bg-neutral-950/60 px-3 font-[Poppins] text-sm text-white disabled:opacity-60";
@@ -161,8 +163,14 @@ function StudentsTable({ data }: { data: ProficiencyData }) {
   );
 }
 
+const isStudentOnly = (role: unknown) => {
+  const roles = Array.isArray(role) ? role : role ? [role] : [];
+  return roles.length > 0 && roles.every((item) => item === "student");
+};
+
 export function ConceptPanelPage() {
   useLocale();
+  const { user } = useAuth() ?? {};
   const ids = { scope: useId(), period: useId(), compare: useId() };
   const [selected, setSelected] = useState("");
   const [compareWith, setCompareWith] = useState("");
@@ -188,6 +196,8 @@ export function ConceptPanelPage() {
   const data = a.data;
 
   const exportName = `painel-conceitos-${current?.scope ?? "selecao"}-${days || "tudo"}`;
+  // The panel is for staff only: students go back to their start page.
+  if (isStudentOnly(user?.role)) return <Navigate to="/home" replace />;
   return (
     <main className="relative flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
       <div className="mx-auto w-full max-w-5xl space-y-5">

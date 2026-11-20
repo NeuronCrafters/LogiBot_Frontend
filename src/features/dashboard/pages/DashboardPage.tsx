@@ -24,6 +24,7 @@ import type { University } from "@/features/academic/types";
 import { useFeatures } from "@/features/release/hooks/useFeatures";
 import { useDialogFocus } from "@/shared/hooks/useDialogFocus";
 import { cn } from "@/shared/lib/cn";
+import { RAIL_TOGGLE_CLASS, RAIL_TOGGLE_ICON_CLASS } from "@/shared/components/layout/railToggle";
 import { periodRange, type PeriodPreset } from "@/features/dashboard/timeBuckets";
 
 type LegacyFilter = DashboardFilterState & { hierarchyParams: Omit<DashboardFilterParams, "startDate" | "endDate">; period?: Pick<DashboardFilterParams, "startDate" | "endDate"> };
@@ -458,15 +459,16 @@ function DashboardContent() {
       {desktop ? (
         <aside id={`${baseId}-panel`} aria-label={t("dashboard.panel.label")} data-collapsed={collapsed || undefined}
           className={cn("dashboard-panel relative flex shrink-0 flex-col overflow-hidden border-l border-white/10 bg-surface", collapsed ? "w-16" : "w-80")}>
-          <div className="flex h-[4.25rem] shrink-0 items-center border-b border-white/10 px-2.5">
-            <h2 className={cn("dashboard-panel-fade min-w-0 flex-1 truncate pl-1.5 font-[Poppins] text-sm font-semibold text-white", collapsed && "opacity-0")} aria-hidden={collapsed || undefined}>
-              {t("dashboard.panel.label")}
-            </h2>
+          <div className={cn("flex h-[4.25rem] shrink-0 items-center border-b border-white/10", collapsed ? "px-2.5" : "px-4")}>
+            {/* Mirrors the main menu: each toggle sits on the edge that faces the page content. */}
             <button type="button" data-dashboard-panel-toggle onClick={toggleRail} aria-expanded={!collapsed} aria-controls={`${baseId}-panel-content`}
               aria-label={collapsed ? t("dashboard.panel.expand") : t("dashboard.panel.collapse")} title={collapsed ? t("dashboard.panel.expand") : t("dashboard.panel.collapse")}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
-              <PanelRightClose aria-hidden="true" className={cn("dashboard-panel-icon h-5 w-5", collapsed && "rotate-180")} />
+              className={RAIL_TOGGLE_CLASS}>
+              <PanelRightClose aria-hidden="true" className={cn("dashboard-panel-icon", RAIL_TOGGLE_ICON_CLASS, collapsed && "rotate-180")} />
             </button>
+            <h2 className={cn("dashboard-panel-fade min-w-0 flex-1 truncate pl-3 font-[Poppins] text-sm font-semibold text-white", collapsed && "opacity-0")} aria-hidden={collapsed || undefined}>
+              {t("dashboard.panel.label")}
+            </h2>
           </div>
           <div className="relative min-h-0 flex-1">
             {/* Both states stay mounted so the width change and the fade run together. */}

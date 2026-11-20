@@ -32,6 +32,7 @@ export function AuthPage({ mode }: AuthPageProps) {
 
   const isSignup = mode === "signup";
   const expired = new URLSearchParams(window.location.search).get("expired") === "1";
+  const institutionInactive = new URLSearchParams(window.location.search).get("inactive") === "1";
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -127,7 +128,9 @@ export function AuthPage({ mode }: AuthPageProps) {
         description={t("auth.oLogibotAiColetaDadosDeUso")}
         onConfirm={handleAcceptConsent}
         onClose={() => setShowConsent(false)}
-      />
+      >
+        <p className="font-[Poppins] text-sm leading-relaxed text-zinc-400">{t("auth.consentMap")}</p>
+      </AppModal>
 
       <main className="flex w-full min-w-0 flex-1 flex-col px-4 py-16 sm:px-6">
         <div className="my-auto grid w-full min-w-0 max-w-lg grid-cols-1 self-center overflow-hidden rounded-3xl border border-white/10 bg-surface shadow-2xl shadow-black/30 lg:max-w-4xl lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]">
@@ -177,6 +180,7 @@ export function AuthPage({ mode }: AuthPageProps) {
 
               <form onSubmit={handleSubmit} className="min-w-0 space-y-3">
             {!isSignup && expired && <p role="status" className="mb-4 text-base leading-relaxed text-zinc-400">{t("auth.sessionExpired")}</p>}
+            {!isSignup && institutionInactive && <p role="status" className="mb-4 rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-base leading-relaxed text-amber-100">{t("auth.institutionInactive")}</p>}
                 {isSignup && (
                   <AuthInput
                     id="signup-name-input"

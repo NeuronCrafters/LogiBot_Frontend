@@ -59,17 +59,9 @@ test('o professor vê os conceitos da turma, compara turmas e exporta', async ({
   await audit(page, 'painel por conceito (comparação)');
 });
 
-test('o aluno vê só o próprio desempenho', async ({ page }) => {
+test('o aluno não tem o painel por conceito', async ({ page }) => {
   await mockApi(page, 'student');
-  await page.route('**/api/concepts/scopes', route => route.fulfill({ json: { me: true, all: false, institutions: [], courses: [], classes: [] } }));
-  let requested = '';
-  await page.route('**/api/concepts/proficiency**', route => {
-    requested = route.request().url();
-    return route.fulfill({ json: { scope: 'me', id: '', days: 90, minGroupSize: 5, aggregated: false, hidden: 0, concepts: [concept('conjunction', 0.75)] } });
-  });
   await page.goto('/concepts');
-  await expect(page.getByText('Conjunção: 75% de acerto')).toBeAttached();
-  expect(new URL(requested).searchParams.get('scope')).toBe('me');
-  await expect(page.getByLabel('Comparar com')).toBeDisabled();
-  await audit(page, 'painel por conceito (aluno)');
+  await expect(page).toHaveURL(/\/home$/);
+  await expect(page.getByRole('link', { name: 'Painel por conceito' })).toHaveCount(0);
 });

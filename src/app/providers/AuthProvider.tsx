@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [prefetchChatHistory]);
 
-  const finishSession = useCallback((expired = false, broadcast = true) => {
+  const finishSession = useCallback((expired: boolean | "inactive" = false, broadcast = true) => {
     generation.current++;
     localStorage.removeItem("has_session");
     if (expired) sessionStorage.setItem("logibot.session.expired", "1");
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearAccountLanguage(true);
     setSession(null);
     setUser(null);
-    navigate(expired ? "/signin?expired=1" : "/signin", { replace: true });
+    navigate(expired === "inactive" ? "/signin?inactive=1" : expired ? "/signin?expired=1" : "/signin", { replace: true });
   }, [queryClient, navigate]);
 
   const expireSession = useCallback(() => finishSession(true), [finishSession]);
@@ -122,10 +122,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (event.key === "logibot.session.ended" && user) finishSession(true, false);
       if (event.key === "logibot.session.started" && user) window.location.reload();
     };
+    const institutionInactive = () => finishSession("inactive");
     window.addEventListener("logibot:unauthorized", unauthorized);
+    window.addEventListener("logibot:institution-inactive", institutionInactive);
     window.addEventListener("storage", endedElsewhere);
     return () => {
       window.removeEventListener("logibot:unauthorized", unauthorized);
+      window.removeEventListener("logibot:institution-inactive", institutionInactive);
       window.removeEventListener("storage", endedElsewhere);
     };
   }, [expireSession, finishSession, user]);

@@ -70,6 +70,12 @@
 @media (min-width: 1024px) {
   .home-page { --home-header-height: 4rem; }
 }
+/* On large screens "Recursos" (its cards nearly fill the screen) covers the visible area below the header,
+   so jumping to it never shows the "Perfis" separator cut at the bottom (the extra pixel keeps the border
+   just out of view). The other sections stay compact, without empty space. */
+@media (min-width: 1024px) and (min-height: 640px) {
+  .home-page #features.home-section { min-height: calc(100dvh - var(--home-header-height) + 1px); }
+}
 
 .page-reveal { animation: route-page-enter var(--motion-enter) var(--motion-ease); }
 
@@ -392,3 +398,17 @@ textarea::-webkit-scrollbar-thumb {
 .account-switch { transition: opacity 200ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .account-switch { transition: none; } }
 :root[data-motion="reduce"] .account-switch { transition: none; }
+
+/* Default cover of the institution page (when no image was sent), in both themes. */
+.institution-cover-art {
+  background:
+    radial-gradient(120% 140% at 10% 0%, #1e3a8a 0%, transparent 55%),
+    radial-gradient(90% 120% at 90% 100%, #0f766e 0%, transparent 60%),
+    linear-gradient(120deg, #0b1220, #111827);
+}
+:root.light .institution-cover-art {
+  background:
+    radial-gradient(120% 140% at 10% 0%, #93c5fd 0%, transparent 55%),
+    radial-gradient(90% 120% at 90% 100%, #99f6e4 0%, transparent 60%),
+    linear-gradient(120deg, #e0e7ff, #f0fdfa);
+}

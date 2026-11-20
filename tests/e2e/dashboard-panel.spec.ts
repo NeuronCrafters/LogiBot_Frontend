@@ -318,3 +318,30 @@ test('comparação: provas, chat, engajamento, maiores diferenças e análise po
   expect(insightBody.b?.universityId).toBe(OTHER);
   await audit(page, 'análise por IA de um gráfico de comparação');
 });
+
+test('os botões de recolher do menu e do painel seguem o mesmo padrão', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile', 'Menus laterais fixos do desktop.');
+  await mockApi(page, 'admin');
+  await page.goto('/dashboard');
+  const left = page.locator('[data-sidebar-toggle]');
+  const right = page.getByRole('complementary', { name: 'Comparação e gráficos' }).locator('[data-dashboard-panel-toggle]');
+  await expect(left).toBeVisible();
+  await expect(right).toBeVisible();
+  const look = (locator: typeof left) => locator.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const icon = element.querySelector('svg')!.getBoundingClientRect();
+    return { width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height, color: style.color, radius: style.borderRadius, icon: [icon.width, icon.height] };
+  });
+  expect(await look(right)).toEqual(await look(left));
+  // Mirrored: each one on the edge that faces the page content (menu on its right, panel on its left).
+  const edges = (locator: typeof left) => locator.evaluate((element) => {
+    const own = element.getBoundingClientRect();
+    const box = element.parentElement!.getBoundingClientRect();
+    return { left: own.left - box.left, right: box.right - own.right };
+  });
+  const menu = await edges(left);
+  const panel = await edges(right);
+  expect(menu.right).toBeLessThan(menu.left);
+  expect(panel.left).toBeLessThan(panel.right);
+  expect(Math.abs(menu.right - panel.left)).toBeLessThanOrEqual(4);
+});

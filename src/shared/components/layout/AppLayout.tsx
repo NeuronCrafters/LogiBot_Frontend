@@ -8,6 +8,7 @@ import {
   MessageCircle,
   PieChart,
   Target,
+  Building2,
   Send,
   Settings,
   TableProperties,
@@ -84,6 +85,10 @@ const PAGE_META: Record<string, { title: string; icon: ReactNode }> = {
   "/dashboard": {
     get title() { return t("common.dashboard"); },
     icon: <PieChart className="w-4 h-4 text-blue-400" />,
+  },
+  "/institution": {
+    get title() { return t("institutions.navLabel"); },
+    icon: <Building2 className="w-4 h-4 text-blue-400" />,
   },
   "/concepts": {
     get title() { return t("concepts.navLabel"); },

@@ -71,7 +71,8 @@ for (const theme of ["light", "dark"]) {
         paddingBottom: parseFloat(getComputedStyle(node).paddingBottom),
       }));
       expect(layout.background).toBe("rgba(0, 0, 0, 0)");
-      expect(layout.minHeight).toBe("0px");
+      // Only "Recursos" covers the screen below the header (so the next separator is not cut); the others stay compact.
+      if (id !== "features") expect(layout.minHeight).toBe("0px");
       expect(layout.paddingTop).toBeLessThanOrEqual(64);
       expect(layout.paddingBottom).toBeLessThanOrEqual(64);
     }

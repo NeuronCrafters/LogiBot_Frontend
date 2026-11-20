@@ -9,6 +9,7 @@ import { QuizHistory } from "@/features/quiz/components/QuizHistory";
 import {
   PieChart,
   Target,
+  Building2,
   Settings,
   TableProperties,
   User,
@@ -40,6 +41,7 @@ import logoMascote from "@/assets/logo.svg";
 import { preloadPracticePage } from "@/shared/navigation/preloadPractice";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { useFeatures } from "@/features/release/hooks/useFeatures";
+import { RAIL_TOGGLE_CLASS, RAIL_TOGGLE_ICON_CLASS } from "@/shared/components/layout/railToggle";
 import { featureForPath } from "@/features/release/featureCatalog";
 
 interface SidebarProps {
@@ -74,12 +76,12 @@ const STUDENT_SECTIONS: NavSection[] = [
       { path: "/practice/translation", icon: <Languages className="w-4 h-4" />, get label() { return t("exercises.type.translation"); }, preload: preloadPracticePage },
       { path: "/practice/parsons", icon: <ListOrdered className="w-4 h-4" />, get label() { return t("exercises.type.parsons"); }, preload: preloadPracticePage },
       { path: "/exams", icon: <ClipboardCheck className="w-4 h-4" />, get label() { return t("exams.navLabel"); } },
-      { path: "/concepts", icon: <Target className="w-4 h-4" />, get label() { return t("concepts.navLabel"); } },
     ],
   },
   {
     get label() { return t("common.conta"); },
     items: [
+      { path: "/institution", icon: <Building2 className="w-4 h-4" />, get label() { return t("institutions.navLabel"); } },
       { path: "/profile", icon: <User className="w-4 h-4" />, get label() { return t("common.perfil"); } },
       {
         path: "/feedback",
@@ -98,6 +100,11 @@ function buildStaffSections(role: Role): NavSection[] {
       icon: <PieChart className="w-4 h-4" />,
       label: t("common.dashboard"),
     });
+  gestao.push({
+    path: "/institution",
+    icon: <Building2 className="w-4 h-4" />,
+    label: t("institutions.navLabel"),
+  });
   if (["teacher", "course-coordinator", "admin"].includes(role))
     gestao.push({
       path: "/concepts",
@@ -304,8 +311,8 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
         {collapsible && (
           <button type="button" onClick={toggleCollapsed} aria-expanded={!collapsed} data-sidebar-toggle
             aria-label={collapsed ? t("navigation.expandMenu") : t("navigation.collapseMenu")} title={collapsed ? t("navigation.expandMenu") : t("navigation.collapseMenu")}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/5 hover:text-white">
-            <PanelLeftClose aria-hidden="true" className={cn("side-rail-icon h-4 w-4", collapsed && "rotate-180")} />
+            className={RAIL_TOGGLE_CLASS}>
+            <PanelLeftClose aria-hidden="true" className={cn("side-rail-icon", RAIL_TOGGLE_ICON_CLASS, collapsed && "rotate-180")} />
           </button>
         )}
         {onMobileClose && (

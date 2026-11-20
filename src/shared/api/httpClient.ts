@@ -39,6 +39,9 @@ api.interceptors.response.use(
       if (error.response?.data?.code !== "auth.apiKeyInvalid" && !/^\/auth\/(session|register|password-reset|password-reset-requests)$/.test(path)) {
         window.dispatchEvent(new Event("logibot:unauthorized"));
       }
+    } else if (error.response?.status === 403 && error.response?.data?.code === "auth.institutionInactive" && !/^\/auth\/session$/.test(String(error.config?.url || ""))) {
+      // The institution was deactivated while the session was open: it ends, with the reason.
+      window.dispatchEvent(new Event("logibot:institution-inactive"));
     } else if (error.response?.status >= 500) {
       logger.error("API", "Erro interno do servidor.", error.response.data);
     }
